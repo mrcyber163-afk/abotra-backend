@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>AI Auto Trading | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Inter', sans-serif;
+}
+
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 11px;
+}
+
+body.light-theme {
+background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
+}
+
+body.light-theme .overlay {
+background: rgba(255,255,255,0.85);
+}
+
+body.light-theme .top-bar,
+body.light-theme .hero-card,
+body.light-theme .info-card,
+body.light-theme .step-card {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+
+body.light-theme .top-bar h2,
+body.light-theme .hero-title,
+body.light-theme .section-title {
+color: #800000;
+}
+
+body.light-theme .hero-subtitle,
+body.light-theme .step-desc {
+color: #555;
+}
+
+body.light-theme .theme-toggle {
+background: rgba(0,0,0,0.08);
+border-color: rgba(128,0,0,0.3);
+}
+
+body.light-theme .theme-toggle i {
+color: #800000;
+}
+
+body.light-theme .bottom-nav {
+background: rgba(255,255,255,0.95);
+border-top: 1px solid rgba(128,0,0,0.2);
+}
+
+body.light-theme .bottom-nav a {
+color: #888;
+}
+
+body.light-theme .bottom-nav a.active {
+color: #800000;
+}
+
+.skeleton-hero-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 24px;
+padding: 28px 20px;
+text-align: center;
+margin-bottom: 20px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-hero-icon {
+width: 60px;
+height: 60px;
+background: rgba(255,255,255,0.08);
+border-radius: 50%;
+margin: 0 auto 16px;
+}
+.skeleton-hero-title {
+height: 24px;
+width: 170px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin: 0 auto 8px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-hero-subtitle {
+height: 10px;
+width: 190px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 5px;
+margin: 0 auto 20px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-hero-buttons {
+display: flex;
+gap: 12px;
+justify-content: center;
+}
+.skeleton-hero-btn {
+width: 140px;
+height: 42px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 40px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-info-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 20px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-section-title {
+height: 18px;
+width: 160px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin-bottom: 16px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-benefits-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 16px;
+}
+.skeleton-benefit-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px;
+background: rgba(255,255,255,0.03);
+border-radius: 14px;
+}
+.skeleton-benefit-icon {
+width: 38px;
+height: 38px;
+background: rgba(255,255,255,0.05);
+border-radius: 50%;
+}
+.skeleton-benefit-text {
+flex: 1;
+}
+.skeleton-benefit-title {
+height: 12px;
+width: 85px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+margin-bottom: 5px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-benefit-desc {
+height: 9px;
+width: 120px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-steps-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 16px;
+}
+.skeleton-step-card {
+background: rgba(255,255,255,0.03);
+border-radius: 16px;
+padding: 16px;
+text-align: center;
+}
+.skeleton-step-number {
+width: 34px;
+height: 34px;
+background: rgba(255,255,255,0.08);
+border-radius: 50%;
+margin: 0 auto 10px;
+}
+.skeleton-step-title {
+height: 12px;
+width: 85px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+margin: 0 auto 6px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-step-desc {
+height: 9px;
+width: 120px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+margin: 0 auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-robot-preview {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+gap: 10px;
+margin-top: 12px;
+}
+.skeleton-robot-item {
+height: 75px;
+background: rgba(255,255,255,0.03);
+border-radius: 10px;
+}
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 1; }
+}
+
+.theme-toggle {
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 10px;
+padding: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+
+.theme-toggle:hover {
+background: rgba(255,215,0,0.2);
+transform: scale(1.05);
+}
+
+.theme-toggle i {
+font-size: 15px;
+color: #FFFFFF;
+}
+
+.theme-toggle span {
+display: none;
+}
+
+.overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.82);
+backdrop-filter: blur(4px);
+z-index: 1;
+}
+
+.top-bar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 100;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 8px 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.logo-area {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.logo-area img {
+width: 32px;
+height: 32px;
+border-radius: 8px;
+object-fit: cover;
+background: transparent !important;
+}
+
+.logo-area h2 {
+color: #FFD700;
+font-size: 14px;
+margin-bottom: 2px;
+}
+
+.logo-area p {
+color: #AAAAAA;
+font-size: 7px;
+}
+
+.top-bar-right {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.back-btn-top {
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 8px;
+padding: 6px 10px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 5px;
+font-size: 9px;
+font-weight: 500;
+}
+
+.back-btn-top:hover {
+background: rgba(255,215,0,0.3);
+}
+
+.main-content {
+position: relative;
+z-index: 2;
+max-width: 1000px;
+margin: 70px auto 20px;
+padding: 0 12px;
+}
+
+.hero-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 24px;
+padding: 25px 20px;
+text-align: center;
+margin-bottom: 20px;
+}
+
+.hero-icon {
+width: 60px;
+height: 60px;
+background: linear-gradient(135deg, #800000, #FFD700);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 auto 16px;
+}
+
+.hero-icon i {
+font-size: 28px;
+color: white;
+}
+
+.hero-title {
+color: #FFD700;
+font-size: 20px;
+font-weight: 800;
+margin-bottom: 8px;
+}
+
+.hero-subtitle {
+color: #AAAAAA;
+font-size: 11px;
+margin-bottom: 20px;
+}
+
+.hero-buttons {
+display: flex;
+gap: 12px;
+justify-content: center;
+flex-wrap: wrap;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, #0ECB81, #0A9E65);
+border: none;
+border-radius: 40px;
+padding: 10px 24px;
+color: white;
+font-weight: 700;
+font-size: 12px;
+cursor: pointer;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+transition: 0.3s;
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(14,203,129,0.4);
+}
+
+.btn-secondary {
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+border-radius: 40px;
+padding: 10px 24px;
+color: white;
+font-weight: 700;
+font-size: 12px;
+cursor: pointer;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+transition: 0.3s;
+}
+
+.btn-secondary:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(255,215,0,0.3);
+}
+
+.info-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 20px;
+}
+
+.section-title {
+color: #FFD700;
+font-size: 15px;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.benefits-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 16px;
+}
+
+.benefit-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px;
+background: rgba(255,255,255,0.03);
+border-radius: 14px;
+}
+
+.benefit-icon {
+width: 38px;
+height: 38px;
+background: rgba(255,215,0,0.15);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #FFD700;
+font-size: 16px;
+}
+
+.benefit-text h4 {
+color: #FFFFFF;
+font-size: 12px;
+margin-bottom: 4px;
+}
+
+.benefit-text p {
+color: #888;
+font-size: 9px;
+}
+
+.steps-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 16px;
+margin-top: 12px;
+}
+
+.step-card {
+background: rgba(255,255,255,0.03);
+border-radius: 16px;
+padding: 16px;
+text-align: center;
+transition: 0.3s;
+}
+
+.step-card:hover {
+transform: translateY(-3px);
+background: rgba(255,215,0,0.05);
+}
+
+.step-number {
+width: 34px;
+height: 34px;
+background: linear-gradient(135deg, #800000, #FFD700);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 800;
+color: white;
+margin: 0 auto 12px;
+font-size: 14px;
+}
+
+.step-title {
+color: #FFD700;
+font-size: 12px;
+font-weight: 700;
+margin-bottom: 6px;
+}
+
+.step-desc {
+color: #AAAAAA;
+font-size: 10px;
+line-height: 1.5;
+}
+
+.robot-preview {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+gap: 10px;
+margin-top: 12px;
+}
+
+.robot-preview-item {
+background: rgba(255,255,255,0.03);
+border-radius: 10px;
+padding: 8px;
+text-align: center;
+}
+
+.robot-preview-icon {
+font-size: 20px;
+margin-bottom: 4px;
+}
+
+.robot-preview-name {
+color: #FFD700;
+font-size: 10px;
+font-weight: 600;
+}
+
+.robot-preview-profit {
+color: #0ECB81;
+font-size: 9px;
+}
+
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 18px 18px 0 0;
+display: flex;
+justify-content: space-around;
+padding: 6px 10px;
+z-index: 100;
+}
+
+.bottom-nav a {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-decoration: none;
+color: #888;
+font-size: 7px;
+transition: 0.3s;
+gap: 2px;
+}
+
+.bottom-nav a i {
+font-size: 16px;
+}
+
+.bottom-nav a.active {
+color: #FFD700;
+}
+
+.bottom-nav a:hover {
+color: #FFD700;
+}
+
+.notification-popup {
+position: fixed;
+top: 70px;
+right: 15px;
+min-width: 240px;
+max-width: 300px;
+padding: 8px 12px;
+border-radius: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+z-index: 99999;
+backdrop-filter: blur(20px);
+box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+animation: slideInRight 0.3s ease;
+border-left: 3px solid;
+}
+
+.notification-popup.success {
+background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08));
+border-left-color: #00FF88;
+}
+
+.notification-popup.error {
+background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08));
+border-left-color: #FF4D4D;
+}
+
+.notification-popup.info {
+background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08));
+border-left-color: #FFD700;
+}
+
+.notification-popup i {
+font-size: 18px;
+}
+
+.notification-popup .popup-message {
+flex: 1;
+font-size: 10px;
+color: #FFFFFF;
+font-weight: 500;
+}
+
+@keyframes slideInRight {
+from { opacity: 0; transform: translateX(100%); }
+to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+from { opacity: 1; transform: translateX(0); }
+to { opacity: 0; transform: translateX(100%); }
+}
+
+@media(max-width: 600px) {
+.hero-title { font-size: 18px; }
+.btn-primary, .btn-secondary { padding: 8px 18px; font-size: 11px; }
+.benefits-grid { grid-template-columns: 1fr; }
+.steps-grid { grid-template-columns: 1fr; }
+.theme-toggle { padding: 8px; }
+.logo-area h2 { font-size: 13px; }
+.logo-area p { display: none; }
+.bottom-nav a span { font-size: 6px; }
+.bottom-nav a i { font-size: 14px; }
+.skeleton-hero-btn { width: 115px; height: 38px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div>
+<h2>ABOTRA-PROAI</h2>
+<p>AI Auto Trading</p>
+</div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'">
+<i class="fas fa-arrow-left"></i> Back
+</button>
+<div class="theme-toggle" id="themeToggle">
+<i class="fas fa-sun"></i>
+<i class="fas fa-moon" style="display:none;"></i>
+</div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="main-content">
+
+<div id="skeletonContainer">
+    <div class="skeleton-hero-card">
+        <div class="skeleton-hero-icon"></div>
+        <div class="skeleton-hero-title"></div>
+        <div class="skeleton-hero-subtitle"></div>
+        <div class="skeleton-hero-buttons">
+            <div class="skeleton-hero-btn"></div>
+            <div class="skeleton-hero-btn"></div>
+        </div>
+    </div>
+    <div class="skeleton-info-card">
+        <div class="skeleton-section-title"></div>
+        <div class="skeleton-benefits-grid">
+            <div class="skeleton-benefit-item"><div class="skeleton-benefit-icon"></div><div class="skeleton-benefit-text"><div class="skeleton-benefit-title"></div><div class="skeleton-benefit-desc"></div></div></div>
+            <div class="skeleton-benefit-item"><div class="skeleton-benefit-icon"></div><div class="skeleton-benefit-text"><div class="skeleton-benefit-title"></div><div class="skeleton-benefit-desc"></div></div></div>
+        </div>
+    </div>
+    <div class="skeleton-info-card">
+        <div class="skeleton-section-title"></div>
+        <div class="skeleton-steps-grid">
+            <div class="skeleton-step-card"><div class="skeleton-step-number"></div><div class="skeleton-step-title"></div><div class="skeleton-step-desc"></div></div>
+            <div class="skeleton-step-card"><div class="skeleton-step-number"></div><div class="skeleton-step-title"></div><div class="skeleton-step-desc"></div></div>
+        </div>
+    </div>
+    <div class="skeleton-info-card">
+        <div class="skeleton-section-title"></div>
+        <div class="skeleton-robot-preview">
+            <div class="skeleton-robot-item"></div>
+            <div class="skeleton-robot-item"></div>
+            <div class="skeleton-robot-item"></div>
+        </div>
+    </div>
+</div>
+
+<div id="realContent" style="display: none;">
+    <div class="hero-card">
+        <div class="hero-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="hero-title">AI Auto Trading Bot</div>
+        <div class="hero-subtitle">Let our advanced AI trade for you 24/7. Set it and forget it!</div>
+        <div class="hero-buttons">
+            <button class="btn-primary" onclick="window.location.href='auto-bot.html'">
+                <i class="fas fa-play"></i> Launch Auto Bot
+            </button>
+            <button class="btn-secondary" onclick="window.location.href='robots.html'">
+                <i class="fas fa-microchip"></i> Buy AI Robots
+            </button>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="section-title"><i class="fas fa-star"></i> Why Use AI Auto Trading?</div>
+        <div class="benefits-grid">
+            <div class="benefit-item"><div class="benefit-icon"><i class="fas fa-clock"></i></div><div class="benefit-text"><h4>24/7 Trading</h4><p>AI never sleeps - trades around the clock</p></div></div>
+            <div class="benefit-item"><div class="benefit-icon"><i class="fas fa-brain"></i></div><div class="benefit-text"><h4>Smart AI Decisions</h4><p>Advanced algorithms analyze market trends</p></div></div>
+            <div class="benefit-item"><div class="benefit-icon"><i class="fas fa-chart-line"></i></div><div class="benefit-text"><h4>Consistent Profits</h4><p>Up to 38% daily returns with premium bots</p></div></div>
+            <div class="benefit-item"><div class="benefit-icon"><i class="fas fa-shield-alt"></i></div><div class="benefit-text"><h4>Risk Management</h4><p>Automated stop-loss and take-profit</p></div></div>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="section-title"><i class="fas fa-graduation-cap"></i> How AI Auto Trading Works</div>
+        <div class="steps-grid">
+            <div class="step-card"><div class="step-number">1</div><div class="step-title">Buy AI Robot</div><div class="step-desc">Purchase a robot from Starter to Legendary level</div></div>
+            <div class="step-card"><div class="step-number">2</div><div class="step-title">Set Amount & Duration</div><div class="step-desc">Choose trade amount and how long bot runs</div></div>
+            <div class="step-card"><div class="step-number">3</div><div class="step-title">Start Auto Trading</div><div class="step-desc">Click START and watch AI trade automatically</div></div>
+            <div class="step-card"><div class="step-number">4</div><div class="step-title">Withdraw Profits</div><div class="step-desc">Collect daily profits directly to your wallet</div></div>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="section-title"><i class="fas fa-microchip"></i> AI Robot Levels</div>
+        <div class="robot-preview">
+            <div class="robot-preview-item"><div class="robot-preview-icon">🔥</div><div class="robot-preview-name">Starter Bot</div><div class="robot-preview-profit">3% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🥉</div><div class="robot-preview-name">Bronze Bot</div><div class="robot-preview-profit">4% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🥈</div><div class="robot-preview-name">Silver Bot</div><div class="robot-preview-profit">5% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🥇</div><div class="robot-preview-name">Gold Bot</div><div class="robot-preview-profit">7% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">💎</div><div class="robot-preview-name">Platinum Bot</div><div class="robot-preview-profit">9% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">💠</div><div class="robot-preview-name">Diamond Bot</div><div class="robot-preview-profit">11% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🟢</div><div class="robot-preview-name">Emerald Bot</div><div class="robot-preview-profit">15% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">❤️</div><div class="robot-preview-name">Ruby Bot</div><div class="robot-preview-profit">19% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🔵</div><div class="robot-preview-name">Sapphire Bot</div><div class="robot-preview-profit">23% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">⚫</div><div class="robot-preview-name">Onyx Bot</div><div class="robot-preview-profit">28% daily</div></div>
+            <div class="robot-preview-item"><div class="robot-preview-icon">🏆</div><div class="robot-preview-name">Legendary Bot</div><div class="robot-preview-profit">38% daily</div></div>
+        </div>
+        <div style="text-align: center; margin-top: 16px;">
+            <button class="btn-secondary" onclick="window.location.href='robots.html'" style="padding: 6px 18px; font-size: 11px;">View All 11 Robots →</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="trade1.html"><i class="fas fa-graduation-cap"></i><span>Tutorial</span></a>
+<a href="trade.html"><i class="fa-solid fa-chart-line"></i><span>Trade</span></a>
+<a href="trade2.html" class="active"><i class="fas fa-graduation-cap"></i><span>AI Guide</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86",
+    measurementId: "G-NFJGQXQZNR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        document.getElementById('skeletonContainer').style.display = 'block';
+        document.getElementById('realContent').style.display = 'none';
+        
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 1500);
+    });
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Media files
+*.mp3
+*.mp4
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.apk
+*.csv
+*.data
+*.zip
+*.jar
+*.pcm
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node modules
+node_modules/
+*.log
+
+# Environment
+.env.local
+.env.*.local

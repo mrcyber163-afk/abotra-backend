@@ -1,0 +1,13 @@
+{
+  "name": "abotra-proai",
+  "version": "2.0.0",
+  "description": "ABOTRA-PROAI AI Trading Platform",
+  "main": "backend/functions/index.js",
+  "scripts": {
+    "start": "node backend/functions/index.js",
+    "dev": "nodemon backend/functions/index.js"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Account | ABOTRA-PROAI - Manage Your Profile</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+body {
+background:#050505;
+background-image:url("../assets/images/background.png");
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+min-height:100vh;
+padding-bottom:75px;
+position:relative;
+transition: background 0.3s ease;
+}
+
+body.light-theme {
+background:#f5f5f5;
+}
+body.light-theme .overlay { background:rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .account-container,
+body.light-theme .account-card,
+body.light-theme .settings-card,
+body.light-theme .referral-card { background:rgba(255,255,255,0.95); border:1px solid rgba(0,0,0,0.08); }
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .section-title { color:#800000; }
+body.light-theme .info-label { color:#666; }
+body.light-theme .info-value { color:#1a1a1a; }
+body.light-theme .setting-item { border-bottom:1px solid rgba(0,0,0,0.08); }
+body.light-theme .setting-item span { color:#333; }
+body.light-theme .bottom-nav { background:rgba(255,255,255,0.95); border-top:1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color:#888; }
+body.light-theme .bottom-nav a.active { color:#800000; }
+
+.skeleton-text {
+    height: 11px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%);
+    background-size: 200% 100%;
+    border-radius: 5px;
+    animation: shimmer 0.8s infinite;
+}
+.skeleton-avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.1) 25%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.1) 75%);
+    background-size: 200% 100%;
+    border-radius: 50%;
+    animation: shimmer 0.8s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.theme-toggle, .logout-top {
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:50px;
+padding:8px;
+cursor:pointer;
+transition:0.3s;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+.theme-toggle i, .logout-top i { font-size:13px; color:#FFD700; }
+.theme-toggle:hover, .logout-top:hover { background:rgba(255,215,0,0.2); transform:scale(1.05); }
+.logout-top i { color:#FF6B6B; }
+.logout-top:hover i { color:#ff4444; }
+
+.overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); backdrop-filter:blur(4px); z-index:1; }
+
+.top-bar {
+position:fixed; top:0; left:0; right:0; z-index:100;
+background:rgba(10,10,10,0.95); backdrop-filter:blur(12px);
+border-bottom:1px solid rgba(255,215,0,0.2);
+padding:10px 16px; display:flex; justify-content:space-between; align-items:center;
+}
+.logo-area { display:flex; align-items:center; gap:10px; }
+.logo-area img { width:34px; height:34px; border-radius:10px; object-fit:cover; background:transparent; }
+.logo-area h2 { color:#FFD700; font-size:14px; }
+.top-right { display:flex; gap:8px; align-items:center; }
+
+.account-container { position:relative; z-index:2; max-width:600px; margin:70px auto 20px; padding:0 15px; }
+.page-title { text-align:center; font-size:17px; font-weight:800; color:#FFD700; margin-bottom:16px; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    background: #1E90FF;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    font-size: 8px;
+    color: white;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.verified-badge i { font-size: 8px; color: white; }
+
+.account-card, .settings-card, .referral-card {
+background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2);
+backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px;
+}
+.section-title { color:#FFD700; font-size:13px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+
+.profile-picture-box {
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:16px;
+padding-bottom:12px;
+border-bottom:1px solid rgba(255,215,0,0.2);
+flex-wrap:wrap;
+}
+.profile-avatar-large {
+position:relative;
+width:70px;
+height:70px;
+}
+.profile-avatar-large img {
+width:100%;
+height:100%;
+border-radius:50%;
+object-fit:cover;
+border:2px solid #FFD700;
+background:#1a1a1a;
+}
+.avatar-upload-btn {
+position:absolute;
+bottom:0;
+right:0;
+background:#FFD700;
+border-radius:50%;
+width:20px;
+height:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:0.2s;
+}
+.avatar-upload-btn i { font-size:8px; color:#800000; }
+.profile-info-text h3 { color:#FFD700; font-size:14px; margin-bottom:3px; display: inline-flex; align-items: center; gap: 4px; }
+.profile-info-text p { color:#AAAAAA; font-size:9px; }
+
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); flex-wrap:wrap; gap:6px; }
+.info-label { color:#AAAAAA; font-size:9px; display:flex; align-items:center; gap:5px; }
+.info-value { color:#FFFFFF; font-size:10px; font-weight:500; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+.username-container { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.username-text { color: #FFD700; font-weight: 600; font-size:11px; }
+.username-edit-icon { cursor: pointer; color: #FFD700; font-size: 9px; opacity: 0.7; transition: 0.2s; }
+.username-edit-icon:hover { opacity: 1; }
+
+.info-stats-inline {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+flex-wrap: wrap;
+gap: 10px;
+}
+.info-stats-inline .info-label { color: #AAAAAA; font-size: 9px; display: flex; align-items: center; gap: 5px; }
+.info-stats-inline .info-value { color: #FFFFFF; font-size: 10px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.inline-stats-number { background: rgba(255,215,0,0.15); padding: 2px 8px; border-radius: 20px; font-weight: 700; color: #FFD700; font-size: 10px; }
+
+.inline-btn { background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; padding:3px 8px; font-size:8px; font-weight:600; color:#FFD700; cursor:pointer; transition:0.2s; }
+.inline-btn:hover { background:#FFD700; color:#800000; }
+.add-btn { background:rgba(0,255,136,0.15); border-color:#00FF88; color:#00FF88; }
+.add-btn:hover { background:#00FF88; color:#000; }
+.edit-btn { background:rgba(255,215,0,0.15); border-color:#FFD700; color:#FFD700; }
+.edit-btn:hover { background:#FFD700; color:#800000; }
+
+.kyc-status { display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:50px; font-size:8px; font-weight:600; }
+.kyc-approved { background:rgba(14,203,129,0.2); color:#0ECB81; }
+.kyc-verified { background:rgba(14,203,129,0.2); color:#0ECB81; }
+.kyc-pending { background:rgba(255,215,0,0.2); color:#FFD700; }
+.kyc-rejected { background:rgba(255,77,77,0.2); color:#F6465D; }
+.kyc-none { background:rgba(255,77,77,0.2); color:#F6465D; }
+
+.setting-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+.setting-item:hover { transform:translateX(3px); }
+.setting-item span { color:#FFFFFF; font-size:10px; display:flex; align-items:center; gap:8px; }
+.setting-item .arrow { color:#888; font-size:9px; }
+
+.biometric-toggle { display:flex; align-items:center; gap:8px; }
+.toggle-switch { width:34px; height:17px; background:#555; border-radius:30px; position:relative; cursor:pointer; transition:0.2s; }
+.toggle-switch.active { background:#FFD700; }
+.toggle-switch::after { content:''; width:13px; height:13px; background:white; border-radius:50%; position:absolute; top:2px; left:2px; transition:0.2s; }
+.toggle-switch.active::after { left:19px; }
+
+.referral-link { background:rgba(255,255,255,0.08); border-radius:12px; padding:8px; display:flex; align-items:center; justify-content:space-between; gap:6px; margin:10px 0; flex-wrap:wrap; }
+.referral-link input { background:transparent; border:none; color:#FFD700; font-size:9px; flex:1; outline:none; }
+.referral-link button { background:rgba(255,215,0,0.2); border:none; border-radius:6px; padding:5px 10px; color:#FFD700; cursor:pointer; font-size:9px; }
+
+.btn-primary { width:100%; background:linear-gradient(135deg,#800000,#FFD700); border:none; border-radius:12px; padding:8px; color:white; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:8px; font-size:10px; }
+
+.country-flag { font-size: 13px; margin-right: 3px; }
+
+.bottom-nav {
+position:fixed; bottom:0; left:0; right:0; background:rgba(10,10,10,0.95);
+backdrop-filter:blur(12px); border-top:1px solid rgba(255,215,0,0.2);
+display:flex; justify-content:space-around; padding:8px 12px; z-index:100;
+}
+.bottom-nav a { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:#888; font-size:8px; gap:3px; }
+.bottom-nav a i { font-size:16px; }
+.bottom-nav a.active { color:#FFD700; }
+
+.modal-overlay {
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+backdrop-filter:blur(8px);
+z-index:20000;
+display:flex;
+align-items:center;
+justify-content:center;
+opacity:0;
+visibility:hidden;
+transition:all 0.3s ease;
+}
+.modal-overlay.active { opacity:1; visibility:visible; }
+.modal-container {
+background:linear-gradient(145deg, #1e1e2e, #161626);
+border-radius:24px;
+border:1px solid rgba(255,215,0,0.3);
+width:90%;
+max-width:340px;
+padding:18px 16px;
+text-align:center;
+box-shadow:0 25px 50px rgba(0,0,0,0.5);
+transform:scale(0.9);
+transition:transform 0.3s ease;
+}
+.modal-overlay.active .modal-container { transform:scale(1); }
+body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, #f0f0f5); }
+.modal-container h3 { color:#FFD700; font-size:15px; margin-bottom:5px; }
+.modal-container p { color:#AAAAAA; font-size:9px; margin-bottom:12px; }
+.modal-container input { width:100%; height:40px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:0 14px; color:#FFFFFF; font-size:11px; outline:none; }
+.modal-container input:focus { border-color:#FFD700; box-shadow:0 0 10px rgba(255,215,0,0.3); }
+.modal-buttons { display:flex; gap:8px; margin-top:6px; }
+.modal-btn { flex:1; height:38px; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:10px; }
+.modal-btn.confirm { background:linear-gradient(135deg,#800000,#FFD700); color:white; }
+.modal-btn.cancel { background:rgba(255,255,255,0.1); color:#CCCCCC; border:1px solid rgba(255,255,255,0.15); }
+.error-message { color:#FF6B6B; font-size:9px; margin-top:5px; display:none; }
+.error-message.show { display:block; }
+
+.otp-input-group { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+.otp-input { width: 38px; height: 38px; text-align: center; font-size: 15px; font-weight: bold; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; color: #FFD700; }
+
+.notification-popup { 
+    position:fixed; top:65px; right:20px; min-width:240px; max-width:320px;
+    padding:8px 12px; border-radius:12px; display:flex; align-items:center; gap:8px;
+    z-index:99999; backdrop-filter:blur(20px); box-shadow:0 15px 35px rgba(0,0,0,0.3);
+    animation:slideInRight 0.4s ease; border-left:4px solid; background:rgba(0,0,0,0.95);
+}
+.notification-popup.success { background:linear-gradient(135deg, rgba(14,203,129,0.2), rgba(14,203,129,0.05)); border-left-color:#0ECB81; }
+.notification-popup.error { background:linear-gradient(135deg, rgba(246,70,93,0.2), rgba(246,70,93,0.05)); border-left-color:#F6465D; }
+.notification-popup.info { background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color:#FFD700; }
+.notification-popup i { font-size:14px; }
+.notification-popup .message { flex:1; font-size:9px; color:#FFFFFF; font-weight:500; }
+
+@keyframes slideInRight { 
+    from { opacity:0; transform:translateX(100%); } 
+    to { opacity:1; transform:translateX(0); } 
+}
+
+@media(max-width:480px){ 
+    .account-container { margin-top:65px; } 
+    .info-row { flex-direction:column; align-items:flex-start; } 
+    .otp-input { width:32px; height:32px; font-size:12px; } 
+    .bottom-nav a span { font-size:7px; } 
+    .bottom-nav a i { font-size:14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<!-- PHONE MODAL -->
+<div class="modal-overlay" id="phoneModal"><div class="modal-container"><i class="fas fa-phone" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Add/Edit Phone Number</h3><p>Enter your phone number with country code</p><input type="tel" id="modalPhoneNumber" placeholder="e.g., +255712345678"><div class="modal-buttons"><button class="modal-btn cancel" id="closePhoneModal">Cancel</button><button class="modal-btn confirm" id="savePhoneModal">Save</button></div></div></div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="emailModal"><div class="modal-container"><i class="fas fa-envelope" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Change Email Address</h3><p>Enter your new email address</p><input type="email" id="modalEmail" placeholder="email@example.com"><div class="modal-buttons"><button class="modal-btn cancel" id="closeEmailModal">Cancel</button><button class="modal-btn confirm" id="saveEmailModal">Save</button></div></div></div>
+
+<!-- BIOMETRIC MODAL -->
+<div class="modal-overlay" id="biometricModal"><div class="modal-container"><i class="fas fa-fingerprint" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Enable Biometric Login</h3><p id="biometricModalMessage">Enter your password to securely enable fingerprint</p><input type="password" id="biometricPassword" placeholder="Enter your password"><div class="error-message" id="biometricError">Incorrect password.</div><div id="biometricStatusDiv" style="display:none; margin-bottom:10px; padding:8px; border-radius:8px;"></div><div class="modal-buttons"><button class="modal-btn cancel" id="closeBiometricModal">Cancel</button><button class="modal-btn confirm" id="confirmBiometricModal">Enable</button></div></div></div>
+
+<!-- USERNAME MODAL -->
+<div class="modal-overlay" id="usernameModal"><div class="modal-container"><i class="fas fa-user-edit" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Change Username</h3><p>Choose a unique username</p><input type="text" id="newUsername" placeholder="Enter new username" maxlength="20"><div class="modal-buttons"><button class="modal-btn cancel" id="closeUsernameModal">Cancel</button><button class="modal-btn confirm" id="saveUsernameModal">Save</button></div></div></div>
+
+<!-- OTP MODAL -->
+<div class="modal-overlay" id="otpModal"><div class="modal-container"><i class="fas fa-key" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Verify Phone Number</h3><p>Enter the 6-digit OTP sent to your phone</p><div class="otp-input-group"><input type="text" maxlength="1" class="otp-input" id="otp1"><input type="text" maxlength="1" class="otp-input" id="otp2"><input type="text" maxlength="1" class="otp-input" id="otp3"><input type="text" maxlength="1" class="otp-input" id="otp4"><input type="text" maxlength="1" class="otp-input" id="otp5"><input type="text" maxlength="1" class="otp-input" id="otp6"></div><div class="error-message" id="otpError">Invalid OTP.</div><div class="modal-buttons"><button class="modal-btn cancel" id="closeOtpModal">Cancel</button><button class="modal-btn confirm" id="verifyOtpBtn">Verify</button></div></div></div>
+
+<div class="top-bar"><div class="logo-area"><img src="../assets/images/logo.png" onerror="this.src='https://placehold.co/34x34/800000/FFD700?text=AI'"><div><h2>ABOTRA-PROAI</h2></div></div><div class="top-right"><div class="logout-top" id="logoutTopBtn"><i class="fas fa-sign-out-alt"></i></div><div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div></div></div>
+
+<div class="account-container">
+<div class="page-title"><i class="fas fa-user-circle"></i> My Account</div>
+
+<div class="account-card" id="accountCard">
+    <div class="profile-picture-box">
+        <div class="profile-avatar-large"><img id="profileAvatar" src="../assets/images/avatar.png"><div class="avatar-upload-btn" id="avatarUploadBtn"><i class="fas fa-camera"></i></div><input type="file" id="avatarInput" accept="image/*" style="display:none"></div>
+        <div class="profile-info-text"><div class="skeleton-text" style="width: 90px; height: 12px; margin-bottom: 5px;"></div><div class="skeleton-text" style="width: 70px; height: 8px;"></div></div>
+    </div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="skeleton-text" style="width: 70px; height: 10px;"></div></div></div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><div class="skeleton-text" style="width: 120px; height: 10px;"></div></div></div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><div class="skeleton-text" style="width: 90px; height: 10px;"></div></div></div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><div class="skeleton-text" style="width: 70px; height: 10px;"></div></div></div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value"><div class="skeleton-text" style="width: 60px; height: 10px;"></div></div></div>
+    <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><div class="skeleton-text" style="width: 30px; height: 10px;"></div></div></div>
+    <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value"><div class="skeleton-text" style="width: 90px; height: 10px;"></div></div></div>
+</div>
+
+<div class="settings-card"><div class="section-title"><i class="fas fa-sliders-h"></i> Account Settings</div>
+<div class="setting-item" id="changePasswordBtn"><span><i class="fas fa-lock"></i> Change Password</span><i class="fas fa-chevron-right arrow"></i></div>
+<div class="setting-item" id="biometricSetting"><span><i class="fas fa-fingerprint"></i> Biometric Login</span><div class="biometric-toggle"><div class="toggle-switch" id="biometricToggle"></div></div></div>
+<div class="setting-item" id="twoFactorBtn"><span><i class="fas fa-shield-alt"></i> Two-Factor Authentication</span><i class="fas fa-chevron-right arrow"></i></div>
+<div class="setting-item" id="kycBtn"><span><i class="fas fa-id-card"></i> Submit KYC Documents</span><i class="fas fa-chevron-right arrow"></i></div>
+</div>
+
+<div class="referral-card"><div class="section-title"><i class="fas fa-users"></i> Referral Program</div>
+<div class="referral-link"><div class="skeleton-text" style="width: 160px; height: 10px;"></div></div>
+<div class="referral-stats" style="display:flex; justify-content:space-around; text-align:center; margin-top:8px;">
+    <div><div class="value" id="refCount" style="font-size:15px; font-weight:800; color:#FFD700;">0</div><div class="label" style="font-size:8px;">Referrals</div></div>
+    <div><div class="value" id="totalCommission" style="font-size:15px; font-weight:800; color:#FFD700;">$0</div><div class="label" style="font-size:8px;">Total Commission</div></div>
+</div>
+<button class="btn-primary" id="inviteBtn"><i class="fas fa-share-alt"></i> Invite Friends</button></div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="wallet.html"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="kyc.html"><i class="fas fa-id-card"></i><span>KYC</span></a>
+<a href="account.html" class="active"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signOut, signInWithEmailAndPassword, updateEmail, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = { 
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM", 
+    authDomain: "abotra-proa1.firebaseapp.com", 
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com", 
+    projectId: "abotra-proa1", 
+    storageBucket: "abotra-proa1.firebasestorage.app", 
+    messagingSenderId: "510401455603", 
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86" 
+};
+
+// ============================================================
+// API BASE URL
+// ============================================================
+const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
+    ? 'http://localhost:5001' 
+    : 'https://abotra-backend.up.railway.app';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const rtdb = getDatabase(app);
+const storage = getStorage(app);
+
+let currentUser = null, userData = null, recaptchaVerifier = null, pendingPhoneNumber = null, phoneConfirmationResult = null;
+let rpId = window.location.hostname || "abotra-proai.com";
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// API CALLS TO BACKEND
+// ============================================================
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('API request error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// COUNTRY FLAGS
+// ============================================================
+const countryFlags = {
+    "Tanzania":"🇹🇿","Kenya":"🇰🇪","Uganda":"🇺🇬","Malawi":"🇲🇼","Zambia":"🇿🇲","South Africa":"🇿🇦","Nigeria":"🇳🇬","Ghana":"🇬🇭","Egypt":"🇪🇬","Morocco":"🇲🇦","Algeria":"🇩🇿","Tunisia":"🇹🇳","Libya":"🇱🇾","Sudan":"🇸🇩","Ethiopia":"🇪🇹","Somalia":"🇸🇴","Rwanda":"🇷🇼","Burundi":"🇧🇮","Mozambique":"🇲🇿","Angola":"🇦🇴","Botswana":"🇧🇼","Namibia":"🇳🇦","Zimbabwe":"🇿🇼","United States":"🇺🇸","United Kingdom":"🇬🇧","Germany":"🇩🇪","France":"🇫🇷","Italy":"🇮🇹","Spain":"🇪🇸","Portugal":"🇵🇹","Netherlands":"🇳🇱","Belgium":"🇧🇪","Switzerland":"🇨🇭","Austria":"🇦🇹","Sweden":"🇸🇪","Norway":"🇳🇴","Denmark":"🇩🇰","Finland":"🇫🇮","Ireland":"🇮🇪","Poland":"🇵🇱","Czech Republic":"🇨🇿","Hungary":"🇭🇺","Romania":"🇷🇴","Bulgaria":"🇧🇬","Greece":"🇬🇷","Turkey":"🇹🇷","Russia":"🇷🇺","Ukraine":"🇺🇦","India":"🇮🇳","China":"🇨🇳","Japan":"🇯🇵","South Korea":"🇰🇷","Indonesia":"🇮🇩","Philippines":"🇵🇭","Vietnam":"🇻🇳","Thailand":"🇹🇭","Malaysia":"🇲🇾","Singapore":"🇸🇬","Australia":"🇦🇺","New Zealand":"🇳🇿","Brazil":"🇧🇷","Argentina":"🇦🇷","Mexico":"🇲🇽","Chile":"🇨🇱","Peru":"🇵🇪","Colombia":"🇨🇴","Venezuela":"🇻🇪","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Sri Lanka":"🇱🇰","Nepal":"🇳🇵","Afghanistan":"🇦🇫","Iraq":"🇮🇶","Iran":"🇮🇷","Saudi Arabia":"🇸🇦","Yemen":"🇾🇪","Oman":"🇴🇲","UAE":"🇦🇪","Qatar":"🇶🇦","Kuwait":"🇰🇼","Israel":"🇮🇱","Jordan":"🇯🇴","Lebanon":"🇱🇧","Syria":"🇸🇾","Canada":"🇨🇦","Cuba":"🇨🇺","Jamaica":"🇯🇲","Haiti":"🇭🇹","Dominican Republic":"🇩🇴","Bahamas":"🇧🇸","Trinidad and Tobago":"🇹🇹","Barbados":"🇧🇧"
+};
+function getFlag(country) { return countryFlags[country] || "🌍"; }
+
+// ============================================================
+// NOTIFICATION FUNCTIONS
+// ============================================================
+function showNotification(msg, type) { 
+    const existing = document.querySelector('.notification-popup'); if(existing) existing.remove(); 
+    const n = document.createElement('div'); n.className = `notification-popup ${type}`; 
+    const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle');
+    n.innerHTML = `<i class="fas ${icon}"></i><div class="message">${msg}</div>`; 
+    document.body.appendChild(n); setTimeout(() => n.remove(), 4000); 
+}
+
+function escapeHtml(t) { if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+// ============================================================
+// COMPRESS IMAGE
+// ============================================================
+function compressImage(file, maxWidth, maxHeight, quality) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if(w > h) { if(w > maxWidth) { h = (h * maxWidth) / w; w = maxWidth; } }
+                else { if(h > maxHeight) { w = (w * maxHeight) / h; h = maxHeight; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                canvas.toBlob(blob => resolve(blob), file.type, quality);
+            };
+        };
+    });
+}
+
+// ============================================================
+// RECAPTCHA
+// ============================================================
+async function initRecaptcha() { if(!recaptchaVerifier) recaptchaVerifier = new RecaptchaVerifier(auth, 'savePhoneModal', { size: 'invisible' }); await recaptchaVerifier.render(); }
+
+// ============================================================
+// BIOMETRIC FUNCTIONS
+// ============================================================
+async function enableBiometricWithWebAuthn(password) {
+    try {
+        const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+        const attResp = await SimpleWebAuthnBrowser.startRegistration({
+            rp: { name: "ABOTRA-PROAI", id: rpId },
+            user: { id: currentUser.uid, name: currentUser.email, displayName: currentUser.email.split('@')[0] },
+            challenge, pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
+            timeout: 60000, attestation: "none"
+        });
+        localStorage.setItem('abotra_biometric_credential', JSON.stringify(attResp));
+        localStorage.setItem('abotra_biometric_email', currentUser.email);
+        localStorage.setItem('abotra_biometric_password', password);
+        localStorage.setItem('abotra_biometric_enabled', 'true');
+        await set(ref(rtdb, `biometric/${currentUser.uid}`), { enabled: true, credentialId: attResp.id, timestamp: Date.now() });
+        return true;
+    } catch(e) { console.error(e); return false; }
+}
+
+async function disableBiometric() {
+    localStorage.removeItem('abotra_biometric_credential');
+    localStorage.removeItem('abotra_biometric_email');
+    localStorage.removeItem('abotra_biometric_password');
+    localStorage.removeItem('abotra_biometric_enabled');
+    if(currentUser) await remove(ref(rtdb, `biometric/${currentUser.uid}`));
+    document.getElementById('biometricToggle')?.classList.remove('active');
+    showNotification('Biometric disabled', 'info');
+}
+
+async function checkBiometricEnabled() {
+    const saved = localStorage.getItem('abotra_biometric_credential');
+    if(saved && currentUser) { document.getElementById('biometricToggle')?.classList.add('active'); return true; }
+    document.getElementById('biometricToggle')?.classList.remove('active');
+    return false;
+}
+
+// ============================================================
+// LOAD USER DATA
+// ============================================================
+async function loadAllUserData(user) {
+    const userRef = ref(rtdb, `users/${user.uid}`);
+    const robotsRef = ref(rtdb, `userRobots/${user.uid}`);
+    const kycRef = ref(rtdb, `kyc/${user.uid}`);
+    
+    const [userSnap, robotsSnap, kycSnap] = await Promise.all([
+        get(userRef), get(robotsRef), get(kycRef)
+    ]);
+    
+    if(userSnap.exists()) userData = userSnap.val();
+    else { 
+        userData = { username: user.email.split('@')[0], email: user.email, createdAt: Date.now(), country: 'Tanzania', commissionEarned: 0, referralCount: 0 }; 
+        await set(userRef, userData); 
+    }
+    
+    let activeRobots = 0;
+    if(robotsSnap.exists()) {
+        robotsSnap.forEach(c => { if(c.val().status === 'active') activeRobots++; });
+    }
+    
+    let kycStatus = userData.kycStatus || 'none';
+    if(kycStatus === 'none' && kycSnap.exists()) {
+        const kycData = kycSnap.val();
+        if(kycData.status === 'approved' || kycData.status === 'verified') kycStatus = 'approved';
+        else if(kycData.status === 'pending') kycStatus = 'pending';
+        else if(kycData.status === 'rejected') kycStatus = 'rejected';
+        else if(kycData.kycStatus === 'approved') kycStatus = 'approved';
+        else if(kycData.kycStatus === 'pending') kycStatus = 'pending';
+        else if(kycData.kycStatus === 'rejected') kycStatus = 'rejected';
+    }
+    
+    const referralCount = userData.referralCount || 0;
+    const commissionEarned = userData.commissionEarned || 0;
+    
+    return { userData, activeRobots, kycStatus, referralCount, commissionEarned };
+}
+
+async function loadUserData(user) {
+    const data = await loadAllUserData(user);
+    
+    const username = data.userData.username || user.email.split('@')[0];
+    const isVerified = data.userData.isVerified === true;
+    const blueTick = isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
+    const createdAt = data.userData.createdAt ? new Date(data.userData.createdAt) : new Date();
+    const formattedDate = createdAt.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const userCountry = data.userData.country || 'Tanzania';
+    const countryFlag = getFlag(userCountry);
+    
+    let kycHtml = '';
+    if(data.kycStatus === 'approved' || data.kycStatus === 'verified') {
+        kycHtml = '<span class="kyc-status kyc-approved"><i class="fas fa-check-circle"></i> APPROVED</span>';
+    } else if(data.kycStatus === 'pending') {
+        kycHtml = '<span class="kyc-status kyc-pending"><i class="fas fa-clock"></i> PENDING</span>';
+    } else if(data.kycStatus === 'rejected') {
+        kycHtml = '<span class="kyc-status kyc-rejected"><i class="fas fa-times-circle"></i> REJECTED</span>';
+    } else {
+        kycHtml = '<span class="kyc-status kyc-none"><i class="fas fa-times-circle"></i> Not Submitted</span>';
+    }
+    
+    const isPhoneUser = data.userData.isPhoneUser === true || 
+                        (user.email && (user.email.includes('temporary') || user.email.includes('temp') || user.email.includes('phone')));
+    
+    let emailHtml = '';
+    if(isPhoneUser) {
+        emailHtml = `<button class="inline-btn edit-btn" id="editEmailBtn"><i class="fas fa-edit"></i> Edit</button>`;
+    }
+    if(!user.emailVerified) {
+        emailHtml += ` <button class="inline-btn" id="verifyEmailBtn"><i class="fas fa-envelope"></i> Verify</button>`;
+    } else if(user.emailVerified && !isPhoneUser) {
+        emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
+    } else if(user.emailVerified && isPhoneUser) {
+        emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
+    }
+    
+    let phoneHtml = '';
+    if(data.userData.phone && data.userData.phoneVerified) {
+        phoneHtml = `<button class="inline-btn edit-btn" id="editPhoneBtn"><i class="fas fa-edit"></i> Edit</button> <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
+    } else if(data.userData.phone && !data.userData.phoneVerified) {
+        phoneHtml = `<button class="inline-btn" id="verifyPhoneBtn"><i class="fas fa-check"></i> Verify</button> <span style="color:#FFD700;">${escapeHtml(data.userData.phone)}</span>`;
+    } else {
+        phoneHtml = `<button class="inline-btn add-btn" id="addPhoneBtn"><i class="fas fa-plus"></i> Add Phone</button>`;
+    }
+    
+    const referralCount = data.referralCount;
+    const totalCommission = data.commissionEarned;
+    
+    document.getElementById('accountCard').innerHTML = `
+        <div class="profile-picture-box">
+            <div class="profile-avatar-large"><img id="profileAvatar" src="${data.userData.profilePicture || '../assets/images/avatar.png'}" onerror="this.src='https://placehold.co/70x70/FFD700/800000?text=User'"><div class="avatar-upload-btn" id="avatarUploadBtn"><i class="fas fa-camera"></i></div><input type="file" id="avatarInput" accept="image/*" style="display:none"></div>
+            <div class="profile-info-text"><h3>${escapeHtml(username)}${blueTick}</h3><p>Member since: ${formattedDate}</p></div>
+        </div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="username-container"><span class="username-text" id="usernameDisplay">${escapeHtml(username)}</span><i class="fas fa-edit username-edit-icon" id="editUsernameBtn"></i></div></div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><span id="accountEmail">${escapeHtml(user.email)}</span> ${emailHtml}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><span id="accountPhone">${data.userData.phone || 'Not added'}</span> ${phoneHtml}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><span class="country-flag">${countryFlag}</span> ${escapeHtml(userCountry)}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value" id="accountKyc">${kycHtml}</div></div>
+        <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><span class="inline-stats-number">${data.activeRobots}</span></div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value">${formattedDate}</div></div>
+    `;
+    
+    document.getElementById('refCount').innerHTML = referralCount;
+    document.getElementById('totalCommission').innerHTML = `$${totalCommission.toFixed(2)}`;
+    
+    let refCode = data.userData.referralCode;
+    if(!refCode){ 
+        refCode = 'ABOTRA' + Math.random().toString(36).substring(2,8).toUpperCase(); 
+        await update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode }); 
+    }
+    const refLinkDiv = document.querySelector('.referral-link');
+    if(refLinkDiv){ 
+        const domain = window.location.origin; 
+        refLinkDiv.innerHTML = `<input type="text" id="referralLink" readonly value="${domain}/register.html?ref=${refCode}"><button id="copyReferralBtn"><i class="fas fa-copy"></i> Copy</button>`; 
+        document.getElementById('copyReferralBtn')?.addEventListener('click',()=>{ 
+            const inp=document.getElementById('referralLink'); 
+            if(inp){ inp.select(); navigator.clipboard.writeText(inp.value); showNotification('Referral link copied!','success'); } 
+        }); 
+    }
+    
+    const inviteBtn = document.getElementById('inviteBtn');
+    if(inviteBtn){
+        inviteBtn.onclick = () => { window.location.href = 'affiliate.html'; };
+    }
+    
+    document.getElementById('avatarUploadBtn')?.addEventListener('click',()=>{ document.getElementById('avatarInput')?.click(); });
+    const avatarInput = document.getElementById('avatarInput');
+    if(avatarInput) avatarInput.addEventListener('change', async (e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const compressed = await compressImage(file, 800, 800, 0.8);
+        const fileName = `profile_${user.uid}_${Date.now()}.jpg`;
+        const uploadResult = await uploadBytes(storageRef(storage, `profilePictures/${fileName}`), compressed);
+        const url = await getDownloadURL(uploadResult.ref);
+        await update(ref(rtdb, `users/${user.uid}`), { profilePicture: url });
+        document.getElementById('profileAvatar').src = url;
+        showNotification('Profile picture updated!', 'success');
+    });
+    
+    document.getElementById('editUsernameBtn')?.addEventListener('click', () => { document.getElementById('newUsername').value = data.userData.username || ''; openUsernameModal(); });
+    document.getElementById('editEmailBtn')?.addEventListener('click', () => { document.getElementById('modalEmail').value = user.email || ''; openEmailModal(); });
+    document.getElementById('editPhoneBtn')?.addEventListener('click', () => { 
+        document.getElementById('modalPhoneNumber').value = data.userData.phone || ''; 
+        openPhoneModal(); 
+    });
+    document.getElementById('verifyEmailBtn')?.addEventListener('click', async()=>{ await sendEmailVerification(user); showNotification('Verification email sent!', 'success'); });
+    document.getElementById('addPhoneBtn')?.addEventListener('click', () => { document.getElementById('modalPhoneNumber').value = ''; openPhoneModal(); });
+    document.getElementById('verifyPhoneBtn')?.addEventListener('click', async()=>{ 
+        await initRecaptcha(); 
+        const conf = await signInWithPhoneNumber(auth, data.userData.phone, recaptchaVerifier);
+        phoneConfirmationResult = conf; pendingPhoneNumber = data.userData.phone;
+        openOtpModal(); for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
+        showNotification('OTP sent', 'info');
+    });
+    
+    await checkBiometricEnabled();
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+const phoneModal = document.getElementById('phoneModal'), emailModal = document.getElementById('emailModal'), biometricModal = document.getElementById('biometricModal'), usernameModal = document.getElementById('usernameModal'), otpModal = document.getElementById('otpModal');
+function openPhoneModal() { phoneModal?.classList.add('active'); }
+function closePhoneModal() { phoneModal?.classList.remove('active'); }
+function openEmailModal() { emailModal?.classList.add('active'); }
+function closeEmailModal() { emailModal?.classList.remove('active'); }
+function openBiometricModal() { biometricModal?.classList.add('active'); document.getElementById('biometricPassword').value = ''; document.getElementById('biometricError').classList.remove('show'); }
+function closeBiometricModal() { biometricModal?.classList.remove('active'); }
+function openUsernameModal() { usernameModal?.classList.add('active'); }
+function closeUsernameModal() { usernameModal?.classList.remove('active'); }
+function openOtpModal() { otpModal?.classList.add('active'); }
+function closeOtpModal() { otpModal?.classList.remove('active'); }
+
+document.getElementById('closePhoneModal')?.addEventListener('click', closePhoneModal);
+document.getElementById('closeEmailModal')?.addEventListener('click', closeEmailModal);
+document.getElementById('closeBiometricModal')?.addEventListener('click', closeBiometricModal);
+document.getElementById('closeUsernameModal')?.addEventListener('click', closeUsernameModal);
+document.getElementById('closeOtpModal')?.addEventListener('click', closeOtpModal);
+
+document.getElementById('savePhoneModal')?.addEventListener('click', async () => {
+    const phone = document.getElementById('modalPhoneNumber').value.trim();
+    if(!phone) return showNotification('Enter phone number', 'error');
+    await initRecaptcha();
+    const conf = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+    phoneConfirmationResult = conf; pendingPhoneNumber = phone;
+    closePhoneModal(); openOtpModal();
+    for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
+    showNotification('OTP sent', 'info');
+});
+
+document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
+    const otp = (document.getElementById('otp1')?.value||'')+(document.getElementById('otp2')?.value||'')+(document.getElementById('otp3')?.value||'')+(document.getElementById('otp4')?.value||'')+(document.getElementById('otp5')?.value||'')+(document.getElementById('otp6')?.value||'');
+    if(otp.length !== 6) return showNotification('Enter 6-digit code', 'error');
+    await phoneConfirmationResult.confirm(otp);
+    await update(ref(rtdb, `users/${currentUser.uid}`), { phone: pendingPhoneNumber, phoneVerified: true });
+    await loadUserData(currentUser);
+    showNotification('Phone verified!', 'success');
+    closeOtpModal();
+});
+
+for(let i=1;i<=6;i++) document.getElementById(`otp${i}`)?.addEventListener('input', function(e){ if(this.value.length===1 && i<6) document.getElementById(`otp${i+1}`)?.focus(); });
+
+document.getElementById('saveEmailModal')?.addEventListener('click', async () => {
+    const newEmail = document.getElementById('modalEmail').value.trim();
+    if(!newEmail.includes('@')) return showNotification('Invalid email', 'error');
+    await updateEmail(currentUser, newEmail);
+    await update(ref(rtdb, `users/${currentUser.uid}`), { email: newEmail, emailVerified: false });
+    await sendEmailVerification(currentUser);
+    await loadUserData(currentUser);
+    showNotification('Email updated! Verification sent.', 'success');
+    closeEmailModal();
+});
+
+document.getElementById('saveUsernameModal')?.addEventListener('click', async () => {
+    const newUsername = document.getElementById('newUsername').value.trim();
+    if(newUsername.length < 3) return showNotification('Username must be at least 3 chars', 'error');
+    await update(ref(rtdb, `users/${currentUser.uid}`), { username: newUsername });
+    await loadUserData(currentUser);
+    showNotification('Username updated!', 'success');
+    closeUsernameModal();
+});
+
+document.getElementById('confirmBiometricModal')?.addEventListener('click', async () => {
+    const pwd = document.getElementById('biometricPassword').value;
+    if(!pwd) return showNotification('Enter password', 'error');
+    try {
+        await signInWithEmailAndPassword(auth, currentUser.email, pwd);
+        const success = await enableBiometricWithWebAuthn(pwd);
+        if(success) { showNotification('Biometric enabled!', 'success'); closeBiometricModal(); document.getElementById('biometricToggle').classList.add('active'); }
+        else showNotification('Biometric failed', 'error');
+    } catch(e) { document.getElementById('biometricError')?.classList.add('show'); }
+});
+
+document.getElementById('biometricToggle')?.addEventListener('click', async (e) => { e.stopPropagation(); (await checkBiometricEnabled()) ? await disableBiometric() : openBiometricModal(); });
+document.getElementById('logoutTopBtn')?.addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
+document.getElementById('changePasswordBtn')?.addEventListener('click', () => { sendPasswordResetEmail(auth, currentUser.email); showNotification('Reset link sent!', 'success'); });
+document.getElementById('twoFactorBtn')?.addEventListener('click', () => showNotification('2FA coming soon', 'info'));
+document.getElementById('kycBtn')?.addEventListener('click', () => window.location.href = 'kyc.html');
+
+function initTheme() { 
+    const saved = localStorage.getItem('abotra_theme');
+    if(saved === 'light') { document.body.classList.add('light-theme'); document.querySelector('#themeToggle i.fa-sun').style.display = 'none'; document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block'; }
+}
+document.getElementById('themeToggle')?.addEventListener('click', () => { document.body.classList.toggle('light-theme'); localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); });
+
+onAuthStateChanged(auth, async(user) => { 
+    if(!user){ window.location.href='login.html'; return; } 
+    currentUser = user; 
+    await loadUserData(user); 
+});
+initTheme();
+</script>
+</body>
+</html>
