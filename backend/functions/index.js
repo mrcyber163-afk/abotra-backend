@@ -170,3 +170,36 @@ try {
 } catch (error) {
     console.error('[ROUTES] ❌ /api/admin/change-password error:', error.message);
 }
+
+// ============================================================
+// TRADE ROUTES
+// ============================================================
+try {
+    const tradeRoutes = require('./routes/trade');
+    app.use('/api/trading', tradeRoutes);
+    console.log('[ROUTES] ✅ /api/trading loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/trading error:', error.message);
+}
+
+// ============================================================
+// LEADERBOARD ROUTES
+// ============================================================
+try {
+    const leaderboardRoutes = require('./routes/leaderboard');
+    app.use('/api/leaderboard', leaderboardRoutes);
+    console.log('[ROUTES] ✅ /api/leaderboard loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/leaderboard error:', error.message);
+}
+
+// ============================================================
+// COPY TRADING ROUTES
+// ============================================================
+try {
+    const copyTradingRoutes = require('./routes/copy-trading');
+    app.use('/api/copy-trading', copyTradingRoutes);
+    console.log('[ROUTES] ✅ /api/copy-trading loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/copy-trading error:', error.message);
+}
