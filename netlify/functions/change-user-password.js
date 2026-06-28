@@ -6,6 +6,9 @@ const admin = require('firebase-admin');
 let db = null;
 let auth = null;
 
+// ============================================================
+// NO CREDENTIAL! JUST databaseURL
+// ============================================================
 if (!admin.apps.length) {
     try {
         admin.initializeApp({
@@ -36,7 +39,7 @@ async function checkIsAdmin(email, uid) {
         }
         return false;
     } catch (error) {
-        console.error('[change-user-password] Error checking admin:', error);
+        console.error('[change-user-password] Error:', error);
         return false;
     }
 }
@@ -99,7 +102,6 @@ exports.handler = async (event, context) => {
                 if (db) {
                     const notifRef = db.ref(`notifications/${targetUid}`).push();
                     await notifRef.set({
-                        id: notifRef.key,
                         title: '🔐 Password Changed',
                         message: 'Your password was changed by an administrator.',
                         type: 'security',
@@ -126,7 +128,7 @@ exports.handler = async (event, context) => {
             if (error.code === 'auth/user-not-found') {
                 errorMessage = 'User not found.';
             } else if (error.code === 'auth/invalid-password') {
-                errorMessage = 'Invalid password format. Must be at least 6 characters.';
+                errorMessage = 'Invalid password format.';
             }
             
             return {

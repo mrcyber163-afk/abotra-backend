@@ -1,5 +1,5 @@
 // ============================================================
-// FIREBASE - SAFE INITIALIZATION (NEVER CRASHES)
+// FIREBASE - NO CREDENTIAL, DATABASEURL ONLY
 // ============================================================
 const admin = require('firebase-admin');
 
@@ -16,7 +16,7 @@ function initializeFirebase() {
             console.log('[FIREBASE] ✅ Already initialized');
             return { db, auth, initialized: true };
         } catch (error) {
-            console.warn('[FIREBASE] ⚠️ Already initialized but failed to get services');
+            console.warn('[FIREBASE] ⚠️ Failed to get services');
             initialized = false;
             return { db: null, auth: null, initialized: false };
         }
@@ -26,27 +26,29 @@ function initializeFirebase() {
         const databaseURL = process.env.FIREBASE_DATABASE_URL;
         
         if (!databaseURL) {
-            console.warn('[FIREBASE] ⚠️ FIREBASE_DATABASE_URL is missing');
+            console.warn('[FIREBASE] ⚠️ FIREBASE_DATABASE_URL missing');
             initialized = false;
             return { db: null, auth: null, initialized: false };
         }
         
-        console.log(`[FIREBASE] 🔑 Initializing with databaseURL...`);
+        console.log(`[FIREBASE] 🔑 Initializing with databaseURL only...`);
         
+        // ============================================================
+        // NO CREDENTIAL! JUST databaseURL
+        // ============================================================
         admin.initializeApp({
-            databaseURL: databaseURL,
-            projectId: process.env.FIREBASE_PROJECT_ID || 'abotra-proa1'
+            databaseURL: databaseURL
         });
         
         db = admin.database();
         auth = admin.auth();
         initialized = true;
         
-        console.log('[FIREBASE] ✅ Admin SDK initialized successfully');
+        console.log('[FIREBASE] ✅ Admin SDK initialized');
         return { db, auth, initialized: true };
         
     } catch (error) {
-        console.error('[FIREBASE] ❌ Initialization failed:', error.message);
+        console.error('[FIREBASE] ❌ Failed:', error.message);
         initialized = false;
         return { db: null, auth: null, initialized: false };
     }
@@ -81,23 +83,8 @@ async function testConnection() {
         const snapshot = await testRef.once('value');
         return snapshot.val() === true;
     } catch (error) {
-        console.error('[FIREBASE] ❌ Connection test failed:', error.message);
         return false;
     }
-}
-
-function resetFirebase() {
-    if (admin.apps.length > 0) {
-        try {
-            admin.apps.forEach(app => app.delete());
-        } catch (error) {
-            console.warn('[FIREBASE] ⚠️ Error deleting apps:', error.message);
-        }
-    }
-    db = null;
-    auth = null;
-    initialized = false;
-    console.log('[FIREBASE] 🔄 Reset complete');
 }
 
 module.exports = {
@@ -106,6 +93,5 @@ module.exports = {
     getAuth,
     isInitialized,
     testConnection,
-    resetFirebase,
     admin
 };
