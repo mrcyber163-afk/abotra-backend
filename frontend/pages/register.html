@@ -6,7 +6,27 @@
 <title>Register | ABOTRA-PROAI - Create Your Trading Account</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+// ============================================================
+// CONFIG - Production Settings
+// ============================================================
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
+/* (style zako zote zilizopo hazibadiliki) */
 * {
     margin: 0;
     padding: 0;
@@ -690,9 +710,9 @@ h1 {
 <!-- ============================================================ -->
 <script type="module">
 // ============================================================
-// CONFIGURATION - Badilisha hii na URL ya backend yako
+// CONFIG - From global
 // ============================================================
-const API_BASE_URL = 'https://abotra-backend.up.railway.app'; // CHANGE THIS
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
 
 // ============================================================
 // FIREBASE CLIENT SDK (Only for Auth)
@@ -1044,8 +1064,7 @@ async function registerWithPhone() {
 
     const digitsOnly = phone.replace(/\D/g, '');
     if (matchedCountry && digitsOnly.length !== matchedCountry.digits) {
-        showNotification(`Phone number must have exactly ${matchedCountry.digits} digits for ${matchedCountry.name}`,
-        'error');
+        showNotification(`Phone number must have exactly ${matchedCountry.digits} digits for ${matchedCountry.name}`, 'error');
         return;
     }
 
@@ -1108,7 +1127,7 @@ async function registerWithPhone() {
                 method: 'phone',
                 emailVerified: false,
                 phoneVerified: true,
-                referredBy: null, // Will handle referral separately
+                referredBy: null,
                 referralCode: genCode,
                 referralCount: 0,
                 commissionEarned: 0,

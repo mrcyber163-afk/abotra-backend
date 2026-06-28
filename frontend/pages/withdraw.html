@@ -6,6 +6,21 @@
 <title>Withdraw | ABOTRA-PROAI - Withdraw Your Funds</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -967,60 +982,60 @@ const COUNTRY_CURRENCY_MAP = {
 // ===== MOBILE NETWORKS WITH REAL NAMES & MIXX BY YAS =====
 const mobileNetworksData = {
     'Tanzania': [
-        { name: "M-Pesa Tanzania", logo: "assets/images/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
-        { name: "Mixx By Yas", logo: "assets/images/icons/mixx.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
-        { name: "Airtel Money", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
-        { name: "HaloPesa", logo: "assets/images/icons/halopesa.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" }
+        { name: "M-Pesa Tanzania", logo: "../assets/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
+        { name: "Mixx By Yas", logo: "../assets/icons/mixx.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
+        { name: "Airtel Money", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" },
+        { name: "HaloPesa", logo: "../assets/icons/halopesa.png", fallbackIcon: "fas fa-mobile-alt", currency: "TZS" }
     ],
     'Kenya': [
-        { name: "M-Pesa Kenya", logo: "assets/images/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "KES" },
-        { name: "Airtel Money Kenya", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "KES" }
+        { name: "M-Pesa Kenya", logo: "../assets/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "KES" },
+        { name: "Airtel Money Kenya", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "KES" }
     ],
     'Uganda': [
-        { name: "MTN MoMo", logo: "assets/images/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "UGX" },
-        { name: "Airtel Money Uganda", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "UGX" }
+        { name: "MTN MoMo", logo: "../assets/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "UGX" },
+        { name: "Airtel Money Uganda", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "UGX" }
     ],
     'Rwanda': [
-        { name: "MTN MoMo Rwanda", logo: "assets/images/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "RWF" },
-        { name: "Airtel Money Rwanda", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "RWF" }
+        { name: "MTN MoMo Rwanda", logo: "../assets/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "RWF" },
+        { name: "Airtel Money Rwanda", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "RWF" }
     ],
     'Malawi': [
-        { name: "Airtel Money Malawi", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MWK" },
-        { name: "TNM Mpamba", logo: "assets/images/icons/tnm.png", fallbackIcon: "fas fa-mobile-alt", currency: "MWK" }
+        { name: "Airtel Money Malawi", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MWK" },
+        { name: "TNM Mpamba", logo: "../assets/icons/tnm.png", fallbackIcon: "fas fa-mobile-alt", currency: "MWK" }
     ],
     'Zambia': [
-        { name: "MTN MoMo Zambia", logo: "assets/images/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" },
-        { name: "Airtel Money Zambia", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" },
-        { name: "Zamtel Kwacha", logo: "assets/images/icons/zamtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" }
+        { name: "MTN MoMo Zambia", logo: "../assets/icons/mtn.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" },
+        { name: "Airtel Money Zambia", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" },
+        { name: "Zamtel Kwacha", logo: "../assets/icons/zamtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "ZMW" }
     ],
     'Congo DRC': [
-        { name: "M-Pesa Congo", logo: "assets/images/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" },
-        { name: "Airtel Money Congo", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" },
-        { name: "Orange Money", logo: "assets/images/icons/orange.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" }
+        { name: "M-Pesa Congo", logo: "../assets/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" },
+        { name: "Airtel Money Congo", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" },
+        { name: "Orange Money", logo: "../assets/icons/orange.png", fallbackIcon: "fas fa-mobile-alt", currency: "CDF" }
     ],
     'Burundi': [
-        { name: "Lumicash", logo: "assets/images/icons/lumicash.png", fallbackIcon: "fas fa-mobile-alt", currency: "BIF" },
-        { name: "EcoCash Burundi", logo: "assets/images/icons/ecocash.png", fallbackIcon: "fas fa-mobile-alt", currency: "BIF" }
+        { name: "Lumicash", logo: "../assets/icons/lumicash.png", fallbackIcon: "fas fa-mobile-alt", currency: "BIF" },
+        { name: "EcoCash Burundi", logo: "../assets/icons/ecocash.png", fallbackIcon: "fas fa-mobile-alt", currency: "BIF" }
     ],
     'Botswana': [
-        { name: "Orange Money", logo: "assets/images/icons/orange.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" },
-        { name: "Mascom Wireless", logo: "assets/images/icons/mascom.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" },
-        { name: "BTC Mobile", logo: "assets/images/icons/btc.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" }
+        { name: "Orange Money", logo: "../assets/icons/orange.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" },
+        { name: "Mascom Wireless", logo: "../assets/icons/mascom.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" },
+        { name: "BTC Mobile", logo: "../assets/icons/btc.png", fallbackIcon: "fas fa-mobile-alt", currency: "BWP" }
     ],
     'Namibia': [
-        { name: "MTC Maris", logo: "assets/images/icons/mtc.png", fallbackIcon: "fas fa-mobile-alt", currency: "NAD" },
-        { name: "eWallet", logo: "assets/images/icons/ewallet.png", fallbackIcon: "fas fa-wallet", currency: "NAD" }
+        { name: "MTC Maris", logo: "../assets/icons/mtc.png", fallbackIcon: "fas fa-mobile-alt", currency: "NAD" },
+        { name: "eWallet", logo: "../assets/icons/ewallet.png", fallbackIcon: "fas fa-wallet", currency: "NAD" }
     ],
     'Mozambique': [
-        { name: "M-Pesa Mozambique", logo: "assets/images/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" },
-        { name: "Movitel", logo: "assets/images/icons/movitel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" },
-        { name: "Tmcel", logo: "assets/images/icons/Tmcel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" }
+        { name: "M-Pesa Mozambique", logo: "../assets/icons/vodacom.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" },
+        { name: "Movitel", logo: "../assets/icons/movitel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" },
+        { name: "Tmcel", logo: "../assets/icons/tmcel.png", fallbackIcon: "fas fa-mobile-alt", currency: "MZN" }
     ],
     'Nigeria': [
-        { name: "MTN MoMo Nigeria", logo: "assets/images/icons/mtn-momo.png", fallbackIcon: "fas fa-mobile-alt", currency: "NGN" },
-        { name: "9mobile", logo: "assets/images/icons/9mobile.png", fallbackIcon: "fas fa-wallet", currency: "NGN" },
-        { name: "Glo", logo: "assets/images/icons/glo.png", fallbackIcon: "fas fa-wallet", currency: "NGN" },
-        { name: "Airtel SmartCash", logo: "assets/images/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "NGN" }
+        { name: "MTN MoMo Nigeria", logo: "../assets/icons/mtn-momo.png", fallbackIcon: "fas fa-mobile-alt", currency: "NGN" },
+        { name: "9mobile", logo: "../assets/icons/9mobile.png", fallbackIcon: "fas fa-wallet", currency: "NGN" },
+        { name: "Glo", logo: "../assets/icons/glo.png", fallbackIcon: "fas fa-wallet", currency: "NGN" },
+        { name: "Airtel SmartCash", logo: "../assets/icons/airtel.png", fallbackIcon: "fas fa-mobile-alt", currency: "NGN" }
     ]
 };
 

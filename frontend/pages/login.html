@@ -6,558 +6,180 @@
 <title>Login | ABOTRA-PROAI - Sign In to Your Trading Account</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- SimpleWebAuthn Library for REAL Biometrics -->
 <script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
 
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body {
     background: #050505;
     background-image: url("../assets/images/background.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    position: relative;
-    transition: background 0.3s ease;
-    font-size: 12px;
-    color: #FFFFFF;
+    background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+    position: relative; transition: background 0.3s ease; font-size: 12px; color: #FFFFFF;
 }
-
-/* LIGHT THEME */
 body.light-theme {
     background: #f5f5f5;
     background-image: url("../assets/images/background.png");
     color: #1a1a1a;
 }
-
-body.light-theme .overlay {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(4px);
-}
-
-body.light-theme .login-box {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid rgba(0,0,0,0.08);
-}
-
-body.light-theme .input-box input {
-    background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(0,0,0,0.1);
-    color: #1a1a1a;
-}
-
-body.light-theme .input-box input::placeholder {
-    color: #999999;
-}
-
-body.light-theme .sub-text {
-    color: #666666;
-}
-
-body.light-theme .bottom-text {
-    color: #666666;
-}
-
-body.light-theme .forgot-link {
-    color: #800000;
-}
-
-body.light-theme .bottom-text a {
-    color: #800000;
-}
-
-body.light-theme .login-option {
-    background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(0,0,0,0.1);
-    color: #1a1a1a;
-}
-
-body.light-theme .login-option.active {
-    background: linear-gradient(135deg, #800000, #b8860b);
-    color: white;
-}
-
-/* THEME TOGGLE BUTTON */
+body.light-theme .overlay { background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); }
+body.light-theme .login-box { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); }
+body.light-theme .input-box input { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #1a1a1a; }
+body.light-theme .input-box input::placeholder { color: #999999; }
+body.light-theme .sub-text { color: #666666; }
+body.light-theme .bottom-text { color: #666666; }
+body.light-theme .forgot-link { color: #800000; }
+body.light-theme .bottom-text a { color: #800000; }
+body.light-theme .login-option { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #1a1a1a; }
+body.light-theme .login-option.active { background: linear-gradient(135deg, #800000, #b8860b); color: white; }
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 50px;
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-    z-index: 10000;
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.3); border-radius: 50px; padding: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: 0.3s; z-index: 10000;
 }
-
-.theme-toggle:hover {
-    background: rgba(255,215,0,0.2);
-    transform: scale(1.05);
-}
-
-.theme-toggle i {
-    font-size: 18px;
-    color: #FFD700;
-}
-
-body.light-theme .theme-toggle {
-    background: rgba(0,0,0,0.1);
-    border-color: rgba(128,0,0,0.3);
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.82);
-    backdrop-filter: blur(4px);
-    z-index: 1;
-}
-
-.container {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 18px; color: #FFD700; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.1); border-color: rgba(128,0,0,0.3); }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.container { position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; }
 .login-box {
-    width: 100%;
-    max-width: 400px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(15px);
-    border-radius: 28px;
-    overflow: hidden;
-    text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-    padding-bottom: 25px;
+    width: 100%; max-width: 400px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px); border-radius: 28px; overflow: hidden;
+    text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.5); padding-bottom: 25px;
 }
-
-.logo {
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-    display: block;
-}
-
-h1 {
-    color: #FFD700;
-    font-size: 24px;
-    font-weight: 800;
-    margin-top: 12px;
-    letter-spacing: 1px;
-}
-
-.sub-text {
-    color: #BBBBBB;
-    font-size: 11px;
-    margin: 6px 0 20px;
-}
-
-/* Login method tabs */
+.logo { width: 100%; height: 170px; object-fit: cover; display: block; }
+h1 { color: #FFD700; font-size: 24px; font-weight: 800; margin-top: 12px; letter-spacing: 1px; }
+.sub-text { color: #BBBBBB; font-size: 11px; margin: 6px 0 20px; }
 .login-methods {
-    display: flex;
-    gap: 8px;
-    margin: 0 18px 18px 18px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 50px;
-    padding: 4px;
+    display: flex; gap: 8px; margin: 0 18px 18px 18px;
+    background: rgba(0,0,0,0.2); border-radius: 50px; padding: 4px;
 }
-
 .login-option {
-    flex: 1;
-    text-align: center;
-    padding: 8px 6px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    transition: 0.3s;
-    background: transparent;
-    color: #CCCCCC;
+    flex: 1; text-align: center; padding: 8px 6px; border-radius: 50px;
+    cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.3s;
+    background: transparent; color: #CCCCCC;
 }
-
-.login-option.active {
-    background: linear-gradient(135deg, #800000, #FFD700);
-    color: #FFFFFF;
-}
-
-.input-box {
-    width: 100%;
-    padding: 0 18px;
-    margin-bottom: 12px;
-    position: relative;
-}
-
+.login-option.active { background: linear-gradient(135deg, #800000, #FFD700); color: #FFFFFF; }
+.input-box { width: 100%; padding: 0 18px; margin-bottom: 12px; position: relative; }
 .input-box input {
-    width: 100%;
-    height: 46px;
-    border: none;
-    outline: none;
-    border-radius: 14px;
-    padding: 0 14px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #FFFFFF;
-    font-size: 12px;
-    transition: 0.3s;
+    width: 100%; height: 46px; border: none; outline: none; border-radius: 14px;
+    padding: 0 14px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08); color: #FFFFFF; font-size: 12px; transition: 0.3s;
 }
-
-.input-box input:focus {
-    border-color: #FFD700;
-    box-shadow: 0 0 8px rgba(255,215,0,0.2);
-}
-
-.input-box input::placeholder {
-    color: #999999;
-    font-size: 11px;
-}
-
-/* Phone container */
-.phone-container {
-    display: flex;
-    gap: 10px;
-    padding: 0 18px;
-    margin-bottom: 12px;
-}
-
-.country-code-select {
-    width: 110px;
-    flex-shrink: 0;
-}
-
+.input-box input:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+.input-box input::placeholder { color: #999999; font-size: 11px; }
+.phone-container { display: flex; gap: 10px; padding: 0 18px; margin-bottom: 12px; }
+.country-code-select { width: 110px; flex-shrink: 0; }
 .country-code-select select {
-    width: 100%;
-    height: 46px;
-    border: none;
-    outline: none;
-    padding: 0 8px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #FFFFFF;
-    font-size: 11px;
-    cursor: pointer;
+    width: 100%; height: 46px; border: none; outline: none; padding: 0 8px; border-radius: 14px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+    color: #FFFFFF; font-size: 11px; cursor: pointer;
 }
-
-.country-code-select select option {
-    background: #1a1a1a;
-    color: #FFFFFF;
-}
-
-.phone-number-input {
-    flex: 1;
-}
-
+.country-code-select select option { background: #1a1a1a; color: #FFFFFF; }
+.phone-number-input { flex: 1; }
 .phone-number-input input {
-    width: 100%;
-    height: 46px;
-    border: none;
-    outline: none;
-    padding: 0 14px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #FFFFFF;
-    font-size: 12px;
+    width: 100%; height: 46px; border: none; outline: none; padding: 0 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: #FFFFFF; font-size: 12px;
 }
-
-.phone-hint {
-    font-size: 9px;
-    color: #888;
-    margin-top: 4px;
-    padding-left: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.password-box i {
-    position: absolute;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #FFD700;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-/* Forgot and Biometric row */
+.phone-hint { font-size: 9px; color: #888; margin-top: 4px; padding-left: 4px; display: flex; align-items: center; gap: 4px; }
+.password-box i { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); color: #FFD700; cursor: pointer; font-size: 14px; }
 .forgot-biometric-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 18px;
-    margin: -5px 0 12px;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 18px; margin: -5px 0 12px; flex-wrap: wrap; gap: 8px;
 }
-.forgot-link {
-    color: #FFD700;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 500;
-    transition: 0.3s;
-}
-.forgot-link:hover {
-    color: #FFFFFF;
-    text-decoration: underline;
-}
+.forgot-link { color: #FFD700; text-decoration: none; font-size: 11px; font-weight: 500; transition: 0.3s; }
+.forgot-link:hover { color: #FFFFFF; text-decoration: underline; }
 .biometric-icon {
-    background: rgba(255,215,0,0.15);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 50px;
-    padding: 6px 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: 0.3s;
-    font-size: 11px;
-    font-weight: 500;
-    color: #FFD700;
+    background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 50px; padding: 6px 12px; cursor: pointer; display: flex;
+    align-items: center; gap: 6px; transition: 0.3s; font-size: 11px; font-weight: 500; color: #FFD700;
 }
-.biometric-icon i {
-    font-size: 14px;
-}
-.biometric-icon:hover {
-    background: rgba(255,215,0,0.3);
-    transform: scale(1.02);
-}
-.biometric-icon.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: rgba(255,215,0,0.08);
-}
-.biometric-icon.disabled:hover {
-    transform: none;
-    background: rgba(255,215,0,0.08);
-}
-
-/* Button container for centering */
-.button-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 8px;
-}
-
+.biometric-icon i { font-size: 14px; }
+.biometric-icon:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
+.biometric-icon.disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,215,0,0.08); }
+.biometric-icon.disabled:hover { transform: none; background: rgba(255,215,0,0.08); }
+.button-container { display: flex; justify-content: center; width: 100%; margin-top: 8px; }
 .login-btn {
-    width: 90%;
-    height: 46px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #800000, #FFD700);
-    color: #FFFFFF;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 5px 15px rgba(255,215,0,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 0 auto;
+    width: 90%; height: 46px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, #800000, #FFD700); color: #FFFFFF;
+    font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(255,215,0,0.15); display: flex; align-items: center;
+    justify-content: center; gap: 8px; margin: 0 auto;
 }
-
-.login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255,215,0,0.25);
-}
-
-.login-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.bottom-text {
-    margin-top: 18px;
-    color: #BBBBBB;
-    font-size: 11px;
-}
-
-.bottom-text a {
-    color: #FFD700;
-    text-decoration: none;
-    font-weight: 700;
-    transition: 0.3s;
-}
-
-.bottom-text a:hover {
-    color: #FFFFFF;
-}
-
-/* Biometric Modal Popup */
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,215,0,0.25); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.bottom-text { margin-top: 18px; color: #BBBBBB; font-size: 11px; }
+.bottom-text a { color: #FFD700; text-decoration: none; font-weight: 700; transition: 0.3s; }
+.bottom-text a:hover { color: #FFFFFF; }
 .biometric-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(12px);
-    z-index: 20000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 20000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
-.biometric-modal.active {
-    opacity: 1;
-    visibility: visible;
-}
+.biometric-modal.active { opacity: 1; visibility: visible; }
 .biometric-modal-card {
-    background: linear-gradient(145deg, #1e1e2e, #161626);
-    border-radius: 28px;
-    width: 90%;
-    max-width: 320px;
-    padding: 28px 22px;
-    text-align: center;
-    border: 1px solid rgba(255,215,0,0.3);
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
+    background: linear-gradient(145deg, #1e1e2e, #161626); border-radius: 28px;
+    width: 90%; max-width: 320px; padding: 28px 22px; text-align: center;
+    border: 1px solid rgba(255,215,0,0.3); box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    transform: scale(0.9); transition: transform 0.3s ease;
 }
-.biometric-modal.active .biometric-modal-card {
-    transform: scale(1);
-}
-body.light-theme .biometric-modal-card {
-    background: linear-gradient(145deg, #ffffff, #f0f0f5);
-}
-.biometric-icon-large {
-    font-size: 60px;
-    color: #FFD700;
-    margin-bottom: 15px;
-}
-.biometric-modal-card h3 {
-    color: #FFD700;
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-.biometric-modal-card p {
-    color: #aaa;
-    font-size: 11px;
-    margin-bottom: 20px;
-}
+.biometric-modal.active .biometric-modal-card { transform: scale(1); }
+body.light-theme .biometric-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); }
+.biometric-icon-large { font-size: 60px; color: #FFD700; margin-bottom: 15px; }
+.biometric-modal-card h3 { color: #FFD700; font-size: 18px; margin-bottom: 8px; }
+.biometric-modal-card p { color: #aaa; font-size: 11px; margin-bottom: 20px; }
 .biometric-status {
-    padding: 10px;
-    border-radius: 14px;
-    margin: 12px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    transition: all 0.3s;
+    padding: 10px; border-radius: 14px; margin: 12px 0; display: flex;
+    align-items: center; justify-content: center; gap: 8px; font-size: 12px; font-weight: 600; transition: all 0.3s;
 }
-.biometric-status.success {
-    background: rgba(14,203,129,0.15);
-    color: #0ECB81;
-    border: 1px solid rgba(14,203,129,0.3);
-}
-.biometric-status.error {
-    background: rgba(246,70,93,0.15);
-    color: #F6465D;
-    border: 1px solid rgba(246,70,93,0.3);
-}
-.biometric-status.waiting {
-    background: rgba(255,215,0,0.1);
-    color: #FFD700;
-    border: 1px solid rgba(255,215,0,0.2);
-}
-.biometric-modal-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
+.biometric-status.success { background: rgba(14,203,129,0.15); color: #0ECB81; border: 1px solid rgba(14,203,129,0.3); }
+.biometric-status.error { background: rgba(246,70,93,0.15); color: #F6465D; border: 1px solid rgba(246,70,93,0.3); }
+.biometric-status.waiting { background: rgba(255,215,0,0.1); color: #FFD700; border: 1px solid rgba(255,215,0,0.2); }
+.biometric-modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
 .biometric-modal-btn {
-    flex: 1;
-    height: 44px;
-    border: none;
-    border-radius: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 12px;
+    flex: 1; height: 44px; border: none; border-radius: 14px; font-weight: 600;
+    cursor: pointer; transition: 0.2s; font-size: 12px;
 }
-.biometric-modal-btn.cancel {
-    background: rgba(255,255,255,0.1);
-    color: #ccc;
-    border: 1px solid rgba(255,255,255,0.15);
-}
-.biometric-modal-btn.cancel:hover {
-    background: rgba(255,255,255,0.2);
-}
-.biometric-modal-btn.use-password {
-    background: linear-gradient(135deg, #800000, #FFD700);
-    color: white;
-}
-.biometric-modal-btn.use-password:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255,215,0,0.3);
-}
-
-/* Notification */
+.biometric-modal-btn.cancel { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.15); }
+.biometric-modal-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+.biometric-modal-btn.use-password { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
+.biometric-modal-btn.use-password:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,215,0,0.3); }
 .notification {
-    position: fixed;
-    top: 80px;
-    right: 25px;
-    min-width: 260px;
-    max-width: 330px;
-    padding: 10px 14px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 99999;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    animation: slideInRight 0.4s ease;
-    border-left: 4px solid;
+    position: fixed; top: 80px; right: 25px; min-width: 260px; max-width: 330px;
+    padding: 10px 14px; border-radius: 16px; display: flex; align-items: center; gap: 10px;
+    z-index: 99999; backdrop-filter: blur(20px); box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    animation: slideInRight 0.4s ease; border-left: 4px solid;
 }
-
 .notification.success { background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1)); border-left-color: #00FF88; }
 .notification.success i { color: #00FF88; }
 .notification.success .message { color: #00FF88; }
-
 .notification.error { background: linear-gradient(135deg, rgba(255,77,77,0.2), rgba(255,77,77,0.1)); border-left-color: #FF4D4D; }
 .notification.error i { color: #FF4D4D; }
 .notification.error .message { color: #FF4D4D; }
-
 .notification.info { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
 .notification i { font-size: 18px; }
 .notification .message { flex: 1; font-size: 12px; font-weight: 500; }
 .notification .close-notif { cursor: pointer; opacity: 0.7; }
-
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
-
 @media(max-width: 480px) {
     .logo { height: 140px; }
     h1 { font-size: 20px; }
@@ -582,12 +204,9 @@ body.light-theme .biometric-modal-card {
 
 <div class="overlay"></div>
 
-<!-- Biometric Modal Popup -->
 <div class="biometric-modal" id="biometricModal">
     <div class="biometric-modal-card">
-        <div class="biometric-icon-large">
-            <i class="fas fa-fingerprint"></i>
-        </div>
+        <div class="biometric-icon-large"><i class="fas fa-fingerprint"></i></div>
         <h3>Biometric Verification</h3>
         <p id="biometricModalText">Place your finger on the sensor or use Face ID</p>
         <div class="biometric-status waiting" id="biometricStatus">
@@ -613,9 +232,7 @@ body.light-theme .biometric-modal-card {
         </div>
 
         <div id="emailLoginSection">
-            <div class="input-box">
-                <input type="email" id="email" placeholder="Email Address" autocomplete="email">
-            </div>
+            <div class="input-box"><input type="email" id="email" placeholder="Email Address" autocomplete="email"></div>
             <div class="input-box password-box">
                 <input type="password" id="password" placeholder="Password" autocomplete="current-password">
                 <i class="fa-solid fa-eye-slash" id="togglePassword"></i>
@@ -625,9 +242,7 @@ body.light-theme .biometric-modal-card {
         <div id="phoneLoginSection" style="display:none;">
             <div class="phone-container">
                 <div class="country-code-select">
-                    <select id="phoneCountryCode">
-                        <option value="">-- Select Country --</option>
-                    </select>
+                    <select id="phoneCountryCode"><option value="">-- Select Country --</option></select>
                 </div>
                 <div class="phone-number-input">
                     <input type="tel" id="phoneNumber" placeholder="Phone Number">
@@ -646,7 +261,6 @@ body.light-theme .biometric-modal-card {
             </button>
         </div>
 
-        <!-- Forgot Password + Biometric Fingerprint Icon Row -->
         <div class="forgot-biometric-row">
             <a href="forgot.html" class="forgot-link">Forgot Password?</a>
             <div class="biometric-icon" id="biometricLoginBtn">
@@ -655,43 +269,28 @@ body.light-theme .biometric-modal-card {
         </div>
 
         <div class="button-container">
-            <button id="loginBtn" class="login-btn">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
+            <button id="loginBtn" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</button>
         </div>
 
-        <p class="bottom-text">
-            No account? <a href="register.html">Register</a>
-        </p>
+        <p class="bottom-text">No account? <a href="register.html">Register</a></p>
     </div>
 </div>
 
 <script type="module">
 // ============================================================
-// CONFIGURATION - Badilisha hii na URL ya backend yako
+// CONFIG - From global
 // ============================================================
-const API_BASE_URL = 'https://abotra-backend.up.railway.app'; // CHANGE THIS
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
 
 // ============================================================
-// FIREBASE CLIENT SDK (Only for Auth)
+// FIREBASE CLIENT SDK
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    getAuth,
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
-    signInWithPhoneNumber,
-    RecaptchaVerifier,
-    onAuthStateChanged
+    getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
+    signInWithPhoneNumber, RecaptchaVerifier, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-    getDatabase,
-    ref,
-    update,
-    get,
-    set
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
@@ -710,14 +309,31 @@ const rtdb = getDatabase(app);
 // ============================================================
 // COUNTRIES DATA
 // ============================================================
-const allCountries = [
-    { code: "+93", name: "Afghanistan", flag: "🇦🇫", digits: 9 }, { code: "+355", name: "Albania", flag: "🇦🇱", digits: 9 }, { code: "+213", name: "Algeria", flag: "🇩🇿", digits: 9 }, { code: "+376", name: "Andorra", flag: "🇦🇩", digits: 6 }, { code: "+244", name: "Angola", flag: "🇦🇴", digits: 9 }, { code: "+1268", name: "Antigua", flag: "🇦🇬", digits: 7 }, { code: "+54", name: "Argentina", flag: "🇦🇷", digits: 10 }, { code: "+374", name: "Armenia", flag: "🇦🇲", digits: 8 }, { code: "+61", name: "Australia", flag: "🇦🇺", digits: 9 }, { code: "+43", name: "Austria", flag: "🇦🇹", digits: 10 }, { code: "+994", name: "Azerbaijan", flag: "🇦🇿", digits: 9 }, { code: "+1242", name: "Bahamas", flag: "🇧🇸", digits: 7 }, { code: "+973", name: "Bahrain", flag: "🇧🇭", digits: 8 }, { code: "+880", name: "Bangladesh", flag: "🇧🇩", digits: 10 }, { code: "+1246", name: "Barbados", flag: "🇧🇧", digits: 7 }, { code: "+375", name: "Belarus", flag: "🇧🇾", digits: 9 }, { code: "+32", name: "Belgium", flag: "🇧🇪", digits: 9 }, { code: "+501", name: "Belize", flag: "🇧🇿", digits: 7 }, { code: "+229", name: "Benin", flag: "🇧🇯", digits: 8 }, { code: "+975", name: "Bhutan", flag: "🇧🇹", digits: 8 }, { code: "+591", name: "Bolivia", flag: "🇧🇴", digits: 8 }, { code: "+387", name: "Bosnia", flag: "🇧🇦", digits: 8 }, { code: "+267", name: "Botswana", flag: "🇧🇼", digits: 7 }, { code: "+55", name: "Brazil", flag: "🇧🇷", digits: 11 }, { code: "+673", name: "Brunei", flag: "🇧🇳", digits: 7 }, { code: "+359", name: "Bulgaria", flag: "🇧🇬", digits: 9 }, { code: "+226", name: "Burkina", flag: "🇧🇫", digits: 8 }, { code: "+257", name: "Burundi", flag: "🇧🇮", digits: 8 }, { code: "+855", name: "Cambodia", flag: "🇰🇭", digits: 9 }, { code: "+237", name: "Cameroon", flag: "🇨🇲", digits: 9 }, { code: "+1", name: "Canada", flag: "🇨🇦", digits: 10 }, { code: "+238", name: "Cape Verde", flag: "🇨🇻", digits: 7 }, { code: "+236", name: "CAR", flag: "🇨🇫", digits: 8 }, { code: "+235", name: "Chad", flag: "🇹🇩", digits: 8 }, { code: "+56", name: "Chile", flag: "🇨🇱", digits: 9 }, { code: "+86", name: "China", flag: "🇨🇳", digits: 11 }, { code: "+57", name: "Colombia", flag: "🇨🇴", digits: 10 }, { code: "+269", name: "Comoros", flag: "🇰🇲", digits: 7 }, { code: "+242", name: "Congo", flag: "🇨🇬", digits: 9 }, { code: "+506", name: "Costa Rica", flag: "🇨🇷", digits: 8 }, { code: "+385", name: "Croatia", flag: "🇭🇷", digits: 9 }, { code: "+53", name: "Cuba", flag: "🇨🇺", digits: 8 }, { code: "+357", name: "Cyprus", flag: "🇨🇾", digits: 8 }, { code: "+420", name: "Czech", flag: "🇨🇿", digits: 9 }, { code: "+45", name: "Denmark", flag: "🇩🇰", digits: 8 }, { code: "+253", name: "Djibouti", flag: "🇩🇯", digits: 8 }, { code: "+1767", name: "Dominica", flag: "🇩🇲", digits: 7 }, { code: "+1849", name: "DR", flag: "🇩🇴", digits: 10 }, { code: "+593", name: "Ecuador", flag: "🇪🇨", digits: 9 }, { code: "+20", name: "Egypt", flag: "🇪🇬", digits: 10 }, { code: "+503", name: "El Salvador", flag: "🇸🇻", digits: 8 }, { code: "+240", name: "Equatorial Guinea", flag: "🇬🇶", digits: 9 }, { code: "+291", name: "Eritrea", flag: "🇪🇷", digits: 7 }, { code: "+372", name: "Estonia", flag: "🇪🇪", digits: 8 }, { code: "+251", name: "Ethiopia", flag: "🇪🇹", digits: 9 }, { code: "+679", name: "Fiji", flag: "🇫🇯", digits: 7 }, { code: "+358", name: "Finland", flag: "🇫🇮", digits: 9 }, { code: "+33", name: "France", flag: "🇫🇷", digits: 9 }, { code: "+241", name: "Gabon", flag: "🇬🇦", digits: 7 }, { code: "+220", name: "Gambia", flag: "🇬🇲", digits: 7 }, { code: "+995", name: "Georgia", flag: "🇬🇪", digits: 9 }, { code: "+49", name: "Germany", flag: "🇩🇪", digits: 10 }, { code: "+233", name: "Ghana", flag: "🇬🇭", digits: 9 }, { code: "+30", name: "Greece", flag: "🇬🇷", digits: 10 }, { code: "+1473", name: "Grenada", flag: "🇬🇩", digits: 7 }, { code: "+502", name: "Guatemala", flag: "🇬🇹", digits: 8 }, { code: "+224", name: "Guinea", flag: "🇬🇳", digits: 9 }, { code: "+245", name: "Guinea-Bissau", flag: "🇬🇼", digits: 7 }, { code: "+592", name: "Guyana", flag: "🇬🇾", digits: 7 }, { code: "+509", name: "Haiti", flag: "🇭🇹", digits: 8 }, { code: "+504", name: "Honduras", flag: "🇭🇳", digits: 8 }, { code: "+36", name: "Hungary", flag: "🇭🇺", digits: 9 }, { code: "+354", name: "Iceland", flag: "🇮🇸", digits: 7 }, { code: "+91", name: "India", flag: "🇮🇳", digits: 10 }, { code: "+62", name: "Indonesia", flag: "🇮🇩", digits: 10 }, { code: "+98", name: "Iran", flag: "🇮🇷", digits: 10 }, { code: "+964", name: "Iraq", flag: "🇮🇶", digits: 10 }, { code: "+353", name: "Ireland", flag: "🇮🇪", digits: 9 }, { code: "+972", name: "Israel", flag: "🇮🇱", digits: 9 }, { code: "+39", name: "Italy", flag: "🇮🇹", digits: 10 }, { code: "+1876", name: "Jamaica", flag: "🇯🇲", digits: 7 }, { code: "+81", name: "Japan", flag: "🇯🇵", digits: 10 }, { code: "+962", name: "Jordan", flag: "🇯🇴", digits: 9 }, { code: "+7", name: "Kazakhstan", flag: "🇰🇿", digits: 10 }, { code: "+254", name: "Kenya", flag: "🇰🇪", digits: 9 }, { code: "+686", name: "Kiribati", flag: "🇰🇮", digits: 5 }, { code: "+965", name: "Kuwait", flag: "🇰🇼", digits: 8 }, { code: "+996", name: "Kyrgyzstan", flag: "🇰🇬", digits: 9 }, { code: "+856", name: "Laos", flag: "🇱🇦", digits: 9 }, { code: "+371", name: "Latvia", flag: "🇱🇻", digits: 8 }, { code: "+961", name: "Lebanon", flag: "🇱🇧", digits: 8 }, { code: "+266", name: "Lesotho", flag: "🇱🇸", digits: 8 }, { code: "+231", name: "Liberia", flag: "🇱🇷", digits: 7 }, { code: "+218", name: "Libya", flag: "🇱🇾", digits: 9 }, { code: "+423", name: "Liechtenstein", flag: "🇱🇮", digits: 7 }, { code: "+370", name: "Lithuania", flag: "🇱🇹", digits: 8 }, { code: "+352", name: "Luxembourg", flag: "🇱🇺", digits: 9 }, { code: "+261", name: "Madagascar", flag: "🇲🇬", digits: 9 }, { code: "+265", name: "Malawi", flag: "🇲🇼", digits: 9 }, { code: "+60", name: "Malaysia", flag: "🇲🇾", digits: 9 }, { code: "+960", name: "Maldives", flag: "🇲🇻", digits: 7 }, { code: "+223", name: "Mali", flag: "🇲🇱", digits: 8 }, { code: "+356", name: "Malta", flag: "🇲🇹", digits: 8 }, { code: "+692", name: "Marshall", flag: "🇲🇭", digits: 7 }, { code: "+222", name: "Mauritania", flag: "🇲🇷", digits: 8 }, { code: "+230", name: "Mauritius", flag: "🇲🇺", digits: 7 }, { code: "+52", name: "Mexico", flag: "🇲🇽", digits: 10 }, { code: "+691", name: "Micronesia", flag: "🇫🇲", digits: 7 }, { code: "+373", name: "Moldova", flag: "🇲🇩", digits: 8 }, { code: "+377", name: "Monaco", flag: "🇲🇨", digits: 8 }, { code: "+976", name: "Mongolia", flag: "🇲🇳", digits: 8 }, { code: "+382", name: "Montenegro", flag: "🇲🇪", digits: 8 }, { code: "+212", name: "Morocco", flag: "🇲🇦", digits: 9 }, { code: "+258", name: "Mozambique", flag: "🇲🇿", digits: 9 }, { code: "+95", name: "Myanmar", flag: "🇲🇲", digits: 9 }, { code: "+264", name: "Namibia", flag: "🇳🇦", digits: 9 }, { code: "+674", name: "Nauru", flag: "🇳🇷", digits: 7 }, { code: "+977", name: "Nepal", flag: "🇳🇵", digits: 10 }, { code: "+31", name: "Netherlands", flag: "🇳🇱", digits: 9 }, { code: "+64", name: "New Zealand", flag: "🇳🇿", digits: 9 }, { code: "+505", name: "Nicaragua", flag: "🇳🇮", digits: 8 }, { code: "+227", name: "Niger", flag: "🇳🇪", digits: 8 }, { code: "+234", name: "Nigeria", flag: "🇳🇬", digits: 10 }, { code: "+850", name: "North Korea", flag: "🇰🇵", digits: 8 }, { code: "+389", name: "North Macedonia", flag: "🇲🇰", digits: 8 }, { code: "+47", name: "Norway", flag: "🇳🇴", digits: 8 }, { code: "+968", name: "Oman", flag: "🇴🇲", digits: 8 }, { code: "+92", name: "Pakistan", flag: "🇵🇰", digits: 10 }, { code: "+680", name: "Palau", flag: "🇵🇼", digits: 7 }, { code: "+970", name: "Palestine", flag: "🇵🇸", digits: 9 }, { code: "+507", name: "Panama", flag: "🇵🇦", digits: 8 }, { code: "+675", name: "PNG", flag: "🇵🇬", digits: 7 }, { code: "+595", name: "Paraguay", flag: "🇵🇾", digits: 9 }, { code: "+51", name: "Peru", flag: "🇵🇪", digits: 9 }, { code: "+63", name: "Philippines", flag: "🇵🇭", digits: 10 }, { code: "+48", name: "Poland", flag: "🇵🇱", digits: 9 }, { code: "+351", name: "Portugal", flag: "🇵🇹", digits: 9 }, { code: "+974", name: "Qatar", flag: "🇶🇦", digits: 8 }, { code: "+40", name: "Romania", flag: "🇷🇴", digits: 9 }, { code: "+7", name: "Russia", flag: "🇷🇺", digits: 10 }, { code: "+250", name: "Rwanda", flag: "🇷🇼", digits: 9 }, { code: "+1869", name: "St Kitts", flag: "🇰🇳", digits: 7 }, { code: "+1758", name: "St Lucia", flag: "🇱🇨", digits: 7 }, { code: "+1784", name: "St Vincent", flag: "🇻🇨", digits: 7 }, { code: "+685", name: "Samoa", flag: "🇼🇸", digits: 7 }, { code: "+378", name: "San Marino", flag: "🇸🇲", digits: 7 }, { code: "+239", name: "Sao Tome", flag: "🇸🇹", digits: 7 }, { code: "+966", name: "Saudi Arabia", flag: "🇸🇦", digits: 9 }, { code: "+221", name: "Senegal", flag: "🇸🇳", digits: 9 }, { code: "+381", name: "Serbia", flag: "🇷🇸", digits: 9 }, { code: "+248", name: "Seychelles", flag: "🇸🇨", digits: 7 }, { code: "+232", name: "Sierra Leone", flag: "🇸🇱", digits: 8 }, { code: "+65", name: "Singapore", flag: "🇸🇬", digits: 8 }, { code: "+421", name: "Slovakia", flag: "🇸🇰", digits: 9 }, { code: "+386", name: "Slovenia", flag: "🇸🇮", digits: 8 }, { code: "+677", name: "Solomon", flag: "🇸🇧", digits: 7 }, { code: "+252", name: "Somalia", flag: "🇸🇴", digits: 8 }, { code: "+27", name: "South Africa", flag: "🇿🇦", digits: 9 }, { code: "+82", name: "South Korea", flag: "🇰🇷", digits: 10 }, { code: "+211", name: "South Sudan", flag: "🇸🇸", digits: 9 }, { code: "+34", name: "Spain", flag: "🇪🇸", digits: 9 }, { code: "+94", name: "Sri Lanka", flag: "🇱🇰", digits: 9 }, { code: "+249", name: "Sudan", flag: "🇸🇩", digits: 9 }, { code: "+597", name: "Suriname", flag: "🇸🇷", digits: 7 }, { code: "+268", name: "Swaziland", flag: "🇸🇿", digits: 8 }, { code: "+46", name: "Sweden", flag: "🇸🇪", digits: 9 }, { code: "+41", name: "Switzerland", flag: "🇨🇭", digits: 9 }, { code: "+963", name: "Syria", flag: "🇸🇾", digits: 9 }, { code: "+886", name: "Taiwan", flag: "🇹🇼", digits: 9 }, { code: "+992", name: "Tajikistan", flag: "🇹🇯", digits: 9 }, { code: "+255", name: "Tanzania", flag: "🇹🇿", digits: 9 }, { code: "+66", name: "Thailand", flag: "🇹🇭", digits: 9 }, { code: "+670", name: "Timor-Leste", flag: "🇹🇱", digits: 7 }, { code: "+228", name: "Togo", flag: "🇹🇬", digits: 8 }, { code: "+676", name: "Tonga", flag: "🇹🇴", digits: 5 }, { code: "+1868", name: "Trinidad", flag: "🇹🇹", digits: 7 }, { code: "+216", name: "Tunisia", flag: "🇹🇳", digits: 8 }, { code: "+90", name: "Turkey", flag: "🇹🇷", digits: 10 }, { code: "+993", name: "Turkmenistan", flag: "🇹🇲", digits: 8 }, { code: "+688", name: "Tuvalu", flag: "🇹🇻", digits: 5 }, { code: "+256", name: "Uganda", flag: "🇺🇬", digits: 9 }, { code: "+380", name: "Ukraine", flag: "🇺🇦", digits: 9 }, { code: "+971", name: "UAE", flag: "🇦🇪", digits: 9 }, { code: "+44", name: "UK", flag: "🇬🇧", digits: 10 }, { code: "+1", name: "USA", flag: "🇺🇸", digits: 10 }, { code: "+598", name: "Uruguay", flag: "🇺🇾", digits: 8 }, { code: "+998", name: "Uzbekistan", flag: "🇺🇿", digits: 9 }, { code: "+678", name: "Vanuatu", flag: "🇻🇺", digits: 5 }, { code: "+379", name: "Vatican", flag: "🇻🇦", digits: 6 }, { code: "+58", name: "Venezuela", flag: "🇻🇪", digits: 10 }, { code: "+84", name: "Vietnam", flag: "🇻🇳", digits: 9 }, { code: "+967", name: "Yemen", flag: "🇾🇪", digits: 9 }, { code: "+260", name: "Zambia", flag: "🇿🇲", digits: 9 }, { code: "+263", name: "Zimbabwe", flag: "🇿🇼", digits: 9 }
+const countriesData = [
+    { code: "+255", name: "Tanzania", flag: "🇹🇿", digits: 9 },
+    { code: "+265", name: "Malawi", flag: "🇲🇼", digits: 9 },
+    { code: "+260", name: "Zambia", flag: "🇿🇲", digits: 9 },
+    { code: "+254", name: "Kenya", flag: "🇰🇪", digits: 9 },
+    { code: "+256", name: "Uganda", flag: "🇺🇬", digits: 9 },
+    { code: "+234", name: "Nigeria", flag: "🇳🇬", digits: 10 },
+    { code: "+233", name: "Ghana", flag: "🇬🇭", digits: 9 },
+    { code: "+27", name: "South Africa", flag: "🇿🇦", digits: 9 },
+    { code: "+243", name: "Congo DRC", flag: "🇨🇩", digits: 9 },
+    { code: "+257", name: "Burundi", flag: "🇧🇮", digits: 8 },
+    { code: "+267", name: "Botswana", flag: "🇧🇼", digits: 7 },
+    { code: "+264", name: "Namibia", flag: "🇳🇦", digits: 9 },
+    { code: "+258", name: "Mozambique", flag: "🇲🇿", digits: 9 },
+    { code: "+250", name: "Rwanda", flag: "🇷🇼", digits: 9 },
+    { code: "+20", name: "Egypt", flag: "🇪🇬", digits: 10 },
+    { code: "+212", name: "Morocco", flag: "🇲🇦", digits: 9 },
+    { code: "+1", name: "USA", flag: "🇺🇸", digits: 10 },
+    { code: "+44", name: "UK", flag: "🇬🇧", digits: 10 }
 ];
 
 function populateCountries() {
     const select = document.getElementById('phoneCountryCode');
     if (!select) return;
-    const sorted = [...allCountries].sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = [...countriesData].sort((a, b) => a.name.localeCompare(b.name));
     sorted.forEach(c => {
         const option = new Option(`${c.flag} ${c.name} (${c.code})`, c.code);
         select.appendChild(option);
@@ -725,14 +341,14 @@ function populateCountries() {
 }
 populateCountries();
 
-// Phone hint update
+// Phone hint
 const phoneCountrySelect = document.getElementById('phoneCountryCode');
 const phoneHint = document.getElementById('phoneHint');
 const phoneNumberInput = document.getElementById('phoneNumber');
 
 function updatePhoneHint() {
     const selectedCode = phoneCountrySelect.value;
-    const matched = allCountries.find(c => c.code === selectedCode);
+    const matched = countriesData.find(c => c.code === selectedCode);
     if (matched) {
         phoneHint.innerHTML = `<i class="fas fa-check-circle"></i> ${matched.flag} ${matched.name} requires ${matched.digits} digits`;
         phoneHint.style.color = '#FFD700';
@@ -748,13 +364,12 @@ function updatePhoneHint() {
 phoneCountrySelect.addEventListener('change', updatePhoneHint);
 updatePhoneHint();
 
-// Auto-detect country by IP
 async function autoDetectCountry() {
     try {
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         const detectedName = data.country_name;
-        const matched = allCountries.find(c => c.name === detectedName);
+        const matched = countriesData.find(c => c.name === detectedName);
         if (matched) {
             const phoneSelect = document.getElementById('phoneCountryCode');
             for (let i = 0; i < phoneSelect.options.length; i++) {
@@ -782,7 +397,6 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 let currentMethod = 'email';
 let recaptchaVerifier = null;
 
-// Method switching
 document.querySelectorAll('.login-option').forEach(opt => {
     opt.addEventListener('click', function() {
         document.querySelectorAll('.login-option').forEach(o => o.classList.remove('active'));
@@ -803,7 +417,6 @@ document.querySelectorAll('.login-option').forEach(opt => {
     });
 });
 
-// Password toggles
 document.getElementById('togglePassword')?.addEventListener('click', function() {
     const inp = document.getElementById('password');
     inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -820,13 +433,10 @@ function showNotification(msg, type) {
     if (existing) existing.remove();
     const n = document.createElement('div');
     n.className = `notification ${type}`;
-    n.innerHTML =
-        `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-times-circle'}"></i><div class="message">${msg}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
+    n.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-times-circle'}"></i><div class="message">${msg}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
     document.body.appendChild(n);
-    setTimeout(() => { n.style.animation = 'fadeOut 0.3s';
-        setTimeout(() => n.remove(), 300); }, 3000);
-    n.querySelector('.close-notif').onclick = () => { n.style.animation = 'fadeOut 0.3s';
-        setTimeout(() => n.remove(), 300); };
+    setTimeout(() => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); }, 3000);
+    n.querySelector('.close-notif').onclick = () => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); };
 }
 
 async function updateUserInRTDB(userId, userData) {
@@ -834,21 +444,17 @@ async function updateUserInRTDB(userId, userData) {
     const snapshot = await get(userRef);
     if (!snapshot.exists()) {
         await set(userRef, {
-            uid: userId,
-            email: userData.email || '',
+            uid: userId, email: userData.email || '',
             username: userData.username || userData.email?.split('@')[0] || 'User',
             fullName: userData.fullName || userData.email?.split('@')[0] || 'User',
-            createdAt: Date.now(),
-            balance: 0,
-            totalDeposited: 0,
-            lastLogin: Date.now()
+            createdAt: Date.now(), balance: 0, totalDeposited: 0, lastLogin: Date.now()
         });
     } else {
         await update(userRef, { lastLogin: Date.now() });
     }
 }
 
-// ========== REAL BIOMETRIC LOGIN WITH SIMPLEWEBAUTHN ==========
+// Biometric
 let biometricCredential = null;
 let rpId = window.location.hostname || "abotra-proai.com";
 
@@ -856,16 +462,13 @@ async function checkBiometricEnabled() {
     const savedCredential = localStorage.getItem('abotra_biometric_credential');
     const savedEmail = localStorage.getItem('abotra_biometric_email');
     const bioBtn = document.getElementById('biometricLoginBtn');
-
     if (savedCredential && savedEmail) {
-        bioBtn.style.opacity = '1';
-        bioBtn.style.cursor = 'pointer';
+        bioBtn.style.opacity = '1'; bioBtn.style.cursor = 'pointer';
         bioBtn.classList.remove('disabled');
         bioBtn.querySelector('span').textContent = 'Biometric Login';
         return true;
     }
-    bioBtn.style.opacity = '0.6';
-    bioBtn.style.cursor = 'not-allowed';
+    bioBtn.style.opacity = '0.6'; bioBtn.style.cursor = 'not-allowed';
     bioBtn.classList.add('disabled');
     bioBtn.querySelector('span').textContent = 'Biometric (Not Setup)';
     return false;
@@ -875,42 +478,28 @@ async function performBiometricLogin() {
     const savedCredentialStr = localStorage.getItem('abotra_biometric_credential');
     const savedEmail = localStorage.getItem('abotra_biometric_email');
     const savedPassword = localStorage.getItem('abotra_biometric_password');
-
     if (!savedCredentialStr || !savedEmail || !savedPassword) {
-        showNotification('Biometric not set up. Please login with password first to enable biometrics.', 'info');
+        showNotification('Biometric not set up. Please login with password first.', 'info');
         return false;
     }
-
     try {
         const savedCredential = JSON.parse(savedCredentialStr);
-
         const authOptions = {
             challenge: new Uint8Array(32),
-            allowCredentials: [{
-                id: savedCredential.id,
-                type: "public-key",
-                transports: ["internal"]
-            }],
-            timeout: 60000,
-            userVerification: "required",
-            rpId: rpId
+            allowCredentials: [{ id: savedCredential.id, type: "public-key", transports: ["internal"] }],
+            timeout: 60000, userVerification: "required", rpId: rpId
         };
-
         crypto.getRandomValues(authOptions.challenge);
-
         const modal = document.getElementById('biometricModal');
         const statusDiv = document.getElementById('biometricStatus');
         const statusText = document.getElementById('biometricStatusText');
         modal.classList.add('active');
         statusText.innerHTML = 'Place finger on sensor or use Face ID...';
         statusDiv.className = 'biometric-status waiting';
-
         const assertionResp = await SimpleWebAuthnBrowser.startAuthentication(authOptions);
-
         if (assertionResp) {
             statusText.innerHTML = 'Verification successful! Logging in...';
             statusDiv.className = 'biometric-status success';
-
             setTimeout(async () => {
                 modal.classList.remove('active');
                 const btn = document.getElementById('loginBtn');
@@ -934,7 +523,7 @@ async function performBiometricLogin() {
         const statusDiv = document.getElementById('biometricStatus');
         if (error.name === "NotAllowedError") {
             statusDiv.className = 'biometric-status error';
-            document.getElementById('biometricStatusText').innerHTML = 'Biometric cancelled or failed. Try again.';
+            document.getElementById('biometricStatusText').innerHTML = 'Biometric cancelled or failed.';
             setTimeout(() => modal.classList.remove('active'), 2000);
             showNotification('Biometric cancelled. Use password.', 'error');
         } else {
@@ -947,34 +536,23 @@ async function performBiometricLogin() {
     }
 }
 
-// Biometric button handler
 document.getElementById('biometricLoginBtn').addEventListener('click', async (e) => {
     e.preventDefault();
     const isEnabled = await checkBiometricEnabled();
-    if (isEnabled) {
-        await performBiometricLogin();
-    } else {
-        showNotification('Biometric not set up. Please login first with password to enable biometrics.', 'info');
-    }
+    if (isEnabled) { await performBiometricLogin(); }
+    else { showNotification('Biometric not set up. Please login first with password.', 'info'); }
 });
 
-// Modal close handlers
 document.getElementById('biometricCancelBtn')?.addEventListener('click', () => {
-    const modal = document.getElementById('biometricModal');
-    if (modal) {
-        modal.classList.remove('active');
-        showNotification('Cancelled', 'info');
-    }
+    document.getElementById('biometricModal').classList.remove('active');
+    showNotification('Cancelled', 'info');
 });
 document.getElementById('biometricUsePasswordBtn')?.addEventListener('click', () => {
-    const modal = document.getElementById('biometricModal');
-    if (modal) {
-        modal.classList.remove('active');
-        showNotification('Use password instead', 'info');
-    }
+    document.getElementById('biometricModal').classList.remove('active');
+    showNotification('Use password instead', 'info');
 });
 
-// ========== EMAIL LOGIN ==========
+// Email Login
 async function loginWithEmail(email, password) {
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
@@ -992,31 +570,24 @@ async function loginWithEmail(email, password) {
     }
 }
 
-// ========== PHONE LOGIN ==========
+// Phone Login
 async function loginWithPhone(phoneNumber, countryCode, password) {
     const fullPhone = countryCode + phoneNumber;
     const digitsOnly = phoneNumber.replace(/\D/g, '');
-
     const usersRef = ref(rtdb, 'users');
     const snapshot = await get(usersRef);
     let foundUser = null;
-
     if (snapshot.exists()) {
         for (const [userId, userData] of Object.entries(snapshot.val())) {
             const userPhone = userData.phone || '';
             const userPhoneRaw = userData.phoneRaw || '';
-            if (userPhone === fullPhone || userPhone === phoneNumber ||
-                userPhoneRaw === digitsOnly || userPhoneRaw === phoneNumber) {
+            if (userPhone === fullPhone || userPhone === phoneNumber || userPhoneRaw === digitsOnly || userPhoneRaw === phoneNumber) {
                 foundUser = { userId, ...userData };
                 break;
             }
         }
     }
-
-    if (!foundUser) {
-        showNotification('Phone number not registered', 'error');
-        return;
-    }
+    if (!foundUser) { showNotification('Phone number not registered', 'error'); return; }
 
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
@@ -1025,11 +596,7 @@ async function loginWithPhone(phoneNumber, countryCode, password) {
         await initRecaptcha();
         const result = await signInWithPhoneNumber(auth, fullPhone, recaptchaVerifier);
         const otp = prompt("Enter 6-digit OTP:");
-        if (!otp) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-            return;
-        }
+        if (!otp) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login'; return; }
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
         const confirmation = await result.confirm(otp);
         await updateUserInRTDB(confirmation.user.uid, { phone: fullPhone });
@@ -1042,7 +609,7 @@ async function loginWithPhone(phoneNumber, countryCode, password) {
     }
 }
 
-// ========== GOOGLE LOGIN ==========
+// Google Login
 document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
     const btn = document.getElementById('googleLoginBtn');
@@ -1081,7 +648,6 @@ async function initRecaptcha() {
     await recaptchaVerifier.render();
 }
 
-// Main login button handler
 document.getElementById('loginBtn').addEventListener('click', async () => {
     if (currentMethod === 'email') {
         const email = document.getElementById('email').value.trim();
@@ -1093,7 +659,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
         const phone = document.getElementById('phoneNumber').value.trim();
         const password = document.getElementById('phonePassword').value;
         if (!countryCode || !phone || !password) { showNotification('Enter phone and password', 'error'); return; }
-        const matched = allCountries.find(c => c.code === countryCode);
+        const matched = countriesData.find(c => c.code === countryCode);
         const digitsOnly = phone.replace(/\D/g, '');
         if (matched && digitsOnly.length !== matched.digits) {
             showNotification(`Invalid ${matched.name} phone number`, 'error');
@@ -1103,7 +669,6 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     }
 });
 
-// Check if already logged in
 onAuthStateChanged(auth, async (user) => {
     if (user && window.location.pathname.includes('login.html')) {
         window.location.href = 'dashboard.html';

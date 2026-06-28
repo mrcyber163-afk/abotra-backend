@@ -6,8 +6,22 @@
 <title>Notifications | ABOTRA-PROAI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- OneSignal SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0',
+    VAPID_PUBLIC_KEY: 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -59,6 +73,7 @@ body.light-theme .clear-notifications-btn {
 }
 body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3); }
 
+/* ===== PERMISSION BANNER ===== */
 .permission-banner {
     background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(128,0,0,0.1));
     border: 1px solid rgba(255,215,0,0.3);
@@ -93,6 +108,7 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
     cursor: pointer;
 }
 
+/* ===== SKELETON ===== */
 .skeleton {
     animation: skeletonPulse 1s ease-in-out infinite;
 }
@@ -320,12 +336,16 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
 .notification-icon.p2p { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.kyc { background: rgba(14,203,129,0.2); color: #0ECB81; }
 .notification-icon.trade { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.copy-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
+.notification-icon.security { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.system { background: rgba(255,215,0,0.2); color: #FFD700; }
 
 .notification-content { flex: 1; }
 .notification-title { font-weight: 700; color: #FFD700; font-size: 11px; margin-bottom: 3px; }
 .notification-content .message { color: #FFFFFF; font-size: 10px; line-height: 1.4; margin-bottom: 3px; }
 .notification-content .time { color: #888; font-size: 8px; }
 .notification-action { margin-top: 6px; }
+
 .action-btn {
     background: rgba(255,215,0,0.2);
     border: none;
@@ -340,6 +360,7 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
     gap: 4px;
 }
 .action-btn:hover { background: rgba(255,215,0,0.4); }
+
 .delete-notif-btn {
     background: rgba(246,70,93,0.15);
     border: none;
@@ -472,108 +493,213 @@ const auth = getAuth(app);
 let currentUser = null;
 let notificationsListener = null;
 let unreadCount = 0;
+let swRegistration = null;
+let pushSubscription = null;
 let oneSignalInitialized = false;
 
 const ONESIGNAL_APP_ID = "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc";
+const API_BASE_URL = CONFIG.API_URL;
 
-// ========== ONESIGNAL PUSH NOTIFICATIONS ==========
-async function initOneSignal() {
-    if (oneSignalInitialized) return;
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+async function registerServiceWorker() {
     try {
-        if (typeof window.OneSignal === 'undefined') {
-            setTimeout(initOneSignal, 1000);
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            });
+            console.log('[SW] Service Worker registered:', registration);
+            swRegistration = registration;
+            return registration;
+        }
+    } catch (error) {
+        console.warn('[SW] Service Worker registration failed:', error);
+    }
+    return null;
+}
+
+// ============================================================
+// REQUEST PUSH PERMISSION
+// ============================================================
+async function requestPushPermission() {
+    try {
+        if (!('Notification' in window)) {
+            showToast('Notifications not supported on this device', 'error');
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            showToast('Notifications already enabled!', 'success');
+            document.getElementById('permissionBanner').style.display = 'none';
+            localStorage.setItem('onesignal_banner_dismissed', 'true');
+            await subscribeToPush();
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            showToast('Notification permission denied. Please enable in settings.', 'error');
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        console.log('[NOTIF] Permission result:', permission);
+        
+        if (permission === 'granted') {
+            document.getElementById('permissionBanner').style.display = 'none';
+            localStorage.setItem('onesignal_banner_dismissed', 'true');
+            showToast('Notifications enabled! You will receive alerts on your phone.', 'success');
+            await subscribeToPush();
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.warn('[NOTIF] Permission request failed:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// SUBSCRIBE TO PUSH NOTIFICATIONS
+// ============================================================
+async function subscribeToPush() {
+    try {
+        if (!swRegistration) {
+            console.warn('[PUSH] No service worker');
+            return null;
+        }
+        
+        const applicationServerKey = CONFIG.VAPID_PUBLIC_KEY;
+        if (!applicationServerKey) {
+            console.warn('[PUSH] No VAPID key configured');
+            return null;
+        }
+        
+        const subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+        
+        console.log('[PUSH] Subscribed successfully:', subscription.endpoint);
+        pushSubscription = subscription;
+        
+        // Send subscription to backend
+        try {
+            const token = await getFirebaseToken();
+            const response = await fetch(`${API_BASE_URL}/api/notifications/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    subscription: subscription,
+                    userId: currentUser?.uid
+                })
+            });
+            console.log('[PUSH] Subscription saved to backend:', response.ok);
+        } catch (e) {
+            console.warn('[PUSH] Failed to save subscription:', e);
+        }
+        
+        return subscription;
+    } catch (error) {
+        console.warn('[PUSH] Subscription failed:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// DEVICE PUSH NOTIFICATION
+// ============================================================
+function sendDevicePushNotification(title, body, type = 'info', link = null) {
+    // Browser Notification API - Shows on device
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const options = {
+                body: body,
+                icon: '../assets/images/logo.png',
+                badge: '../assets/images/logo.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: Date.now().toString(),
+                data: {
+                    url: link || window.location.href
+                }
+            };
+            
+            const notif = new Notification(title, options);
+            
+            notif.onclick = (event) => {
+                event.preventDefault();
+                window.focus();
+                if (link) {
+                    window.location.href = link;
+                }
+            };
+            
+            console.log('[NOTIF] Device notification sent:', title);
+        } catch (e) {
+            console.warn('[NOTIF] Device notification error:', e);
+        }
+    }
+    
+    // Also show in-app notification
+    showToast(body, type);
+}
+
+// ============================================================
+// INIT PUSH NOTIFICATIONS
+// ============================================================
+async function initPushNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const registration = await registerServiceWorker();
+        if (!registration) {
+            console.log('[PUSH] No service worker, skipping');
             return;
         }
         
-        await window.OneSignal.Deferred;
-        await window.OneSignal.init({
-            appId: ONESIGNAL_APP_ID,
-            safari_web_id: "web.onesignal.auto.123456789",
-            notifyButton: { enable: false },
-            allowLocalhostAsSecureOrigin: true,
-        });
+        // Check if already granted
+        if (Notification.permission === 'granted') {
+            await subscribeToPush();
+        }
         
-        oneSignalInitialized = true;
-        console.log("OneSignal initialized");
-        
-        const isSubscribed = await window.OneSignal.Notifications.permission;
-        const bannerDismissed = localStorage.getItem('onesignal_banner_dismissed');
-        
-        if (isSubscribed !== true && !bannerDismissed) {
+        // Show permission banner if not decided
+        if (Notification.permission === 'default' && !localStorage.getItem('onesignal_banner_dismissed')) {
             document.getElementById('permissionBanner').style.display = 'flex';
         }
         
-        if (currentUser) {
-            await window.OneSignal.sendTag("user_id", currentUser.uid);
-            await window.OneSignal.sendTag("user_email", currentUser.email);
-            await window.OneSignal.setExternalUserId(currentUser.uid);
-        }
-        
     } catch (error) {
-        console.error("OneSignal init error:", error);
+        console.warn('[PUSH] Initialization failed:', error);
     }
 }
 
-async function requestPushPermission() {
-    try {
-        if (typeof window.OneSignal === 'undefined') return;
-        
-        const result = await window.OneSignal.Notifications.requestPermission();
-        if (result === true) {
-            localStorage.setItem('onesignal_banner_dismissed', 'true');
-            document.getElementById('permissionBanner').style.display = 'none';
-            showToast('Notifications enabled! You will receive alerts on your phone.', 'success');
-            
-            if (currentUser) {
-                await window.OneSignal.sendTag("user_id", currentUser.uid);
-                await window.OneSignal.sendTag("user_email", currentUser.email);
-                await window.OneSignal.setExternalUserId(currentUser.uid);
-            }
-        } else {
-            showToast('Notification permission denied', 'info');
-        }
-    } catch (error) {
-        console.error("Permission error:", error);
-        showToast('Could not enable notifications', 'error');
-    }
-}
-
-// Send push notification
-async function sendPushNotification(title, message, link = null) {
-    if (!oneSignalInitialized || !currentUser) return;
-    try {
-        await window.OneSignal.Notifications.sendSelf({
-            title: title,
-            message: message,
-            url: link || window.location.origin + '/notifications.html',
-            icon: 'https://placehold.co/64x64/800000/FFD700?text=AI'
-        });
-        console.log("Push notification sent:", title);
-    } catch(e) {
-        console.log("Push not sent:", e);
-    }
-}
-
-// Add notification with push
-async function addNotificationWithPush(userId, title, message, type = 'info', link = null, actionData = null) {
-    if (!userId) return;
-    
-    const notifRef = push(ref(db, `notifications/${userId}`));
-    await set(notifRef, {
-        id: notifRef.key, title, message, type, read: false,
-        timestamp: Date.now(), date: new Date().toISOString(), link, actionData
-    });
-    
-    if (userId === currentUser?.uid && oneSignalInitialized) {
-        await sendPushNotification(title, message, link);
-    }
-    
-    return notifRef.key;
-}
-
-window.addNotification = addNotificationWithPush;
-
-// ========== ORIGINAL CODE CONTINUES ==========
+// ============================================================
+// ORIGINAL NOTIFICATION FUNCTIONS
+// ============================================================
 function showToast(message, type) {
     const existing = document.querySelector('.notification-popup');
     if (existing) existing.remove();
@@ -708,6 +834,9 @@ async function updateUnreadCountAndBadge() {
     return unread;
 }
 
+// ============================================================
+// GET ICON AND PAGE BUTTON FOR NOTIFICATION TYPE
+// ============================================================
 function getNotificationIcon(type) {
     const typeMap = {
         'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
@@ -718,11 +847,55 @@ function getNotificationIcon(type) {
         'p2p-order': { icon: 'fas fa-shopping-cart', class: 'p2p' },
         'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
         'trade': { icon: 'fas fa-chart-line', class: 'trade' },
+        'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
+        'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'copy-trade': { icon: 'fas fa-copy', class: 'copy-trade' },
         'success': { icon: 'fas fa-check-circle', class: 'success' },
         'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
-        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' }
+        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
+        'security': { icon: 'fas fa-shield-alt', class: 'security' },
+        'system': { icon: 'fas fa-bell', class: 'system' }
     };
     return typeMap[type] || { icon: 'fas fa-bell', class: 'info' };
+}
+
+function getPageButton(notification) {
+    const type = notification.type || '';
+    const link = notification.link || '';
+    let buttonText = 'View';
+    let icon = 'fa-arrow-right';
+    let pageLink = link || '#';
+    
+    // Type-based page routing
+    const pageMap = {
+        'deposit': { text: '💰 Deposit', icon: 'fa-wallet', page: 'deposit.html' },
+        'withdrawal': { text: '💳 Withdraw', icon: 'fa-arrow-up', page: 'withdraw.html' },
+        'kyc': { text: '📋 KYC', icon: 'fa-id-card', page: 'kyc.html' },
+        'trade': { text: '📊 Trades', icon: 'fa-chart-line', page: 'trade-history.html' },
+        'trade-opened': { text: '📈 Trade', icon: 'fa-chart-line', page: 'trade.html' },
+        'trade-closed': { text: '📉 Trade', icon: 'fa-chart-line', page: 'trade-history.html' },
+        'master-trade': { text: '👑 Master Trade', icon: 'fa-crown', page: 'copy-trading.html' },
+        'copy-trade': { text: '📋 Copy Trade', icon: 'fa-copy', page: 'copy-trading.html' },
+        'p2p': { text: '🤝 P2P', icon: 'fa-handshake', page: 'p2p-market.html' },
+        'p2p-order': { text: '📦 Order', icon: 'fa-shopping-cart', page: 'p2p-order.html' },
+        'transfer': { text: '🔄 Transfer', icon: 'fa-exchange-alt', page: 'wallet.html' },
+        'security': { text: '🔐 Security', icon: 'fa-shield-alt', page: 'security.html' },
+        'success': { text: '✅ Success', icon: 'fa-check-circle', page: 'dashboard.html' },
+        'system': { text: '⚙️ Settings', icon: 'fa-cog', page: 'settings.html' }
+    };
+    
+    const pageInfo = pageMap[type];
+    if (pageInfo) {
+        buttonText = pageInfo.text;
+        icon = pageInfo.icon;
+        pageLink = pageInfo.page;
+    }
+    
+    if (link) {
+        pageLink = link;
+    }
+    
+    return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='${pageLink}'"><i class="fas ${icon}"></i> ${buttonText}</button></div>`;
 }
 
 function timeAgo(timestamp) {
@@ -738,35 +911,6 @@ function timeAgo(timestamp) {
     return `${weeks}w ago`;
 }
 
-function getActionButton(notification) {
-    const type = notification.type || '';
-    
-    if (type === 'deposit' || type === 'withdrawal') {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='wallet.html'"><i class="fas fa-wallet"></i> View Wallet</button></div>`;
-    }
-    
-    if (type === 'kyc') {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='account.html'"><i class="fas fa-id-card"></i> View KYC</button></div>`;
-    }
-    
-    if (type === 'trade' || type === 'trade-opened' || type === 'trade-closed') {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='trade-history.html'"><i class="fas fa-chart-line"></i> View Trades</button></div>`;
-    }
-    
-    if (type === 'master-trade') {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='copy-trading.html'"><i class="fas fa-copy"></i> Copy Trade</button></div>`;
-    }
-    
-    if (type === 'p2p' || type === 'p2p-order') {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='p2p-orders.html'"><i class="fas fa-handshake"></i> View Order</button></div>`;
-    }
-    
-    if (notification.link) {
-        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='${notification.link}'"><i class="fas fa-arrow-right"></i> View</button></div>`;
-    }
-    return '';
-}
-
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -774,6 +918,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ============================================================
+// RENDER NOTIFICATIONS WITH PAGE BUTTONS
+// ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
     if (notifications.length === 0) {
@@ -784,7 +931,7 @@ function renderNotifications(notifications) {
     container.innerHTML = '';
     notifications.forEach(notif => {
         const icon = getNotificationIcon(notif.type);
-        const actionButton = getActionButton(notif);
+        const pageButton = getPageButton(notif);
         const notifCard = document.createElement('div');
         notifCard.className = `notification-card ${notif.read ? '' : 'unread'}`;
         notifCard.onclick = () => markAsRead(notif.id, null);
@@ -794,7 +941,7 @@ function renderNotifications(notifications) {
                 ${notif.title ? `<div class="notification-title">${escapeHtml(notif.title)}</div>` : ''}
                 <div class="message">${escapeHtml(notif.message || '')}</div>
                 <div class="time"><i class="far fa-clock"></i> ${timeAgo(notif.timestamp)} ${!notif.read ? '<span style="color:#FFD700;"> • Unread</span>' : ''}</div>
-                ${actionButton}
+                ${pageButton}
             </div>
             <button class="delete-notif-btn" onclick="event.stopPropagation(); window.deleteNotification('${notif.id}')"><i class="fas fa-trash-alt"></i></button>
         `;
@@ -857,6 +1004,31 @@ async function checkRegistrationAndDevice() {
     }
 }
 
+// ============================================================
+// ADD NOTIFICATION WITH PUSH TO DEVICE
+// ============================================================
+async function addNotificationWithPush(userId, title, message, type = 'info', link = null, actionData = null) {
+    if (!userId) return;
+    
+    const notifRef = push(ref(db, `notifications/${userId}`));
+    await set(notifRef, {
+        id: notifRef.key, title, message, type, read: false,
+        timestamp: Date.now(), date: new Date().toISOString(), link, actionData
+    });
+    
+    // Send push notification to device
+    if (userId === currentUser?.uid) {
+        sendDevicePushNotification(title, message, type, link);
+    }
+    
+    return notifRef.key;
+}
+
+window.addNotification = addNotificationWithPush;
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
 document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
 document.getElementById('clearNotificationsBtn').addEventListener('click', clearAllNotifications);
 document.getElementById('allowNotificationsBtn').addEventListener('click', requestPushPermission);
@@ -865,6 +1037,9 @@ document.getElementById('laterBtn').addEventListener('click', () => {
     document.getElementById('permissionBanner').style.display = 'none';
 });
 
+// ============================================================
+// INIT
+// ============================================================
 onAuthStateChanged(auth, async (user) => {
     if (!user) { 
         window.location.href = 'login.html'; 
@@ -874,7 +1049,7 @@ onAuthStateChanged(auth, async (user) => {
     
     await checkRegistrationAndDevice();
     loadNotifications(user.uid);
-    await initOneSignal();
+    await initPushNotifications();
 });
 
 initTheme();

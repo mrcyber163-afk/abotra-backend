@@ -6,6 +6,22 @@
 <title>P2P Chat | ABOTRA-PROAI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0',
+    VAPID_PUBLIC_KEY: 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -39,10 +55,8 @@ body.light-theme .order-label,
 body.light-theme .chat-message.system .chat-message-text { color: #666; }
 body.light-theme .order-value { color: #800000; }
 body.light-theme .chat-message-other { background: #e9ecef; }
-body.light-theme .chat-message-other .chat-username,
 body.light-theme .chat-message-other .chat-message-text { color: #111 !important; }
 body.light-theme .chat-message-own { background: #dcf8c5; }
-body.light-theme .chat-message-own .chat-username,
 body.light-theme .chat-message-own .chat-message-text { color: #111 !important; }
 body.light-theme .chat-input-area input {
     background: white;
@@ -60,6 +74,106 @@ body.light-theme .theme-toggle {
     border-color: rgba(128,0,0,0.3);
 }
 body.light-theme .theme-toggle i { color: #800000; }
+
+/* ===== SYSTEM MESSAGE - GOLDEN THEME ===== */
+.chat-message-system {
+    align-self: center;
+    max-width: 92%;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    border: 2px solid #FFD700;
+}
+
+/* DARK THEME - Golden background with dark text */
+body:not(.light-theme) .chat-message-system {
+    background: linear-gradient(135deg, #1a1a0a, #2a1a00);
+    border-color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-body {
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-header {
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-time {
+    color: #aa8800;
+}
+body:not(.light-theme) .chat-message-system .system-body .copy-number {
+    background: rgba(255,215,0,0.2);
+    border-color: rgba(255,215,0,0.4);
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-body .copy-number:hover {
+    background: rgba(255,215,0,0.35);
+}
+
+/* LIGHT THEME - Golden text on light background */
+body.light-theme .chat-message-system {
+    background: linear-gradient(135deg, #fff8e1, #ffecb3);
+    border-color: #B8860B;
+}
+body.light-theme .chat-message-system .system-body {
+    color: #8B6914;
+}
+body.light-theme .chat-message-system .system-header {
+    color: #B8860B;
+}
+body.light-theme .chat-message-system .system-time {
+    color: #aa8800;
+}
+body.light-theme .chat-message-system .system-body .copy-number {
+    background: rgba(184,134,11,0.15);
+    border-color: rgba(184,134,11,0.3);
+    color: #8B6914;
+}
+body.light-theme .chat-message-system .system-body .copy-number:hover {
+    background: rgba(184,134,11,0.3);
+}
+
+.chat-message-system .system-header {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chat-message-system .system-header i { font-size: 12px; }
+.chat-message-system .system-body {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.chat-message-system .system-body .highlight {
+    font-weight: 700;
+}
+.chat-message-system .system-body .copy-number {
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.3s;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+}
+.chat-message-system .system-body .copy-number:hover {
+    transform: scale(1.02);
+}
+.chat-message-system .system-body .copy-number i { font-size: 10px; }
+.chat-message-system .system-time {
+    font-size: 8px;
+    margin-top: 6px;
+    text-align: right;
+    border-top: 1px solid rgba(255,215,0,0.15);
+    padding-top: 4px;
+}
 
 /* Skeleton Loading Animations */
 .skeleton-order-card {
@@ -256,69 +370,33 @@ body.light-theme .theme-toggle i { color: #800000; }
     background: linear-gradient(135deg, #FFD700, #FFA500); 
     border-bottom-right-radius: 4px; 
 }
-.chat-message-own .chat-username,
-.chat-message-own .chat-message-text,
-.chat-message-own .chat-message-time {
-    color: #1a1a1a !important;
-}
+.chat-message-own .chat-message-text { color: #1a1a1a !important; }
 .chat-message-other { 
     align-self: flex-start; 
     background: linear-gradient(135deg, #0ECB81, #0A9E65); 
     border-bottom-left-radius: 4px; 
 }
-.chat-message-other .chat-username,
-.chat-message-other .chat-message-text,
-.chat-message-other .chat-message-time {
-    color: white !important;
-}
-.chat-message-system {
-    align-self: center;
-    background: rgba(255, 215, 0, 0.15);
-    backdrop-filter: blur(8px);
-    max-width: 95%;
-    border: 2px solid rgba(255, 215, 0, 0.5);
-    border-radius: 14px;
-}
-.chat-message-system .chat-message-text {
-    color: #FFD700 !important;
-    font-size: 10px;
-    text-align: left;
-    font-family: 'Courier New', 'Inter', monospace;
-    white-space: pre-wrap;
-    line-height: 1.5;
-    letter-spacing: 0.3px;
-}
-.chat-message-system .chat-username {
-    display: none !important;
-}
-.chat-username { 
-    font-weight: 700; 
-    font-size: 10px; 
-    margin-bottom: 3px; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    flex-wrap: wrap;
-    color: #FFD700 !important;
-}
-.chat-message-text { font-size: 11px; line-height: 1.4; word-wrap: break-word; }
-.chat-message-time { font-size: 7px; opacity: 0.7; margin-top: 3px; display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+.chat-message-other .chat-message-text { color: white !important; }
 
-.verified-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 5px;
-    background: #1E90FF;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    font-size: 9px;
-    color: white;
-    vertical-align: middle;
-    flex-shrink: 0;
+.message-tick {
+    font-size: 10px;
+    margin-left: 4px;
+    color: #888;
 }
-.verified-badge i { font-size: 8px; color: white; }
+.message-tick.delivered { color: #34B7F1; }
+.message-tick.seen { color: #34B7F1; }
+
+.chat-message-text { font-size: 11px; line-height: 1.4; word-wrap: break-word; }
+.chat-message-time { 
+    font-size: 8px; 
+    opacity: 0.7; 
+    margin-top: 3px; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 4px;
+}
+.chat-message-own .chat-message-time { color: #1a1a1a; }
 
 .chat-input-area {
     display: flex;
@@ -441,12 +519,14 @@ body.light-theme .theme-toggle i { color: #800000; }
 .bottom-nav a:hover { color: #FFD700; transform: translateY(-2px); }
 .bottom-nav a.active { color: #FFD700; }
 
+/* ===== PUSH NOTIFICATION STYLES ===== */
 .notification-popup {
     position: fixed;
     top: 75px;
     right: 20px;
-    min-width: 260px;
-    padding: 10px 14px;
+    min-width: 280px;
+    max-width: 380px;
+    padding: 12px 16px;
     border-radius: 14px;
     backdrop-filter: blur(20px);
     animation: slideInRight 0.4s ease;
@@ -454,12 +534,37 @@ body.light-theme .theme-toggle i { color: #800000; }
     z-index: 99999;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-size: 11px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
-.notification-popup.success { background: linear-gradient(135deg, rgba(14,203,129,0.15), rgba(14,203,129,0.08)); border-left-color: #0ECB81; color: white; }
-.notification-popup.error { background: linear-gradient(135deg, rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; color: white; }
-.notification-popup.info { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; color: white; }
+.notification-popup.success { background: linear-gradient(135deg, rgba(14,203,129,0.2), rgba(14,203,129,0.08)); border-left-color: #0ECB81; color: white; }
+.notification-popup.error { background: linear-gradient(135deg, rgba(255,77,77,0.2), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; color: white; }
+.notification-popup.info { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.08)); border-left-color: #FFD700; color: white; }
+.notification-popup .notif-icon { font-size: 18px; }
+.notification-popup .notif-content { flex: 1; }
+.notification-popup .notif-title { font-weight: 700; font-size: 12px; margin-bottom: 2px; }
+.notification-popup .notif-body { font-size: 10px; opacity: 0.9; }
+.notification-popup .notif-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.notification-popup .notif-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: white;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.notification-popup .notif-btn:hover { background: rgba(255,255,255,0.3); }
+.notification-popup .notif-close {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.3s;
+    font-size: 14px;
+}
+.notification-popup .notif-close:hover { opacity: 1; }
+
 @keyframes slideInRight {
     from { opacity: 0; transform: translateX(100%); }
     to { opacity: 1; transform: translateX(0); }
@@ -536,6 +641,7 @@ body.light-theme .theme-toggle i { color: #800000; }
     .chat-message { max-width: 95%; }
     .order-info-row { flex-direction: column; gap: 3px; }
     .action-buttons { flex-direction: column; }
+    .notification-popup { right: 10px; left: 10px; min-width: auto; }
 }
 </style>
 </head>
@@ -547,7 +653,7 @@ body.light-theme .theme-toggle i { color: #800000; }
     <div><h2>ABOTRA-PROAI</h2><p>P2P Chat</p></div>
 </div>
 <div class="top-bar-right">
-    <a href="p2p-orders.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+    <a href="p2p-order.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Orders</a>
     <div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
 </div>
 </div>
@@ -622,38 +728,295 @@ const auth = getAuth(app);
 let currentUser = null;
 let orderData = null;
 let chatUnsubscribe = null;
-let currentUsername = 'Trader';
 let countdownInterval = null;
 let paymentMessageSent = false;
+let swRegistration = null;
+let pushSubscription = null;
 
 const ORDER_TIMEOUT_MINUTES = 30;
-const API_BASE_URL = 'https://abotra-backend.up.railway.app';
+const API_BASE_URL = 'https://abotra-backend-production.up.railway.app';
 
 function formatNumber(n) { return (n || 0).toLocaleString('en-US'); }
 
-function formatTimeAgo(timestamp) {
+function formatTime(timestamp) {
     if (!timestamp) return '';
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 5) return "Just now";
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return new Date(timestamp).toLocaleDateString();
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
 }
 
-function showNotification(msg, type) {
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+async function registerServiceWorker() {
+    try {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            });
+            console.log('[SW] Service Worker registered:', registration);
+            swRegistration = registration;
+            return registration;
+        }
+    } catch (error) {
+        console.warn('[SW] Service Worker registration failed:', error);
+    }
+    return null;
+}
+
+// ============================================================
+// REQUEST PUSH PERMISSION
+// ============================================================
+async function requestPushPermission() {
+    try {
+        if (!('Notification' in window)) {
+            console.log('[NOTIF] Notifications not supported');
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            console.log('[NOTIF] Permission already granted');
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            console.log('[NOTIF] Permission denied by user');
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        console.log('[NOTIF] Permission result:', permission);
+        return permission === 'granted';
+    } catch (error) {
+        console.warn('[NOTIF] Permission request failed:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// SUBSCRIBE TO PUSH
+// ============================================================
+async function subscribeToPush() {
+    try {
+        if (!swRegistration) return null;
+        
+        const applicationServerKey = CONFIG.VAPID_PUBLIC_KEY;
+        if (!applicationServerKey) {
+            console.warn('[PUSH] No VAPID key configured');
+            return null;
+        }
+        
+        const subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+        
+        console.log('[PUSH] Subscribed successfully:', subscription.endpoint);
+        pushSubscription = subscription;
+        
+        // Send subscription to backend
+        try {
+            const token = await getFirebaseToken();
+            const response = await fetch(`${CONFIG.API_URL}/api/notifications/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    subscription: subscription,
+                    userId: currentUser?.uid
+                })
+            });
+            console.log('[PUSH] Subscription saved to backend:', response.ok);
+        } catch (e) {
+            console.warn('[PUSH] Failed to save subscription:', e);
+        }
+        
+        return subscription;
+    } catch (error) {
+        console.warn('[PUSH] Subscription failed:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// DEVICE PUSH NOTIFICATION (Shows on device - APK)
+// ============================================================
+function sendDevicePushNotification(title, body, type = 'info', action = null, actionData = null) {
+    // Browser Notification API - Shows on device
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const options = {
+                body: body,
+                icon: '../assets/images/logo.png',
+                badge: '../assets/images/logo.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: Date.now().toString(),
+                data: {
+                    url: window.location.href,
+                    action: action,
+                    actionData: actionData
+                }
+            };
+            
+            if (action === 'extend') {
+                options.actions = [
+                    { action: 'extend', title: '⏰ Extend Time' },
+                    { action: 'close', title: 'Close' }
+                ];
+            }
+            
+            const notif = new Notification(title, options);
+            
+            notif.onclick = (event) => {
+                event.preventDefault();
+                window.focus();
+                if (action === 'extend') {
+                    const extendBtn = document.getElementById('extendBtn');
+                    if (extendBtn) extendBtn.click();
+                }
+            };
+            
+            notif.onaction = (event) => {
+                if (event.action === 'extend') {
+                    const extendBtn = document.getElementById('extendBtn');
+                    if (extendBtn) extendBtn.click();
+                }
+            };
+            
+            console.log('[NOTIF] Device notification sent:', title);
+        } catch (e) {
+            console.warn('[NOTIF] Device notification error:', e);
+        }
+    }
+    
+    // Also show in-app notification
+    showInAppNotification(body, type, title, action, actionData);
+}
+
+// ============================================================
+// IN-APP NOTIFICATION (Inside the app)
+// ============================================================
+function showInAppNotification(message, type = 'info', title = '', action = null, actionData = null) {
     const existing = document.querySelector('.notification-popup');
     if (existing) existing.remove();
+    
     const toast = document.createElement('div');
     toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i> ${msg}<div class="close-notif" style="margin-left:auto; cursor:pointer;"><i class="fas fa-times"></i></div>`;
+    
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-triangle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    let actionsHtml = '';
+    if (action) {
+        let actionText = '';
+        if (action === 'extend') {
+            actionText = '⏰ Extend Time';
+        } else if (action === 'view') {
+            actionText = '👁️ View';
+        }
+        if (actionText) {
+            actionsHtml = `<div class="notif-actions"><button class="notif-btn" onclick="window.handleNotifAction('${action}')">${actionText}</button></div>`;
+        }
+    }
+    
+    toast.innerHTML = `
+        <div class="notif-icon"><i class="fas ${iconMap[type] || 'fa-info-circle'}"></i></div>
+        <div class="notif-content">
+            ${title ? `<div class="notif-title">${title}</div>` : ''}
+            <div class="notif-body">${message}</div>
+            ${actionsHtml}
+        </div>
+        <div class="notif-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>
+    `;
+    
     document.body.appendChild(toast);
-    toast.querySelector('.close-notif').addEventListener('click', () => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); });
-    setTimeout(() => { if(toast.parentNode) { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); } }, 4000);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 8000);
 }
 
+window.handleNotifAction = function(action) {
+    if (action === 'extend') {
+        const extendBtn = document.getElementById('extendBtn');
+        if (extendBtn) extendBtn.click();
+    }
+    const notif = document.querySelector('.notification-popup');
+    if (notif) notif.remove();
+};
+
+// ============================================================
+// INIT PUSH NOTIFICATIONS
+// ============================================================
+async function initPushNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const hasPermission = await requestPushPermission();
+        if (!hasPermission) {
+            console.log('[PUSH] No permission, skipping subscription');
+            return;
+        }
+        
+        const registration = await registerServiceWorker();
+        if (!registration) {
+            console.log('[PUSH] No service worker, skipping');
+            return;
+        }
+        
+        const subscription = await subscribeToPush();
+        if (subscription) {
+            console.log('[PUSH] Push notifications ready!');
+        }
+    } catch (error) {
+        console.warn('[PUSH] Initialization failed:', error);
+    }
+}
+
+// ============================================================
+// WRAPPER: sendPushNotification
+// ============================================================
+function sendPushNotification(title, body, type = 'info', action = null, actionData = null) {
+    sendDevicePushNotification(title, body, type, action, actionData);
+}
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -661,6 +1024,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
 function openModal(message, callback) {
     window.pendingCallback = callback;
     document.getElementById('modalMessage').innerText = message;
@@ -678,18 +1044,25 @@ window.closeModal = closeModal;
 window.closeDisputeModal = closeDisputeModal;
 window.closeImageModal = closeImageModal;
 window.openImageModal = openImageModal;
-window.copyText = (text) => { navigator.clipboard.writeText(text); showNotification('Copied!', 'success'); };
+window.copyText = (text) => { 
+    navigator.clipboard.writeText(text); 
+    sendPushNotification('Copied!', '📋 Account number copied to clipboard', 'success');
+};
 
+// ============================================================
+// SYSTEM MESSAGE FUNCTIONS
+// ============================================================
 async function sendSystemMessage(orderId, msg, isPaymentMsg = false) {
     const chatRef = ref(db, `p2p_chat/${orderId}`);
     const newMsgRef = push(chatRef);
     await set(newMsgRef, { 
         sender: 'system', 
-        senderName: 'System', 
         message: msg, 
         timestamp: Date.now(), 
         isSystem: true,
-        isPaymentMessage: isPaymentMsg
+        isPaymentMessage: isPaymentMsg,
+        delivered: true,
+        seen: true
     });
 }
 
@@ -731,70 +1104,69 @@ async function getMerchantPaymentDetailsFromOrder(order) {
     return { bankName, accountNumber, accountName };
 }
 
+function formatPaymentMessage(order, paymentDetails) {
+    const rate = order.rate || 2800;
+    const currency = order.currency || 'TZS';
+    const localAmount = order.amount * rate;
+    const formattedLocalAmount = formatNumber(localAmount);
+    const { bankName, accountNumber, accountName } = paymentDetails;
+    
+    return `
+╔══════════════════════════════════════════╗
+║          📋 PAYMENT INSTRUCTIONS          ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  💰 AMOUNT TO PAY:                       ║
+║     ${formattedLocalAmount} ${currency}                         ║
+║     (${formatNumber(order.amount)} USDT @ ${formatNumber(rate)} ${currency}/USDT)     ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║  🏦 BANK DETAILS:                        ║
+║                                          ║
+║     Bank: ${bankName.padEnd(30)} ║
+║     Account: 📋 ${accountNumber.padEnd(30)} ║
+║     Name: ${accountName.padEnd(30)} ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║  📝 INSTRUCTIONS:                        ║
+║                                          ║
+║     1. Transfer EXACT amount to above    ║
+║     2. Use your phone as reference       ║
+║     3. Upload payment screenshot         ║
+║     4. Click "I HAVE PAID" after transfer║
+║     5. Wait for seller to release USDT   ║
+║                                          ║
+║     ⏰ Complete within ${ORDER_TIMEOUT_MINUTES} minutes   ║
+║                                          ║
+╚══════════════════════════════════════════╝
+    `;
+}
+
 async function sendPaymentInstructions(orderId) {
     if (!orderData || paymentMessageSent) return;
-    
-    const rate = orderData.rate || 2800;
-    const currency = orderData.currency || 'TZS';
-    const localAmount = orderData.amount * rate;
-    const formattedLocalAmount = formatNumber(localAmount);
     
     const paymentDetails = await getMerchantPaymentDetailsFromOrder(orderData);
     
     if (!paymentDetails) {
         const errorMessage = `
-─────────────────────────────────────────────
-           PAYMENT INSTRUCTIONS              
-─────────────────────────────────────────────
-                                             
-  ⚠️ PAYMENT DETAILS MISSING                 
-                                             
-  Please contact customer support to complete
-  this transaction.                          
-                                             
-  Order #: ${orderData.id?.slice(-8) || 'N/A'}                    
-  Amount: ${formattedLocalAmount} ${currency}                         
-                                             
-─────────────────────────────────────────────
+╔══════════════════════════════════════════╗
+║          ⚠️ PAYMENT DETAILS MISSING       ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  Please contact customer support to      ║
+║  complete this transaction.              ║
+║                                          ║
+║  Order #: ${orderData.id?.slice(-8) || 'N/A'}                    ║
+║                                          ║
+╚══════════════════════════════════════════╝
         `;
         await sendSystemMessage(orderId, errorMessage, true);
         paymentMessageSent = true;
         return;
     }
     
-    const { bankName, accountNumber, accountName } = paymentDetails;
-    
-    const paymentMessage = `
-─────────────────────────────────────────────
-           PAYMENT INSTRUCTIONS              
-─────────────────────────────────────────────
-                                             
-  AMOUNT TO PAY:                             
-     ${formattedLocalAmount} ${currency}                         
-     (${orderData.amount} USDT @ ${formatNumber(rate)} ${currency}/USDT)     
-                                             
-────────────────────────────────────────────
-  BANK DETAILS:                              
-                                             
-     Bank: ${bankName}                                
-     Account: ${accountNumber}                           
-     Name: ${accountName}               
-                                             
-─────────────────────────────────────────────
-  INSTRUCTIONS:                              
-                                             
-     1. Transfer EXACT amount to above account
-     2. Use your phone number as reference   
-     3. Upload payment screenshot as proof   
-     4. Click "I HAVE PAID" after transfer   
-     5. Wait for seller to release USDT      
-                                             
-     Complete within ${ORDER_TIMEOUT_MINUTES} minutes  
-                                             
-─────────────────────────────────────────────
-    `;
-    
-    await sendSystemMessage(orderId, paymentMessage, true);
+    const formattedMessage = formatPaymentMessage(orderData, paymentDetails);
+    await sendSystemMessage(orderId, formattedMessage, true);
     paymentMessageSent = true;
 }
 
@@ -814,18 +1186,18 @@ async function checkForImageProof(orderId) {
 async function markAsPaid(orderId) {
     const hasImageProof = await checkForImageProof(orderId);
     if (!hasImageProof) {
-        showNotification('Please upload a payment screenshot first!', 'error');
+        sendPushNotification('Payment Proof Required', 'Please upload a payment screenshot first!', 'error');
         return;
     }
     await update(ref(db, `p2p_orders/${orderId}`), { status: 'paid', paidAt: Date.now() });
-    await sendSystemMessage(orderId, 'Buyer marked as PAID. Seller, please verify and release USDT.');
-    showNotification('Payment marked as paid! Waiting for seller.', 'success');
+    await sendSystemMessage(orderId, '✅ Buyer marked as PAID. Seller, please verify and release USDT.');
+    sendPushNotification('Payment Confirmed', 'You marked the payment as PAID. Waiting for seller to release USDT.', 'success');
     setTimeout(() => window.location.reload(), 1500);
 }
 
 async function releaseUSDT(orderId) {
     if (orderData.merchantUserId !== currentUser.uid) {
-        showNotification("Not authorized", "error");
+        sendPushNotification('Not Authorized', 'You are not authorized to release this USDT.', 'error');
         return;
     }
     
@@ -845,29 +1217,29 @@ async function releaseUSDT(orderId) {
         }
         
         await update(ref(db, `p2p_orders/${orderId}`), { status: 'completed', completedAt: Date.now() });
-        await sendSystemMessage(orderId, `${formatNumber(orderData.amount)} USDT released! Trade completed. Funds added to your balance.`);
-        showNotification(`${formatNumber(orderData.amount)} USDT released and added to buyer's balance!`, 'success');
+        await sendSystemMessage(orderId, `✅ ${formatNumber(orderData.amount)} USDT released! Trade completed. Funds added to your balance.`);
+        sendPushNotification('USDT Released', `${formatNumber(orderData.amount)} USDT has been released and added to buyer's balance.`, 'success');
         setTimeout(() => window.location.reload(), 1500);
         
     } catch (error) {
         console.error("Release USDT error:", error);
-        showNotification('Error releasing USDT. Please try again.', 'error');
+        sendPushNotification('Error', 'Error releasing USDT. Please try again.', 'error');
     }
 }
 
 async function openDispute(orderId, reason) {
     await update(ref(db, `p2p_orders/${orderId}`), { status: 'disputed', disputeReason: reason, disputeOpenedAt: Date.now() });
     await push(ref(db, 'adminDisputes'), { orderId, amount: orderData.amount, buyerId: orderData.buyerId, sellerId: orderData.merchantUserId, reason, timestamp: Date.now(), status: 'pending' });
-    await sendSystemMessage(orderId, `Dispute opened: ${reason.substring(0, 150)}... Admin will review within 24 hours.`);
-    showNotification('Dispute opened! Admin will review.', 'success');
+    await sendSystemMessage(orderId, `⚖️ Dispute opened: ${reason.substring(0, 150)}... Admin will review within 24 hours.`);
+    sendPushNotification('Dispute Opened', 'Your dispute has been submitted. Admin will review within 24 hours.', 'info');
     setTimeout(() => window.location.reload(), 1500);
 }
 
 async function cancelOrder(orderId) {
     await update(ref(db, `p2p_orders/${orderId}`), { status: 'cancelled', cancelledAt: Date.now(), cancelledBy: currentUser.uid });
-    await sendSystemMessage(orderId, `Order cancelled by ${currentUser.uid === orderData.buyerId ? 'buyer' : 'seller'}.`);
-    showNotification('Order cancelled.', 'info');
-    setTimeout(() => window.location.href = 'p2p-orders.html', 1500);
+    await sendSystemMessage(orderId, `❌ Order cancelled by ${currentUser.uid === orderData.buyerId ? 'buyer' : 'seller'}.`);
+    sendPushNotification('Order Cancelled', 'Your order has been cancelled.', 'error');
+    setTimeout(() => window.location.href = 'p2p-order.html', 1500);
 }
 
 async function extendTime(orderId) {
@@ -878,8 +1250,8 @@ async function extendTime(orderId) {
         newExpiryAt: newExpiry,
         extendCount: (orderData.extendCount || 0) + 1
     });
-    await sendSystemMessage(orderId, `Time extended by ${ORDER_TIMEOUT_MINUTES} minutes!`);
-    showNotification(`Time extended by ${ORDER_TIMEOUT_MINUTES} minutes!`, 'success');
+    await sendSystemMessage(orderId, `⏰ Time extended by ${ORDER_TIMEOUT_MINUTES} minutes!`);
+    sendPushNotification('Time Extended', `Payment time extended by ${ORDER_TIMEOUT_MINUTES} minutes.`, 'success');
     if (countdownInterval) clearInterval(countdownInterval);
     startCountdown(orderId);
 }
@@ -890,6 +1262,8 @@ function startCountdown(orderId) {
     if (!countdownElement) return;
     
     let expiryTime = orderData.newExpiryAt || (orderData.createdAtMillis + (ORDER_TIMEOUT_MINUTES * 60 * 1000));
+    let notifiedAt5 = false;
+    let notifiedAt2 = false;
     
     countdownInterval = setInterval(async () => {
         const now = Date.now();
@@ -902,8 +1276,8 @@ function startCountdown(orderId) {
             
             if (orderData.status === 'pending') {
                 await update(ref(db, `p2p_orders/${orderId}`), { status: 'expired', expiredAt: Date.now() });
-                await sendSystemMessage(orderId, `Order expired after ${ORDER_TIMEOUT_MINUTES} minutes without payment.`);
-                showNotification('Order has expired!', 'error');
+                await sendSystemMessage(orderId, `⏰ Order expired after ${ORDER_TIMEOUT_MINUTES} minutes without payment.`);
+                sendPushNotification('Order Expired', 'Your order has expired. Please create a new order.', 'error');
                 setTimeout(() => window.location.reload(), 2000);
             }
             return;
@@ -912,6 +1286,16 @@ function startCountdown(orderId) {
         const minutes = Math.floor(remaining / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
         countdownElement.innerHTML = `<i class="fas fa-hourglass-half"></i> ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (remaining < 5 * 60 * 1000 && !notifiedAt5) {
+            notifiedAt5 = true;
+            sendPushNotification('⏰ Time Running Out', 'Only 5 minutes remaining to complete payment!', 'warning', 'extend');
+        }
+        
+        if (remaining < 2 * 60 * 1000 && !notifiedAt2) {
+            notifiedAt2 = true;
+            sendPushNotification('⏰ Urgent! Time Almost Up', 'Only 2 minutes remaining! Extend time now.', 'error', 'extend');
+        }
         
         if (remaining < 5 * 60 * 1000) {
             countdownElement.classList.add('warning');
@@ -925,18 +1309,24 @@ async function sendMessage(orderId) {
     const input = document.getElementById('messageInput');
     const msg = input?.value.trim();
     if (!msg) return;
-    const isBuyer = orderData.buyerId === currentUser.uid;
     
     const chatRef = ref(db, `p2p_chat/${orderId}`);
     const newMsgRef = push(chatRef);
     
     await set(newMsgRef, { 
-        sender: isBuyer ? 'buyer' : 'seller', 
         senderId: currentUser.uid, 
-        senderName: currentUsername, 
         message: msg, 
-        timestamp: Date.now() 
+        timestamp: Date.now(),
+        delivered: true,
+        seen: false
     });
+    
+    // Send push notification to other party
+    const partnerId = orderData.buyerId === currentUser.uid ? orderData.merchantUserId : orderData.buyerId;
+    if (partnerId) {
+        const partnerName = orderData.buyerId === currentUser.uid ? 'Seller' : 'Buyer';
+        sendPushNotification('💬 New Message', `${partnerName}: ${msg.substring(0, 50)}...`, 'info', 'view');
+    }
     
     if (input) input.value = '';
 }
@@ -944,10 +1334,9 @@ async function sendMessage(orderId) {
 async function uploadImageMessage(orderId, file) {
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { 
-        showNotification("Image too large! Max 2MB", "error"); 
+        sendPushNotification('Image too large!', 'Maximum size is 2MB', 'error');
         return; 
     }
-    const isBuyer = orderData.buyerId === currentUser.uid;
     
     const reader = new FileReader();
     reader.onload = async (ev) => {
@@ -955,16 +1344,16 @@ async function uploadImageMessage(orderId, file) {
         const newMsgRef = push(chatRef);
         
         await set(newMsgRef, {
-            sender: isBuyer ? 'buyer' : 'seller', 
             senderId: currentUser.uid,
-            senderName: currentUsername, 
-            message: 'Payment Proof', 
-            imageData: ev.target.result, 
-            timestamp: Date.now(), 
-            isImage: true
+            message: '📷 Payment Proof',
+            imageData: ev.target.result,
+            timestamp: Date.now(),
+            isImage: true,
+            delivered: true,
+            seen: false
         });
         
-        showNotification("Payment proof uploaded!", "success");
+        sendPushNotification('Payment Proof Uploaded', 'You uploaded a payment screenshot.', 'success');
         const paidBtn = document.getElementById('paidBtn');
         if (paidBtn) { 
             paidBtn.disabled = false; 
@@ -972,16 +1361,6 @@ async function uploadImageMessage(orderId, file) {
         }
     };
     reader.readAsDataURL(file);
-}
-
-async function fetchCurrentUserData() {
-    const snap = await get(ref(db, `users/${currentUser.uid}`));
-    if (snap.exists()) {
-        const data = snap.val();
-        currentUsername = data.username || data.fullName || data.name || 'Trader';
-    } else {
-        currentUsername = currentUser.email?.split('@')[0] || 'Trader';
-    }
 }
 
 function setupChatListener(orderId) {
@@ -992,6 +1371,8 @@ function setupChatListener(orderId) {
     
     const chatRef = ref(db, `p2p_chat/${orderId}`);
     const chatQuery = query(chatRef, orderByChild('timestamp'));
+    
+    let lastMessageCount = 0;
     
     chatUnsubscribe = onValue(chatQuery, (snapshot) => {
         const container = document.getElementById('chatMessages');
@@ -1008,12 +1389,23 @@ function setupChatListener(orderId) {
         });
         
         messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        
+        if (messages.length > lastMessageCount && lastMessageCount > 0) {
+            const newMessages = messages.slice(lastMessageCount);
+            for (const msg of newMessages) {
+                if (msg.senderId !== currentUser?.uid && !msg.isSystem) {
+                    const senderName = orderData.buyerId === currentUser.uid ? 'Seller' : 'Buyer';
+                    sendPushNotification('💬 New Message', `${senderName}: ${msg.message?.substring(0, 60) || 'New message'}`, 'info', 'view');
+                }
+            }
+        }
+        lastMessageCount = messages.length;
+        
         container.innerHTML = '';
         
         for (const msg of messages) {
             const isSystem = msg.isSystem === true;
-            let isOwn = false;
-            if (!isSystem && msg.senderId) isOwn = msg.senderId === currentUser?.uid;
+            const isOwn = msg.senderId === currentUser?.uid;
             
             let msgClass = '';
             if (isSystem) {
@@ -1024,34 +1416,61 @@ function setupChatListener(orderId) {
                 msgClass = 'chat-message-other';
             }
             
-            const timeStr = formatTimeAgo(msg.timestamp);
-            const senderName = isSystem ? 'System' : (msg.senderName || 'Trader');
+            const timeStr = formatTime(msg.timestamp);
             
             const div = document.createElement('div');
             div.className = `chat-message ${msgClass}`;
             
-            if (msg.isImage && msg.imageData) {
+            if (isSystem) {
+                const rawMessage = msg.message || '';
+                let accountNumberToCopy = null;
+                const accountMatch = rawMessage.match(/Account:\s*📋\s*([\d\s]+)/);
+                if (accountMatch && accountMatch[1]) {
+                    accountNumberToCopy = accountMatch[1].trim();
+                }
+                
+                let formattedMessage = escapeHtml(rawMessage).replace(/\n/g, '<br>');
+                
+                if (accountNumberToCopy) {
+                    const accountRegex = /Account:\s*📋\s*([\d\s]+)/;
+                    formattedMessage = formattedMessage.replace(
+                        accountRegex,
+                        `Account: 📋 <span class="copy-number" onclick="window.copyText('${accountNumberToCopy}')">${accountNumberToCopy} <i class="fas fa-copy"></i></span>`
+                    );
+                }
+                
                 div.innerHTML = `
-                    <div class="chat-username" style="${isSystem ? 'display:none;' : ''}">
-                        ${!isSystem ? `<i class="fas fa-user-circle" style="font-size:24px;"></i> ${escapeHtml(senderName)}` : ''}
-                    </div>
-                    <img src="${escapeHtml(msg.imageData)}" class="chat-image" onclick="openImageModal('${escapeHtml(msg.imageData).replace(/'/g, "\\'")}')">
-                    <div class="chat-message-time">
-                        <span><i class="far fa-clock"></i> ${timeStr}</span>
-                    </div>
+                    <div class="system-header"><i class="fas fa-robot"></i> SYSTEM</div>
+                    <div class="system-body">${formattedMessage}</div>
+                    <div class="system-time">${timeStr}</div>
                 `;
             } else {
-                let messageText = escapeHtml(msg.message || '').replace(/\n/g, '<br>');
-                if (isSystem && msg.isPaymentMessage) {
-                    div.innerHTML = `<div class="chat-message-text" style="font-family: monospace; white-space: pre-wrap; line-height: 1.5;">${messageText}</div><div class="chat-message-time"><span><i class="far fa-clock"></i> ${timeStr}</span></div>`;
-                } else {
+                let tickHtml = '';
+                if (isOwn) {
+                    if (msg.seen === true) {
+                        tickHtml = `<span class="message-tick seen"><i class="fas fa-check-double"></i></span>`;
+                    } else if (msg.delivered === true) {
+                        tickHtml = `<span class="message-tick delivered"><i class="fas fa-check"></i></span>`;
+                    } else {
+                        tickHtml = `<span class="message-tick"><i class="fas fa-clock"></i></span>`;
+                    }
+                }
+                
+                if (msg.isImage && msg.imageData) {
                     div.innerHTML = `
-                        <div class="chat-username" style="${isSystem ? 'display:none;' : ''}">
-                            ${!isSystem ? `<i class="fas fa-user-circle" style="font-size:24px;"></i> ${escapeHtml(senderName)}` : ''}
+                        <img src="${escapeHtml(msg.imageData)}" class="chat-image" onclick="openImageModal('${escapeHtml(msg.imageData).replace(/'/g, "\\'")}')">
+                        <div class="chat-message-time">
+                            <span>${timeStr}</span>
+                            ${tickHtml}
                         </div>
+                    `;
+                } else {
+                    let messageText = escapeHtml(msg.message || '').replace(/\n/g, '<br>');
+                    div.innerHTML = `
                         <div class="chat-message-text">${messageText}</div>
                         <div class="chat-message-time">
-                            <span><i class="far fa-clock"></i> ${timeStr}</span>
+                            <span>${timeStr}</span>
+                            ${tickHtml}
                         </div>
                     `;
                 }
@@ -1062,36 +1481,17 @@ function setupChatListener(orderId) {
     });
 }
 
-async function getPartnerName(partnerId, isBuyer) {
-    if (!partnerId) return 'Trader';
-    
-    if (isBuyer && orderData.merchantName) {
-        return orderData.merchantName;
-    }
-    
-    try {
-        const userSnap = await get(ref(db, `users/${partnerId}`));
-        if (userSnap.exists()) {
-            const userData = userSnap.val();
-            return userData.username || userData.fullName || userData.name || 'Trader';
-        }
-    } catch(e) {
-        console.error("Error getting partner name:", e);
-    }
-    return 'Trader';
-}
-
 async function loadOrderAndChat() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('orderId');
     if (!orderId) { 
-        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>No order ID provided</p><a href="p2p-orders.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
+        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>No order ID provided</p><a href="p2p-order.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
         return; 
     }
     
     const orderSnap = await get(ref(db, `p2p_orders/${orderId}`));
     if (!orderSnap.exists()) { 
-        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>Order not found</p><a href="p2p-orders.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
+        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>Order not found</p><a href="p2p-order.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
         return; 
     }
     
@@ -1105,8 +1505,12 @@ async function loadOrderAndChat() {
     const currency = orderData.currency || 'TZS';
     const hasImageProof = await checkForImageProof(orderId);
     
-    const partnerId = isBuyer ? orderData.merchantUserId : orderData.buyerId;
-    const partnerName = await getPartnerName(partnerId, isBuyer);
+    let partnerName = 'Trader';
+    if (isBuyer && orderData.merchantName) {
+        partnerName = orderData.merchantName;
+    } else if (isSeller && orderData.buyerName) {
+        partnerName = orderData.buyerName;
+    }
     
     let timeRemaining = '';
     if (orderData.status === 'pending') {
@@ -1224,7 +1628,7 @@ async function loadOrderAndChat() {
     if (imageUploadBtn) {
         imageUploadBtn.addEventListener('click', () => {
             if (orderData.status !== 'pending') {
-                showNotification('Cannot upload - order is no longer pending', 'error');
+                sendPushNotification('Cannot Upload', 'Order is no longer pending', 'error');
                 return;
             }
             const input = document.createElement('input');
@@ -1245,7 +1649,7 @@ async function loadOrderAndChat() {
                 closeDisputeModal(); 
                 openDispute(orderId, reason); 
             } else { 
-                showNotification('Please enter a reason for the dispute', 'error'); 
+                sendPushNotification('Reason Required', 'Please enter a reason for the dispute', 'error'); 
             }
         };
     }
@@ -1289,7 +1693,12 @@ document.getElementById('themeToggle')?.addEventListener('click', () => {
 onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = 'login.html'; return; }
     currentUser = user;
-    await fetchCurrentUserData();
+    
+    // Initialize push notifications
+    setTimeout(async () => {
+        await initPushNotifications();
+    }, 2000);
+    
     await loadOrderAndChat();
 });
 

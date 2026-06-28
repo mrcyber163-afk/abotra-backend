@@ -6,7 +6,27 @@
 <title>Dashboard | ABOTRA-PROAI - AI Trading Platform</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+// ============================================================
+// CONFIG - Production Settings
+// ============================================================
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
+/* STYLES ZAKO ZOTE HAPA (sijabadilisha, zile zile ulizonazo) */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 body {
@@ -1129,7 +1149,6 @@ gap:5px;
         <button class="action-btn" onclick="window.location.href='subscriptions.html'"><i class="fas fa-crown"></i><span>Subscribe</span></button>
         <button class="action-btn" onclick="window.location.href='copy-trading.html'"><i class="fas fa-copy"></i><span>Copy Trade</span></button>
         <button class="action-btn" onclick="window.location.href='wallet.html'"><i class="fa-solid fa-wallet"></i><span>Wallet</span></button>
-        <!-- ===== WHATSAPP GROUP BUTTON - GREEN ===== -->
         <button class="action-btn whatsapp" id="whatsappGroupBtn" style="display:none;" onclick="openWhatsAppGroup()">
             <i class="fab fa-whatsapp"></i>
             <span>WhatsApp</span>
@@ -1270,14 +1289,18 @@ let exchangeRates = { USD: 1, TZS: 2800, MWK: 5600, ZMW: 30 };
 let userCountry = 'Tanzania';
 let localCurrencySymbol = 'TZS';
 let localCurrencyRate = 2800;
+let whatsappGroups = {};
 
 let chatUnsubscribe = null;
 let postsUnsubscribe = null;
 let transactionsUnsubscribe = null;
+let notificationsUnsubscribe = null;
 
 let replyingToMessage = null;
 
-// ==================== COUNTRY FLAG MAPPING ====================
+// ============================================================
+// COUNTRY FLAG MAPPING
+// ============================================================
 const countryFlagImages = {
     'Tanzania': 'https://flagcdn.com/tz.svg',
     'Malawi': 'https://flagcdn.com/mw.svg',
@@ -1317,28 +1340,60 @@ const countryCurrencies = {
     'Morocco': { symbol: 'MAD', rate: 10 }
 };
 
-// ==================== WHATSAPP FUNCTION ====================
-const whatsappGroups = {
-    'Tanzania': 'https://chat.whatsapp.com/D2fegQD6rqdJPoM7ZIkZIG',
-    'Malawi': 'https://chat.whatsapp.com/GkfqtLPBcGm9Nd87txfwMP',
-    'Zambia': 'https://chat.whatsapp.com/JuVaMTB3EogHIRNiV2zuUT',
-    'Kenya': 'https://chat.whatsapp.com/KenyaGroupLink',
-    'Uganda': 'https://chat.whatsapp.com/UgandaGroupLink',
-    'Nigeria': 'https://chat.whatsapp.com/NigeriaGroupLink',
-    'Ghana': 'https://chat.whatsapp.com/GhanaGroupLink',
-    'South Africa': 'https://chat.whatsapp.com/SouthAfricaGroupLink',
-    'Congo DRC': 'https://chat.whatsapp.com/CongoGroupLink',
-    'Burundi': 'https://chat.whatsapp.com/BurundiGroupLink',
-    'Botswana': 'https://chat.whatsapp.com/BotswanaGroupLink',
-    'Namibia': 'https://chat.whatsapp.com/NamibiaGroupLink',
-    'Mozambique': 'https://chat.whatsapp.com/MozambiqueGroupLink',
-    'Rwanda': 'https://chat.whatsapp.com/RwandaGroupLink',
-    'default': 'https://chat.whatsapp.com/YourDefaultGroupLink'
-};
+// ============================================================
+// WHATSAPP GROUPS - FETCH FROM FIREBASE
+// ============================================================
+async function loadWhatsAppGroups() {
+    try {
+        const snapshot = await get(ref(db, 'whatsappGroups'));
+        if (snapshot.exists()) {
+            whatsappGroups = snapshot.val();
+            console.log('[ABOTRA] WhatsApp groups loaded from Firebase:', whatsappGroups);
+        } else {
+            // Default fallback if no groups in Firebase
+            whatsappGroups = {
+                'Tanzania': { link: 'https://chat.whatsapp.com/D2fegQD6rqdJPoM7ZIkZIG', name: 'ABOTRA Tanzania' },
+                'Malawi': { link: 'https://chat.whatsapp.com/GkfqtLPBcGm9Nd87txfwMP', name: 'ABOTRA Malawi' },
+                'Zambia': { link: 'https://chat.whatsapp.com/JuVaMTB3EogHIRNiV2zuUT', name: 'ABOTRA Zambia' },
+                'Kenya': { link: 'https://chat.whatsapp.com/KenyaGroupLink', name: 'ABOTRA Kenya' },
+                'Uganda': { link: 'https://chat.whatsapp.com/UgandaGroupLink', name: 'ABOTRA Uganda' },
+                'Nigeria': { link: 'https://chat.whatsapp.com/NigeriaGroupLink', name: 'ABOTRA Nigeria' },
+                'Ghana': { link: 'https://chat.whatsapp.com/GhanaGroupLink', name: 'ABOTRA Ghana' },
+                'South Africa': { link: 'https://chat.whatsapp.com/SouthAfricaGroupLink', name: 'ABOTRA South Africa' },
+                'Congo DRC': { link: 'https://chat.whatsapp.com/CongoGroupLink', name: 'ABOTRA Congo' },
+                'Burundi': { link: 'https://chat.whatsapp.com/BurundiGroupLink', name: 'ABOTRA Burundi' },
+                'Botswana': { link: 'https://chat.whatsapp.com/BotswanaGroupLink', name: 'ABOTRA Botswana' },
+                'Namibia': { link: 'https://chat.whatsapp.com/NamibiaGroupLink', name: 'ABOTRA Namibia' },
+                'Mozambique': { link: 'https://chat.whatsapp.com/MozambiqueGroupLink', name: 'ABOTRA Mozambique' },
+                'Rwanda': { link: 'https://chat.whatsapp.com/RwandaGroupLink', name: 'ABOTRA Rwanda' },
+                'default': { link: 'https://chat.whatsapp.com/YourDefaultGroupLink', name: 'ABOTRA Community' }
+            };
+            // Save defaults to Firebase
+            await set(ref(db, 'whatsappGroups'), whatsappGroups);
+        }
+        await updateWhatsAppButton();
+    } catch(error) {
+        console.error('Error loading WhatsApp groups:', error);
+        // Use fallback
+        whatsappGroups = {
+            'Tanzania': { link: 'https://chat.whatsapp.com/D2fegQD6rqdJPoM7ZIkZIG', name: 'ABOTRA Tanzania' },
+            'default': { link: 'https://chat.whatsapp.com/YourDefaultGroupLink', name: 'ABOTRA Community' }
+        };
+    }
+}
 
 function getWhatsAppLink(country) {
-    if (country && whatsappGroups[country]) return whatsappGroups[country];
-    return whatsappGroups['default'];
+    if (!country) return whatsappGroups['default']?.link || '#';
+    const group = whatsappGroups[country];
+    if (group && group.link) return group.link;
+    return whatsappGroups['default']?.link || '#';
+}
+
+function getWhatsAppName(country) {
+    if (!country) return whatsappGroups['default']?.name || 'WhatsApp Group';
+    const group = whatsappGroups[country];
+    if (group && group.name) return group.name;
+    return whatsappGroups['default']?.name || 'WhatsApp Group';
 }
 
 async function updateWhatsAppButton() {
@@ -1349,81 +1404,400 @@ async function updateWhatsAppButton() {
         if (userSnap.exists()) {
             const userCountry = userSnap.val().country || 'default';
             const whatsappLink = getWhatsAppLink(userCountry);
+            const whatsappName = getWhatsAppName(userCountry);
             const whatsappBtn = document.getElementById('whatsappGroupBtn');
             if (whatsappBtn) {
                 whatsappBtn.style.display = 'flex';
                 whatsappBtn.setAttribute('data-link', whatsappLink);
                 whatsappBtn.setAttribute('data-country', userCountry);
+                const span = whatsappBtn.querySelector('span');
+                if (span) {
+                    span.textContent = whatsappName.length > 15 ? whatsappName.substring(0, 12) + '...' : whatsappName;
+                }
+                whatsappBtn.title = `Join ${whatsappName}`;
             }
         }
-    } catch (error) {}
+    } catch(error) {
+        console.error('Error updating WhatsApp button:', error);
+    }
 }
 
 function openWhatsAppGroup() {
     const btn = document.getElementById('whatsappGroupBtn');
     if (!btn) return;
     const link = btn.getAttribute('data-link') || getWhatsAppLink('default');
-    window.open(link, '_blank');
+    if (link && link !== '#') {
+        window.open(link, '_blank');
+    } else {
+        showNotification('WhatsApp group link not configured for your country. Please contact admin.', 'info');
+    }
 }
 
 window.openWhatsAppGroup = openWhatsAppGroup;
+window.getWhatsAppLink = getWhatsAppLink;
+window.getWhatsAppName = getWhatsAppName;
 
-// ==================== POST ZOOM FUNCTIONS ====================
+// ============================================================
+// NOTIFICATION FUNCTIONS (PUSH NOTIFICATIONS)
+// ============================================================
 
-function openPostZoom(postData) {
-    const modal = document.getElementById('postZoomModal');
-    const body = document.getElementById('postZoomBody');
-    if (!modal || !body) return;
+async function sendPushNotification(userId, title, body, data = {}) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/notifications/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${await getAuthToken()}`
+            },
+            body: JSON.stringify({
+                userId: userId,
+                title: title,
+                body: body,
+                data: data
+            })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Send notification error:', error);
+        return { success: false };
+    }
+}
+
+async function getAuthToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// SAVE NOTIFICATION TO DATABASE
+// ============================================================
+
+async function saveNotification(userId, title, message, type = 'info', data = {}) {
+    try {
+        const notifRef = push(ref(db, `notifications/${userId}`));
+        await set(notifRef, {
+            id: notifRef.key,
+            title: title,
+            message: message,
+            type: type,
+            read: false,
+            data: data,
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+        return notifRef.key;
+    } catch (error) {
+        console.error('Save notification error:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// NOTIFY ALL USERS (for global events)
+// ============================================================
+
+async function notifyAllUsers(title, message, type = 'info', data = {}) {
+    try {
+        const usersSnap = await get(ref(db, 'users'));
+        if (!usersSnap.exists()) return;
+        
+        const users = usersSnap.val();
+        const promises = [];
+        
+        for (const userId of Object.keys(users)) {
+            promises.push(saveNotification(userId, title, message, type, data));
+        }
+        
+        await Promise.all(promises);
+        console.log(`[NOTIFY] Sent notification to ${Object.keys(users).length} users`);
+    } catch (error) {
+        console.error('Notify all users error:', error);
+    }
+}
+
+// ============================================================
+// NOTIFICATION LISTENER FOR CURRENT USER
+// ============================================================
+
+function setupNotificationListener() {
+    if (!currentUser) return;
     
-    const isOwner = currentUser && postData.userId === currentUser.uid;
-    const postAuthorDisplay = postData.author || 'Trader';
-    const displayTime = postData.timestamp ? formatTimeAgo(postData.timestamp) : 'Just now';
-    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
-    
-    let followBtnHtml = '';
-    if (currentUser && postData.userId && postData.userId !== currentUser.uid) {
-        followBtnHtml = `<button class="follow-btn" onclick="window.followUser('${postData.userId}', '${escapeHtml(postAuthorDisplay)}', this)">Follow</button>`;
+    if (notificationsUnsubscribe) {
+        try { off(notificationsUnsubscribe); } catch(e) {}
+        notificationsUnsubscribe = null;
     }
     
-    body.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-            <i class="fas fa-user-circle" style="font-size:40px; color:#FFD700;"></i>
-            <div>
-                <div class="post-author" style="font-size:16px;">${escapeHtml(postAuthorDisplay)}</div>
-                <div class="post-time">${displayTime}</div>
-            </div>
-            ${followBtnHtml}
-            ${isOwner ? `<button class="delete-post-btn" onclick="window.deletePost('${postData.id}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-trash-alt"></i> Delete</button>` : 
-                        `<button class="report-post-btn" onclick="window.showReportModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-flag"></i> Report</button>`}
-        </div>
-        <div class="post-content">${contentHtml}</div>
-        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" onclick="window.open(this.src, '_blank')" style="max-height:400px; width:100%; object-fit:contain; border-radius:12px; margin:12px 0; border:1px solid rgba(255,215,0,0.2);">` : ''}
-        <div class="post-actions" style="border-top:1px solid rgba(255,215,0,0.15); padding-top:12px; margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-            <button class="like-btn" onclick="window.toggleLike('${postData.id}', this)" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
-                <i class="fas fa-heart"></i> <span class="like-count">${postData.likes || 0}</span>
-            </button>
-            <button class="comment-btn" onclick="window.showCommentsModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
-                <i class="fas fa-comment"></i> <span class="comment-count">${postData.commentCount || 0}</span>
-            </button>
-            <button class="share-btn" onclick="window.sharePost('${postData.id}', '${postData.userId}', '${escapeHtml(postData.content || '').substring(0, 100).replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
-                <i class="fas fa-share"></i> Share
-            </button>
-        </div>
-    `;
+    const notifRef = ref(db, `notifications/${currentUser.uid}`);
+    notificationsUnsubscribe = onValue(notifRef, (snapshot) => {
+        let unread = 0;
+        let latestNotification = null;
+        
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const notif = child.val();
+                if (!notif.read) {
+                    unread++;
+                }
+                if (!latestNotification || (notif.timestamp || 0) > (latestNotification.timestamp || 0)) {
+                    latestNotification = notif;
+                }
+            });
+        }
+        
+        const badge = document.getElementById('topNotificationBadge');
+        if (badge) {
+            if (unread > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = unread > 99 ? '99+' : unread;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Show desktop/push notification for new unread notifications
+        if (unread > 0 && latestNotification && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            try {
+                new Notification('🔔 ABOTRA-PROAI', {
+                    body: `${latestNotification.title}: ${latestNotification.message}`,
+                    icon: '../assets/images/logo.png'
+                });
+            } catch(e) {}
+        }
+    });
+}
+
+// ============================================================
+// CHAT FUNCTIONS WITH NOTIFICATIONS
+// ============================================================
+
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    if (!input) return;
+    const msg = input.value.trim();
+    if (!msg) {
+        showNotification('Please type a message', 'error');
+        return;
+    }
+    if (!checkAuth()) return;
     
-    modal.classList.add('active');
+    let displayUsername = userData?.username || "Trader";
+    
+    try {
+        const chatRef = ref(db, 'global_chat');
+        const newMessageRef = push(chatRef);
+        const messageData = {
+            username: displayUsername,
+            message: msg,
+            timestamp: Date.now(),
+            userId: currentUser.uid,
+            userEmail: currentUser.email || ''
+        };
+        if (replyingToMessage) {
+            messageData.replyTo = replyingToMessage.id;
+            messageData.replyToUsername = replyingToMessage.username;
+            cancelReply();
+        }
+        
+        await set(newMessageRef, messageData);
+        input.value = '';
+        
+        // Send notification to all users about new chat message
+        const chatMessage = replyingToMessage 
+            ? `${displayUsername} replied to ${replyingToMessage.username}: ${msg.substring(0, 50)}`
+            : `${displayUsername}: ${msg.substring(0, 50)}`;
+        
+        // Notify all users about new chat message
+        await notifyAllUsers(
+            '💬 New Chat Message',
+            chatMessage,
+            'info',
+            { chatId: newMessageRef.key, userId: currentUser.uid, username: displayUsername }
+        );
+        
+        const container = document.getElementById('chatMessages');
+        if (container) {
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+        showNotification('Message sent!', 'success');
+    } catch(error) { 
+        console.error('Send message error:', error); 
+        showNotification('Failed to send message. Please try again.', 'error'); 
+    }
 }
 
-function closePostZoom() {
-    document.getElementById('postZoomModal').classList.remove('active');
+// ============================================================
+// SOCIAL POSTS WITH NOTIFICATIONS
+// ============================================================
+
+async function createPost() {
+    const contentInput = document.getElementById('postContent');
+    const imageInput = document.getElementById('postImage');
+    const previewImg = document.getElementById('imagePreview');
+    const content = contentInput ? contentInput.value.trim() : '';
+    const file = imageInput ? imageInput.files[0] : null;
+    
+    if (!content && !file) { 
+        showNotification('✏️ Write something or add an image', 'error'); 
+        return; 
+    }
+    if (!checkAuth()) return;
+    
+    let authorName = userData?.username || "Trader";
+    if (!authorName || authorName === "Trader") {
+        try {
+            const userSnap = await get(ref(db, `users/${currentUser.uid}`));
+            if (userSnap.exists()) {
+                authorName = userSnap.val().username || userSnap.val().fullName || "Trader";
+                if (userData) userData.username = authorName;
+            }
+        } catch(e) {}
+    }
+    
+    const timestamp = Date.now();
+    const tempId = 'temp_' + timestamp + '_' + Math.random().toString(36).substr(2, 6);
+    
+    const tempPostData = {
+        id: tempId,
+        author: authorName,
+        userId: currentUser.uid,
+        content: content || "",
+        image: null,
+        likes: 0,
+        commentCount: 0,
+        timestamp: timestamp,
+        isTemp: true
+    };
+    
+    const tempElement = addPostToUI(tempPostData);
+    
+    if (contentInput) contentInput.value = '';
+    if (imageInput) imageInput.value = '';
+    if (previewImg) previewImg.style.display = 'none';
+    
+    let imageUrl = null;
+    if (file) {
+        showNotification('📤 Uploading image...', 'info');
+        try {
+            imageUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        } catch(e) {
+            showNotification('Failed to load image', 'error');
+        }
+    }
+    
+    const finalPostData = {
+        author: authorName,
+        userId: currentUser.uid,
+        content: content || "",
+        image: imageUrl || null,
+        likes: 0,
+        commentCount: 0,
+        timestamp: timestamp,
+        createdAt: timestamp
+    };
+    
+    try {
+        const newRef = push(ref(db, 'social_posts'));
+        await set(newRef, finalPostData);
+        
+        if (tempElement && tempElement.parentNode) {
+            tempElement.remove();
+        }
+        
+        // Send notification to all users about new post
+        await notifyAllUsers(
+            '📝 New Community Post',
+            `${authorName} shared a new post: ${content.substring(0, 60)}...`,
+            'info',
+            { postId: newRef.key, author: authorName }
+        );
+        
+        showNotification('✅ Post shared successfully!', 'success');
+    } catch(e) {
+        console.error("Failed to save post:", e);
+        showNotification('❌ Failed to save post. Please try again.', 'error');
+        if (tempElement && tempElement.parentNode) {
+            tempElement.remove();
+        }
+    }
 }
 
-document.getElementById('postZoomClose')?.addEventListener('click', closePostZoom);
-document.getElementById('postZoomModal')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closePostZoom();
-});
+// ============================================================
+// COMMENT WITH NOTIFICATIONS
+// ============================================================
 
-// ==================== UTILITY FUNCTIONS ====================
+async function postComment(postId, postAuthor) {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) { showNotification('Please enter a comment', 'error'); return; }
+    if (!checkAuth()) return;
+    
+    const commentData = { 
+        postId, 
+        userId: currentUser?.uid, 
+        author: userData?.username || 'Trader', 
+        text, 
+        timestamp: Date.now() 
+    };
+    if (currentPostComments?.replyingTo) { 
+        commentData.parentCommentId = currentPostComments.replyingTo.id; 
+        commentData.replyTo = currentPostComments.replyingTo.author; 
+    }
+    
+    try {
+        const commentRef = push(ref(db, `comments/${postId}`));
+        await set(commentRef, commentData);
+        
+        const postRef = ref(db, `social_posts/${postId}`);
+        const postSnap = await get(postRef);
+        if (postSnap.exists()) {
+            const newCommentCount = (postSnap.val().commentCount || 0) + 1;
+            await update(postRef, { commentCount: newCommentCount });
+            
+            // Send notification to post author about new comment
+            const postData = postSnap.val();
+            if (postData.userId && postData.userId !== currentUser.uid) {
+                await saveNotification(
+                    postData.userId,
+                    '💬 New Comment',
+                    `${userData?.username || 'User'} commented on your post: "${text.substring(0, 50)}..."`,
+                    'info',
+                    { postId: postId, commenterId: currentUser.uid }
+                );
+            }
+        }
+        input.value = '';
+        currentPostComments.replyingTo = null;
+        await loadComments(postId, postAuthor);
+        showNotification('Comment posted!', 'success');
+    } catch(error) { 
+        console.error('Comment error:', error); 
+        showNotification('Failed to post comment', 'error'); 
+    }
+}
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
 
 function checkAuth() {
     if (!currentUser) {
@@ -1483,7 +1857,9 @@ function showNotification(message, type) {
     }
 }
 
-// ==================== COUNTRY & CURRENCY ====================
+// ============================================================
+// COUNTRY & CURRENCY
+// ============================================================
 
 async function loadUserCountry() {
     if (!currentUser) return 'Tanzania';
@@ -1569,39 +1945,130 @@ function setupExchangeCurrency() {
     });
 }
 
-// ==================== USER FUNCTIONS ====================
+// ============================================================
+// POST FUNCTIONS
+// ============================================================
 
-async function getUserProfileData(userId) {
-    if (!userId) return { username: 'Trader', profilePic: null };
-    try {
-        const userRef = ref(db, `users/${userId}`);
-        const snap = await get(userRef);
-        if (snap.exists()) {
-            const data = snap.val();
-            return {
-                username: data.username || data.fullName || data.name || 'Trader',
-                profilePic: data.profilePic || data.photoURL || null
+function addPostToUI(postData) {
+    const container = document.getElementById('postsContainer');
+    if (!container) return null;
+    
+    const postAuthorDisplay = postData.author || 'Trader';
+    const displayTime = postData.isTemp ? "Just now" : formatTimeAgo(postData.timestamp);
+    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
+    
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post-card post-card-own';
+    postDiv.setAttribute('data-temp-id', postData.id);
+    postDiv.setAttribute('data-post-id', postData.id);
+    postDiv.setAttribute('data-author', postAuthorDisplay);
+    
+    postDiv.innerHTML = `
+        <div class="post-header">
+            <i class="fas fa-user-circle" style="font-size:28px; color:#FFD700;"></i>
+            <div class="post-author-wrapper">
+                <span class="post-author">${escapeHtml(postAuthorDisplay)}</span>
+            </div>
+            <div class="post-time">${displayTime}</div>
+            <button class="delete-post-btn" disabled style="opacity:0.5; cursor:not-allowed;"><i class="fas fa-spinner fa-pulse"></i> Posting...</button>
+        </div>
+        <div class="post-content">${contentHtml}</div>
+        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" loading="lazy" onclick="event.stopPropagation(); window.open(this.src, '_blank')">` : ''}
+        <div class="post-actions">
+            <button class="like-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-heart"></i> <span class="like-count">0</span>
+            </button>
+            <button class="comment-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-comment"></i> <span class="comment-count">0</span>
+            </button>
+            <button class="share-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+        <div style="font-size:8px; color:#FFD700; text-align:center; margin-top:4px;">
+            <i class="fas fa-spinner fa-pulse"></i> Posting...
+        </div>
+    `;
+    
+    postDiv.addEventListener('click', function(e) {
+        if (e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.closest('button')) return;
+        const postId = this.getAttribute('data-post-id');
+        if (postId && !postId.startsWith('temp_')) {
+            const postData = { 
+                id: postId, 
+                author: this.getAttribute('data-author') || 'User',
+                content: this.querySelector('.post-content')?.textContent || '',
+                image: this.querySelector('.post-image')?.src || null,
+                likes: parseInt(this.querySelector('.like-count')?.textContent || '0'),
+                commentCount: parseInt(this.querySelector('.comment-count')?.textContent || '0'),
+                userId: ''
             };
+            const postRef = ref(db, `social_posts/${postId}`);
+            get(postRef).then((snap) => {
+                if (snap.exists()) {
+                    postData.userId = snap.val().userId || '';
+                    postData.author = snap.val().author || postData.author;
+                    openPostZoom(postData);
+                } else {
+                    openPostZoom(postData);
+                }
+            }).catch(() => {
+                openPostZoom(postData);
+            });
         }
-        return { username: 'Trader', profilePic: null };
-    } catch(e) { return { username: 'Trader', profilePic: null }; }
+    });
+    
+    container.insertBefore(postDiv, container.firstChild);
+    return postDiv;
 }
 
-async function getUserVerifiedStatus(userId) {
-    if (!userId) return false;
-    try {
-        const userRef = ref(db, `users/${userId}`);
-        const snap = await get(userRef);
-        return snap.exists() && snap.val().isVerified === true;
-    } catch(e) { return false; }
+function openPostZoom(postData) {
+    const modal = document.getElementById('postZoomModal');
+    const body = document.getElementById('postZoomBody');
+    if (!modal || !body) return;
+    
+    const isOwner = currentUser && postData.userId === currentUser.uid;
+    const postAuthorDisplay = postData.author || 'Trader';
+    const displayTime = postData.timestamp ? formatTimeAgo(postData.timestamp) : 'Just now';
+    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
+    
+    let followBtnHtml = '';
+    if (currentUser && postData.userId && postData.userId !== currentUser.uid) {
+        followBtnHtml = `<button class="follow-btn" onclick="window.followUser('${postData.userId}', '${escapeHtml(postAuthorDisplay)}', this)">Follow</button>`;
+    }
+    
+    body.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+            <i class="fas fa-user-circle" style="font-size:40px; color:#FFD700;"></i>
+            <div>
+                <div class="post-author" style="font-size:16px;">${escapeHtml(postAuthorDisplay)}</div>
+                <div class="post-time">${displayTime}</div>
+            </div>
+            ${followBtnHtml}
+            ${isOwner ? `<button class="delete-post-btn" onclick="window.deletePost('${postData.id}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-trash-alt"></i> Delete</button>` : 
+                        `<button class="report-post-btn" onclick="window.showReportModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-flag"></i> Report</button>`}
+        </div>
+        <div class="post-content">${contentHtml}</div>
+        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" onclick="window.open(this.src, '_blank')" style="max-height:400px; width:100%; object-fit:contain; border-radius:12px; margin:12px 0; border:1px solid rgba(255,215,0,0.2);">` : ''}
+        <div class="post-actions" style="border-top:1px solid rgba(255,215,0,0.15); padding-top:12px; margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="like-btn" onclick="window.toggleLike('${postData.id}', this)" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-heart"></i> <span class="like-count">${postData.likes || 0}</span>
+            </button>
+            <button class="comment-btn" onclick="window.showCommentsModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-comment"></i> <span class="comment-count">${postData.commentCount || 0}</span>
+            </button>
+            <button class="share-btn" onclick="window.sharePost('${postData.id}', '${postData.userId}', '${escapeHtml(postData.content || '').substring(0, 100).replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
 }
 
-function renderBlueTick(isVerified) {
-    if (!isVerified) return '';
-    return '<span class="verified-badge"><i class="fas fa-check"></i></span>';
-}
-
-// ==================== CHAT FUNCTIONS ====================
+// ============================================================
+// CHAT FUNCTIONS
+// ============================================================
 
 function setReplyingTo(messageId, username) {
     replyingToMessage = { id: messageId, username: username };
@@ -1618,48 +2085,6 @@ function cancelReply() {
     replyingToMessage = null;
     const replyIndicator = document.getElementById('replyIndicator');
     if (replyIndicator) replyIndicator.style.display = 'none';
-}
-
-async function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    if (!input) return;
-    const msg = input.value.trim();
-    if (!msg) {
-        showNotification('Please type a message', 'error');
-        return;
-    }
-    if (!checkAuth()) return;
-    
-    let displayUsername = userData?.username || "Trader";
-    
-    try {
-        const chatRef = ref(db, 'global_chat');
-        const newMessageRef = push(chatRef);
-        const messageData = {
-            username: displayUsername,
-            message: msg,
-            timestamp: Date.now(),
-            userId: currentUser.uid
-        };
-        if (replyingToMessage) {
-            messageData.replyTo = replyingToMessage.id;
-            messageData.replyToUsername = replyingToMessage.username;
-            cancelReply();
-        }
-        
-        await retryOperation(() => set(newMessageRef, messageData));
-        input.value = '';
-        const container = document.getElementById('chatMessages');
-        if (container) {
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 100);
-        }
-        showNotification('Message sent!', 'success');
-    } catch(error) { 
-        console.error('Send message error:', error); 
-        showNotification('Failed to send message. Please try again.', 'error'); 
-    }
 }
 
 async function deleteChatMessage(messageId) {
@@ -1692,7 +2117,9 @@ async function deleteChatMessage(messageId) {
 window.deleteChatMessage = deleteChatMessage;
 window.replyToChatMessage = setReplyingTo;
 
-// ==================== CHAT - NO RELOAD ====================
+// ============================================================
+// SETUP CHAT
+// ============================================================
 
 function setupChat() {
     if (chatUnsubscribe) {
@@ -1815,476 +2242,9 @@ async function createChatMessageElement(msg) {
     return div;
 }
 
-// ==================== SOCIAL POSTS FUNCTIONS ====================
-
-function addPostToUI(postData) {
-    const container = document.getElementById('postsContainer');
-    if (!container) return null;
-    
-    const postAuthorDisplay = postData.author || 'Trader';
-    const displayTime = postData.isTemp ? "Just now" : formatTimeAgo(postData.timestamp);
-    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
-    
-    const postDiv = document.createElement('div');
-    postDiv.className = 'post-card post-card-own';
-    postDiv.setAttribute('data-temp-id', postData.id);
-    postDiv.setAttribute('data-post-id', postData.id);
-    postDiv.setAttribute('data-author', postAuthorDisplay);
-    
-    postDiv.innerHTML = `
-        <div class="post-header">
-            <i class="fas fa-user-circle" style="font-size:28px; color:#FFD700;"></i>
-            <div class="post-author-wrapper">
-                <span class="post-author">${escapeHtml(postAuthorDisplay)}</span>
-            </div>
-            <div class="post-time">${displayTime}</div>
-            <button class="delete-post-btn" disabled style="opacity:0.5; cursor:not-allowed;"><i class="fas fa-spinner fa-pulse"></i> Posting...</button>
-        </div>
-        <div class="post-content">${contentHtml}</div>
-        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" loading="lazy" onclick="event.stopPropagation(); window.open(this.src, '_blank')">` : ''}
-        <div class="post-actions">
-            <button class="like-btn" disabled style="opacity:0.5;">
-                <i class="fas fa-heart"></i> <span class="like-count">0</span>
-            </button>
-            <button class="comment-btn" disabled style="opacity:0.5;">
-                <i class="fas fa-comment"></i> <span class="comment-count">0</span>
-            </button>
-            <button class="share-btn" disabled style="opacity:0.5;">
-                <i class="fas fa-share"></i> Share
-            </button>
-        </div>
-        <div style="font-size:8px; color:#FFD700; text-align:center; margin-top:4px;">
-            <i class="fas fa-spinner fa-pulse"></i> Posting...
-        </div>
-    `;
-    
-    postDiv.addEventListener('click', function(e) {
-        if (e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.closest('button')) return;
-        const postId = this.getAttribute('data-post-id');
-        if (postId && !postId.startsWith('temp_')) {
-            const postData = { 
-                id: postId, 
-                author: this.getAttribute('data-author') || 'User',
-                content: this.querySelector('.post-content')?.textContent || '',
-                image: this.querySelector('.post-image')?.src || null,
-                likes: parseInt(this.querySelector('.like-count')?.textContent || '0'),
-                commentCount: parseInt(this.querySelector('.comment-count')?.textContent || '0'),
-                userId: ''
-            };
-            const postRef = ref(db, `social_posts/${postId}`);
-            get(postRef).then((snap) => {
-                if (snap.exists()) {
-                    postData.userId = snap.val().userId || '';
-                    postData.author = snap.val().author || postData.author;
-                    openPostZoom(postData);
-                } else {
-                    openPostZoom(postData);
-                }
-            }).catch(() => {
-                openPostZoom(postData);
-            });
-        }
-    });
-    
-    container.insertBefore(postDiv, container.firstChild);
-    return postDiv;
-}
-
-async function createPost() {
-    const contentInput = document.getElementById('postContent');
-    const imageInput = document.getElementById('postImage');
-    const previewImg = document.getElementById('imagePreview');
-    const content = contentInput ? contentInput.value.trim() : '';
-    const file = imageInput ? imageInput.files[0] : null;
-    
-    if (!content && !file) { 
-        showNotification('✏️ Write something or add an image', 'error'); 
-        return; 
-    }
-    if (!checkAuth()) return;
-    
-    let authorName = userData?.username || "Trader";
-    if (!authorName || authorName === "Trader") {
-        try {
-            const userSnap = await get(ref(db, `users/${currentUser.uid}`));
-            if (userSnap.exists()) {
-                authorName = userSnap.val().username || userSnap.val().fullName || "Trader";
-                if (userData) userData.username = authorName;
-            }
-        } catch(e) {}
-    }
-    
-    const timestamp = Date.now();
-    const tempId = 'temp_' + timestamp + '_' + Math.random().toString(36).substr(2, 6);
-    
-    const tempPostData = {
-        id: tempId,
-        author: authorName,
-        userId: currentUser.uid,
-        content: content || "",
-        image: null,
-        likes: 0,
-        commentCount: 0,
-        timestamp: timestamp,
-        isTemp: true
-    };
-    
-    const tempElement = addPostToUI(tempPostData);
-    
-    if (contentInput) contentInput.value = '';
-    if (imageInput) imageInput.value = '';
-    if (previewImg) previewImg.style.display = 'none';
-    
-    let imageUrl = null;
-    if (file) {
-        showNotification('📤 Uploading image...', 'info');
-        try {
-            imageUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        } catch(e) {
-            showNotification('Failed to load image', 'error');
-        }
-    }
-    
-    const finalPostData = {
-        author: authorName,
-        userId: currentUser.uid,
-        content: content || "",
-        image: imageUrl || null,
-        likes: 0,
-        commentCount: 0,
-        timestamp: timestamp,
-        createdAt: timestamp
-    };
-    
-    try {
-        const newRef = push(ref(db, 'social_posts'));
-        await retryOperation(() => set(newRef, finalPostData));
-        if (tempElement && tempElement.parentNode) {
-            tempElement.remove();
-        }
-        showNotification('✅ Post shared successfully!', 'success');
-    } catch(e) {
-        console.error("Failed to save post:", e);
-        showNotification('❌ Failed to save post. Please try again.', 'error');
-        if (tempElement && tempElement.parentNode) {
-            tempElement.remove();
-        }
-    }
-}
-
-// ==================== LIKE ====================
-
-async function toggleLike(postId, buttonElement) {
-    if (!checkAuth()) return;
-    try {
-        const likeRef = ref(db, `postLikes/${postId}/${currentUser.uid}`);
-        const likeSnap = await get(likeRef);
-        const postRef = ref(db, `social_posts/${postId}`);
-        
-        if (likeSnap.exists()) {
-            await retryOperation(() => remove(likeRef));
-            const postSnap = await get(postRef);
-            if (postSnap.exists()) {
-                const currentLikes = postSnap.val().likes || 0;
-                await retryOperation(() => update(postRef, { likes: Math.max(0, currentLikes - 1) }));
-                if (buttonElement) { 
-                    const likeSpan = buttonElement.querySelector('.like-count'); 
-                    if (likeSpan) {
-                        likeSpan.textContent = currentLikes - 1;
-                    }
-                }
-            }
-        } else {
-            await retryOperation(() => set(likeRef, { userId: currentUser.uid, timestamp: Date.now() }));
-            const postSnap = await get(postRef);
-            if (postSnap.exists()) {
-                const currentLikes = postSnap.val().likes || 0;
-                await retryOperation(() => update(postRef, { likes: currentLikes + 1 }));
-                if (buttonElement) { 
-                    const likeSpan = buttonElement.querySelector('.like-count'); 
-                    if (likeSpan) {
-                        likeSpan.textContent = currentLikes + 1;
-                    }
-                }
-            }
-        }
-    } catch(error) { 
-        console.error('Like error:', error); 
-        showNotification('Failed to like post', 'error');
-    }
-}
-
-async function deletePost(postId) {
-    if (!checkAuth()) return;
-    
-    const modal = document.createElement('div');
-    modal.className = 'delete-modal';
-    modal.innerHTML = `<div class="delete-modal-card"><h3><i class="fas fa-exclamation-triangle"></i> Delete Post</h3><div class="modal-message" style="color:#ccc; margin-bottom:10px;">Are you sure you want to delete this post permanently?</div><div class="modal-warning"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone.</div><div class="modal-buttons"><button class="modal-btn cancel" id="cancelBtn">Cancel</button><button class="modal-btn confirm" id="confirmBtn">Confirm Delete</button></div></div>`;
-    document.body.appendChild(modal);
-    
-    document.getElementById('confirmBtn').addEventListener('click', async () => {
-        modal.remove();
-        try {
-            const postRef = ref(db, `social_posts/${postId}`);
-            const snapshot = await get(postRef);
-            if (snapshot.exists() && snapshot.val().userId === currentUser.uid) { 
-                await retryOperation(() => remove(postRef));
-                const likesRef = ref(db, `postLikes/${postId}`);
-                await retryOperation(() => remove(likesRef));
-                const commentsRef = ref(db, `comments/${postId}`);
-                await retryOperation(() => remove(commentsRef));
-                showNotification('🗑️ Post deleted permanently!', 'success');
-            } else { 
-                showNotification('You can only delete your own posts!', 'error'); 
-            }
-        } catch(error) { 
-            console.error('Delete post error:', error); 
-            showNotification('Failed to delete post', 'error'); 
-        }
-    });
-    document.getElementById('cancelBtn').addEventListener('click', () => modal.remove());
-}
-
-async function showReportModal(postId, postAuthor) {
-    const modal = document.createElement('div');
-    modal.className = 'report-modal';
-    modal.innerHTML = `<div class="report-modal-card"><div class="report-modal-header"><h3><i class="fas fa-flag"></i> Report Post</h3><button class="close-report-modal"><i class="fas fa-times"></i></button></div><div class="report-modal-body"><label class="report-reason-label">Reporting post by: <strong style="color:#FFD700;">${escapeHtml(postAuthor)}</strong></label><textarea class="report-reason-textarea" id="reportReason" placeholder="Please describe why you are reporting this post..."></textarea></div><div class="report-modal-footer"><button class="report-modal-btn cancel" id="cancelReportBtn">Cancel</button><button class="report-modal-btn submit" id="submitReportBtn">Submit Report</button></div></div>`;
-    document.body.appendChild(modal);
-    
-    const closeModal = () => modal.remove();
-    modal.querySelector('.close-report-modal').addEventListener('click', closeModal);
-    document.getElementById('cancelReportBtn').addEventListener('click', closeModal);
-    document.getElementById('submitReportBtn').addEventListener('click', async () => {
-        const reason = document.getElementById('reportReason').value.trim();
-        if (!reason) { showNotification('Please provide a reason for reporting', 'error'); return; }
-        try {
-            const reportRef = push(ref(db, 'reports'));
-            await retryOperation(() => set(reportRef, { 
-                postId, 
-                reportedBy: currentUser?.uid, 
-                reportedByEmail: currentUser?.email, 
-                reason, 
-                status: 'pending', 
-                reportedAt: Date.now(),
-                postAuthor: postAuthor
-            }));
-            showNotification('Post reported! Admin will review.', 'info');
-            closeModal();
-        } catch(error) { 
-            console.error('Report error:', error); 
-            showNotification('Failed to report post', 'error'); 
-        }
-    });
-}
-
-async function followUser(targetUserId, targetUserName, buttonElement) {
-    if (!checkAuth() || targetUserId === currentUser.uid) { 
-        showNotification("You cannot follow yourself", "error"); 
-        return false; 
-    }
-    try {
-        const followRef = ref(db, `follows/${currentUser.uid}/${targetUserId}`);
-        const snapshot = await get(followRef);
-        if (snapshot.exists()) {
-            await retryOperation(() => remove(followRef));
-            showNotification(`Unfollowed ${targetUserName}`, "info");
-            if (buttonElement) { buttonElement.textContent = "Follow"; buttonElement.classList.remove("following"); }
-            return false;
-        } else {
-            await retryOperation(() => set(followRef, { targetId: targetUserId, targetName: targetUserName, timestamp: Date.now() }));
-            showNotification(`Now following ${targetUserName}`, "success");
-            if (buttonElement) { buttonElement.textContent = "Following"; buttonElement.classList.add("following"); }
-            return true;
-        }
-    } catch(e) {
-        showNotification('Failed to follow user', 'error');
-        return false;
-    }
-}
-
-let currentPostComments = null;
-
-window.showCommentsModal = async function(postId, postAuthor) {
-    const existing = document.querySelector('.comments-modal');
-    if (existing) existing.remove();
-    currentPostComments = { postId, postAuthor, replyingTo: null };
-    
-    const modal = document.createElement('div');
-    modal.className = 'comments-modal';
-    modal.innerHTML = `
-        <div class="comments-modal-card">
-            <div class="comments-header">
-                <h3><i class="fas fa-comments"></i> Comments on ${escapeHtml(postAuthor)}'s post</h3>
-                <button class="close-comments"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="comments-list" id="commentsList"></div>
-            <div class="comment-input-area">
-                <input type="text" id="commentInput" placeholder="Write a comment...">
-                <button id="postCommentBtn"><i class="fas fa-paper-plane"></i> Post</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    modal.querySelector('.close-comments').addEventListener('click', () => modal.remove());
-    
-    await loadComments(postId, postAuthor);
-    
-    document.getElementById('postCommentBtn').addEventListener('click', async () => {
-        const input = document.getElementById('commentInput');
-        const text = input.value.trim();
-        if (!text) { showNotification('Please enter a comment', 'error'); return; }
-        if (!checkAuth()) return;
-        
-        const commentData = { 
-            postId, 
-            userId: currentUser?.uid, 
-            author: userData?.username || 'Trader', 
-            text, 
-            timestamp: Date.now() 
-        };
-        if (currentPostComments?.replyingTo) { 
-            commentData.parentCommentId = currentPostComments.replyingTo.id; 
-            commentData.replyTo = currentPostComments.replyingTo.author; 
-        }
-        
-        try {
-            const commentRef = push(ref(db, `comments/${postId}`));
-            await retryOperation(() => set(commentRef, commentData));
-            const postRef = ref(db, `social_posts/${postId}`);
-            const postSnap = await get(postRef);
-            if (postSnap.exists()) {
-                await retryOperation(() => update(postRef, { commentCount: (postSnap.val().commentCount || 0) + 1 }));
-                const postElement = document.querySelector(`[data-post-id="${postId}"]`);
-                if (postElement) {
-                    const commentSpan = postElement.querySelector('.comment-count');
-                    if (commentSpan) {
-                        commentSpan.textContent = (postSnap.val().commentCount || 0) + 1;
-                    }
-                }
-            }
-            input.value = '';
-            currentPostComments.replyingTo = null;
-            await loadComments(postId, postAuthor);
-            showNotification('Comment posted!', 'success');
-        } catch(error) { 
-            console.error('Comment error:', error); 
-            showNotification('Failed to post comment', 'error'); 
-        }
-    });
-    
-    const commentInput = document.getElementById('commentInput');
-    if (commentInput) {
-        commentInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('postCommentBtn').click();
-            }
-        });
-    }
-};
-
-async function loadComments(postId, postAuthor) {
-    const commentsList = document.getElementById('commentsList');
-    if (!commentsList) return;
-    
-    const commentsRef = ref(db, `comments/${postId}`);
-    const snapshot = await get(commentsRef);
-    
-    if (!snapshot.exists()) {
-        commentsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No comments yet. Be the first to comment!</div>';
-        return;
-    }
-    
-    const comments = [];
-    snapshot.forEach(child => {
-        comments.push({ id: child.key, ...child.val() });
-    });
-    
-    comments.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-    commentsList.innerHTML = '';
-    
-    for (const comment of comments) {
-        const userProfile = await getUserProfileData(comment.userId);
-        const authorName = userProfile.username || comment.author || 'User';
-        const isVerified = await getUserVerifiedStatus(comment.userId);
-        const blueTickHtml = renderBlueTick(isVerified);
-        const timeStr = new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        const commentDiv = document.createElement('div');
-        commentDiv.className = 'comment-item';
-        commentDiv.innerHTML = `
-            <div class="comment-author">
-                <i class="fas fa-user-circle"></i> ${escapeHtml(authorName)}${blueTickHtml}
-                <span class="comment-time">${timeStr}</span>
-                <button class="comment-reply-btn" data-comment-id="${comment.id}" data-author="${authorName}"><i class="fas fa-reply"></i> Reply</button>
-                ${currentUser && comment.userId === currentUser.uid ? `<button class="delete-comment-btn" data-comment-id="${comment.id}" style="background:transparent; border:none; color:#F6465D; cursor:pointer; margin-left:10px;"><i class="fas fa-trash-alt"></i> Delete</button>` : ''}
-            </div>
-            <div class="comment-text">${escapeHtml(comment.text)}</div>
-        `;
-        
-        const replyBtn = commentDiv.querySelector('.comment-reply-btn');
-        replyBtn.addEventListener('click', () => {
-            currentPostComments.replyingTo = { id: comment.id, author: authorName };
-            const input = document.getElementById('commentInput');
-            if (input) input.placeholder = `Replying to ${authorName}...`;
-            showNotification(`Replying to ${authorName}`, 'info');
-        });
-        
-        const deleteBtn = commentDiv.querySelector('.delete-comment-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                try {
-                    await remove(ref(db, `comments/${postId}/${comment.id}`));
-                    const postRef = ref(db, `social_posts/${postId}`);
-                    const postSnap = await get(postRef);
-                    if (postSnap.exists()) {
-                        await update(postRef, { commentCount: Math.max(0, (postSnap.val().commentCount || 0) - 1) });
-                    }
-                    await loadComments(postId, postAuthor);
-                    showNotification('Comment deleted!', 'success');
-                } catch(error) {
-                    console.error('Delete comment error:', error);
-                    showNotification('Failed to delete comment', 'error');
-                }
-            });
-        }
-        commentsList.appendChild(commentDiv);
-    }
-    
-    commentsList.scrollTop = commentsList.scrollHeight;
-}
-
-window.sharePost = async function(postId, postAuthorId, postContent) {
-    if (!checkAuth()) return;
-    try {
-        const shareRef = push(ref(db, `postShares/${postId}`));
-        await retryOperation(() => set(shareRef, { 
-            postId, 
-            sharedBy: currentUser.uid, 
-            sharedByName: userData?.username || currentUser.email?.split('@')[0], 
-            timestamp: Date.now() 
-        }));
-        showNotification('Post shared!', 'success');
-    } catch(error) { 
-        console.error('Share error:', error); 
-        showNotification('Failed to share post', 'error'); 
-    }
-};
-
-window.toggleLike = toggleLike;
-window.deletePost = deletePost;
-window.showReportModal = showReportModal;
-window.followUser = followUser;
-window.openPostZoom = openPostZoom;
-
-// ==================== SOCIAL POSTS ====================
+// ============================================================
+// SETUP SOCIAL POSTS
+// ============================================================
 
 function setupSocialPosts() {
     if (postsUnsubscribe) {
@@ -2480,7 +2440,43 @@ async function createPostElement(post) {
     return postDiv;
 }
 
-// ==================== TRANSACTIONS ====================
+// ============================================================
+// USER PROFILE HELPERS
+// ============================================================
+
+async function getUserProfileData(userId) {
+    if (!userId) return { username: 'Trader', profilePic: null };
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snap = await get(userRef);
+        if (snap.exists()) {
+            const data = snap.val();
+            return {
+                username: data.username || data.fullName || data.name || 'Trader',
+                profilePic: data.profilePic || data.photoURL || null
+            };
+        }
+        return { username: 'Trader', profilePic: null };
+    } catch(e) { return { username: 'Trader', profilePic: null }; }
+}
+
+async function getUserVerifiedStatus(userId) {
+    if (!userId) return false;
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snap = await get(userRef);
+        return snap.exists() && snap.val().isVerified === true;
+    } catch(e) { return false; }
+}
+
+function renderBlueTick(isVerified) {
+    if (!isVerified) return '';
+    return '<span class="verified-badge"><i class="fas fa-check"></i></span>';
+}
+
+// ============================================================
+// LIVE TRANSACTIONS
+// ============================================================
 
 function setupLiveTransactions() {
     if (transactionsUnsubscribe) {
@@ -2536,30 +2532,12 @@ function setupLiveTransactions() {
     });
 }
 
-// ==================== MARKET WITH LOGOS ====================
+// ============================================================
+// MARKET & CAROUSEL
+// ============================================================
 
-let lastPrices = {};
 let carouselIndex = 0;
 let totalSlides = 6;
-
-function getCoinIcon(symbol) {
-    const fallbacks = {
-        'BTC': '₿', 'ETH': 'Ξ', 'BNB': 'BNB', 'SOL': '◎', 'XRP': '✕',
-        'ADA': '₳', 'DOGE': 'Ð', 'TRX': 'TRX', 'DOT': '●', 'MATIC': 'MATIC',
-        'SHIB': 'SHIB', 'LINK': 'LINK', 'UNI': 'UNI', 'AVAX': 'AVAX', 'ATOM': 'ATOM',
-        'LTC': 'Ł', 'ETC': 'ETC', 'XLM': 'XLM', 'ALGO': 'ALGO', 'VET': 'VET',
-        'FIL': 'FIL', 'THETA': 'θ', 'FTM': 'FTM', 'NEAR': 'NEAR', 'ARB': 'ARB',
-        'APT': 'APT', 'OP': 'OP', 'ICP': 'ICP', 'AAVE': 'AAVE', 'MKR': 'MKR',
-        'CRV': 'CRV', 'SUSHI': '🍣', 'COMP': 'COMP', 'SNX': 'SNX', 'ZEC': 'ZEC',
-        'DASH': 'DASH', 'XTZ': 'XTZ', 'EOS': 'EOS', 'NEO': 'NEO', 'IOTA': 'IOTA',
-        'CHZ': 'CHZ', 'BAT': 'BAT', 'ENJ': 'ENJ', 'MANA': 'MANA', 'SAND': 'SAND',
-        'AXS': 'AXS', 'GALA': 'GALA', 'KAVA': 'KAVA', 'QTUM': 'QTUM', 'ZIL': 'ZIL',
-        'ONT': 'ONT', 'CRO': 'CRO', 'KSM': 'KSM', 'WAVES': '🌊', 'STX': 'STX',
-        'FLOW': 'FLOW', 'MINA': 'MINA', 'ROSE': 'ROSE', 'EGLD': 'EGLD', 'RNDR': 'RNDR',
-        'INJ': 'INJ'
-    };
-    return fallbacks[symbol] || symbol.substring(0, 2);
-}
 
 function updateCarousel() {
     const track = document.getElementById('carouselTrack');
@@ -2607,7 +2585,7 @@ async function fetchLiveMarket() {
             const price = coin.current_price || 0;
             const change = coin.price_change_percentage_24h || 0;
             const logoUrl = coin.image || '';
-            const fallback = getCoinIcon(symbol);
+            const fallback = symbol.substring(0, 2);
             
             marketData.push({
                 symbol: symbol,
@@ -2653,21 +2631,9 @@ async function fetchLiveMarket() {
     }
 }
 
-// ==================== NOTIFICATIONS ====================
-
-function loadUnreadNotificationsCount() {
-    if (!currentUser) return;
-    const notifRef = ref(db, `notifications/${currentUser.uid}`);
-    onValue(notifRef, (snapshot) => {
-        let unread = 0;
-        if (snapshot.exists()) { snapshot.forEach(child => { if (!child.val().read) unread++; }); }
-        const badge = document.getElementById('topNotificationBadge');
-        if (badge) {
-            if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread > 99 ? '99+' : unread; }
-            else { badge.style.display = 'none'; }
-        }
-    });
-}
+// ============================================================
+// NOTIFICATIONS PERMISSION
+// ============================================================
 
 async function requestNotificationPermission() {
     if (typeof Notification === 'undefined') {
@@ -2689,7 +2655,9 @@ async function requestNotificationPermission() {
     }
 }
 
-// ==================== REALTIME USER DATA ====================
+// ============================================================
+// REALTIME USER DATA
+// ============================================================
 
 function setupRealtimeUserData(uid) {
     const userRTDBRef = ref(db, `users/${uid}`);
@@ -2770,7 +2738,9 @@ async function loadUserInitialData(user) {
     return { balance, totalDeposited, username, profilePic };
 }
 
-// ==================== THEME ====================
+// ============================================================
+// THEME
+// ============================================================
 
 function initTheme() {
     const saved = localStorage.getItem('abotra_theme');
@@ -2789,7 +2759,9 @@ function initTheme() {
     }
 }
 
-// ==================== EVENT LISTENERS ====================
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
 
 function setupEventListeners() {
     const themeToggle = document.getElementById('themeToggle');
@@ -2871,7 +2843,9 @@ function setupEventListeners() {
     if (notifPermissionBtn) notifPermissionBtn.addEventListener('click', requestNotificationPermission);
 }
 
-// ==================== AUTH STATE ====================
+// ============================================================
+// AUTH STATE
+// ============================================================
 
 onAuthStateChanged(auth, async (user) => {
     if(!user) { window.location.href = 'login.html'; return; }
@@ -2888,14 +2862,16 @@ onAuthStateChanged(auth, async (user) => {
     loadUserRealTimeStats(user.uid);
     fetchLiveMarket();
     setupCarousel();
-    loadUnreadNotificationsCount();
+    setupNotificationListener();
     setupEventListeners();
     
     setupChat();
     setupSocialPosts();
     setupLiveTransactions();
     
-    await updateWhatsAppButton();
+    // Load WhatsApp groups from Firebase
+    await loadWhatsAppGroups();
+    
     setInterval(() => fetchLiveMarket(), 30000);
     
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {

@@ -262,12 +262,12 @@ body.light-theme .notification-panel{background:white;border-left:1px solid rgba
             <div class="input-group">
                 <label><i class="fas fa-tag"></i> Merchant Type</label>
                 <select id="merchantType">
-                    <option value="buy">🟢 Buy (P2P - Users sell to merchant)</option>
-                    <option value="sell">🔴 Sell (P2P - Users buy from merchant)</option>
-                    <option value="both">🔄 Both Buy & Sell</option>
+                    <option value="buy">🟢 BUY (Sell USDT to users)</option>
+                    <option value="sell">🔴 SELL (Buy USDT from users)</option>
+                    <option value="both">🔄 BOTH (Buy & Sell)</option>
                 </select>
                 <div style="font-size:9px;color:#888;margin-top:4px;">
-                    <span id="typeExplanation">🟢 Buy: Merchant buys USDT from users</span>
+                    <span id="typeExplanation">🟢 BUY: Merchant SELLS USDT to users (appears in BUY tab)</span>
                 </div>
             </div>
             <div class="input-group">
@@ -317,8 +317,8 @@ body.light-theme .notification-panel{background:white;border-left:1px solid rgba
         
         <div class="type-filter">
             <button class="type-filter-btn active" data-filter="all">📊 All</button>
-            <button class="type-filter-btn" data-filter="buy">🟢 Buy</button>
-            <button class="type-filter-btn" data-filter="sell">🔴 Sell</button>
+            <button class="type-filter-btn" data-filter="buy">🟢 BUY (Sellers)</button>
+            <button class="type-filter-btn" data-filter="sell">🔴 SELL (Buyers)</button>
             <button class="type-filter-btn" data-filter="both">🔄 Both</button>
         </div>
         
@@ -573,8 +573,36 @@ document.getElementById('clearAllNotifBtn').addEventListener('click', async () =
 });
 
 // ============================================================
-// MERCHANT FUNCTIONS
+// MERCHANT FUNCTIONS - SAHIHI
 // ============================================================
+
+// ============================================================
+// MERCHANT TYPE EXPLANATION - SAHIHI
+// ============================================================
+function getTypeExplanation(type) {
+    if (type === 'buy') return '🟢 BUY: Merchant SELLS USDT to users (appears in BUY tab)';
+    if (type === 'sell') return '🔴 SELL: Merchant BUYS USDT from users (appears in SELL tab)';
+    return '🔄 BOTH: Merchant does both buy and sell';
+}
+
+// ============================================================
+// GET MERCHANT TYPE LABEL - SAHIHI
+// ============================================================
+function getMerchantTypeLabel(type) {
+    if (type === 'buy') return '🟢 SELLER (Sells to users)';
+    if (type === 'sell') return '🔴 BUYER (Buys from users)';
+    return '🔄 BOTH';
+}
+
+// ============================================================
+// GET MERCHANT TYPE CLASS
+// ============================================================
+function getMerchantTypeClass(type) {
+    if (type === 'buy') return 'buy';
+    if (type === 'sell') return 'sell';
+    return 'both';
+}
+
 function combinePaymentDetails(bankName, accountNumber, accountName) {
     let details = '';
     if (bankName) details += `Bank: ${bankName}\n`;
@@ -593,24 +621,6 @@ function parsePaymentDetails(paymentDetails) {
         else if (line.toLowerCase().startsWith('name:')) result.accountName = line.substring(5).trim();
     }
     return result;
-}
-
-function getMerchantTypeLabel(type) {
-    if (type === 'buy') return '🟢 Buy';
-    if (type === 'sell') return '🔴 Sell';
-    return '🔄 Both';
-}
-
-function getMerchantTypeClass(type) {
-    if (type === 'buy') return 'buy';
-    if (type === 'sell') return 'sell';
-    return 'both';
-}
-
-function getTypeExplanation(type) {
-    if (type === 'buy') return '🟢 Buy: Merchant buys USDT from users';
-    if (type === 'sell') return '🔴 Sell: Merchant sells USDT to users';
-    return '🔄 Both: Merchant does both buy and sell';
 }
 
 async function findUserByEmail(email) {
@@ -643,6 +653,9 @@ function loadMerchants() {
     });
 }
 
+// ============================================================
+// RENDER MERCHANTS - SAHIHI
+// ============================================================
 function renderMerchants() {
     const container = document.getElementById('merchantsList');
     
@@ -667,6 +680,7 @@ function renderMerchants() {
         const paymentInfo = parsePaymentDetails(m.paymentDetails);
         const typeLabel = getMerchantTypeLabel(m.type || 'buy');
         const typeClass = getMerchantTypeClass(m.type || 'buy');
+        const typeExplanation = getTypeExplanation(m.type || 'buy');
         
         const card = document.createElement('div');
         card.className = 'merchant-card';
@@ -675,6 +689,7 @@ function renderMerchants() {
                 <i class="fas fa-store"></i> ${escapeHtml(m.name || m.email?.split('@')[0] || 'Merchant')}
                 <span class="type-badge ${typeClass}">${typeLabel}</span>
             </h4>
+            <p><i class="fas fa-info-circle"></i> <span style="color:#FFD700;font-size:10px;">${typeExplanation}</span></p>
             <p><i class="fas fa-envelope"></i> ${escapeHtml(m.email)}</p>
             <p><i class="fas fa-phone"></i> ${escapeHtml(m.phone || 'N/A')}</p>
             <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(m.country || 'N/A')}</p>
@@ -865,10 +880,18 @@ document.getElementById('saveMerchantBtn').addEventListener('click', async () =>
 });
 
 // ============================================================
-// TYPE SELECT EXPLANATION
+// TYPE SELECT EXPLANATION - SAHIHI
 // ============================================================
 document.getElementById('merchantType').addEventListener('change', function() {
     document.getElementById('typeExplanation').textContent = getTypeExplanation(this.value);
+});
+
+// Initialize type explanation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('merchantType');
+    if (typeSelect) {
+        document.getElementById('typeExplanation').textContent = getTypeExplanation(typeSelect.value);
+    }
 });
 
 // ============================================================

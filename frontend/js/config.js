@@ -1,6 +1,11 @@
-// frontend/js/config.js
+// ============================================================
+// CONFIG.JS - Backend Configuration
+// ============================================================
 const CONFIG = {
-    API_BASE_URL: 'https://abotra-backend.up.railway.app',
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0',
     FIREBASE: {
         apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
         authDomain: "abotra-proa1.firebaseapp.com",
@@ -12,4 +17,10 @@ const CONFIG = {
     }
 };
 
-export { CONFIG };
+// Make it available globally
+window.CONFIG = CONFIG;
+
+// Export for module usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}

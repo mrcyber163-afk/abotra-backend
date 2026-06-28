@@ -6,6 +6,21 @@
 <title>My P2P Orders | ABOTRA-PROAI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -50,6 +65,8 @@ body.light-theme .order-status-badge.status-completed-badge {
     background: rgba(14,203,129,0.15);
     color: #0A9E65;
 }
+body.light-theme .order-type-badge.buy-type { background: rgba(14,203,129,0.15); color: #0A9E65; }
+body.light-theme .order-type-badge.sell-type { background: rgba(246,70,93,0.15); color: #D43F52; }
 body.light-theme .theme-toggle {
     background: rgba(0,0,0,0.08);
     border-color: rgba(128,0,0,0.3);
@@ -203,6 +220,20 @@ body.light-theme .empty-orders i { color: #800000; }
 .status-disputed-badge { background: rgba(246,70,93,0.2); color: #F6465D; }
 .status-cancelled-badge { background: rgba(128,128,128,0.2); color: #aaa; }
 .status-expired-badge { background: rgba(246,70,93,0.15); color: #F6465D; }
+
+/* Order Type Badge - NEW */
+.order-type-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-right: 6px;
+}
+.order-type-badge.buy-type { background: rgba(14,203,129,0.25); color: #0ECB81; }
+.order-type-badge.sell-type { background: rgba(246,70,93,0.25); color: #F6465D; }
+
 .chat-btn {
     background: linear-gradient(135deg, #800000, #FFD700);
     border: none;
@@ -506,6 +537,9 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     }
 });
 
+// ============================================================
+// RENDER ORDERS - WITH BUY/SELL INDICATOR
+// ============================================================
 function renderOrders(orders) {
     const container = document.getElementById('appContainer');
     if (!container) return;
@@ -519,39 +553,83 @@ function renderOrders(orders) {
     
     for (let i = 0; i < orders.length; i++) {
         const order = orders[i];
-        const statusText = { 
+        
+        // ============================================================
+        // DETERMINE ORDER TYPE (BUY or SELL) - SAHIHI
+        // ============================================================
+        // If current user is buyer → BUY order
+        // If current user is merchant → SELL order
+        // ============================================================
+        const isBuyer = order.buyerId === currentUser?.uid;
+        const isMerchant = order.merchantUserId === currentUser?.uid;
+        
+        let orderType = '';
+        let orderTypeClass = '';
+        let orderTypeIcon = '';
+        let partnerName = '';
+        
+        if (isBuyer) {
+            orderType = 'BUY';
+            orderTypeClass = 'buy-type';
+            orderTypeIcon = 'fa-arrow-down';
+            partnerName = order.merchantName || 'Merchant';
+        } else if (isMerchant) {
+            orderType = 'SELL';
+            orderTypeClass = 'sell-type';
+            orderTypeIcon = 'fa-arrow-up';
+            partnerName = order.buyerName || 'Buyer';
+        } else {
+            orderType = 'UNKNOWN';
+            orderTypeClass = 'buy-type';
+            orderTypeIcon = 'fa-question';
+            partnerName = 'Unknown';
+        }
+        
+        // Status text
+        const statusMap = { 
             pending: 'Awaiting Payment', 
             paid: 'Payment Sent', 
+            confirmed: 'Confirmed', 
             completed: 'Completed', 
             disputed: 'Disputed', 
             cancelled: 'Cancelled', 
             expired: 'Expired' 
-        }[order.status] || order.status;
+        };
+        const statusText = statusMap[order.status] || order.status;
+        const statusClass = `status-${order.status}-badge`;
         
-        let statusClass = `status-${order.status}-badge`;
-        if (order.status === 'expired') statusClass = 'status-expired-badge';
-        if (order.status === 'cancelled') statusClass = 'status-cancelled-badge';
-        
-        const isBuyerOrder = order.buyerId === currentUser?.uid;
-        let partnerName = isBuyerOrder ? (order.merchantName || 'Merchant') : (order.buyerName || 'Buyer');
-        
+        // Format details
         const rate = order.rate || 2800;
         const currency = order.currency || 'TZS';
-        const date = new Date(order.createdAtMillis || order.createdAt);
-        const dateStr = date.toLocaleDateString();
+        const amount = order.amount || 0;
+        const totalLocal = amount * rate;
+        const dateStr = new Date(order.createdAtMillis || order.createdAt).toLocaleDateString();
         const timeAgo = formatTimeAgo(order.createdAtMillis || order.createdAt);
+        
+        // Payment method
+        const paymentMethod = order.paymentMethod || order.merchantPaymentDetails || 'Bank Transfer';
+        const paymentDisplay = typeof paymentMethod === 'string' ? paymentMethod.substring(0, 30) : 'Bank Transfer';
         
         html += `
             <div class="order-card" style="animation-delay: ${i * 0.02}s">
                 <div class="order-info">
-                    <h4>${formatNumber(order.amount)} USDT @ ${formatNumber(rate)} ${currency}</h4>
-                    <p><i class="fas fa-user"></i> ${escapeHtml(partnerName)} • ${dateStr} (${timeAgo})</p>
+                    <h4>
+                        <span class="order-type-badge ${orderTypeClass}"><i class="fas ${orderTypeIcon}"></i> ${orderType}</span>
+                        ${formatNumber(amount)} USDT @ ${formatNumber(rate)} ${currency}
+                    </h4>
+                    <p style="display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:2px;">
+                        <span><i class="fas fa-user"></i> ${escapeHtml(partnerName)}</span>
+                        <span><i class="fas fa-calendar"></i> ${dateStr} (${timeAgo})</span>
+                        <span><i class="fas fa-money-bill-wave"></i> ${escapeHtml(paymentDisplay)}</span>
+                        <span><i class="fas fa-coins"></i> ${formatNumber(totalLocal)} ${currency}</span>
+                    </p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <div class="order-status-badge ${statusClass}">${statusText}</div>
                     <a href="p2p-chat.html?orderId=${order.id}" class="chat-btn"><i class="fas fa-comments"></i> Chat</a>
                 </div>
-            </div>`;
+            </div>
+        `;
     }
     html += '</div>';
     container.innerHTML = html;

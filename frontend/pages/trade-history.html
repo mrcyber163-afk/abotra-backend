@@ -6,813 +6,188 @@
 <title>Trade History | ABOTRA-PROAI - Your Trading Record</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
-
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Inter', sans-serif;
-}
-
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body {
-background: #050505;
-background-image: url("../assets/images/background.png");
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-background-attachment: fixed;
-min-height: 100vh;
-padding-bottom: 75px;
-position: relative;
-font-size: 11px;
+    background: #050505;
+    background-image: url("../assets/images/background.png");
+    background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
+    min-height: 100vh; padding-bottom: 75px; position: relative; font-size: 11px;
 }
-
-/* LIGHT THEME */
 body.light-theme {
-background: #f5f5f5;
-background-image: url("../assets/images/background-light.png");
+    background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
 }
-
-body.light-theme .overlay {
-background: rgba(255,255,255,0.85);
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar, body.light-theme .history-container, body.light-theme .history-card,
+body.light-theme .filter-card, body.light-theme .stats-card {
+    background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08);
 }
-
-body.light-theme .top-bar,
-body.light-theme .history-container,
-body.light-theme .history-card,
-body.light-theme .filter-card,
-body.light-theme .stats-card {
-background: rgba(255,255,255,0.95);
-border: 1px solid rgba(0,0,0,0.08);
-}
-
-body.light-theme .top-bar h2,
-body.light-theme .page-title {
-color: #800000;
-}
-
-body.light-theme .history-info,
-body.light-theme .filter-label {
-color: #555;
-}
-
-body.light-theme .detail-value {
-color: #333;
-}
-
-body.light-theme .theme-toggle {
-background: rgba(0,0,0,0.08);
-border-color: rgba(128,0,0,0.3);
-}
-
-body.light-theme .theme-toggle i {
-color: #800000;
-}
-
-body.light-theme .bottom-nav {
-background: rgba(255,255,255,0.95);
-border-top: 1px solid rgba(128,0,0,0.2);
-}
-
-body.light-theme .bottom-nav a {
-color: #888;
-}
-
-body.light-theme .bottom-nav a.active {
-color: #800000;
-}
-
-/* Skeleton Loading Styles */
-.skeleton-stats-summary {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 12px;
-margin-bottom: 16px;
-}
-.skeleton-stats-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 16px;
-padding: 16px;
-text-align: center;
-animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-.skeleton-stats-label {
-height: 10px;
-width: 70px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-margin: 0 auto 6px auto;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-stats-number {
-height: 24px;
-width: 60px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 6px;
-margin: 0 auto 4px auto;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-stats-sub {
-height: 8px;
-width: 50px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 4px;
-margin: 4px auto 0;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-filter-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 16px;
-padding: 16px;
-margin-bottom: 16px;
-animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-.skeleton-filter-title {
-height: 14px;
-width: 90px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-margin-bottom: 12px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-filter-row {
-display: flex;
-gap: 12px;
-flex-wrap: wrap;
-}
-.skeleton-filter-group {
-flex: 1;
-min-width: 130px;
-}
-.skeleton-filter-label {
-height: 8px;
-width: 50px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 3px;
-margin-bottom: 5px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-filter-select {
-height: 38px;
-width: 100%;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 10px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-history-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 16px;
-padding: 16px;
-margin-bottom: 12px;
-animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-.skeleton-header {
-display: flex;
-justify-content: space-between;
-margin-bottom: 12px;
-}
-.skeleton-type {
-height: 24px;
-width: 70px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 16px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-date {
-height: 12px;
-width: 100px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-details {
-display: grid;
-grid-template-columns: repeat(6, 1fr);
-gap: 10px;
-margin-bottom: 12px;
-}
-.skeleton-detail {
-height: 36px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 7px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-pnl {
-display: flex;
-justify-content: flex-end;
-gap: 16px;
-padding-top: 10px;
-border-top: 1px solid rgba(255,255,255,0.08);
-}
-.skeleton-pnl-amount {
-height: 20px;
-width: 70px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-pnl-percent {
-height: 14px;
-width: 45px;
-background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 4px;
-animation: shimmer 1.5s infinite;
-}
-@keyframes shimmer {
-0% { background-position: -200% 0; }
-100% { background-position: 200% 0; }
-}
-@keyframes skeletonPulse {
-0%, 100% { opacity: 0.6; }
-50% { opacity: 1; }
-}
-
-/* THEME TOGGLE - ICON ONLY */
-.theme-toggle {
-background: rgba(0,0,0,0.7);
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255,215,0,0.3);
-border-radius: 10px;
-padding: 8px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: 0.3s;
-}
-
-.theme-toggle:hover {
-background: rgba(255,215,0,0.2);
-transform: scale(1.05);
-}
-
-.theme-toggle i {
-font-size: 15px;
-color: #FFFFFF;
-}
-
-.theme-toggle span {
-display: none;
-}
-
-.overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.82);
-backdrop-filter: blur(4px);
-z-index: 1;
-}
-
-/* TOP BAR */
+body.light-theme .top-bar h2, body.light-theme .page-title { color: #800000; }
+body.light-theme .history-info, body.light-theme .filter-label { color: #555; }
+body.light-theme .detail-value { color: #333; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+.skeleton-stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.skeleton-stats-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; text-align: center; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-stats-label { height: 10px; width: 70px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 5px; margin: 0 auto 6px auto; animation: shimmer 1.5s infinite; }
+.skeleton-stats-number { height: 24px; width: 60px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 6px; margin: 0 auto 4px auto; animation: shimmer 1.5s infinite; }
+.skeleton-stats-sub { height: 8px; width: 50px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 4px; margin: 4px auto 0; animation: shimmer 1.5s infinite; }
+.skeleton-filter-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; margin-bottom: 16px; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-filter-title { height: 14px; width: 90px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 5px; margin-bottom: 12px; animation: shimmer 1.5s infinite; }
+.skeleton-filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.skeleton-filter-group { flex: 1; min-width: 130px; }
+.skeleton-filter-label { height: 8px; width: 50px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 3px; margin-bottom: 5px; animation: shimmer 1.5s infinite; }
+.skeleton-filter-select { height: 38px; width: 100%; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 10px; animation: shimmer 1.5s infinite; }
+.skeleton-history-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; margin-bottom: 12px; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.skeleton-type { height: 24px; width: 70px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 16px; animation: shimmer 1.5s infinite; }
+.skeleton-date { height: 12px; width: 100px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 5px; animation: shimmer 1.5s infinite; }
+.skeleton-details { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; }
+.skeleton-detail { height: 36px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 7px; animation: shimmer 1.5s infinite; }
+.skeleton-pnl { display: flex; justify-content: flex-end; gap: 16px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+.skeleton-pnl-amount { height: 20px; width: 70px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 5px; animation: shimmer 1.5s infinite; }
+.skeleton-pnl-percent { height: 14px; width: 45px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 4px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+.theme-toggle span { display: none; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
 .top-bar {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-z-index: 100;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(12px);
-border-bottom: 1px solid rgba(255,215,0,0.2);
-padding: 8px 16px;
-display: flex;
-justify-content: space-between;
-align-items: center;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+    padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;
 }
-
-.logo-area {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.logo-area img {
-width: 32px;
-height: 32px;
-border-radius: 8px;
-object-fit: cover;
-}
-
-.logo-area h2 {
-color: #FFD700;
-font-size: 14px;
-margin-bottom: 2px;
-}
-
-.logo-area p {
-color: #AAAAAA;
-font-size: 7px;
-}
-
-.top-bar-right {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.back-btn-top {
-background: rgba(255,215,0,0.15);
-border: none;
-border-radius: 8px;
-padding: 6px 10px;
-color: #FFD700;
-cursor: pointer;
-transition: 0.3s;
-display: flex;
-align-items: center;
-gap: 5px;
-font-size: 9px;
-font-weight: 500;
-}
-
-.back-btn-top:hover {
-background: rgba(255,215,0,0.3);
-}
-
-/* MAIN CONTAINER */
-.history-container {
-position: relative;
-z-index: 2;
-max-width: 1200px;
-margin: 70px auto 20px;
-padding: 0 12px;
-}
-
-/* PAGE TITLE */
-.page-title {
-text-align: center;
-font-size: 20px;
-font-weight: 800;
-color: #FFD700;
-margin-bottom: 16px;
-letter-spacing: 1px;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-}
-
-/* STATS SUMMARY */
-.stats-summary {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 12px;
-margin-bottom: 16px;
-}
-
-.stats-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-backdrop-filter: blur(10px);
-border-radius: 16px;
-padding: 16px;
-text-align: center;
-}
-
-.stats-label {
-color: #AAAAAA;
-font-size: 9px;
-margin-bottom: 4px;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 4px;
-}
-
-.stats-number {
-color: #FFD700;
-font-size: 18px;
-font-weight: 800;
-}
-
-.stats-sub {
-font-size: 9px;
-margin-top: 4px;
-}
-
-.stats-sub.positive {
-color: #0ECB81;
-}
-
-.stats-sub.negative {
-color: #F6465D;
-}
-
-/* FILTER CARD */
-.filter-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-backdrop-filter: blur(10px);
-border-radius: 16px;
-padding: 16px;
-margin-bottom: 16px;
-}
-
-.filter-title {
-color: #FFD700;
-font-size: 12px;
-font-weight: 700;
-margin-bottom: 12px;
-display: flex;
-align-items: center;
-gap: 6px;
-}
-
-.filter-row {
-display: flex;
-gap: 12px;
-flex-wrap: wrap;
-}
-
-.filter-group {
-flex: 1;
-min-width: 130px;
-}
-
-.filter-label {
-color: #AAAAAA;
-font-size: 9px;
-margin-bottom: 4px;
-display: block;
-}
-
-.filter-select,
-.filter-input {
-width: 100%;
-height: 38px;
-background: rgba(255,255,255,0.08);
-border: 1px solid rgba(255,255,255,0.1);
-border-radius: 10px;
-padding: 0 10px;
-color: #FFFFFF;
-font-size: 11px;
-outline: none;
-cursor: pointer;
-}
-
-.filter-select option {
-background: #1a1a1a;
-}
-
-.reset-filter {
-background: rgba(255,215,0,0.2);
-border: 1px solid rgba(255,215,0,0.3);
-border-radius: 10px;
-padding: 0 16px;
-color: #FFD700;
-cursor: pointer;
-transition: 0.3s;
-font-size: 11px;
-height: 38px;
-}
-
-.reset-filter:hover {
-background: rgba(255,215,0,0.4);
-}
-
-/* HISTORY CARD */
-.history-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 16px;
-padding: 16px;
-margin-bottom: 12px;
-transition: 0.3s;
-}
-
-.history-card:hover {
-transform: translateX(3px);
-border-color: #FFD700;
-}
-
-.card-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 12px;
-flex-wrap: wrap;
-gap: 8px;
-}
-
-.trade-type {
-font-weight: 700;
-font-size: 12px;
-padding: 3px 10px;
-border-radius: 16px;
-display: inline-block;
-}
-
-.trade-type.buy {
-background: rgba(14,203,129,0.2);
-color: #0ECB81;
-}
-
-.trade-type.sell {
-background: rgba(246,70,93,0.2);
-color: #F6465D;
-}
-
-.trade-date {
-color: #888;
-font-size: 10px;
-display: flex;
-align-items: center;
-gap: 4px;
-}
-
-.card-details {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-gap: 10px;
-margin-bottom: 12px;
-}
-
-.detail-item {
-display: flex;
-flex-direction: column;
-gap: 3px;
-}
-
-.detail-label {
-color: #888;
-font-size: 8px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-}
-
-.detail-value {
-color: #FFFFFF;
-font-size: 11px;
-font-weight: 600;
-}
-
-.pnl-section {
-display: flex;
-justify-content: flex-end;
-align-items: center;
-gap: 16px;
-padding-top: 10px;
-border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.pnl-amount {
-font-size: 14px;
-font-weight: 800;
-}
-
-.pnl-amount.positive {
-color: #0ECB81;
-}
-
-.pnl-amount.negative {
-color: #F6465D;
-}
-
-.pnl-percent {
-font-size: 10px;
-}
-
-.pnl-percent.positive {
-color: #0ECB81;
-}
-
-.pnl-percent.negative {
-color: #F6465D;
-}
-
-/* LOADING STATE */
-.loading-container {
-text-align: center;
-padding: 50px 20px;
-}
-
-.loading-spinner {
-width: 35px;
-height: 35px;
-border: 2px solid rgba(255,215,0,0.2);
-border-top: 2px solid #FFD700;
-border-radius: 50%;
-animation: spin 1s linear infinite;
-margin: 0 auto 12px auto;
-}
-
-@keyframes spin {
-0% { transform: rotate(0deg); }
-100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-color: #FFD700;
-font-size: 12px;
-font-weight: 500;
-}
-
-/* EMPTY STATE */
-.empty-state {
-text-align: center;
-padding: 50px 20px;
-background: rgba(255,255,255,0.03);
-border-radius: 16px;
-}
-
-.empty-state i {
-font-size: 38px;
-color: rgba(255,215,0,0.3);
-margin-bottom: 12px;
-}
-
-.empty-state p {
-color: #AAAAAA;
-font-size: 11px;
-}
-
-/* BOTTOM NAVIGATION */
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 10px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+.history-container { position: relative; z-index: 2; max-width: 1200px; margin: 70px auto 20px; padding: 0 12px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stats-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; text-align: center; }
+.stats-label { color: #AAAAAA; font-size: 9px; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.stats-number { color: #FFD700; font-size: 18px; font-weight: 800; }
+.stats-sub { font-size: 9px; margin-top: 4px; }
+.stats-sub.positive { color: #0ECB81; }
+.stats-sub.negative { color: #F6465D; }
+.filter-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.filter-title { color: #FFD700; font-size: 12px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.filter-group { flex: 1; min-width: 130px; }
+.filter-label { color: #AAAAAA; font-size: 9px; margin-bottom: 4px; display: block; }
+.filter-select, .filter-input { width: 100%; height: 38px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0 10px; color: #FFFFFF; font-size: 11px; outline: none; cursor: pointer; }
+.filter-select option { background: #1a1a1a; }
+.reset-filter { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 0 16px; color: #FFD700; cursor: pointer; transition: 0.3s; font-size: 11px; height: 38px; }
+.reset-filter:hover { background: rgba(255,215,0,0.4); }
+.history-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; margin-bottom: 12px; transition: 0.3s; }
+.history-card:hover { transform: translateX(3px); border-color: #FFD700; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.trade-type { font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: 16px; display: inline-block; }
+.trade-type.buy { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.trade-type.sell { background: rgba(246,70,93,0.2); color: #F6465D; }
+.trade-date { color: #888; font-size: 10px; display: flex; align-items: center; gap: 4px; }
+.card-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.detail-item { display: flex; flex-direction: column; gap: 3px; }
+.detail-label { color: #888; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-value { color: #FFFFFF; font-size: 11px; font-weight: 600; }
+.pnl-section { display: flex; justify-content: flex-end; align-items: center; gap: 16px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+.pnl-amount { font-size: 14px; font-weight: 800; }
+.pnl-amount.positive { color: #0ECB81; }
+.pnl-amount.negative { color: #F6465D; }
+.pnl-percent { font-size: 10px; }
+.pnl-percent.positive { color: #0ECB81; }
+.pnl-percent.negative { color: #F6465D; }
+.loading-container { text-align: center; padding: 50px 20px; }
+.loading-spinner { width: 35px; height: 35px; border: 2px solid rgba(255,215,0,0.2); border-top: 2px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.loading-text { color: #FFD700; font-size: 12px; font-weight: 500; }
+.empty-state { text-align: center; padding: 50px 20px; background: rgba(255,255,255,0.03); border-radius: 16px; }
+.empty-state i { font-size: 38px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
+.empty-state p { color: #AAAAAA; font-size: 11px; }
 .bottom-nav {
-position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(12px);
-border-top: 1px solid rgba(255,215,0,0.2);
-border-radius: 18px 18px 0 0;
-display: flex;
-justify-content: space-around;
-padding: 6px 10px;
-z-index: 100;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,215,0,0.2);
+    border-radius: 18px 18px 0 0;
+    display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100;
 }
-
-.bottom-nav a {
-display: flex;
-flex-direction: column;
-align-items: center;
-text-decoration: none;
-color: #888;
-font-size: 7px;
-transition: 0.3s;
-gap: 2px;
-}
-
-.bottom-nav a i {
-font-size: 16px;
-}
-
-.bottom-nav a.active {
-color: #FFD700;
-}
-
-/* NOTIFICATION POPUP */
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 16px; }
+.bottom-nav a.active { color: #FFD700; }
 .notification-popup {
-position: fixed;
-top: 70px;
-right: 15px;
-min-width: 240px;
-max-width: 300px;
-padding: 8px 12px;
-border-radius: 12px;
-display: flex;
-align-items: center;
-gap: 10px;
-z-index: 99999;
-backdrop-filter: blur(20px);
-box-shadow: 0 12px 28px rgba(0,0,0,0.3);
-animation: slideInRight 0.3s ease;
-border-left: 3px solid;
+    position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px;
+    padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px;
+    z-index: 99999; backdrop-filter: blur(20px); box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+    animation: slideInRight 0.3s ease; border-left: 3px solid;
 }
-
-.notification-popup.success {
-background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08));
-border-left-color: #00FF88;
-}
-
-.notification-popup.error {
-background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08));
-border-left-color: #FF4D4D;
-}
-
-.notification-popup.info {
-background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08));
-border-left-color: #FFD700;
-}
-
-.notification-popup i {
-font-size: 18px;
-}
-
-.notification-popup .popup-message {
-flex: 1;
-font-size: 10px;
-color: #FFFFFF;
-font-weight: 500;
-}
-
-@keyframes slideInRight {
-from { opacity: 0; transform: translateX(100%); }
-to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeOut {
-from { opacity: 1; transform: translateX(0); }
-to { opacity: 0; transform: translateX(100%); }
-}
-
-/* RESPONSIVE */
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15),rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup i { font-size: 18px; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 @media(max-width: 700px) {
-.history-container {
-padding: 0 12px;
-margin-top: 65px;
-}
-.page-title {
-font-size: 18px;
-}
-.stats-summary {
-grid-template-columns: repeat(2, 1fr);
-gap: 8px;
-}
-.filter-row {
-flex-direction: column;
-}
-.reset-filter {
-height: 38px;
-}
-.card-details {
-grid-template-columns: repeat(2, 1fr);
-}
-.pnl-section {
-flex-direction: column;
-align-items: flex-end;
-}
-.theme-toggle {
-padding: 8px;
-}
-.logo-area h2 {
-font-size: 13px;
-}
-.logo-area p {
-display: none;
-}
-.bottom-nav a span {
-font-size: 6px;
-}
-.bottom-nav a i {
-font-size: 14px;
-}
-.skeleton-stats-summary {
-grid-template-columns: repeat(2, 1fr);
-}
-.skeleton-details {
-grid-template-columns: repeat(2, 1fr);
-}
+    .history-container { padding: 0 12px; margin-top: 65px; }
+    .page-title { font-size: 18px; }
+    .stats-summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .filter-row { flex-direction: column; }
+    .reset-filter { height: 38px; }
+    .card-details { grid-template-columns: repeat(2, 1fr); }
+    .pnl-section { flex-direction: column; align-items: flex-end; }
+    .theme-toggle { padding: 8px; }
+    .logo-area h2 { font-size: 13px; }
+    .logo-area p { display: none; }
+    .bottom-nav a span { font-size: 6px; }
+    .bottom-nav a i { font-size: 14px; }
+    .skeleton-stats-summary { grid-template-columns: repeat(2, 1fr); }
+    .skeleton-details { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="top-bar">
 <div class="logo-area">
 <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
-<div>
-<h2>ABOTRA-PROAI</h2>
-<p>Trade History</p>
-</div>
+<div><h2>ABOTRA-PROAI</h2><p>Trade History</p></div>
 </div>
 <div class="top-bar-right">
-<button class="back-btn-top" onclick="window.location.href='dashboard.html'">
-<i class="fas fa-arrow-left"></i> Back
-</button>
-<div class="theme-toggle" id="themeToggle">
-<i class="fas fa-sun"></i>
-<i class="fas fa-moon" style="display:none;"></i>
-</div>
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
 </div>
 </div>
 
 <div class="overlay"></div>
 
 <div class="history-container">
-<div class="page-title">
-<i class="fas fa-history"></i> Trade History
-</div>
+<div class="page-title"><i class="fas fa-history"></i> Trade History</div>
 
-<!-- SKELETON SECTION -->
 <div id="skeletonContainer">
     <div class="skeleton-stats-summary">
         <div class="skeleton-stats-card"><div class="skeleton-stats-label"></div><div class="skeleton-stats-number"></div></div>
@@ -846,45 +221,18 @@ grid-template-columns: repeat(2, 1fr);
         </div>
         <div class="skeleton-pnl"><div class="skeleton-pnl-amount"></div><div class="skeleton-pnl-percent"></div></div>
     </div>
-    <div class="skeleton-history-card">
-        <div class="skeleton-header"><div class="skeleton-type"></div><div class="skeleton-date"></div></div>
-        <div class="skeleton-details">
-            <div class="skeleton-detail"></div><div class="skeleton-detail"></div>
-            <div class="skeleton-detail"></div><div class="skeleton-detail"></div>
-            <div class="skeleton-detail"></div><div class="skeleton-detail"></div>
-        </div>
-        <div class="skeleton-pnl"><div class="skeleton-pnl-amount"></div><div class="skeleton-pnl-percent"></div></div>
-    </div>
 </div>
 
-<!-- REAL CONTENT -->
 <div id="realContent" style="display: none;">
-    <!-- STATS SUMMARY -->
     <div class="stats-summary" id="statsSummary">
-        <div class="stats-card">
-            <div class="stats-label"><i class="fas fa-chart-line"></i> Total Trades</div>
-            <div class="stats-number" id="totalTrades">0</div>
-        </div>
-        <div class="stats-card">
-            <div class="stats-label"><i class="fas fa-arrow-up"></i> Win Rate</div>
-            <div class="stats-number" id="winRate">0%</div>
-        </div>
-        <div class="stats-card">
-            <div class="stats-label"><i class="fas fa-dollar-sign"></i> Total PnL</div>
-            <div class="stats-number" id="totalPnl">$0</div>
-            <div class="stats-sub" id="pnlPercent"></div>
-        </div>
-        <div class="stats-card">
-            <div class="stats-label"><i class="fas fa-trophy"></i> Best Trade</div>
-            <div class="stats-number" id="bestTrade">$0</div>
-        </div>
+        <div class="stats-card"><div class="stats-label"><i class="fas fa-chart-line"></i> Total Trades</div><div class="stats-number" id="totalTrades">0</div></div>
+        <div class="stats-card"><div class="stats-label"><i class="fas fa-arrow-up"></i> Win Rate</div><div class="stats-number" id="winRate">0%</div></div>
+        <div class="stats-card"><div class="stats-label"><i class="fas fa-dollar-sign"></i> Total PnL</div><div class="stats-number" id="totalPnl">$0</div><div class="stats-sub" id="pnlPercent"></div></div>
+        <div class="stats-card"><div class="stats-label"><i class="fas fa-trophy"></i> Best Trade</div><div class="stats-number" id="bestTrade">$0</div></div>
     </div>
 
-    <!-- FILTER SECTION -->
     <div class="filter-card">
-        <div class="filter-title">
-            <i class="fas fa-filter"></i> Filter Trades
-        </div>
+        <div class="filter-title"><i class="fas fa-filter"></i> Filter Trades</div>
         <div class="filter-row">
             <div class="filter-group">
                 <label class="filter-label">Trade Type</label>
@@ -916,17 +264,10 @@ grid-template-columns: repeat(2, 1fr);
         </div>
     </div>
 
-    <!-- HISTORY LIST -->
-    <div id="historyContainer">
-        <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Loading trades...</div>
-        </div>
-    </div>
+    <div id="historyContainer"><div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Loading trades...</div></div></div>
 </div>
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav">
 <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
 <a href="trade2.html"><i class="fas fa-graduation-cap"></i><span>Tutorial</span></a>
@@ -936,6 +277,14 @@ grid-template-columns: repeat(2, 1fr);
 </div>
 
 <script type="module">
+// ============================================================
+// CONFIG - From global
+// ============================================================
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
+
+// ============================================================
+// FIREBASE
+// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -958,19 +307,40 @@ let currentUser = null;
 let allTrades = [];
 let filteredTrades = [];
 
+// ============================================================
+// API HELPER
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) { reject(new Error('No user logged in')); return; }
+            try { const token = await user.getIdToken(true); resolve(token); } catch (error) { reject(error); }
+        });
+    });
+}
+
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+        if (body) options.body = JSON.stringify(body);
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        return await response.json();
+    } catch (error) { console.error('API error:', error); return { success: false, error: error.message }; }
+}
+
+// ============================================================
+// THEME
+// ============================================================
 function initTheme() {
     const savedTheme = localStorage.getItem('abotra_theme');
     if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
         document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
         document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
-    } else {
-        document.body.classList.remove('light-theme');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
     }
 }
-
 document.getElementById('themeToggle').addEventListener('click', function() {
     if (document.body.classList.contains('light-theme')) {
         document.body.classList.remove('light-theme');
@@ -992,28 +362,35 @@ function showNotification(message, type) {
     toast.className = `notification-popup ${type}`;
     toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
     document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
+// ============================================================
+// LOAD TRADES
+// ============================================================
 async function loadTrades() {
     if (!currentUser) return;
     const container = document.getElementById('historyContainer');
     container.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Loading trades...</div></div>';
     
     try {
-        const tradesRef = ref(db, `trades/${currentUser.uid}`);
-        const snapshot = await get(tradesRef);
-        allTrades = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                const trade = child.val();
-                if (trade.status === 'closed' || trade.status === 'completed') {
-                    allTrades.push({ id: child.key, ...trade });
-                }
-            });
+        // Try backend API first
+        const data = await apiRequest('trades/history', 'GET');
+        if (data.success && data.trades) {
+            allTrades = data.trades || [];
+        } else {
+            // Fallback to Firebase
+            const tradesRef = ref(db, `trades/${currentUser.uid}`);
+            const snapshot = await get(tradesRef);
+            allTrades = [];
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const trade = child.val();
+                    if (trade.status === 'closed' || trade.status === 'completed') {
+                        allTrades.push({ id: child.key, ...trade });
+                    }
+                });
+            }
         }
         allTrades.sort((a, b) => {
             const dateA = a.closedAt || a.timestamp || 0;
@@ -1022,7 +399,7 @@ async function loadTrades() {
         });
         applyFilters();
         if (allTrades.length === 0) {
-            showNotification('No completed trades found yet. Start trading to see your history!', 'info');
+            showNotification('No completed trades found.', 'info');
         }
         setTimeout(() => {
             document.getElementById('skeletonContainer').style.display = 'none';
@@ -1047,10 +424,8 @@ function applyFilters() {
     if (typeFilter !== 'all') {
         filteredTrades = filteredTrades.filter(t => t.type === typeFilter);
     }
-    
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
     if (dateFilter === 'today') {
         filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= today);
     } else if (dateFilter === 'week') {
@@ -1063,13 +438,11 @@ function applyFilters() {
         const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
         filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= yearAgo);
     }
-    
     if (resultFilter === 'profit') {
         filteredTrades = filteredTrades.filter(t => (t.closedProfit || t.profit || 0) > 0);
     } else if (resultFilter === 'loss') {
         filteredTrades = filteredTrades.filter(t => (t.closedProfit || t.profit || 0) < 0);
     }
-    
     updateStats();
     renderHistory();
 }
@@ -1086,7 +459,6 @@ function updateStats() {
     document.getElementById('winRate').textContent = `${winRate}%`;
     document.getElementById('totalPnl').innerHTML = `$${totalPnl.toFixed(2)}`;
     document.getElementById('bestTrade').innerHTML = `$${bestTrade.toFixed(2)}`;
-    
     const pnlPercent = document.getElementById('pnlPercent');
     if (avgProfit > 0) {
         pnlPercent.innerHTML = `Avg: +$${avgProfit.toFixed(2)}`;
@@ -1114,9 +486,7 @@ function renderHistory() {
         const priceChange = entryPrice > 0 ? ((closePrice - entryPrice) / entryPrice * 100).toFixed(2) : 0;
         const closeDate = new Date(trade.closedAt || trade.timestamp || Date.now()).toLocaleString();
         const leverage = trade.leverage || 1;
-        
-        // ===== FIX: Get the staked/invested amount =====
-        const stakedAmount = trade.margin || trade.investedAmount || trade.amount || trade.investAmount || 0;
+        const stakedAmount = trade.margin || trade.investedAmount || trade.amount || 0;
         
         const card = document.createElement('div');
         card.className = 'history-card';
@@ -1126,30 +496,12 @@ function renderHistory() {
                 <div class="trade-date"><i class="far fa-calendar-alt"></i> ${closeDate}</div>
             </div>
             <div class="card-details">
-                <div class="detail-item">
-                    <div class="detail-label">Amount Staked</div>
-                    <div class="detail-value" style="color:#FFD700; font-weight:700;">$${stakedAmount.toFixed(2)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Leverage</div>
-                    <div class="detail-value">${leverage}x</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Entry Price</div>
-                    <div class="detail-value">$${entryPrice.toFixed(2)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Close Price</div>
-                    <div class="detail-value">$${closePrice.toFixed(2)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Price Change</div>
-                    <div class="detail-value ${priceChange >= 0 ? 'positive' : 'negative'}">${priceChange >= 0 ? '+' : ''}${priceChange}%</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Symbol</div>
-                    <div class="detail-value">${trade.symbol || 'BTC/USDT'}</div>
-                </div>
+                <div class="detail-item"><div class="detail-label">Amount Staked</div><div class="detail-value" style="color:#FFD700; font-weight:700;">$${stakedAmount.toFixed(2)}</div></div>
+                <div class="detail-item"><div class="detail-label">Leverage</div><div class="detail-value">${leverage}x</div></div>
+                <div class="detail-item"><div class="detail-label">Entry Price</div><div class="detail-value">$${entryPrice.toFixed(2)}</div></div>
+                <div class="detail-item"><div class="detail-label">Close Price</div><div class="detail-value">$${closePrice.toFixed(2)}</div></div>
+                <div class="detail-item"><div class="detail-label">Price Change</div><div class="detail-value ${priceChange >= 0 ? 'positive' : 'negative'}">${priceChange >= 0 ? '+' : ''}${priceChange}%</div></div>
+                <div class="detail-item"><div class="detail-label">Symbol</div><div class="detail-value">${trade.symbol || 'BTC/USDT'}</div></div>
             </div>
             <div class="pnl-section">
                 <div class="pnl-amount ${pnl >= 0 ? 'positive' : 'negative'}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</div>
@@ -1172,18 +524,17 @@ document.getElementById('filterDate').addEventListener('change', applyFilters);
 document.getElementById('filterResult').addEventListener('change', applyFilters);
 document.getElementById('resetFilterBtn').addEventListener('click', resetFilters);
 
+// ============================================================
+// INIT
+// ============================================================
 function init() {
     initTheme();
     onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
+        if (!user) { window.location.href = 'login.html'; return; }
         currentUser = user;
         await loadTrades();
     });
 }
-
 init();
 </script>
 </body>

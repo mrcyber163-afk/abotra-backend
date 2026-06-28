@@ -31,6 +31,9 @@ body.light-theme .modal-content h3{color:#800000;}
 body.light-theme .modal-content p{color:#555;}
 body.light-theme .confirm-modal-card{background:linear-gradient(145deg,#ffffff,#f0f0f5);border:1px solid rgba(128,0,0,0.2);}
 body.light-theme .confirm-modal-title{color:#1a1a1a;}
+body.light-theme .whatsapp-group-item{background:#f5f5f5;color:#333;border-color:#ddd;}
+body.light-theme .whatsapp-group-item strong{color:#800000;}
+body.light-theme .whatsapp-group-item small{color:#555;}
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);z-index:0;pointer-events:none;}
 body.light-theme .overlay{background:rgba(255,255,255,0.85);}
 .admin-header{position:fixed;top:0;left:0;right:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,215,0,0.2);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:100;}
@@ -81,6 +84,20 @@ body.light-theme .overlay{background:rgba(255,255,255,0.85);}
 .payment-method-item small{color:#ccc;font-size:10px;}
 .delete-method{background:rgba(246,70,93,0.2);border:none;border-radius:6px;padding:3px 8px;color:#F6465D;cursor:pointer;font-size:10px;transition:0.3s;}
 .delete-method:hover{background:rgba(246,70,93,0.4);}
+
+/* WhatsApp Group Items */
+.whatsapp-group-item{background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;transition:0.3s;border:1px solid rgba(37,211,102,0.15);}
+.whatsapp-group-item:hover{background:rgba(37,211,102,0.08);border-color:rgba(37,211,102,0.3);}
+.whatsapp-group-item strong{color:#FFD700;font-size:13px;display:flex;align-items:center;gap:6px;}
+.whatsapp-group-item strong i{color:#25D366;}
+.whatsapp-group-item .group-link{color:#25D366;font-size:11px;word-break:break-all;}
+.whatsapp-group-item small{color:#aaa;font-size:10px;}
+.edit-group-btn{background:rgba(255,215,0,0.2);border:none;border-radius:6px;padding:4px 10px;color:#FFD700;cursor:pointer;font-size:10px;transition:0.3s;display:inline-flex;align-items:center;gap:4px;}
+.edit-group-btn:hover{background:rgba(255,215,0,0.4);}
+.delete-group-btn{background:rgba(246,70,93,0.2);border:none;border-radius:6px;padding:4px 10px;color:#F6465D;cursor:pointer;font-size:10px;transition:0.3s;display:inline-flex;align-items:center;gap:4px;margin-left:4px;}
+.delete-group-btn:hover{background:rgba(246,70,93,0.4);}
+.whatsapp-group-actions{display:flex;gap:4px;flex-wrap:wrap;}
+
 .user-search-container{margin-bottom:12px;}
 .search-user-input{width:100%;height:40px;border:none;outline:none;border-radius:10px;padding:0 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,215,0,0.2);color:white;font-size:12px;}
 .user-search-results{margin-top:10px;max-height:200px;overflow-y:auto;}
@@ -220,6 +237,57 @@ body.light-theme .notification-panel{background:white;border-left:1px solid rgba
 
 <div class="main-content">
     <div class="page-title"><i class="fas fa-cog"></i> System Settings</div>
+
+    <!-- WhatsApp Group Links - NEW SECTION -->
+    <div class="section-card">
+        <div class="section-title"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp Group Links</div>
+        <p style="color:#aaa;font-size:10px;margin-bottom:12px;">Manage WhatsApp group links for each country. Users will see these links on the dashboard.</p>
+        
+        <div id="whatsappGroupsList">
+            <div style="text-align:center;padding:14px;color:#888;font-size:11px;">Loading group links...</div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,215,0,0.1);">
+            <div class="input-group">
+                <label><i class="fas fa-globe"></i> Country</label>
+                <select id="newGroupCountry">
+                    <option value="Tanzania">🇹🇿 Tanzania</option>
+                    <option value="Malawi">🇲🇼 Malawi</option>
+                    <option value="Zambia">🇿🇲 Zambia</option>
+                    <option value="Kenya">🇰🇪 Kenya</option>
+                    <option value="Uganda">🇺🇬 Uganda</option>
+                    <option value="Nigeria">🇳🇬 Nigeria</option>
+                    <option value="Ghana">🇬🇭 Ghana</option>
+                    <option value="South Africa">🇿🇦 South Africa</option>
+                    <option value="Congo DRC">🇨🇩 Congo DRC</option>
+                    <option value="Burundi">🇧🇮 Burundi</option>
+                    <option value="Botswana">🇧🇼 Botswana</option>
+                    <option value="Namibia">🇳🇦 Namibia</option>
+                    <option value="Mozambique">🇲🇿 Mozambique</option>
+                    <option value="Rwanda">🇷🇼 Rwanda</option>
+                    <option value="Egypt">🇪🇬 Egypt</option>
+                    <option value="Morocco">🇲🇦 Morocco</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label><i class="fab fa-whatsapp"></i> Group Link</label>
+                <input type="url" id="newGroupLink" placeholder="https://chat.whatsapp.com/...">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-tag"></i> Display Name (Optional)</label>
+                <input type="text" id="newGroupName" placeholder="e.g., ABOTRA Tanzania Community">
+            </div>
+            <button class="save-btn danger" id="addGroupBtn"><i class="fab fa-whatsapp"></i> Add/Update Group Link</button>
+        </div>
+        
+        <div class="input-group" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,215,0,0.1);">
+            <p style="color:#aaa;font-size:10px;">
+                <i class="fas fa-info-circle"></i> 
+                <strong style="color:#FFD700;">Note:</strong> These links appear on the dashboard as WhatsApp buttons. 
+                Users click to join the group for their country.
+            </p>
+        </div>
+    </div>
 
     <!-- Blue Tick Badge -->
     <div class="section-card">
@@ -617,6 +685,151 @@ async function loadAllUsers() {
 }
 
 // ============================================================
+// WHATSAPP GROUP LINKS - NEW FUNCTIONS
+// ============================================================
+function loadWhatsAppGroups() {
+    const container = document.getElementById('whatsappGroupsList');
+    
+    const groupsRef = db.ref('whatsappGroups');
+    groupsRef.on('value', (snapshot) => {
+        container.innerHTML = '<div style="font-weight:600;color:#25D366;font-size:12px;margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Group Links by Country</div>';
+        
+        if (!snapshot.exists()) {
+            container.innerHTML += '<div style="text-align:center;padding:14px;color:#888;font-size:11px;">No WhatsApp groups configured yet. Add one below.</div>';
+            return;
+        }
+        
+        const groups = snapshot.val();
+        const countryList = Object.keys(groups).sort();
+        let hasGroups = false;
+        
+        for (const country of countryList) {
+            const data = groups[country];
+            const link = data.link || '';
+            const name = data.name || country;
+            
+            if (link) {
+                hasGroups = true;
+                const div = document.createElement('div');
+                div.className = 'whatsapp-group-item';
+                div.innerHTML = `
+                    <div>
+                        <strong><i class="fab fa-whatsapp"></i> ${escapeHtml(country)}</strong>
+                        ${data.name ? `<br><small>${escapeHtml(data.name)}</small>` : ''}
+                        <br>
+                        <span class="group-link"><i class="fas fa-link"></i> ${escapeHtml(link)}</span>
+                        ${data.updatedAt ? `<br><small>Updated: ${new Date(data.updatedAt).toLocaleDateString()}</small>` : ''}
+                    </div>
+                    <div class="whatsapp-group-actions">
+                        <button class="edit-group-btn" data-country="${country}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="delete-group-btn" data-country="${country}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+        
+        if (!hasGroups) {
+            container.innerHTML += '<div style="text-align:center;padding:14px;color:#888;font-size:11px;">No WhatsApp groups configured yet. Add one below.</div>';
+        }
+        
+        // Edit buttons
+        document.querySelectorAll('.edit-group-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const country = btn.dataset.country;
+                const snapshot = await db.ref(`whatsappGroups/${country}`).once('value');
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('newGroupCountry').value = country;
+                    document.getElementById('newGroupLink').value = data.link || '';
+                    document.getElementById('newGroupName').value = data.name || '';
+                    showToast(`Edit group link for ${country}`, 'info');
+                    document.getElementById('newGroupLink').focus();
+                }
+            });
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.delete-group-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const country = btn.dataset.country;
+                const confirmed = await showConfirmModal({
+                    title: 'Delete WhatsApp Group?',
+                    subtitle: `Remove WhatsApp group link for ${country}?`,
+                    icon: '🗑️',
+                    iconClass: 'danger',
+                    details: { 'Country': country },
+                    warning: 'This will remove the group link from the dashboard!',
+                    btnText: 'Delete Group',
+                    btnIcon: 'fa-trash-alt'
+                });
+                
+                if (confirmed) {
+                    try {
+                        await db.ref(`whatsappGroups/${country}`).remove();
+                        showToast(`✅ WhatsApp group for ${country} removed`, 'success');
+                    } catch(error) {
+                        showToast('Error: ' + error.message, 'error');
+                    }
+                }
+            });
+        });
+    });
+}
+
+// Add/Update WhatsApp Group
+document.getElementById('addGroupBtn').addEventListener('click', async () => {
+    const country = document.getElementById('newGroupCountry').value;
+    const link = document.getElementById('newGroupLink').value.trim();
+    const name = document.getElementById('newGroupName').value.trim();
+    
+    if (!link) {
+        showToast('Please enter a group link', 'error');
+        return;
+    }
+    
+    // Validate WhatsApp link
+    if (!link.includes('chat.whatsapp.com') && !link.includes('wa.me')) {
+        const confirm = await showConfirmModal({
+            title: 'Invalid Link Format?',
+            subtitle: 'The link does not appear to be a valid WhatsApp link. Continue anyway?',
+            icon: '⚠️',
+            iconClass: 'warning',
+            btnText: 'Continue',
+            btnIcon: 'fa-check'
+        });
+        if (!confirm) return;
+    }
+    
+    const confirmed = await showConfirmModal({
+        title: 'Save WhatsApp Group?',
+        subtitle: `${country} group link will be ${link}`,
+        icon: '💾',
+        iconClass: 'success',
+        details: { 'Country': country, 'Link': link, 'Name': name || '(Not set)' },
+        btnText: 'Save Group',
+        btnIcon: 'fa-save',
+        btnClass: 'confirm-success'
+    });
+    
+    if (!confirmed) return;
+    
+    try {
+        await db.ref(`whatsappGroups/${country}`).set({
+            link: link,
+            name: name || country,
+            updatedAt: Date.now(),
+            updatedBy: currentAdminEmail || currentAdminId
+        });
+        showToast(`✅ WhatsApp group for ${country} saved!`, 'success');
+        document.getElementById('newGroupLink').value = '';
+        document.getElementById('newGroupName').value = '';
+    } catch(error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+});
+
+// ============================================================
 // BLUE TICK BADGE
 // ============================================================
 function searchUsers() {
@@ -885,7 +1098,7 @@ document.getElementById('addPaymentBtn').addEventListener('click', async () => {
 });
 
 // ============================================================
-// CHANGE PASSWORD - FIXED (Direct Netlify Function Call)
+// CHANGE PASSWORD - FIXED
 // ============================================================
 function checkPasswordStrength(password) {
     let strength = 0;
@@ -1012,7 +1225,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ============================================================
-// CHANGE PASSWORD BUTTON - FIXED
+// CHANGE PASSWORD BUTTON
 // ============================================================
 document.getElementById('changePasswordBtn').addEventListener('click', async () => {
     const email = document.getElementById('resetUserEmail').value.trim();
@@ -1020,7 +1233,6 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
     const confirmPassword = document.getElementById('resetConfirmPassword').value;
     const resultDiv = document.getElementById('passwordChangeResult');
     
-    // Validation
     if (!email) {
         showToast('Please select a user first', 'error');
         resultDiv.innerHTML = '<span style="color:#F6465D;"><i class="fas fa-exclamation-triangle"></i> Please select a user</span>';
@@ -1039,7 +1251,6 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
         return;
     }
     
-    // Find user UID
     const targetUser = allUsers.find(u => u.email === email);
     if (!targetUser) {
         showToast('User not found', 'error');
@@ -1050,7 +1261,6 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
     const targetUid = targetUser.uid;
     const name = targetUser.fullName || targetUser.username || email;
     
-    // Confirm with admin
     const confirmed = await showConfirmModal({
         title: 'Change Password?',
         subtitle: `Change password for ${escapeHtml(name)}?`,
@@ -1073,16 +1283,10 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
     resultDiv.innerHTML = '<span style="color:#FFD700;"><i class="fas fa-spinner fa-spin"></i> Processing...</span>';
     
     try {
-        // Get Firebase ID Token for authentication
         const user = auth.currentUser;
-        if (!user) {
-            throw new Error('No authenticated admin user found');
-        }
-        
+        if (!user) throw new Error('No authenticated admin user found');
         const token = await user.getIdToken(true);
-        console.log('✅ Token obtained successfully');
         
-        // Call Netlify Function directly
         const response = await fetch('/.netlify/functions/change-user-password', {
             method: 'POST',
             headers: {
@@ -1100,8 +1304,6 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
         if (response.ok && data.success) {
             resultDiv.innerHTML = `<span style="color:#0ECB81;"><i class="fas fa-check-circle"></i> ✅ ${data.message}</span>`;
             showToast('✅ Password updated successfully!', 'success');
-            
-            // Clear fields
             document.getElementById('resetUserEmail').value = '';
             document.getElementById('resetNewPassword').value = '';
             document.getElementById('resetConfirmPassword').value = '';
@@ -1109,17 +1311,13 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
             dropdown.style.display = 'none';
             document.getElementById('passwordStrengthText').textContent = 'Enter a password to see strength';
             document.querySelectorAll('.password-strength .bar').forEach(bar => bar.className = 'bar');
-            
         } else {
             const errorMsg = data.error || 'Unknown error occurred';
             resultDiv.innerHTML = `<span style="color:#F6465D;"><i class="fas fa-exclamation-triangle"></i> ❌ ${errorMsg}</span>`;
             showToast(`Error: ${errorMsg}`, 'error');
         }
-        
     } catch(error) {
         console.error('[PASSWORD CHANGE] Error:', error);
-        
-        // Try fallback: Save to Firebase
         try {
             const requestRef = db.ref('passwordChangeRequests').push();
             await requestRef.set({
@@ -1137,7 +1335,6 @@ document.getElementById('changePasswordBtn').addEventListener('click', async () 
             resultDiv.innerHTML = `<span style="color:#F6465D;"><i class="fas fa-exclamation-triangle"></i> ❌ Network error: ${error.message}</span>`;
             showToast('Failed to connect to server. Check Netlify Function.', 'error');
         }
-        
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-key"></i> Change User Password';
@@ -1184,6 +1381,7 @@ auth.onAuthStateChanged(async (user) => {
     await loadAllUsers();
     await loadExchangeRates();
     loadPaymentMethods();
+    loadWhatsAppGroups(); // NEW
     loadAdminNotifications();
     document.getElementById('searchUserInput').addEventListener('input', searchUsers);
 });

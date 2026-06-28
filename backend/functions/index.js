@@ -5,8 +5,12 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// ============================================================
+// FIREBASE - SAFE INITIALIZATION
+// ============================================================
 const { initializeFirebase, getDB, getAuth, testConnection, isInitialized } = require('./firebase');
 
+// Initialize Firebase safely - NEVER crashes the server
 let firebaseInitialized = false;
 
 try {
@@ -23,10 +27,14 @@ try {
     firebaseInitialized = false;
 }
 
+// Make Firebase available globally (with safe fallback)
 global.__firebaseDb = firebaseInitialized ? getDB() : null;
 global.__firebaseAuth = firebaseInitialized ? getAuth() : null;
 global.__firebaseInitialized = firebaseInitialized;
 
+// ============================================================
+// ROUTES - Load safely (if Firebase fails, routes will use null)
+// ============================================================
 let authRoutes, tradeRoutes, userRoutes, depositRoutes, withdrawRoutes;
 let walletRoutes, tradeHistoryRoutes, p2pRoutes, orderRoutes, chatRoutes;
 let notificationRoutes, robotRoutes, botRoutes, subscriptionRoutes, signalRoutes;
@@ -69,8 +77,12 @@ try {
     console.error('[SERVER] ❌ Error loading routes:', error.message);
 }
 
+// ============================================================
+// EXPRESS APP
+// ============================================================
 const app = express();
 
+// Middleware
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -79,6 +91,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ============================================================
+// MIDDLEWARE: Inject Firebase into req
+// ============================================================
 app.use((req, res, next) => {
     req.firebase = {
         db: global.__firebaseDb,
@@ -88,6 +103,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// ============================================================
+// MIDDLEWARE: Check Firebase connection for protected routes
+// ============================================================
 const requireFirebase = (req, res, next) => {
     if (!global.__firebaseInitialized) {
         return res.status(503).json({
@@ -98,6 +116,9 @@ const requireFirebase = (req, res, next) => {
     next();
 };
 
+// ============================================================
+// HEALTH CHECK - ALWAYS WORKS
+// ============================================================
 app.get('/health', async (req, res) => {
     let firebaseStatus = 'unknown';
     let connected = false;
@@ -114,6 +135,9 @@ app.get('/health', async (req, res) => {
         firebaseStatus = 'not_initialized';
     }
     
+    // ============================================================
+    // ALWAYS returns 200 OK - even if Firebase fails
+    // ============================================================
     res.status(200).json({
         status: firebaseStatus === 'connected' ? 'ok' : 'degraded',
         timestamp: new Date().toISOString(),
@@ -128,6 +152,9 @@ app.get('/health', async (req, res) => {
     });
 });
 
+// ============================================================
+// API ROUTES (only if routes loaded successfully)
+// ============================================================
 if (authRoutes) app.use('/api/auth', requireFirebase, authRoutes);
 if (tradeRoutes) app.use('/api/trade', requireFirebase, tradeRoutes);
 if (tradeRoutes) app.use('/api/trades', requireFirebase, tradeRoutes);
@@ -152,6 +179,9 @@ if (kycRoutes) app.use('/api/kyc', requireFirebase, kycRoutes);
 if (leaderboardRoutes) app.use('/api/leaderboard', requireFirebase, leaderboardRoutes);
 if (adminRoutes) app.use('/api/admin', requireFirebase, adminRoutes);
 
+// ============================================================
+// 404 HANDLER
+// ============================================================
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -159,6 +189,9 @@ app.use((req, res) => {
     });
 });
 
+// ============================================================
+// ERROR HANDLER
+// ============================================================
 app.use((err, req, res, next) => {
     console.error('[ERROR]', err.stack || err.message);
     res.status(500).json({
@@ -167,6 +200,9 @@ app.use((err, req, res, next) => {
     });
 });
 
+// ============================================================
+// START SERVER - ALWAYS RUNS
+// ============================================================
 const PORT = process.env.PORT || 5001;
 
 const server = app.listen(PORT, async () => {
@@ -180,6 +216,7 @@ const server = app.listen(PORT, async () => {
         console.warn('[SERVER] 📝 To enable Firebase, set FIREBASE_DATABASE_URL environment variable.');
     }
     
+    // Test Firebase connection if initialized
     if (global.__firebaseInitialized) {
         try {
             const connected = await testConnection();
@@ -189,6 +226,7 @@ const server = app.listen(PORT, async () => {
         }
     }
     
+    // Start Price Stream (if available)
     try {
         if (getPriceStream) {
             const priceStream = getPriceStream();
@@ -198,6 +236,7 @@ const server = app.listen(PORT, async () => {
         console.warn('[SERVER] ⚠️ Price stream failed (non-critical):', error.message);
     }
     
+    // Start Scheduler (if available)
     try {
         if (startScheduler) {
             startScheduler();
@@ -208,6 +247,9 @@ const server = app.listen(PORT, async () => {
     }
 });
 
+// ============================================================
+// GRACEFUL SHUTDOWN
+// ============================================================
 process.on('SIGINT', () => {
     console.log('[SERVER] Shutting down gracefully...');
     server.close(() => {
@@ -224,6 +266,9 @@ process.on('SIGTERM', () => {
     });
 });
 
+// ============================================================
+// EXPORT
+// ============================================================
 module.exports = {
     app,
     server,

@@ -9,16 +9,23 @@ async function getAllOpenTrades() {
     const db = getDB();
     const snapshot = await db.ref('trades').once('value');
     const trades = [];
-    if (snapshot.exists()) {
-        snapshot.forEach(userSnapshot => {
-            const userId = userSnapshot.key;
-            userSnapshot.forEach(tradeSnapshot => {
-                const trade = tradeSnapshot.val();
-                if (trade.status === 'open') {
-                    trades.push({ id: tradeSnapshot.key, userId: userId, ...trade });
+    
+    // REST API returns data directly, not a snapshot with exists()
+    const data = snapshot.val();
+    if (data && typeof data === 'object') {
+        // Iterate through users
+        for (const userId of Object.keys(data)) {
+            const userTrades = data[userId];
+            if (userTrades && typeof userTrades === 'object') {
+                // Iterate through trades for this user
+                for (const tradeId of Object.keys(userTrades)) {
+                    const trade = userTrades[tradeId];
+                    if (trade && trade.status === 'open') {
+                        trades.push({ id: tradeId, userId: userId, ...trade });
+                    }
                 }
-            });
-        });
+            }
+        }
     }
     return trades;
 }
@@ -69,20 +76,27 @@ async function updateUserStats() {
         const db = getDB();
         const priceStream = getPriceStream();
         const usersSnap = await db.ref('users').once('value');
-        if (!usersSnap.exists()) return;
         
-        for (const [userId, userData] of Object.entries(usersSnap.val())) {
+        // REST API returns data directly
+        const usersData = usersSnap.val();
+        if (!usersData || typeof usersData !== 'object') return;
+        
+        for (const userId of Object.keys(usersData)) {
             try {
+                const userData = usersData[userId];
                 const tradesSnap = await db.ref(`trades/${userId}`).once('value');
+                const tradesData = tradesSnap.val();
                 const openTrades = [];
-                if (tradesSnap.exists()) {
-                    tradesSnap.forEach(child => {
-                        const trade = child.val();
-                        if (trade.status === 'open') {
-                            openTrades.push({ id: child.key, ...trade });
+                
+                if (tradesData && typeof tradesData === 'object') {
+                    for (const tradeId of Object.keys(tradesData)) {
+                        const trade = tradesData[tradeId];
+                        if (trade && trade.status === 'open') {
+                            openTrades.push({ id: tradeId, ...trade });
                         }
-                    });
+                    }
                 }
+                
                 if (openTrades.length === 0) continue;
                 
                 const tradingBalance = userData.tradingBalance || 0;

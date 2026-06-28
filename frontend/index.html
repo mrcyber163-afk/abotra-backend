@@ -6,8 +6,22 @@
 <title>ABOTRA-PROAI | AI Trading Platform - Trade with AI Robots | 3%-38% Daily Profit</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
 
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+    const CONFIG = {
+        API_URL: 'https://abotra-backend-production.up.railway.app',
+        WS_URL: 'wss://abotra-backend-production.up.railway.app',
+        ENVIRONMENT: 'production',
+        VERSION: '2.0.0'
+    };
+    window.CONFIG = CONFIG;
+    console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
 * {
 margin:0;
 padding:0;
@@ -17,7 +31,7 @@ font-family:'Inter',sans-serif;
 
 body {
 background:#050505;
-background-image:url("../assets/images/background.png");
+background-image:url("assets/images/background.png");
 background-size:cover;
 background-position:center;
 background-repeat:no-repeat;
@@ -30,7 +44,7 @@ font-size:12px;
 
 body.light-theme {
 background:#f5f5f5;
-background-image:url("../assets/images/background-light.png");
+background-image:url("assets/images/background-light.png");
 }
 
 body.light-theme .overlay {
@@ -161,6 +175,28 @@ color:#FFD700;
 font-size:13px;
 font-weight:600;
 color:#FFFFFF;
+}
+.sun-only,
+.moon-only {
+  display: none;
+}
+
+/* DARK THEME → show sun only */
+.dark-theme #sunIcon {
+  display: inline-block;
+}
+
+.dark-theme #moonIcon {
+  display: none;
+}
+
+/* DAY THEME → show moon only */
+.light-theme #moonIcon {
+  display: inline-block;
+}
+
+.light-theme #sunIcon {
+  display: none;
 }
 
 body.light-theme .theme-toggle {
@@ -1269,8 +1305,25 @@ to { opacity:0; transform:translateX(100%); }
 <body>
 
 <div class="theme-toggle" id="themeToggle">
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+<!-- SUN (for dark theme) -->
+<svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+     fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="5"></circle>
+  <line x1="12" y1="1" x2="12" y2="3"></line>
+  <line x1="12" y1="21" x2="12" y2="23"></line>
+  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+  <line x1="1" y1="12" x2="3" y2="12"></line>
+  <line x1="21" y1="12" x2="23" y2="12"></line>
+  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+</svg>
+
+<!-- MOON (for day theme) -->
+<svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+     fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M21 12.3A9 9 0 1 1 11.7 3A7 7 0 0 0 21 12.3Z"></path>
+</svg>
 <span>Switch Theme</span>
 </div>
 
@@ -1278,7 +1331,7 @@ to { opacity:0; transform:translateX(100%); }
 
 <div class="header">
 <div class="logo">
-<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/55x55/FFD700/800000?text=AI'">
+<img src="assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/55x55/FFD700/800000?text=AI'">
 <div class="logo-text">ABOTRA<span>-PROAI</span></div>
 </div>
 <div class="nav-links">
@@ -1286,8 +1339,8 @@ to { opacity:0; transform:translateX(100%); }
 <a href="#about">About</a>
 <a href="#robots">Robots</a>
 <a href="#guide">Guide</a>
-<a href="login.html" class="btn-login"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg> Login</a>
-<a href="register.html" class="btn-nav"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Get Started</a>
+<a href="pages/login.html" class="btn-login"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg> Login</a>
+<a href="pages/register.html" class="btn-nav"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Get Started</a>
 </div>
 </div>
 
@@ -1296,7 +1349,7 @@ to { opacity:0; transform:translateX(100%); }
 <h1>Trade Smarter with <span>AI Robots</span></h1>
 <p>Experience the future of trading with our advanced AI-powered trading robots. Get automated profits from 3% to 38% daily!</p>
 <div class="hero-buttons">
-<a href="register.html" class="btn-primary">
+<a href="pages/register.html" class="btn-primary">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
 Get Started
 </a>
@@ -1307,7 +1360,7 @@ Read Guide
 </div>
 </div>
 <div class="hero-image">
-<img src="../assets/images/hero.png" alt="AI Trading Robot" onerror="this.src='https://placehold.co/500x400/800000/FFD700?text=AI+Trading+Robot'">
+<img src="assets/images/hero.png" alt="AI Trading Robot" onerror="this.src='https://placehold.co/500x400/800000/FFD700?text=AI+Trading+Robot'">
 </div>
 </div>
 
@@ -1406,16 +1459,16 @@ Read Guide
 <h2 class="section-title">Our <span>Partners</span></h2>
 <div class="slideshow-container">
 <div class="slideshow-track">
-<div class="slide-item"><img src="../assets/images/slide1.jpeg" alt="Partner 1"></div>
-<div class="slide-item"><img src="../assets/images/slide2.jpeg" alt="Partner 2"></div>
-<div class="slide-item"><img src="../assets/images/slide3.jpeg" alt="Partner 3"></div>
-<div class="slide-item"><img src="../assets/images/slide4.jpeg" alt="Partner 4"></div>
-<div class="slide-item"><img src="../assets/images/slide5.jpeg" alt="Partner 5"></div>
-<div class="slide-item"><img src="../assets/images/slide6.jpeg" alt="Partner 6"></div>
-<div class="slide-item"><img src="../assets/images/slide4.jpeg" alt="Partner 4"></div>
-<div class="slide-item"><img src="../assets/images/slide5.jpeg" alt="Partner 5"></div>
-<div class="slide-item"><img src="../assets/images/slide2.jpeg" alt="Partner 2"></div>
-<div class="slide-item"><img src="../assets/images/slide3.jpeg" alt="Partner 3"></div>
+<div class="slide-item"><img src="assets/images/slide1.jpeg" alt="Partner 1"></div>
+<div class="slide-item"><img src="assets/images/slide2.jpeg" alt="Partner 2"></div>
+<div class="slide-item"><img src="assets/images/slide3.jpeg" alt="Partner 3"></div>
+<div class="slide-item"><img src="assets/images/slide4.jpeg" alt="Partner 4"></div>
+<div class="slide-item"><img src="assets/images/slide5.jpeg" alt="Partner 5"></div>
+<div class="slide-item"><img src="assets/images/slide6.jpeg" alt="Partner 6"></div>
+<div class="slide-item"><img src="assets/images/slide4.jpeg" alt="Partner 4"></div>
+<div class="slide-item"><img src="assets/images/slide5.jpeg" alt="Partner 5"></div>
+<div class="slide-item"><img src="assets/images/slide2.jpeg" alt="Partner 2"></div>
+<div class="slide-item"><img src="assets/images/slide3.jpeg" alt="Partner 3"></div>
 </div>
 </div>
 </div>
@@ -1423,7 +1476,7 @@ Read Guide
 <div class="cta-banner">
 <h3>🚀 Ready to Start Trading?</h3>
 <p>Join over 50,000+ traders earning daily profits with ABOTRA-PROAI</p>
-<a href="register.html" class="btn-primary">
+<a href="pages/register.html" class="btn-primary">
 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
 Create Free Account
 </a>
@@ -1472,172 +1525,105 @@ Create Free Account
 </div>
 
 <script>
-// ========== ROBOT DATA - ALL IMAGES ARE .png ==========
+// ============================================================
+// BACKEND API TEST FUNCTION
+// ============================================================
+async function testBackendConnection() {
+    try {
+        console.log('[ABOTRA] 🔍 Testing backend connection...');
+        const response = await fetch(`${CONFIG.API_URL}/api/health`);
+        const data = await response.json();
+        console.log('[ABOTRA] ✅ Backend connected:', data);
+        return data;
+    } catch (error) {
+        console.error('[ABOTRA] ❌ Backend connection failed:', error.message);
+        return null;
+    }
+}
+
+// ============================================================
+// LIVE BTC PRICE FROM BACKEND OR BINANCE
+// ============================================================
+async function fetchBTCPrice() {
+    try {
+        // Try backend first
+        const response = await fetch(`${CONFIG.API_URL}/api/chart/price?symbol=BTCUSDT`);
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('btcPrice').innerHTML = `$${data.price.toFixed(2)}`;
+            return;
+        }
+    } catch (error) {
+        // Fallback to Binance
+        try {
+            const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+            const data = await response.json();
+            const price = parseFloat(data.price).toFixed(2);
+            document.getElementById('btcPrice').innerHTML = `$${price}`;
+        } catch (err) {
+            document.getElementById('btcPrice').innerHTML = `$67,500`;
+        }
+    }
+}
+
+// ============================================================
+// ROBOT DATA
+// ============================================================
 const robots = [
     { 
-        id: 0,
-        icon: "🔥", 
-        name: "Starter Bot", 
-        profit: "3%", 
-        price: 10, 
-        level: 0, 
-        minTrade: 3, 
-        maxTrade: 80, 
+        id: 0, icon: "🔥", name: "Starter Bot", profit: "3%", price: 10, level: 0, minTrade: 3, maxTrade: 80, 
         description: "✨ Start your AI trading journey! Perfect for beginners. Low-cost entry with steady 3% daily returns.",
-        image: "../assets/images/robot0.png",
-        hot: false,
-        isStarter: true,
-        winRate: 80
+        image: "assets/images/robot0.png", hot: false, isStarter: true, winRate: 80
     },
     { 
-        id: 1,
-        icon: "🥉", 
-        name: "Bronze Bot", 
-        profit: "4%", 
-        price: 30, 
-        level: 1, 
-        minTrade: 10, 
-        maxTrade: 100, 
+        id: 1, icon: "🥉", name: "Bronze Bot", profit: "4%", price: 30, level: 1, minTrade: 10, maxTrade: 100,
         description: "Entry-level AI bot perfect for beginners learning automated trading. Low risk, steady returns.",
-        image: "../assets/images/robot1.png",
-        hot: false,
-        isStarter: false,
-        winRate: 86
+        image: "assets/images/robot1.png", hot: false, isStarter: false, winRate: 86
     },
     { 
-        id: 2,
-        icon: "🥈", 
-        name: "Silver Bot", 
-        profit: "5%", 
-        price: 72, 
-        level: 2, 
-        minTrade: 30, 
-        maxTrade: 500, 
+        id: 2, icon: "🥈", name: "Silver Bot", profit: "5%", price: 72, level: 2, minTrade: 30, maxTrade: 500,
         description: "Enhanced AI algorithms for more consistent daily returns. Medium-low risk profile.",
-        image: "../assets/images/robot2.png",
-        hot: false,
-        isStarter: false,
-        winRate: 87
+        image: "assets/images/robot2.png", hot: false, isStarter: false, winRate: 87
     },
     { 
-        id: 3,
-        icon: "🥇", 
-        name: "Gold Bot", 
-        profit: "7%", 
-        price: 120, 
-        level: 3, 
-        minTrade: 50, 
-        maxTrade: 2000, 
+        id: 3, icon: "🥇", name: "Gold Bot", profit: "7%", price: 120, level: 3, minTrade: 50, maxTrade: 2000,
         description: "Premium trading with advanced market analysis. Best seller! High accuracy.",
-        image: "../assets/images/robot3.png",
-        hot: true,
-        isStarter: false,
-        winRate: 88
+        image: "assets/images/robot3.png", hot: true, isStarter: false, winRate: 88
     },
     { 
-        id: 4,
-        icon: "💎", 
-        name: "Platinum Bot", 
-        profit: "9%", 
-        price: 180, 
-        level: 4, 
-        minTrade: 90, 
-        maxTrade: 5000, 
+        id: 4, icon: "💎", name: "Platinum Bot", profit: "9%", price: 180, level: 4, minTrade: 90, maxTrade: 5000,
         description: "Multi-strategy trading bot with real-time market adaptation. Medium-high returns.",
-        image: "../assets/images/robot4.png",
-        hot: false,
-        isStarter: false,
-        winRate: 89
+        image: "assets/images/robot4.png", hot: false, isStarter: false, winRate: 89
     },
     { 
-        id: 5,
-        icon: "💠", 
-        name: "Diamond Bot", 
-        profit: "11%", 
-        price: 240, 
-        level: 5, 
-        minTrade: 120, 
-        maxTrade: 20000, 
+        id: 5, icon: "💠", name: "Diamond Bot", profit: "11%", price: 240, level: 5, minTrade: 120, maxTrade: 20000,
         description: "High-frequency trading with superior risk management. For serious traders.",
-        image: "../assets/images/robot5.png",
-        hot: false,
-        isStarter: false,
-        winRate: 90
+        image: "assets/images/robot5.png", hot: false, isStarter: false, winRate: 90
     },
     { 
-        id: 6,
-        icon: "🟢", 
-        name: "Emerald Bot", 
-        profit: "15%", 
-        price: 300, 
-        level: 6, 
-        minTrade: 150, 
-        maxTrade: 50000, 
+        id: 6, icon: "🟢", name: "Emerald Bot", profit: "15%", price: 300, level: 6, minTrade: 150, maxTrade: 50000,
         description: "Green energy trading focused on sustainable profit growth. Eco-friendly AI.",
-        image: "../assets/images/robot6.png",
-        hot: false,
-        isStarter: false,
-        winRate: 91
+        image: "assets/images/robot6.png", hot: false, isStarter: false, winRate: 91
     },
     { 
-        id: 7,
-        icon: "❤️", 
-        name: "Ruby Bot", 
-        profit: "19%", 
-        price: 450, 
-        level: 7, 
-        minTrade: 200, 
-        maxTrade: 100000, 
+        id: 7, icon: "❤️", name: "Ruby Bot", profit: "19%", price: 450, level: 7, minTrade: 200, maxTrade: 100000,
         description: "Aggressive trading bot with high return potential. For experienced investors.",
-        image: "../assets/images/robot7.png",
-        hot: true,
-        isStarter: false,
-        winRate: 92
+        image: "assets/images/robot7.png", hot: true, isStarter: false, winRate: 92
     },
     { 
-        id: 8,
-        icon: "🔵", 
-        name: "Sapphire Bot", 
-        profit: "23%", 
-        price: 560, 
-        level: 8, 
-        minTrade: 250, 
-        maxTrade: 200000, 
+        id: 8, icon: "🔵", name: "Sapphire Bot", profit: "23%", price: 560, level: 8, minTrade: 250, maxTrade: 200000,
         description: "Institutional-grade AI with deep market insights. Professional trading.",
-        image: "../assets/images/robot8.png",
-        hot: false,
-        isStarter: false,
-        winRate: 93
+        image: "assets/images/robot8.png", hot: false, isStarter: false, winRate: 93
     },
     { 
-        id: 9,
-        icon: "⚫", 
-        name: "Onyx Bot", 
-        profit: "28%", 
-        price: 720, 
-        level: 9, 
-        minTrade: 300, 
-        maxTrade: 350000, 
+        id: 9, icon: "⚫", name: "Onyx Bot", profit: "28%", price: 720, level: 9, minTrade: 300, maxTrade: 350000,
         description: "Black box trading with proprietary AI algorithms. Elite performance.",
-        image: "../assets/images/robot9.png",
-        hot: false,
-        isStarter: false,
-        winRate: 94
+        image: "assets/images/robot9.png", hot: false, isStarter: false, winRate: 94
     },
     { 
-        id: 10,
-        icon: "🏆", 
-        name: "Legendary Bot", 
-        profit: "38%", 
-        price: 1000, 
-        level: 10, 
-        minTrade: 500, 
-        maxTrade: 500000, 
+        id: 10, icon: "🏆", name: "Legendary Bot", profit: "38%", price: 1000, level: 10, minTrade: 500, maxTrade: 500000,
         description: "Ultimate AI trading bot - maximum profit potential! The final level.",
-        image: "../assets/images/robot10.png",
-        hot: true,
-        isStarter: false,
-        winRate: 95
+        image: "assets/images/robot10.png", hot: true, isStarter: false, winRate: 95
     }
 ];
 
@@ -1671,7 +1657,7 @@ if(robotsGrid) {
                     <div class="robot-stat"><div class="robot-stat-label">Monthly ROI</div><div class="robot-stat-value">${profitValue * 30}%</div></div>
                     <div class="robot-stat"><div class="robot-stat-label">Min Trade</div><div class="robot-stat-value">$${robot.minTrade}</div></div>
                 </div>
-                <button class="buy-robot-btn" onclick="event.stopPropagation(); window.location.href='register.html'">
+                <button class="buy-robot-btn" onclick="event.stopPropagation(); window.location.href='pages/register.html'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     Buy Now
                 </button>
@@ -1680,6 +1666,42 @@ if(robotsGrid) {
         robotsGrid.appendChild(card);
     });
 }
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function openModal(title, subtitle, content, btnText, btnLink) {
+    document.getElementById('modalTitle').innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        ${title}
+    `;
+    document.getElementById('modalSubtitle').textContent = subtitle || 'Complete guide for ABOTRA-PROAI';
+    document.getElementById('modalBody').textContent = content;
+    document.getElementById('modalActionBtn').innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        ${btnText || 'Get Started'}
+    `;
+    document.getElementById('modalActionBtn').onclick = function() {
+        if (btnLink) {
+            window.location.href = btnLink;
+        } else {
+            document.getElementById('guideModal').classList.remove('active');
+        }
+    };
+    document.getElementById('guideModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('guideModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
+document.getElementById('guideModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
 
 function showRobotDetails(robot) {
     const content = `
@@ -1717,127 +1739,13 @@ ${robot.description}
         `Level ${robot.level} • Daily Profit ${robot.profit} • Min Trade $${robot.minTrade}`,
         content,
         'Buy This Robot',
-        'register.html'
+        'pages/register.html'
     );
 }
 
-// ========== MODAL FUNCTIONS ==========
-function openModal(title, subtitle, content, btnText, btnLink) {
-    document.getElementById('modalTitle').innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        ${title}
-    `;
-    document.getElementById('modalSubtitle').textContent = subtitle || 'Complete guide for ABOTRA-PROAI';
-    document.getElementById('modalBody').textContent = content;
-    document.getElementById('modalActionBtn').innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-        ${btnText || 'Get Started'}
-    `;
-    document.getElementById('modalActionBtn').onclick = function() {
-        if (btnLink) {
-            window.location.href = btnLink;
-        } else {
-            document.getElementById('guideModal').classList.remove('active');
-        }
-    };
-    document.getElementById('guideModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    document.getElementById('guideModal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
-
-document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
-document.getElementById('guideModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
-
-// ========== THEME TOGGLE ==========
-function initTheme() {
-    const savedTheme = localStorage.getItem('abotra_theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        document.querySelector('#themeToggle svg:first-child').style.display = 'none';
-        document.querySelector('#themeToggle svg:last-child').style.display = 'inline-block';
-    } else {
-        document.body.classList.remove('light-theme');
-        document.querySelector('#themeToggle svg:first-child').style.display = 'inline-block';
-        document.querySelector('#themeToggle svg:last-child').style.display = 'none';
-    }
-}
-
-document.getElementById('themeToggle').addEventListener('click', function() {
-    if (document.body.classList.contains('light-theme')) {
-        document.body.classList.remove('light-theme');
-        localStorage.setItem('abotra_theme', 'dark');
-        document.querySelector('#themeToggle svg:first-child').style.display = 'inline-block';
-        document.querySelector('#themeToggle svg:last-child').style.display = 'none';
-    } else {
-        document.body.classList.add('light-theme');
-        localStorage.setItem('abotra_theme', 'light');
-        document.querySelector('#themeToggle svg:first-child').style.display = 'none';
-        document.querySelector('#themeToggle svg:last-child').style.display = 'inline-block';
-    }
-});
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if(target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-});
-
-// ========== LIVE BTC PRICE ==========
-async function fetchBTCPrice() {
-    try {
-        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-        const data = await response.json();
-        const price = parseFloat(data.price).toFixed(2);
-        document.getElementById('btcPrice').innerHTML = `$${price}`;
-    } catch(error) {
-        document.getElementById('btcPrice').innerHTML = `$67,500`;
-    }
-}
-
-// ========== LIVE STATS ==========
-function updateLiveStats() {
-    const activeRobotsCount = Math.floor(Math.random() * (3000 - 800 + 1) + 800);
-    const onlineUsersCount = Math.floor(Math.random() * (600 - 150 + 1) + 150);
-    const volume = (Math.random() * (5 - 1) + 1).toFixed(1);
-    document.getElementById('activeRobots').innerHTML = activeRobotsCount.toLocaleString();
-    document.getElementById('onlineUsers').innerHTML = onlineUsersCount;
-    document.getElementById('totalVolume').innerHTML = `$${volume}M`;
-}
-
-fetchBTCPrice();
-setInterval(fetchBTCPrice, 30000);
-setInterval(updateLiveStats, 10000);
-
-// ========== SCROLL ANIMATIONS ==========
-const observerOptions = { threshold: 0.5 };
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, observerOptions);
-
-document.querySelectorAll('.stat-item, .robot-card, .feature-card, .testimonial-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'all 0.6s ease';
-    observer.observe(el);
-});
-
-// ========== SHOW GUIDE ==========
+// ============================================================
+// SHOW GUIDE
+// ============================================================
 window.showGuide = function(type) {
     const guides = {
         register: `🔐 ACCOUNT SETUP GUIDE
@@ -1861,14 +1769,8 @@ window.showGuide = function(type) {
    • Go to Account page
    • Add your country (important for payment methods)
    • Add your phone number (for withdrawals)
-   • Upload a profile picture (optional)
-
-✅ After completing these steps:
-   • You can now deposit funds
-   • You can purchase AI robots
-   • You can refer friends
-   • You can start earning daily profits!`,
-
+   • Upload a profile picture (optional)`,
+        
         robots: `🤖 AI ROBOT LEVELS - COMPLETE GUIDE
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1876,62 +1778,22 @@ window.showGuide = function(type) {
 📊 ALL 11 ROBOT LEVELS:
 
 0️⃣ STARTER BOT - $10 (3% daily) | Min Trade: $3
-   • Perfect entry-level bot! Start your AI journey with just $10
-
 1️⃣ BRONZE BOT - $30 (4% daily) | Min Trade: $10
-   • Entry level bot perfect for beginners
-
 2️⃣ SILVER BOT - $72 (5% daily) | Min Trade: $30
-   • Enhanced AI algorithms for consistent returns
-
 3️⃣ GOLD BOT - $120 (7% daily) | Min Trade: $50
-   • Premium trading with advanced analysis. BEST SELLER!
-
 4️⃣ PLATINUM BOT - $180 (9% daily) | Min Trade: $90
-   • Multi-strategy trading with real-time market adaptation
-
 5️⃣ DIAMOND BOT - $240 (11% daily) | Min Trade: $120
-   • High-frequency trading with superior risk management
-
 6️⃣ EMERALD BOT - $300 (15% daily) | Min Trade: $150
-   • Green energy trading focused on sustainable profit growth
-
 7️⃣ RUBY BOT - $450 (19% daily) | Min Trade: $200
-   • Aggressive trading bot with high return potential
-
 8️⃣ SAPPHIRE BOT - $560 (23% daily) | Min Trade: $250
-   • Institutional-grade AI with deep market insights
-
 9️⃣ ONYX BOT - $720 (28% daily) | Min Trade: $300
-   • Black box proprietary AI with elite performance
+🔟 LEGENDARY BOT - $1,000 (38% daily) | Min Trade: $500`,
 
-🔟 LEGENDARY BOT - $1,000 (38% daily) | Min Trade: $500
-   • Ultimate AI trading bot - maximum profit potential!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📈 HOW TO BUY A ROBOT:
-   1. Deposit the required amount (minimum equals robot price)
-   2. Go to Dashboard → Robots
-   3. Select your preferred robot
-   4. Click "Purchase Robot"
-   5. Robot starts trading automatically within 24 hours
-
-💡 TIP: Higher level robots = higher daily profits!`,
-
-        deposit: `💸 DEPOSIT METHODS - COMPLETE GUIDE
+        deposit: `💸 DEPOSIT METHODS
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💰 MINIMUM DEPOSIT: $10 USD
-
-🏦 AVAILABLE DEPOSIT METHODS:
-
-1️⃣ BANK TRANSFER (Local Banks)
-2️⃣ CRYPTOCURRENCY (BTC, ETH, USDT, BNB)
-3️⃣ BINANCE PAY
-4️⃣ P2P TRADING
-5️⃣ MOBILE MONEY (M-Pesa, TigoPesa, Airtel Money, Halopesa, MTN, TNM)
 
 📝 HOW TO DEPOSIT:
    1. Login to your account
@@ -1946,7 +1808,7 @@ window.showGuide = function(type) {
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💵 MINIMUM WITHDRAWAL: $20 USD
+💵 MINIMUM WITHDRAWAL: $2 USD
 ⏰ PROCESSING TIME: 24 hours
 💰 WITHDRAWAL FEE: 10%
 
@@ -1955,14 +1817,12 @@ window.showGuide = function(type) {
    2. Go to Dashboard → Withdraw
    3. Select your country
    4. Choose withdrawal method
-   5. Enter amount (minimum $20)
+   5. Enter amount (minimum $2)
    6. Enter your phone number or bank details
    7. Click "Request Withdrawal"
-   8. Wait for admin approval (24 hours)
+   8. Wait for admin approval (24 hours)`,
 
-⚠️ KYC verification required before first withdrawal`,
-
-        referral: `👥 REFERRAL PROGRAM - EARN 5% COMMISSION
+        referral: `👥 REFERRAL PROGRAM
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1972,11 +1832,7 @@ window.showGuide = function(type) {
 📝 HOW IT WORKS:
    1. Get your unique referral link from Dashboard → Affiliate
    2. Share your link on social media, WhatsApp, Telegram
-   3. Earn 5% commission when they deposit
-
-📊 EXAMPLE EARNINGS:
-   • 10 friends × $1,000 deposit = $10,000 total
-   • Your commission: 5% × $10,000 = $500!`,
+   3. Earn 5% commission when they deposit`,
 
         trading: `📈 AI TRADING SYSTEM
 
@@ -1985,15 +1841,10 @@ window.showGuide = function(type) {
 🤖 AI TRADING EXPLANATION:
 Our AI system uses advanced algorithms to analyze cryptocurrency markets 24/7 and execute profitable trades automatically.
 
-⚙️ HOW PROFIT IS CALCULATED:
-   Daily Profit = (Allocated Amount × Daily Rate × Multiplier) / 100
-
 🛡️ RISK MANAGEMENT:
    • Stop-loss protection on every trade
    • Maximum drawdown limits
-   • Diversified trading across multiple pairs
-
-⚠️ IMPORTANT: Trading involves risk of loss. Never invest more than you can afford to lose.`,
+   • Diversified trading across multiple pairs`,
 
         faq: `❓ FREQUENTLY ASKED QUESTIONS
 
@@ -2007,24 +1858,14 @@ Our AI system uses advanced algorithms to analyze cryptocurrency markets 24/7 an
    Q: Minimum deposit? A: $10
    Q: Minimum withdrawal? A: $20
    Q: How long do withdrawals take? A: Within 24 hours
-   Q: Are there withdrawal fees? A: Yes, 10% platform fee
-
-🤖 ROBOTS & TRADING:
-   Q: How many robots can I buy? A: You can buy all 11 robots!
-   Q: Do robots trade automatically? A: Yes! AI trades 24/7 without manual intervention.`,
+   Q: Are there withdrawal fees? A: Yes, 10% platform fee`,
 
         support: `🆘 SUPPORT & HELP
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📧 EMAIL SUPPORT: abotraproai@gmail.com
-💬 WHATSAPP SUPPORT: [Click to join groups]
-📱 LIVE CHAT: Available on website (bottom right)
-
-📋 COMMON ISSUES & SOLUTIONS:
-   1️⃣ Can't login? → Reset password or clear browser cache
-   2️⃣ Withdrawal pending? → Check KYC status
-   3️⃣ Deposit not confirmed? → Send payment proof to support`
+📱 LIVE CHAT: Available on website (bottom right)`
     };
     
     const guideData = guides[type] || "Guide not available.";
@@ -2033,33 +1874,94 @@ Our AI system uses advanced algorithms to analyze cryptocurrency markets 24/7 an
     const cleanTitle = titleLine.replace(/[🔐🤖💸💰👥📈❓🆘]/g, '').trim();
     const emoji = titleLine.match(/[🔐🤖💸💰👥📈❓🆘]/g) || ['📖'];
     
-    let subtitle = 'Complete guide for ABOTRA-PROAI';
-    if (lines.length > 1 && lines[1].includes('━')) {
-        subtitle = lines[2] || 'Complete guide for ABOTRA-PROAI';
-    }
-    
     let btnText = 'Get Started';
-    let btnLink = 'register.html';
+    let btnLink = 'pages/register.html';
     
     if (type === 'robots') { btnText = 'View All Robots'; btnLink = '#robots'; }
-    else if (type === 'deposit') { btnText = 'Go to Deposit'; btnLink = 'deposit.html'; }
-    else if (type === 'withdraw') { btnText = 'Go to Withdraw'; btnLink = 'withdraw.html'; }
-    else if (type === 'register') { btnText = 'Create Account'; btnLink = 'register.html'; }
-    else if (type === 'referral') { btnText = 'Refer Friends'; btnLink = 'dashboard.html#affiliate'; }
-    else if (type === 'trading') { btnText = 'Start Trading'; btnLink = 'dashboard.html'; }
+    else if (type === 'deposit') { btnText = 'Go to Deposit'; btnLink = 'pages/deposit.html'; }
+    else if (type === 'withdraw') { btnText = 'Go to Withdraw'; btnLink = 'pages/withdraw.html'; }
+    else if (type === 'register') { btnText = 'Create Account'; btnLink = 'pages/register.html'; }
+    else if (type === 'referral') { btnText = 'Refer Friends'; btnLink = 'pages/dashboard.html#affiliate'; }
+    else if (type === 'trading') { btnText = 'Start Trading'; btnLink = 'pages/dashboard.html'; }
     else if (type === 'support') { btnText = 'Contact Support'; btnLink = '#support'; }
     
     openModal(
         `${emoji[0] || '📖'} ${cleanTitle || 'User Guide'}`,
-        subtitle,
+        'Complete guide for ABOTRA-PROAI',
         guideData,
         btnText,
         btnLink
     );
 };
 
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function setTheme(theme) {
+    document.body.classList.remove('light-theme', 'dark-theme');
+    document.body.classList.add(theme);
+    localStorage.setItem('abotra_theme', theme);
+}
+
+// INIT
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme') || 'dark-theme';
+    setTheme(saved);
+}
+
+// TOGGLE
+document.getElementById('themeToggle').addEventListener('click', function() {
+    const isLight = document.body.classList.contains('light-theme');
+    setTheme(isLight ? 'dark-theme' : 'light-theme');
+});
+
+// ============================================================
+// LIVE STATS
+// ============================================================
+function updateLiveStats() {
+    const activeRobotsCount = Math.floor(Math.random() * (3000 - 800 + 1) + 800);
+    const onlineUsersCount = Math.floor(Math.random() * (600 - 150 + 1) + 150);
+    const volume = (Math.random() * (5 - 1) + 1).toFixed(1);
+    document.getElementById('activeRobots').innerHTML = activeRobotsCount.toLocaleString();
+    document.getElementById('onlineUsers').innerHTML = onlineUsersCount;
+    document.getElementById('totalVolume').innerHTML = `$${volume}M`;
+}
+
+// ============================================================
+// SCROLL ANIMATIONS
+// ============================================================
+const observerOptions = { threshold: 0.5 };
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.stat-item, .robot-card, .feature-card, .testimonial-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'all 0.6s ease';
+    observer.observe(el);
+});
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
 initTheme();
-console.log('ABOTRA-PROAI Landing Page Loaded Successfully!');
+fetchBTCPrice();
+setInterval(fetchBTCPrice, 30000);
+setInterval(updateLiveStats, 10000);
+
+// Test backend connection on load
+testBackendConnection();
+
+console.log('[ABOTRA] 🚀 Platform initialized successfully!');
+console.log('[ABOTRA] 🔗 Backend URL:', CONFIG.API_URL);
+console.log('[ABOTRA] 🌍 Environment:', CONFIG.ENVIRONMENT);
+console.log('[ABOTRA] 📦 Version:', CONFIG.VERSION);
 </script>
 </body>
 </html>

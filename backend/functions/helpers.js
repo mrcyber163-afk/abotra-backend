@@ -1,10 +1,48 @@
-// ============================================================
-// HELPERS.JS - Utility Functions
-// ============================================================
-// Location: backend/functions/helpers.js
-// ============================================================
-
 const { getDB, testConnection } = require('./firebase');
+
+// ============================================================
+// SNAPSHOT HELPER - For REST API compatibility
+// ============================================================
+class Snapshot {
+    constructor(data) {
+        this._data = data;
+        this.key = null;
+        this.ref = null;
+    }
+    
+    exists() {
+        return this._data !== null && this._data !== undefined;
+    }
+    
+    val() {
+        return this._data;
+    }
+    
+    forEach(callback) {
+        if (this._data && typeof this._data === 'object') {
+            for (const key of Object.keys(this._data)) {
+                const childSnapshot = new Snapshot(this._data[key]);
+                childSnapshot.key = key;
+                callback(childSnapshot);
+            }
+        }
+    }
+    
+    numChildren() {
+        if (this._data && typeof this._data === 'object') {
+            return Object.keys(this._data).length;
+        }
+        return 0;
+    }
+    
+    child() {
+        return this;
+    }
+    
+    toJSON() {
+        return this._data;
+    }
+}
 
 // ============================================================
 // TRANSACTION WITH RETRY
@@ -217,6 +255,9 @@ function randomItem(arr) {
 // EXPORTS
 // ============================================================
 module.exports = {
+    // Snapshot
+    Snapshot,
+    
     // Transaction
     runTransaction,
     safeTransaction,

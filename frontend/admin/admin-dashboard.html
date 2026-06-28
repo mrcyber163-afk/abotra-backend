@@ -9,6 +9,22 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0',
+    VAPID_PUBLIC_KEY: 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
 <style>
 * {
     margin: 0;
@@ -925,10 +941,6 @@ body.light-theme .confirm-modal-title {
     border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-.confirm-modal-details .detail-row:last-child {
-    border-bottom: none;
-}
-
 .confirm-modal-details .detail-label {
     color: #888;
 }
@@ -1471,6 +1483,171 @@ const auth = firebase.auth();
 let currentAdminId = null;
 let currentAdminEmail = null;
 let notificationListener = null;
+let swRegistration = null;
+
+const VAPID_PUBLIC_KEY = CONFIG.VAPID_PUBLIC_KEY;
+
+// ============================================================
+// SERVICE WORKER REGISTRATION - FIXED
+// ============================================================
+async function registerServiceWorker() {
+    try {
+        if ('serviceWorker' in navigator) {
+            // Check if SW already registered
+            const existingRegistration = await navigator.serviceWorker.getRegistration();
+            if (existingRegistration) {
+                console.log('[SW] Already registered:', existingRegistration);
+                swRegistration = existingRegistration;
+                return existingRegistration;
+            }
+            
+            // Register new SW
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            });
+            
+            console.log('[SW] ✅ Service Worker registered:', registration);
+            swRegistration = registration;
+            
+            // Handle waiting state
+            if (registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            
+            // Handle updating
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'activated') {
+                        console.log('[SW] ✅ New worker activated');
+                    }
+                });
+            });
+            
+            return registration;
+        }
+    } catch (error) {
+        console.warn('[SW] Service Worker registration failed:', error);
+        // Continue without SW - notifications will still work via browser API
+        return null;
+    }
+    return null;
+}
+
+// ============================================================
+// FALLBACK: Browser Notification API
+// ============================================================
+function sendBrowserNotification(title, body, link = null) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const options = {
+                body: body,
+                icon: '../assets/images/logo.png',
+                badge: '../assets/images/logo.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: 'admin_' + Date.now()
+            };
+            
+            const notif = new Notification(title, options);
+            notif.onclick = () => {
+                window.focus();
+                if (link) window.location.href = link;
+            };
+            
+            console.log('[PUSH] Browser notification sent:', title);
+            return true;
+        } catch (e) {
+            console.warn('[PUSH] Browser notification error:', e);
+            return false;
+        }
+    }
+    return false;
+}
+
+// ============================================================
+// REQUEST PUSH PERMISSION
+// ============================================================
+async function requestPushPermission() {
+    try {
+        if (!('Notification' in window)) {
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            await subscribeToPush();
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            await subscribeToPush();
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.warn('[PUSH] Permission error:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// SUBSCRIBE TO PUSH
+// ============================================================
+async function subscribeToPush() {
+    try {
+        if (!swRegistration) {
+            await registerServiceWorker();
+            if (!swRegistration) return null;
+        }
+        
+        if (!VAPID_PUBLIC_KEY) {
+            console.warn('[PUSH] No VAPID key');
+            return null;
+        }
+        
+        const subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: VAPID_PUBLIC_KEY
+        });
+        
+        console.log('[PUSH] Admin subscribed:', subscription.endpoint);
+        return subscription;
+    } catch (error) {
+        console.warn('[PUSH] Subscription error:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// SEND DEVICE PUSH NOTIFICATION
+// ============================================================
+function sendDevicePushNotification(title, body, type = 'info', link = null) {
+    // Try Service Worker push first
+    if (swRegistration) {
+        try {
+            swRegistration.showNotification(title, {
+                body: body,
+                icon: '../assets/images/logo.png',
+                badge: '../assets/images/logo.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: 'admin_' + Date.now()
+            });
+            console.log('[PUSH] SW notification sent:', title);
+            return true;
+        } catch (e) {
+            console.warn('[PUSH] SW notification error:', e);
+        }
+    }
+    
+    // Fallback to browser notification
+    return sendBrowserNotification(title, body, link);
+}
 
 // ============================================================
 // TOAST
@@ -1483,6 +1660,11 @@ function showToast(message, type) {
     toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
+    
+    // Also send device push for important notifications
+    if (type === 'success' || type === 'info') {
+        sendDevicePushNotification('🔔 Admin Alert', message, type);
+    }
 }
 
 function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
@@ -1745,24 +1927,19 @@ document.getElementById('clearAllNotifBtn').addEventListener('click', async () =
 });
 
 // ============================================================
-// SEND PUSH NOTIFICATION VIA NETLIFY FUNCTION
+// SEND PUSH NOTIFICATION TO ALL USERS
 // ============================================================
 async function sendPushToAllUsers(title, message) {
     try {
-        // Get all users first
+        // Get all users
         const usersSnap = await db.ref('users').once('value');
         const userIds = [];
-        let userEmails = [];
         
         if (usersSnap.exists()) {
             usersSnap.forEach(child => {
                 const user = child.val();
-                if (user.uid) {
-                    userIds.push(user.uid);
-                } else {
-                    userIds.push(child.key);
-                }
-                if (user.email) userEmails.push(user.email);
+                const uid = user.uid || child.key;
+                userIds.push(uid);
             });
         }
         
@@ -1770,26 +1947,60 @@ async function sendPushToAllUsers(title, message) {
             return { success: false, error: 'No users found' };
         }
         
-        // Send to all via Netlify Function
-        const response = await fetch('/.netlify/functions/send-push-all', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                userIds: userIds,
+        // Save notification to each user
+        const promises = [];
+        for (const userId of userIds) {
+            const notifRef = db.ref(`notifications/${userId}`).push();
+            const notifData = {
+                id: notifRef.key,
                 title: title,
                 message: message,
-                data: {
-                    screen: 'dashboard',
-                    type: 'admin_broadcast',
-                    totalUsers: userIds.length
+                type: 'broadcast',
+                read: false,
+                timestamp: Date.now(),
+                date: new Date().toISOString(),
+                link: 'dashboard.html'
+            };
+            promises.push(notifRef.set(notifData));
+        }
+        
+        await Promise.all(promises);
+        
+        // Send device push notifications
+        const notificationPromises = userIds.map(async (userId) => {
+            try {
+                // Try to send via Service Worker
+                if (swRegistration) {
+                    await swRegistration.showNotification(title, {
+                        body: message,
+                        icon: '../assets/images/logo.png',
+                        badge: '../assets/images/logo.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: true,
+                        tag: 'admin_broadcast_' + Date.now()
+                    });
                 }
-            })
+                
+                // Also send via browser notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notif = new Notification(title, {
+                        body: message,
+                        icon: '../assets/images/logo.png',
+                        badge: '../assets/images/logo.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: true
+                    });
+                    notif.onclick = () => window.focus();
+                }
+            } catch (e) {
+                // Silent fail for individual pushes
+            }
         });
         
-        const result = await response.json();
-        return result;
+        // Wait for all device notifications
+        await Promise.allSettled(notificationPromises);
+        
+        return { success: true, totalUsers: userIds.length };
         
     } catch (error) {
         console.error('❌ Push error:', error);
@@ -1826,6 +2037,8 @@ document.getElementById('sendPushBtn').addEventListener('click', async function(
         
         if (result.success) {
             showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
+            // Send device notification to admin
+            sendDevicePushNotification('✅ Push Sent', `Successfully sent to ${result.totalUsers} users`, 'success');
         } else {
             showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
         }
@@ -2054,6 +2267,10 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 // ============================================================
 async function init() {
     initTheme();
+    
+    // Register service worker for push
+    await registerServiceWorker();
+    
     auth.onAuthStateChanged(async (user) => {
         if (!user) { 
             window.location.href = 'login.html'; 
@@ -2069,6 +2286,11 @@ async function init() {
         await loadRecentDeposits();
         await loadRecentWithdrawals();
         loadAdminNotifications();
+        
+        // Request push permission after login
+        setTimeout(async () => {
+            await requestPushPermission();
+        }, 2000);
         
         setInterval(async () => {
             await loadStats();
