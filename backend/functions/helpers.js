@@ -4,7 +4,76 @@
 // Location: backend/functions/helpers.js
 // ============================================================
 
-const { getDB, testConnection } = require('./firebase');
+// ============================================================
+// SNAPSHOT HELPER - For REST API compatibility
+// ============================================================
+class Snapshot {
+    constructor(data) {
+        this._data = data;
+        this.key = null;
+        this.ref = null;
+    }
+    
+    exists() {
+        return this._data !== null && this._data !== undefined;
+    }
+    
+    val() {
+        return this._data;
+    }
+    
+    forEach(callback) {
+        if (this._data && typeof this._data === 'object') {
+            for (const key of Object.keys(this._data)) {
+                const childSnapshot = new Snapshot(this._data[key]);
+                childSnapshot.key = key;
+                callback(childSnapshot);
+            }
+        }
+    }
+    
+    numChildren() {
+        if (this._data && typeof this._data === 'object') {
+            return Object.keys(this._data).length;
+        }
+        return 0;
+    }
+    
+    child() {
+        return this;
+    }
+    
+    toJSON() {
+        return this._data;
+    }
+}
+
+// ============================================================
+// GET DB WITH CACHE
+// ============================================================
+let cachedDB = null;
+
+function getDB() {
+    if (cachedDB) return cachedDB;
+    try {
+        const firebase = require('./firebase');
+        cachedDB = firebase.getDB();
+        return cachedDB;
+    } catch (error) {
+        console.error('[HELPERS] Failed to get DB:', error.message);
+        return null;
+    }
+}
+
+async function testConnection() {
+    try {
+        const firebase = require('./firebase');
+        return await firebase.testConnection();
+    } catch (error) {
+        console.error('[HELPERS] Connection test failed:', error.message);
+        return false;
+    }
+}
 
 // ============================================================
 // TRANSACTION WITH RETRY
@@ -21,11 +90,22 @@ async function runTransaction(path, updateFn, maxRetries = 3) {
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-            const result = await ref.transaction(updateFn);
-            if (result.committed) {
-                return result;
+            // Use our custom transaction
+            const snapshot = await ref.once('value');
+            const currentData = snapshot.val();
+            const newData = updateFn(currentData);
+            
+            if (newData !== undefined && newData !== null) {
+                await ref.set(newData);
+                return { 
+                    committed: true, 
+                    snapshot: new Snapshot(newData) 
+                };
             }
-            return result;
+            return { 
+                committed: false, 
+                snapshot: new Snapshot(currentData) 
+            };
         } catch (error) {
             lastError = error;
             console.error(`[TRANSACTION] Error on attempt ${attempt + 1}:`, error.message);
@@ -217,6 +297,13 @@ function randomItem(arr) {
 // EXPORTS
 // ============================================================
 module.exports = {
+    // Snapshot
+    Snapshot,
+    
+    // DB
+    getDB,
+    testConnection,
+    
     // Transaction
     runTransaction,
     safeTransaction,

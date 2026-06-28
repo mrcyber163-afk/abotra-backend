@@ -203,7 +203,7 @@ app.use((err, req, res, next) => {
 // ============================================================
 // START SERVER - ALWAYS RUNS
 // ============================================================
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8081;
 
 const server = app.listen(PORT, async () => {
     console.log(`[SERVER] ✅ Running on port ${PORT}`);

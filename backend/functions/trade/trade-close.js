@@ -11,11 +11,11 @@ async function closeTrade(userId, tradeId, reason = 'Manual') {
     const db = getDB();
     const priceStream = getPriceStream();
     
-    // Get trade
+    // Get trade - REST API returns data directly
     const tradeSnap = await db.ref(`trades/${userId}/${tradeId}`).once('value');
-    if (!tradeSnap.exists()) throw new Error('Trade not found');
     const trade = tradeSnap.val();
     
+    if (!trade) throw new Error('Trade not found');
     if (trade.status !== 'open') throw new Error('Trade already closed');
     
     // Get current price
@@ -38,7 +38,8 @@ async function closeTrade(userId, tradeId, reason = 'Manual') {
             performanceFeeAmount = pnl * config.PERFORMANCE_FEE_PERCENT;
             const perfFeeRef = db.ref(`performanceFees/${userId}/${tradeId}`);
             const perfSnap = await perfFeeRef.once('value');
-            if (perfSnap.exists()) {
+            const perfData = perfSnap.val();
+            if (perfData) {
                 await perfFeeRef.update({
                     status: 'collected',
                     feeAmount: performanceFeeAmount,
@@ -50,7 +51,8 @@ async function closeTrade(userId, tradeId, reason = 'Manual') {
         } else {
             const perfFeeRef = db.ref(`performanceFees/${userId}/${tradeId}`);
             const perfSnap = await perfFeeRef.once('value');
-            if (perfSnap.exists()) {
+            const perfData = perfSnap.val();
+            if (perfData) {
                 await perfFeeRef.update({
                     status: 'no_profit',
                     profitAmount: pnl,

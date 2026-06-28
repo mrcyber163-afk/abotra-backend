@@ -12,13 +12,16 @@ async function getOpenTrades(userId) {
     const db = getDB();
     const snapshot = await db.ref(`trades/${userId}`).once('value');
     const trades = [];
-    if (snapshot.exists()) {
-        snapshot.forEach(child => {
-            const trade = child.val();
-            if (trade.status === 'open') {
-                trades.push({ id: child.key, ...trade });
+    
+    // REST API returns data directly
+    const data = snapshot.val();
+    if (data && typeof data === 'object') {
+        for (const tradeId of Object.keys(data)) {
+            const trade = data[tradeId];
+            if (trade && trade.status === 'open') {
+                trades.push({ id: tradeId, ...trade });
             }
-        });
+        }
     }
     return trades;
 }
@@ -57,8 +60,9 @@ async function openTrade(userId, tradeData) {
     
     // Get user data
     const userSnap = await db.ref(`users/${userId}`).once('value');
-    if (!userSnap.exists()) throw new Error('User not found');
     const userData = userSnap.val();
+    if (!userData) throw new Error('User not found');
+    
     const tradingBalance = userData.tradingBalance || 0;
     const dailyLoss = userData.dailyLoss || 0;
     
