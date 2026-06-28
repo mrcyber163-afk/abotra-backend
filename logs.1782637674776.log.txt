@@ -1,0 +1,615 @@
+2026-06-28T08:59:00.457537773Z [inf]  Starting Container
+2026-06-28T08:59:00.865436604Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:00.865453753Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:00.865453832Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:00.865465472Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:00.865471994Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:00.865472903Z [err]    throw err;
+2026-06-28T08:59:00.865476284Z [inf]  
+2026-06-28T08:59:00.865482694Z [err]    ^
+2026-06-28T08:59:00.865486478Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:00.865489150Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:00.865493229Z [err]  
+2026-06-28T08:59:00.865500418Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:00.865501863Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:00.865504467Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:00.865511394Z [inf]  
+2026-06-28T08:59:00.865514101Z [err]  Require stack:
+2026-06-28T08:59:00.865521026Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:00.865526598Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:00.865531996Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:00.865537785Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:00.865543131Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:00.865548563Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:00.865558354Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:00.865563298Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:00.866008035Z [err]  Node.js v18.20.5
+2026-06-28T08:59:00.866087952Z [err]  }
+2026-06-28T08:59:00.866096406Z [err]  
+2026-06-28T08:59:00.897634181Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:00.945246047Z [inf]  
+2026-06-28T08:59:00.945258914Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:00.945268110Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:00.945274879Z [inf]  
+2026-06-28T08:59:00.975860429Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:00.975865825Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:00.975869155Z [err]    throw err;
+2026-06-28T08:59:00.975874274Z [err]    ^
+2026-06-28T08:59:00.975880438Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:00.975880448Z [err]  
+2026-06-28T08:59:00.975887332Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:00.975890997Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:00.975893297Z [err]  Require stack:
+2026-06-28T08:59:00.975898706Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:00.975899767Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:00.975904304Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:00.975908520Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:00.975910808Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:00.975917217Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:00.975918299Z [err]  }
+2026-06-28T08:59:00.975923134Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:00.975927843Z [err]  
+2026-06-28T08:59:00.975929093Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:00.975934734Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:00.975936871Z [err]  Node.js v18.20.5
+2026-06-28T08:59:00.975940681Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:02.242500250Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:02.288314102Z [inf]  
+2026-06-28T08:59:02.288321015Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:02.288327799Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:02.288351503Z [inf]  
+2026-06-28T08:59:02.988317800Z [err]  
+2026-06-28T08:59:02.988333110Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:02.988334348Z [err]  Node.js v18.20.5
+2026-06-28T08:59:02.988345672Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:02.988355173Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:02.988361138Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:02.988368432Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:02.988375091Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:02.988387483Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:02.988398763Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:02.988405636Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:02.988406789Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:02.988414943Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:02.988421451Z [err]    throw err;
+2026-06-28T08:59:02.988422176Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:02.988434446Z [err]    ^
+2026-06-28T08:59:02.988436898Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:02.988445183Z [err]  
+2026-06-28T08:59:02.988449665Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:02.988459113Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:02.988459261Z [err]  }
+2026-06-28T08:59:02.988468451Z [err]  Require stack:
+2026-06-28T08:59:03.580167969Z [inf]  Stopping Container
+2026-06-28T08:59:03.900470147Z [inf]  
+2026-06-28T08:59:03.900480955Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:03.900488269Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:03.900493399Z [inf]  
+2026-06-28T08:59:03.900499065Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:03.900504241Z [err]    throw err;
+2026-06-28T08:59:03.900509390Z [err]    ^
+2026-06-28T08:59:03.900515026Z [err]  
+2026-06-28T08:59:03.900520758Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:03.900531601Z [err]  Require stack:
+2026-06-28T08:59:03.900535745Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:03.900542328Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:03.900547999Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:03.900554156Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:03.900559651Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:03.900564493Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:03.900568144Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:03.900572988Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:03.900584439Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:03.900589563Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:03.900594649Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:03.900599299Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:03.900605433Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:03.900610458Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:03.901542743Z [err]  
+2026-06-28T08:59:03.901551879Z [err]  Node.js v18.20.5
+2026-06-28T08:59:03.901626780Z [err]  }
+2026-06-28T08:59:04.953965157Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:04.981460966Z [inf]  
+2026-06-28T08:59:04.981466756Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:04.981472220Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:04.981478551Z [inf]  
+2026-06-28T08:59:05.029974776Z [err]  }
+2026-06-28T08:59:05.029987847Z [err]  
+2026-06-28T08:59:05.029997094Z [err]  Node.js v18.20.5
+2026-06-28T08:59:05.030059062Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:05.030065223Z [err]    throw err;
+2026-06-28T08:59:05.030070805Z [err]    ^
+2026-06-28T08:59:05.030076983Z [err]  
+2026-06-28T08:59:05.030082802Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:05.030089066Z [err]  Require stack:
+2026-06-28T08:59:05.030093718Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:05.030099371Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:05.030104630Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:05.030112130Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:05.030117793Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:05.030122906Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:05.030128360Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:05.030133381Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:05.030138294Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:05.030143023Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:05.030148427Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:05.030153612Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:05.030158293Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:05.573511243Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:05.573516363Z [inf]  
+2026-06-28T08:59:05.573522153Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:05.573526793Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:05.573531583Z [inf]  
+2026-06-28T08:59:05.573535563Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:05.573539603Z [err]    throw err;
+2026-06-28T08:59:05.573543623Z [err]    ^
+2026-06-28T08:59:05.573547553Z [err]  
+2026-06-28T08:59:05.573551443Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:05.573556063Z [err]  Require stack:
+2026-06-28T08:59:05.573559983Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:05.573564143Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:05.573568423Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:05.573572512Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:05.573576722Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:05.573580972Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:05.573585062Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:05.573589322Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:05.573593782Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:05.573598092Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:05.573601892Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:05.573605932Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:05.573609412Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:05.574700354Z [err]  }
+2026-06-28T08:59:05.574704874Z [err]  
+2026-06-28T08:59:05.574709214Z [err]  Node.js v18.20.5
+2026-06-28T08:59:05.883151652Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:05.883155882Z [inf]  
+2026-06-28T08:59:05.883159372Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:05.883163322Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:05.883166862Z [inf]  
+2026-06-28T08:59:05.895236742Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:05.895242102Z [err]    throw err;
+2026-06-28T08:59:05.895245832Z [err]    ^
+2026-06-28T08:59:05.895249712Z [err]  
+2026-06-28T08:59:05.895253522Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:05.895256952Z [err]  Require stack:
+2026-06-28T08:59:05.895260212Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:05.895263572Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:05.895267032Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:05.895270242Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:05.895273132Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:05.895276632Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:05.895279342Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:05.895282332Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:05.895285042Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:05.895288222Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:05.895291432Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:05.895294652Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:05.895297682Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:05.895300482Z [err]  }
+2026-06-28T08:59:05.895303492Z [err]  
+2026-06-28T08:59:05.895306702Z [err]  Node.js v18.20.5
+2026-06-28T08:59:06.022438407Z [inf]  Starting Container
+2026-06-28T08:59:06.876661709Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:06.876673124Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:06.876679525Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:06.876688370Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:06.876982853Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:06.876987712Z [inf]  
+2026-06-28T08:59:06.876992169Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:06.876997815Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:06.877002395Z [inf]  
+2026-06-28T08:59:06.877008727Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:06.877013855Z [err]    throw err;
+2026-06-28T08:59:06.877018306Z [err]    ^
+2026-06-28T08:59:06.877023135Z [err]  
+2026-06-28T08:59:06.877027616Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:06.877032622Z [err]  Require stack:
+2026-06-28T08:59:06.877037274Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:06.877041776Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:06.877046351Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:06.877051224Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:06.877056547Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:06.877061883Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:06.877066525Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:06.877070481Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:06.877075228Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:06.878361502Z [err]  }
+2026-06-28T08:59:06.878369860Z [err]  
+2026-06-28T08:59:06.878377345Z [err]  Node.js v18.20.5
+2026-06-28T08:59:06.883215469Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:06.905176465Z [inf]  
+2026-06-28T08:59:06.905185713Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:06.905193163Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:06.905197023Z [inf]  
+2026-06-28T08:59:06.928917396Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:06.928924066Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:06.928929116Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:06.928934606Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:06.928939416Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:06.928944276Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:06.928948726Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:06.928953756Z [err]  }
+2026-06-28T08:59:06.928958816Z [err]  
+2026-06-28T08:59:06.928964136Z [err]  Node.js v18.20.5
+2026-06-28T08:59:06.928989326Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:06.928997216Z [err]    throw err;
+2026-06-28T08:59:06.929001496Z [err]    ^
+2026-06-28T08:59:06.929006546Z [err]  
+2026-06-28T08:59:06.929010136Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:06.929014896Z [err]  Require stack:
+2026-06-28T08:59:06.929017916Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:06.929020536Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:06.929023846Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:06.929026696Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:06.929029426Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:06.929032326Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:07.699631724Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:07.720404856Z [inf]  
+2026-06-28T08:59:07.720410086Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:07.720414306Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:07.720419766Z [inf]  
+2026-06-28T08:59:07.761371034Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:07.761372064Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:07.761383884Z [err]    throw err;
+2026-06-28T08:59:07.761387474Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:07.761392924Z [err]    ^
+2026-06-28T08:59:07.761396624Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:07.761399564Z [err]  
+2026-06-28T08:59:07.761407584Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:07.761407774Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:07.761417054Z [err]  Require stack:
+2026-06-28T08:59:07.761417664Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:07.761424134Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:07.761427564Z [err]  }
+2026-06-28T08:59:07.761431094Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:07.761437284Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:07.761439674Z [err]  
+2026-06-28T08:59:07.761443644Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:07.761449844Z [err]  Node.js v18.20.5
+2026-06-28T08:59:07.761450944Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:07.761456434Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:07.761459734Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:07.761463654Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:08.013230612Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:08.013242101Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:08.013251330Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:08.013258830Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:08.013265410Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:08.013296542Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:08.013302981Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:08.013309170Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:08.013314604Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:08.013321456Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:08.013329473Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:08.013329763Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:08.013337925Z [inf]  
+2026-06-28T08:59:08.013339678Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:08.013344101Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:08.013348472Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:08.013354151Z [inf]  
+2026-06-28T08:59:08.013358530Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:08.013363295Z [err]    throw err;
+2026-06-28T08:59:08.013369296Z [err]    ^
+2026-06-28T08:59:08.013374576Z [err]  
+2026-06-28T08:59:08.013378872Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:08.013383198Z [err]  Require stack:
+2026-06-28T08:59:08.013387259Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:08.014572893Z [err]  }
+2026-06-28T08:59:08.014577758Z [err]  
+2026-06-28T08:59:08.014582360Z [err]  Node.js v18.20.5
+2026-06-28T08:59:08.604143845Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:08.604148675Z [inf]  
+2026-06-28T08:59:08.604152295Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:08.604155945Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:08.604159715Z [inf]  
+2026-06-28T08:59:08.604163655Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:08.604167225Z [err]    throw err;
+2026-06-28T08:59:08.604170515Z [err]    ^
+2026-06-28T08:59:08.604173945Z [err]  
+2026-06-28T08:59:08.604177005Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:08.604180045Z [err]  Require stack:
+2026-06-28T08:59:08.604183414Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:08.604186504Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:08.604189884Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:08.604193094Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:08.604196024Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:08.604199234Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:08.604202314Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:08.604205334Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:08.604208704Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:08.604211744Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:08.604215624Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:08.604219314Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:08.604222644Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:08.604258404Z [err]  }
+2026-06-28T08:59:08.604272304Z [err]  
+2026-06-28T08:59:08.604278094Z [err]  Node.js v18.20.5
+2026-06-28T08:59:09.008947695Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:09.012243811Z [inf]  
+2026-06-28T08:59:09.012324580Z [inf]  
+2026-06-28T08:59:09.012330721Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:09.012336335Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:09.304305471Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:09.304319261Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:09.304327261Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:09.304335186Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:09.304343706Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:09.304351847Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:09.304358983Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:09.304366001Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:09.304373959Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:09.304381236Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:09.304388620Z [err]  }
+2026-06-28T08:59:09.304396737Z [err]  
+2026-06-28T08:59:09.304404346Z [err]  Node.js v18.20.5
+2026-06-28T08:59:09.304471755Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:09.304477890Z [err]    throw err;
+2026-06-28T08:59:09.304482186Z [err]    ^
+2026-06-28T08:59:09.304487006Z [err]  
+2026-06-28T08:59:09.304492905Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:09.304498690Z [err]  Require stack:
+2026-06-28T08:59:09.304505651Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:09.304510971Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:09.304516004Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:09.340646429Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:09.347074136Z [inf]  
+2026-06-28T08:59:09.347076796Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:09.347079826Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:09.347082686Z [inf]  
+2026-06-28T08:59:09.386129177Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:09.386138257Z [err]    throw err;
+2026-06-28T08:59:09.386142167Z [err]    ^
+2026-06-28T08:59:09.386146127Z [err]  
+2026-06-28T08:59:09.386149637Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:09.386153027Z [err]  Require stack:
+2026-06-28T08:59:09.386156007Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:09.386159337Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:09.386163157Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:09.386166887Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:09.386170147Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:09.386175077Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:09.386178067Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:09.386180757Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:09.386183867Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:09.386186697Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:09.386189707Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:09.386193197Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:09.386197387Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:09.386200887Z [err]  }
+2026-06-28T08:59:09.386203607Z [err]  
+2026-06-28T08:59:09.386206437Z [err]  Node.js v18.20.5
+2026-06-28T08:59:10.338611326Z [inf]  Stopping Container
+2026-06-28T08:59:10.374868432Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:10.379486141Z [inf]  
+2026-06-28T08:59:10.379491121Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:10.379494261Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:10.379496761Z [inf]  
+2026-06-28T08:59:10.420384290Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:10.420390210Z [err]    throw err;
+2026-06-28T08:59:10.420393690Z [err]    ^
+2026-06-28T08:59:10.420398410Z [err]  
+2026-06-28T08:59:10.420402000Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:10.420405210Z [err]  Require stack:
+2026-06-28T08:59:10.420408630Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:10.420411960Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:10.420414930Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:10.420417860Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:10.420422230Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:10.420425370Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:10.420429210Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:10.420432330Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:10.420435270Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:10.420439550Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:10.420442720Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:10.420447250Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:10.420450630Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:10.420454000Z [err]  }
+2026-06-28T08:59:10.420457320Z [err]  
+2026-06-28T08:59:10.420460410Z [err]  Node.js v18.20.5
+2026-06-28T08:59:11.196555393Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:11.201751279Z [inf]  
+2026-06-28T08:59:11.201756428Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:11.201761118Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:11.201763968Z [inf]  
+2026-06-28T08:59:11.240795510Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:11.240798450Z [err]    throw err;
+2026-06-28T08:59:11.240801310Z [err]    ^
+2026-06-28T08:59:11.240804280Z [err]  
+2026-06-28T08:59:11.240808200Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:11.240811140Z [err]  Require stack:
+2026-06-28T08:59:11.240814820Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:11.240817780Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:11.240820860Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:11.240823820Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:11.240826550Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:11.240829980Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:11.240832620Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:11.240835290Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:11.240838860Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:11.240841940Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:11.240844920Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:11.240847720Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:11.240850660Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:11.240853400Z [err]  }
+2026-06-28T08:59:11.240856220Z [err]  
+2026-06-28T08:59:11.240858790Z [err]  Node.js v18.20.5
+2026-06-28T08:59:12.203057120Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:12.207905409Z [inf]  
+2026-06-28T08:59:12.207910369Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:12.207913739Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:12.207916599Z [inf]  
+2026-06-28T08:59:12.247389277Z [err]  
+2026-06-28T08:59:12.247397647Z [err]  Node.js v18.20.5
+2026-06-28T08:59:12.247405787Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:12.247408137Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:12.247422037Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:12.247422327Z [err]    throw err;
+2026-06-28T08:59:12.247432407Z [err]    ^
+2026-06-28T08:59:12.247434407Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:12.247435357Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:12.247441797Z [err]  
+2026-06-28T08:59:12.247441967Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:12.247449117Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:12.247453767Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:12.247454507Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:12.247460616Z [err]  Require stack:
+2026-06-28T08:59:12.247461606Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:12.247466426Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:12.247468256Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:12.247472896Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:12.247475676Z [err]  }
+2026-06-28T08:59:12.247478986Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:12.247482696Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:13.112531622Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:13.133549003Z [inf]  
+2026-06-28T08:59:13.133553363Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:13.133556283Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:13.133558923Z [inf]  
+2026-06-28T08:59:13.173441848Z [err]  Node.js v18.20.5
+2026-06-28T08:59:13.173444888Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:13.173454168Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:13.173459198Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:13.173467458Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:13.173468248Z [err]  }
+2026-06-28T08:59:13.173477248Z [err]  
+2026-06-28T08:59:13.173479248Z [err]    throw err;
+2026-06-28T08:59:13.173482528Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:13.173488218Z [err]    ^
+2026-06-28T08:59:13.173494448Z [err]  
+2026-06-28T08:59:13.173498938Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:13.173504578Z [err]  Require stack:
+2026-06-28T08:59:13.173508108Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:13.173509178Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:13.173514208Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:13.173516958Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:13.173523828Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:13.173524738Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:13.173530308Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:13.173534367Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:13.173539127Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:13.929096528Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T08:59:13.929100168Z [inf]  
+2026-06-28T08:59:13.929103838Z [inf]  > abotra-proai@2.0.0 start
+2026-06-28T08:59:13.929107187Z [inf]  > node backend/functions/index.js
+2026-06-28T08:59:13.929155677Z [inf]  
+2026-06-28T08:59:13.971635206Z [err]  node:internal/modules/cjs/loader:1143
+2026-06-28T08:59:13.971637676Z [err]    throw err;
+2026-06-28T08:59:13.971640266Z [err]    ^
+2026-06-28T08:59:13.971642906Z [err]  
+2026-06-28T08:59:13.971645566Z [err]  Error: Cannot find module 'express'
+2026-06-28T08:59:13.971648296Z [err]  Require stack:
+2026-06-28T08:59:13.971650686Z [err]  - /app/backend/functions/index.js
+2026-06-28T08:59:13.971653146Z [err]      at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+2026-06-28T08:59:13.971655406Z [err]      at Module._load (node:internal/modules/cjs/loader:981:27)
+2026-06-28T08:59:13.971658196Z [err]      at Module.require (node:internal/modules/cjs/loader:1231:19)
+2026-06-28T08:59:13.971660846Z [err]      at require (node:internal/modules/helpers:177:18)
+2026-06-28T08:59:13.971663406Z [err]      at Object.<anonymous> (/app/backend/functions/index.js:7:17)
+2026-06-28T08:59:13.971665806Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T08:59:13.971668066Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T08:59:13.971670346Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T08:59:13.971672956Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T08:59:13.971675336Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T08:59:13.971677836Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-28T08:59:13.971680216Z [err]    requireStack: [ '/app/backend/functions/index.js' ]
+2026-06-28T08:59:13.971682446Z [err]  }
+2026-06-28T08:59:13.971685236Z [err]  
+2026-06-28T08:59:13.971687536Z [err]  Node.js v18.20.5
+2026-06-28T09:06:25.693269244Z [inf]  [SERVER] ✅ Scheduler started
+2026-06-28T09:06:25.693275264Z [err]  [2026-06-28T09:06:25.674Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:25.693520193Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T09:06:25.693526333Z [inf]  
+2026-06-28T09:06:25.693530753Z [inf]  > abotra-proai-backend@2.0.0 start
+2026-06-28T09:06:25.693545222Z [inf]  > node backend/functions/index.js
+2026-06-28T09:06:25.693550472Z [inf]  
+2026-06-28T09:06:25.693554602Z [inf]  [FIREBASE] 🔑 Initializing...
+2026-06-28T09:06:25.693559232Z [inf]  [FIREBASE] 🔑 Initializing with Workload Identity...
+2026-06-28T09:06:25.693564202Z [inf]  [FIREBASE] 📁 Project: abotra-proa1
+2026-06-28T09:06:25.693568752Z [inf]  [FIREBASE] 🌐 Database: https://abotra-proa1-default-rtdb.firebaseio.com
+2026-06-28T09:06:25.693573192Z [inf]  [FIREBASE] ✅ Admin SDK initialized with Workload Identity
+2026-06-28T09:06:25.693578632Z [inf]  [FIREBASE] ✅ Initialized successfully
+2026-06-28T09:06:25.693583252Z [inf]  [SERVER] ✅ Running on port 8080
+2026-06-28T09:06:25.693588372Z [inf]  [SERVER] Environment: production
+2026-06-28T09:06:25.693592782Z [inf]  [SERVER] Firebase initialized: ✅ YES
+2026-06-28T09:06:25.693597262Z [inf]  [SERVER] Routes loaded:
+2026-06-28T09:06:25.693602312Z [inf]    - /api/auth   (Auth routes)
+2026-06-28T09:06:25.693606872Z [inf]    - /api/trade  (Trade routes)
+2026-06-28T09:06:25.693611912Z [inf]    - /api/user   (User routes)
+2026-06-28T09:06:25.693616162Z [inf]    - /api/deposit (Deposit routes)
+2026-06-28T09:06:25.693621342Z [inf]    - /api/withdraw (Withdraw routes)
+2026-06-28T09:06:25.693626292Z [inf]  [FIREBASE] ✅ Connection test passed: false
+2026-06-28T09:06:25.693630462Z [inf]  [FIREBASE] Connection test: ✅ PASSED
+2026-06-28T09:06:25.693635032Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:25.693639122Z [inf]  [SERVER] ✅ Price stream started
+2026-06-28T09:06:25.693643912Z [inf]  [SCHEDULER] Starting...
+2026-06-28T09:06:25.693648442Z [inf]  [SCHEDULER] ✅ All jobs started
+2026-06-28T09:06:25.759693243Z [inf]  Starting Container
+2026-06-28T09:06:26.045836814Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:26.045840344Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:26.066435257Z [err]  [2026-06-28T09:06:26.063Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:26.750396597Z [err]  [2026-06-28T09:06:26.599Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:27.048954970Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:27.475829402Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:27.475834032Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:27.880249364Z [err]  [2026-06-28T09:06:27.850Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:28.967152113Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:29.070983034Z [err]  [2026-06-28T09:06:29.059Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:29.294287780Z [err]  [2026-06-28T09:06:29.278Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:29.407615943Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:29.407629063Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:29.440815229Z [inf]  Stopping Container
+2026-06-28T09:06:30.736448254Z [err]  [2026-06-28T09:06:30.676Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:31.751224338Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:32.178709886Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:32.178714896Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:33.087854801Z [err]  [2026-06-28T09:06:33.008Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:35.533662206Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:35.973763117Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:35.973767787Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:38.184591049Z [err]  [2026-06-28T09:06:38.167Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:39.373013844Z [err]  [2026-06-28T09:06:39.367Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:39.866702475Z [err]  [2026-06-28T09:06:39.845Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:40.979334716Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:41.426677872Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:41.426683882Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:45.296721401Z [err]  [2026-06-28T09:06:45.284Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:06:46.429304218Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:46.901357883Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:46.901361173Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:51.942903899Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:52.334089131Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:52.334092531Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:06:57.386413960Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:06:57.812965764Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:06:57.812968824Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:02.290869818Z [err]  [2026-06-28T09:07:02.283Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:07:02.799426808Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:03.247585059Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:03.247589999Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:08.247867716Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:08.706284044Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:08.706287844Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:13.723365217Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:14.163187609Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:14.163193709Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:19.184779734Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:19.598504987Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:19.598507287Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:20.874248792Z [err]  [2026-06-28T09:07:20.872Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:07:24.600379892Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:25.050672470Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:25.050676870Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:25.050679690Z [err]  [2026-06-28T09:07:25.040Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:07:30.035955346Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:30.476816652Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:30.476825312Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:35.480205366Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:35.937014934Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:35.937017424Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:40.915986928Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:41.365298551Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:41.365301991Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:46.363550325Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:07:46.832330419Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:07:46.832333979Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:07:48.192375165Z [err]  [2026-06-28T09:07:48.156Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 

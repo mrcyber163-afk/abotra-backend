@@ -1,0 +1,413 @@
+2026-06-28T09:37:29.653864560Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:37:29.653868482Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:37:29.653872731Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:37:34.716383796Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:37:35.684503027Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:37:35.684510108Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:38:46.833993722Z [err]  [2026-06-28T09:38:39.255Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:09.650822409Z [err]  [2026-06-28T09:41:09.622Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:55.070675453Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T09:41:55.070688303Z [inf]  
+2026-06-28T09:41:55.070692973Z [inf]  > abotra-proai-backend@2.0.0 start
+2026-06-28T09:41:55.070698153Z [inf]  > node backend/functions/index.js
+2026-06-28T09:41:55.070702613Z [inf]  
+2026-06-28T09:41:55.070706612Z [inf]  [FIREBASE] 🔑 Initializing...
+2026-06-28T09:41:55.070710742Z [inf]  [FIREBASE] 🔑 Initializing...
+2026-06-28T09:41:55.070714672Z [inf]  [FIREBASE] 📁 Project: abotra-proa1
+2026-06-28T09:41:55.070718092Z [inf]  [FIREBASE] 🌐 Database: https://abotra-proa1-default-rtdb.firebaseio.com
+2026-06-28T09:41:55.070721912Z [inf]  [FIREBASE] ✅ Admin SDK initialized successfully
+2026-06-28T09:41:55.070725552Z [inf]  [FIREBASE] ✅ Initialized successfully
+2026-06-28T09:41:55.070729602Z [inf]  [SERVER] ✅ Running on port 8080
+2026-06-28T09:41:55.070733382Z [inf]  [SERVER] Environment: production
+2026-06-28T09:41:55.070736832Z [inf]  [SERVER] Firebase initialized: ✅ YES
+2026-06-28T09:41:55.070740202Z [inf]  [SERVER] Routes loaded:
+2026-06-28T09:41:55.070744172Z [inf]    - /api/auth   (Auth routes)
+2026-06-28T09:41:55.070747882Z [inf]    - /api/trade  (Trade routes)
+2026-06-28T09:41:55.070752492Z [inf]    - /api/user   (User routes)
+2026-06-28T09:41:55.070756402Z [inf]    - /api/deposit (Deposit routes)
+2026-06-28T09:41:55.070759822Z [inf]    - /api/withdraw (Withdraw routes)
+2026-06-28T09:41:55.070763662Z [inf]  [FIREBASE] ✅ Connection test passed: false
+2026-06-28T09:41:55.070767142Z [inf]  [FIREBASE] Connection test: ✅ PASSED
+2026-06-28T09:41:55.070770932Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:41:55.070774162Z [inf]  [SERVER] ✅ Price stream started
+2026-06-28T09:41:55.070777752Z [inf]  [SCHEDULER] Starting...
+2026-06-28T09:41:55.070782122Z [inf]  [SCHEDULER] ✅ All jobs started
+2026-06-28T09:41:55.070785392Z [inf]  [SERVER] ✅ Scheduler started
+2026-06-28T09:41:55.071915622Z [err]  [2026-06-28T09:41:54.989Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:55.179000350Z [inf]  Starting Container
+2026-06-28T09:41:55.365290373Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:41:55.365293572Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:41:55.646512855Z [err]  [2026-06-28T09:41:55.636Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:55.914994205Z [err]  [2026-06-28T09:41:55.914Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:56.364348536Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:41:56.571298029Z [err]  [2026-06-28T09:41:56.567Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:56.815771498Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:41:56.815775638Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:41:57.932321004Z [err]  [2026-06-28T09:41:57.929Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:57.969174167Z [err]  [2026-06-28T09:41:57.954Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:41:58.316141376Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:41:58.746203234Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:41:58.746275194Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:41:59.834861417Z [err]  npm error path /app
+2026-06-28T09:41:59.834868573Z [err]  npm error command failed
+2026-06-28T09:41:59.834875473Z [err]  npm error signal SIGTERM
+2026-06-28T09:41:59.834882440Z [err]  npm error command sh -c node backend/functions/index.js
+2026-06-28T09:41:59.834889601Z [err]  npm error A complete log of this run can be found in: /root/.npm/_logs/2026-06-28T09_33_13_846Z-debug-0.log
+2026-06-28T09:41:59.893619263Z [inf]  Stopping Container
+2026-06-28T09:42:00.151483012Z [err]  [2026-06-28T09:42:00.112Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:01.120709407Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:01.412530501Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:01.412534631Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:03.223574638Z [err]  [2026-06-28T09:42:03.215Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:03.293013632Z [err]  [2026-06-28T09:42:03.290Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:04.790829119Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:05.255298531Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:05.255302611Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:10.235053627Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:10.675904103Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:10.675909523Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:11.370773181Z [err]  [2026-06-28T09:42:11.365Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:15.211737401Z [err]  [2026-06-28T09:42:15.194Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:15.689207171Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:16.213128865Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:16.213131775Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:21.281193069Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:21.607107830Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:21.607112010Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:26.621785434Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:27.048439799Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:27.048443689Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:28.627534786Z [err]  [2026-06-28T09:42:28.626Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:32.041307683Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:32.494468963Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:32.494471803Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:36.687349972Z [err]  [2026-06-28T09:42:36.686Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:37.498223718Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:37.944784128Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:37.944786848Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:42.938691013Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:43.384838216Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:43.384930285Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:48.405375306Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:48.807896150Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:48.807905030Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:53.804368021Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:54.244014253Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:54.244018013Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:42:55.130755156Z [err]  [2026-06-28T09:42:55.127Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:58.196677426Z [err]  [2026-06-28T09:42:58.193Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:42:59.253090279Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:42:59.693195905Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:42:59.693200005Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:04.294803417Z [err]  [2026-06-28T09:43:04.286Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:43:04.676413599Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:05.122604279Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:05.122607439Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:10.122493991Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:10.574412446Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:10.574414816Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:15.547099699Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:15.996922353Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:15.996925963Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:20.994155481Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:21.546024476Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:21.546029096Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:26.551945036Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:26.872607416Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:26.872612116Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:31.878454717Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:32.326902061Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:32.326905921Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:32.604703865Z [err]  [2026-06-28T09:43:32.561Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:43:37.332894421Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:37.771949542Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:37.771955072Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:42.773104588Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:43.212183086Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:43.212187996Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:48.210498430Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:48.677731610Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:48.677733850Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:53.687238652Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:54.081120325Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:54.081123035Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:43:59.080204014Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:43:59.522301813Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:43:59.522306053Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:04.521957329Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:04.975438963Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:04.975443313Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:09.980133384Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:10.407230350Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:10.407233909Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:12.408769691Z [err]  [2026-06-28T09:44:12.405Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:44:15.410344187Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:15.858533878Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:15.858536558Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:20.858754673Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:21.315497654Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:21.315502494Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:26.313772960Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:26.912006546Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:26.912011296Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:28.829375213Z [err]  [2026-06-28T09:44:28.812Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:44:31.820830028Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:32.161052491Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:32.161058181Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:37.159561289Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:37.576683713Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:37.576686463Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:41.972904176Z [err]  [2026-06-28T09:44:41.965Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:44:42.572351709Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:43.003227116Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:43.003230346Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:48.002955796Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:48.441181774Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:48.441192544Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:53.442149756Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:53.953010694Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:53.953014584Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:44:58.945777493Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:44:59.295182909Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:44:59.295185369Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:04.295537032Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:04.724110428Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:04.724113758Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:09.728787032Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:10.159393178Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:10.159405278Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:15.156976341Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:15.629519769Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:15.629523479Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:20.625675278Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:21.081086104Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:21.081089394Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:26.076625111Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:26.516651648Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:26.516655688Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:31.514767864Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:32.085483074Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:32.085486244Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:36.959102673Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:37.398340237Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:37.398343187Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:41.940054105Z [err]  [2026-06-28T09:45:41.930Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:45:42.407711026Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:42.872542741Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:42.872545611Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:47.849145976Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:48.330303610Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:48.330307120Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:53.309222146Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:53.811028899Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:53.811031919Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:45:58.784297811Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:45:59.257886143Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:45:59.257889743Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:46:04.248107622Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:46:04.662096866Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:46:04.662105846Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:46:09.678795523Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:46:10.107667577Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:46:10.107672057Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:46:12.582599017Z [err]  [2026-06-28T09:46:12.581Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:46:15.104415043Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:46:15.541533571Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:46:15.541541871Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:48:25.889527356Z [err]  [2026-06-28T09:48:19.647Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:48:58.753600166Z [inf]  [SCHEDULER] Starting...
+2026-06-28T09:48:58.753608166Z [inf]  [SCHEDULER] ✅ All jobs started
+2026-06-28T09:48:58.753614836Z [inf]  [SERVER] ✅ Scheduler started
+2026-06-28T09:48:58.753620886Z [err]  [2026-06-28T09:48:58.452Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:48:58.753631546Z [inf]    - /api/deposit (Deposit routes)
+2026-06-28T09:48:58.753639696Z [inf]  > node backend/functions/index.js
+2026-06-28T09:48:58.753639906Z [inf]  [FIREBASE] ✅ Initialized successfully
+2026-06-28T09:48:58.753641856Z [inf]  [SERVER] Routes loaded:
+2026-06-28T09:48:58.753645136Z [inf]    - /api/withdraw (Withdraw routes)
+2026-06-28T09:48:58.753649266Z [inf]  [SERVER] ✅ Running on port 8080
+2026-06-28T09:48:58.753653666Z [err]  npm warn config production Use `--omit=dev` instead.
+2026-06-28T09:48:58.753655486Z [inf]  
+2026-06-28T09:48:58.753659366Z [inf]  [FIREBASE] Connection test: ✅ PASSED
+2026-06-28T09:48:58.753659656Z [inf]    - /api/auth   (Auth routes)
+2026-06-28T09:48:58.753661426Z [inf]  [SERVER] Environment: production
+2026-06-28T09:48:58.753664986Z [inf]  
+2026-06-28T09:48:58.753669566Z [inf]  [FIREBASE] 🔑 Initializing...
+2026-06-28T09:48:58.753669586Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:48:58.753671386Z [inf]  [SERVER] Firebase initialized: ✅ YES
+2026-06-28T09:48:58.753671656Z [inf]    - /api/trade  (Trade routes)
+2026-06-28T09:48:58.753677386Z [inf]  > abotra-proai-backend@2.0.0 start
+2026-06-28T09:48:58.753680726Z [inf]  [SERVER] ✅ Price stream started
+2026-06-28T09:48:58.753680746Z [inf]  [FIREBASE] 🔑 Initializing with databaseURL only...
+2026-06-28T09:48:58.753684576Z [inf]    - /api/user   (User routes)
+2026-06-28T09:48:58.753687546Z [inf]  [FIREBASE] ✅ Admin SDK initialized
+2026-06-28T09:48:58.826355397Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:48:58.826358657Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:48:58.884220559Z [inf]  Starting Container
+2026-06-28T09:48:59.180205797Z [err]  [2026-06-28T09:48:59.179Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:48:59.411167063Z [err]  [2026-06-28T09:48:59.378Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:48:59.833702724Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:00.379046747Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:00.379111376Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:00.383373924Z [err]  [2026-06-28T09:49:00.379Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:00.776321687Z [err]  [2026-06-28T09:49:00.774Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:01.768277090Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:02.212684765Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:02.212704005Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:02.284942179Z [err]  [2026-06-28T09:49:02.267Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:02.436933482Z [err]  [2026-06-28T09:49:02.434Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:02.857392251Z [inf]  Stopping Container
+2026-06-28T09:49:03.004476097Z [err]  [2026-06-28T09:49:02.991Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:03.975036991Z [err]  [2026-06-28T09:49:03.966Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:04.489725365Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:04.931043593Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:04.931047123Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:05.817250248Z [err]  npm error path /app
+2026-06-28T09:49:05.817255998Z [err]  npm error command failed
+2026-06-28T09:49:05.817260028Z [err]  npm error signal SIGTERM
+2026-06-28T09:49:05.817264088Z [err]  npm error command sh -c node backend/functions/index.js
+2026-06-28T09:49:05.817267898Z [err]  npm error A complete log of this run can be found in: /root/.npm/_logs/2026-06-28T09_41_54_695Z-debug-0.log
+2026-06-28T09:49:06.998619523Z [err]  [2026-06-28T09:49:06.990Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:08.288464544Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:08.730528606Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:08.730533296Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:09.930666935Z [err]  [2026-06-28T09:49:09.929Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:11.411653512Z [err]  [2026-06-28T09:49:11.408Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:13.760728083Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:14.200999508Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:14.201002668Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:16.007098988Z [err]  [2026-06-28T09:49:16.000Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:19.273465609Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:19.617362381Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:19.617366471Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:24.608792398Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:25.073061981Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:25.073067641Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:26.720917051Z [err]  [2026-06-28T09:49:26.719Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:30.116075302Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:30.602910853Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:30.602924463Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:35.577194886Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:35.999033839Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:35.999038189Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:40.981213068Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:41.477266878Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:41.477271738Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:44.166103405Z [err]  [2026-06-28T09:49:44.158Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:49:46.464043746Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:46.901333599Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:46.901341089Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:51.897013554Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:52.244151130Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:52.244156430Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:57.348617046Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:49:57.574796935Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:49:57.574799775Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:49:58.558389778Z [err]  [2026-06-28T09:49:58.549Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:02.560418255Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:02.911431090Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:02.911434180Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:07.889505341Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:08.210674091Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:08.210683961Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:13.251270333Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:13.525717387Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:13.525720347Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:18.565098903Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:18.867831442Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:18.867834792Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:23.843203047Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:24.214583156Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:24.214589046Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:29.173620829Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:29.495254335Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:29.495258815Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:34.497724154Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:34.881832847Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:34.881836397Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:39.872776417Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:40.035558805Z [err]  [2026-06-28T09:50:40.032Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:40.165586871Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:40.165591501Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:45.180216137Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:45.502677005Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:45.502682015Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:50.619338724Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:50.838585714Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:50.838589894Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:55.853513088Z [inf]  [PRICE] Connecting to Binance...
+2026-06-28T09:50:56.084603881Z [inf]  Starting Container
+2026-06-28T09:50:56.199956884Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:56.199961414Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:56.329310868Z [inf]  [SERVER] ✅ Running on port 8080
+2026-06-28T09:50:56.329315598Z [inf]  [SERVER] Environment: production
+2026-06-28T09:50:56.329318268Z [inf]  [SERVER] Firebase initialized: ✅ YES
+2026-06-28T09:50:56.329321418Z [inf]  [SERVER] Routes loaded:
+2026-06-28T09:50:56.329324378Z [inf]    - /api/auth   (Auth routes)
+2026-06-28T09:50:56.329327138Z [inf]    - /api/trade  (Trade routes)
+2026-06-28T09:50:56.329329368Z [inf]    - /api/user   (User routes)
+2026-06-28T09:50:56.329331618Z [inf]    - /api/deposit (Deposit routes)
+2026-06-28T09:50:56.329333878Z [inf]    - /api/withdraw (Withdraw routes)
+2026-06-28T09:50:56.333543788Z [inf]  [FIREBASE] Connection test: ✅ PASSED
+2026-06-28T09:50:56.333554767Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com:9443/ws)...
+2026-06-28T09:50:56.344141076Z [inf]  [SERVER] ✅ Price stream started
+2026-06-28T09:50:56.344146196Z [inf]  [SCHEDULER] Starting...
+2026-06-28T09:50:56.344149406Z [inf]  [SCHEDULER] ✅ All jobs started
+2026-06-28T09:50:56.344152026Z [inf]  [SERVER] ✅ Scheduler started
+2026-06-28T09:50:56.426874689Z [err]  [2026-06-28T09:50:56.416Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:56.685663466Z [err]  [2026-06-28T09:50:56.678Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:56.692554150Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:56.692559470Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:57.354793478Z [err]  [2026-06-28T09:50:57.350Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:57.704477580Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com:9443/ws)...
+2026-06-28T09:50:58.345720847Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:58.345724897Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:50:58.345727247Z [err]  [2026-06-28T09:50:58.234Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:50:59.535492214Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com:9443/ws)...
+2026-06-28T09:50:59.807598702Z [err]  npm error command sh -c node backend/functions/index.js
+2026-06-28T09:50:59.807604292Z [err]  npm error A complete log of this run can be found in: /root/.npm/_logs/2026-06-28T09_48_58_157Z-debug-0.log
+2026-06-28T09:50:59.807627181Z [err]  npm error path /app
+2026-06-28T09:50:59.807637531Z [err]  npm error command failed
+2026-06-28T09:50:59.807642671Z [err]  npm error signal SIGTERM
+2026-06-28T09:50:59.883775380Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:50:59.883780600Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:00.122561185Z [inf]  Stopping Container
+2026-06-28T09:51:00.483978907Z [err]  [2026-06-28T09:51:00.423Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:01.759157551Z [err]  [2026-06-28T09:51:01.758Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:02.116142624Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com:9443/ws)...
+2026-06-28T09:51:02.464752275Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:02.464755715Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:02.464777635Z [inf]  [PRICE] 🔄 Switching to next Binance URL
+2026-06-28T09:51:04.985309856Z [err]  [2026-06-28T09:51:04.984Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:05.828631790Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com/ws)...
+2026-06-28T09:51:06.193560346Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:06.193563546Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:06.432483833Z [err]  [2026-06-28T09:51:06.429Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:08.006249954Z [err]  [2026-06-28T09:51:07.956Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:09.826810097Z [err]  [2026-06-28T09:51:09.825Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:11.291686304Z [err]  [2026-06-28T09:51:11.185Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:11.291690014Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com/ws)...
+2026-06-28T09:51:11.566965024Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:11.566969714Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:14.869799799Z [err]  [2026-06-28T09:51:14.804Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:19.170040729Z [inf]  [PRICE] Connecting to Binance (wss://stream.binance.com/ws)...
+2026-06-28T09:51:19.504151478Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:19.504156458Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:19.504160258Z [inf]  [PRICE] 🔄 Switching to next Binance URL
+2026-06-28T09:51:21.193962475Z [err]  [2026-06-28T09:51:21.191Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:29.554170109Z [inf]  [PRICE] Connecting to Binance (wss://ws-api.binance.com/ws-api/v3)...
+2026-06-28T09:51:29.991133929Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:29.991138809Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:39.987666974Z [inf]  [PRICE] Connecting to Binance (wss://ws-api.binance.com/ws-api/v3)...
+2026-06-28T09:51:40.484480096Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:40.484483626Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:51:44.432780401Z [err]  [2026-06-28T09:51:44.405Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:51:50.390444828Z [inf]  [PRICE] Connecting to Binance (wss://ws-api.binance.com/ws-api/v3)...
+2026-06-28T09:51:50.843826131Z [inf]  [PRICE] 🔄 Switching to next Binance URL
+2026-06-28T09:51:50.843954441Z [err]  [PRICE] WebSocket error: Unexpected server response: 451
+2026-06-28T09:51:50.843957980Z [inf]  [PRICE] ❌ Disconnected from Binance
+2026-06-28T09:52:00.835836861Z [inf]  [PRICE] Connecting to Binance (wss://data-stream.binance.com/stream)...
+2026-06-28T09:52:01.326616689Z [inf]  [PRICE] ✅ Connected to Binance (wss://data-stream.binance.com/stream)
+2026-06-28T09:52:01.326619869Z [inf]  [PRICE] Subscribed to: BTCUSDT
+2026-06-28T09:52:02.696454798Z [err]  [2026-06-28T09:52:02.586Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:52:07.618197542Z [err]  [2026-06-28T09:52:07.602Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
+2026-06-28T09:52:37.638800372Z [err]  [2026-06-28T09:52:29.182Z]  @firebase/database: FIREBASE WARNING: {"code":"app/invalid-credential","message":"Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"Error fetching access token: Error while making request: getaddrinfo ENOTFOUND metadata.google.internal. Error code: ENOTFOUND\"."} 
