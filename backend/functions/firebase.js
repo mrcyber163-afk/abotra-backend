@@ -1,24 +1,17 @@
 // ============================================================
-// FIREBASE ADMIN SDK - Workload Identity Federation
+// FIREBASE ADMIN SDK - Direct Initialization
 // ============================================================
 // Location: backend/functions/firebase.js
 // ============================================================
 
 const admin = require('firebase-admin');
 
-// ============================================================
-// STATE
-// ============================================================
 let db = null;
 let auth = null;
 let firebaseApp = null;
 let initialized = false;
 
-// ============================================================
-// INITIALIZE FIREBASE ADMIN SDK
-// ============================================================
 function initializeFirebase() {
-    // Check if already initialized
     if (admin.apps.length > 0) {
         firebaseApp = admin.apps[0];
         db = admin.database();
@@ -39,19 +32,11 @@ function initializeFirebase() {
             throw new Error('FIREBASE_DATABASE_URL is missing');
         }
         
-        console.log(`[FIREBASE] 🔑 Initializing with Workload Identity...`);
+        console.log(`[FIREBASE] 🔑 Initializing...`);
         console.log(`[FIREBASE] 📁 Project: ${projectId}`);
         console.log(`[FIREBASE] 🌐 Database: ${databaseURL}`);
         
-        // ============================================================
-        // WORKLOAD IDENTITY - NO PRIVATE KEY NEEDED!
-        // ============================================================
-        // applicationDefault() inatumia:
-        //   - GCP Metadata Server (kwa Railway)
-        //   - GOOGLE_APPLICATION_CREDENTIALS (kwa local)
-        // ============================================================
         firebaseApp = admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
             databaseURL: databaseURL,
             projectId: projectId
         });
@@ -60,20 +45,16 @@ function initializeFirebase() {
         auth = admin.auth();
         initialized = true;
         
-        console.log('[FIREBASE] ✅ Admin SDK initialized with Workload Identity');
+        console.log('[FIREBASE] ✅ Admin SDK initialized successfully');
         return { db, auth, app: firebaseApp };
         
     } catch (error) {
         console.error('[FIREBASE] ❌ Initialization failed:', error.message);
-        console.error('[FIREBASE] ❌ Full error:', error);
         initialized = false;
         throw error;
     }
 }
 
-// ============================================================
-// GETTER FUNCTIONS
-// ============================================================
 function getDB() {
     if (!db) {
         const init = initializeFirebase();
@@ -102,9 +83,6 @@ function isInitialized() {
     return initialized;
 }
 
-// ============================================================
-// TEST CONNECTION
-// ============================================================
 async function testConnection() {
     try {
         const dbInstance = getDB();
@@ -118,9 +96,6 @@ async function testConnection() {
     }
 }
 
-// ============================================================
-// EXPORTS
-// ============================================================
 module.exports = {
     initializeFirebase,
     getDB,
