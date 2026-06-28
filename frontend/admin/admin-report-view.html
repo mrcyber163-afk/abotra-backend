@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>View Report | Admin Panel - ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:#050505;background-image:url("../assets/images/background.png");background-size:cover;background-position:center;background-attachment:fixed;min-height:100vh;position:relative;}
+body.light-theme{background:#f5f5f5;background-image:url("../assets/images/background-light.png");}
+body.light-theme .top-bar,body.light-theme .card{background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.08);}
+body.light-theme .detail-value{color:#800000;}
+body.light-theme .post-box{background:rgba(0,0,0,0.04);}
+body.light-theme .post-box .content{color:#333;}
+body.light-theme .post-box .author{color:#800000;}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);z-index:0;pointer-events:none;}
+body.light-theme .overlay{background:rgba(255,255,255,0.85);}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,215,0,0.2);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;}
+.logo-area{display:flex;align-items:center;gap:10px;}
+.logo-area img{width:36px;height:36px;border-radius:10px;object-fit:cover;}
+.logo-area h2{color:#FFD700;font-size:16px;font-weight:700;}
+.logo-area p{color:rgba(255,255,255,0.7);font-size:8px;}
+.top-bar-right{display:flex;align-items:center;gap:12px;}
+.back-btn{background:rgba(255,215,0,0.15);border:none;border-radius:10px;padding:8px 14px;color:#FFD700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:0.3s;font-weight:500;font-size:11px;}
+.back-btn:hover{background:rgba(255,215,0,0.3);transform:scale(1.02);}
+.main-content{position:relative;z-index:2;margin-top:70px;padding:20px;max-width:900px;margin-left:auto;margin-right:auto;}
+.page-title{font-size:22px;font-weight:800;color:#FFD700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,215,0,0.2);border-radius:16px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px);}
+.card-title{color:#FFD700;font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid rgba(255,215,0,0.2);}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:6px;}
+.detail-label{color:#888;font-weight:500;font-size:11px;display:flex;align-items:center;gap:4px;}
+.detail-value{color:#FFD700;font-weight:600;font-size:12px;word-break:break-word;}
+.post-box{background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin:10px 0;border-left:4px solid #FFD700;}
+.post-box .author{color:#FFD700;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;font-size:13px;}
+.post-box .content{color:#ccc;font-size:13px;line-height:1.7;}
+.post-box .image{max-width:100%;max-height:300px;border-radius:10px;margin-top:10px;object-fit:cover;}
+.report-box{background:rgba(255,215,0,0.08);border-radius:12px;padding:12px 16px;margin:10px 0;}
+.status-badge{display:inline-block;padding:3px 12px;border-radius:30px;font-size:11px;font-weight:700;}
+.status-badge.pending{background:rgba(255,215,0,0.2);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
+.status-badge.reviewed{background:rgba(14,203,129,0.2);color:#0ECB81;border:1px solid rgba(14,203,129,0.3);}
+.status-badge.deleted{background:rgba(246,70,93,0.2);color:#F6465D;border:1px solid rgba(246,70,93,0.3);}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.btn{padding:10px 20px;border:none;border-radius:12px;font-weight:700;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:8px;font-size:13px;}
+.btn-delete{background:linear-gradient(135deg,#F6465D,#D43F52);color:white;}
+.btn-delete:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(246,70,93,0.4);}
+.btn-ignore{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.08);}
+.btn-ignore:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
+.btn-back{background:rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
+.btn-back:hover{background:rgba(255,215,0,0.3);transform:translateY(-2px);}
+.loading-spinner{width:30px;height:30px;border:3px solid rgba(255,215,0,0.2);border-top:3px solid #FFD700;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.empty-state{text-align:center;padding:40px 20px;color:#888;}
+.empty-state i{font-size:40px;margin-bottom:12px;opacity:0.5;}
+.confirm-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(16px);z-index:20000;display:none;align-items:center;justify-content:center;}
+.confirm-modal.active{display:flex;}
+.confirm-modal-card{background:linear-gradient(145deg,#1e1e2e,#14141f);border-radius:24px;padding:28px 24px;max-width:400px;width:90%;border:1px solid rgba(255,215,0,0.25);box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:modalSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);text-align:center;}
+@keyframes modalSlideUp{from{transform:translateY(40px) scale(0.95);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+body.light-theme .confirm-modal-card{background:linear-gradient(145deg,#ffffff,#f0f0f5);border:1px solid rgba(128,0,0,0.2);}
+.confirm-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;}
+.confirm-modal-icon.danger{background:rgba(246,70,93,0.15);color:#F6465D;}
+.confirm-modal-icon.success{background:rgba(14,203,129,0.15);color:#0ECB81;}
+.confirm-modal-title{color:#FFFFFF;font-size:18px;font-weight:700;margin-bottom:6px;}
+body.light-theme .confirm-modal-title{color:#1a1a1a;}
+.confirm-modal-subtitle{color:#aaa;font-size:13px;margin-bottom:16px;line-height:1.5;}
+.confirm-modal-details{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:left;border:1px solid rgba(255,255,255,0.06);}
+.confirm-modal-details .detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.confirm-modal-details .detail-row:last-child{border-bottom:none;}
+.confirm-modal-details .detail-label{color:#888;}
+.confirm-modal-details .detail-value{color:#FFD700;font-weight:600;}
+body.light-theme .confirm-modal-details .detail-value{color:#800000;}
+.confirm-modal-warning{background:rgba(246,70,93,0.1);border-radius:10px;padding:8px 12px;margin:10px 0;color:#F6465D;font-size:12px;border:1px solid rgba(246,70,93,0.2);display:flex;align-items:center;gap:6px;}
+.confirm-modal-buttons{display:flex;gap:10px;margin-top:16px;}
+.confirm-modal-btn{flex:1;padding:10px 16px;border:none;border-radius:30px;font-weight:700;font-size:13px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.confirm-modal-btn.cancel{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.08);}
+.confirm-modal-btn.cancel:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
+.confirm-modal-btn.confirm{background:linear-gradient(135deg,#F6465D,#D43F52);color:white;}
+.confirm-modal-btn.confirm:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(246,70,93,0.4);}
+.confirm-modal-btn.confirm-success{background:linear-gradient(135deg,#0ECB81,#0A9E65);color:white;}
+.confirm-modal-btn.confirm-success:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(14,203,129,0.4);}
+.toast-notification{position:fixed;bottom:25px;right:25px;padding:10px 16px;border-radius:10px;color:white;z-index:9999;animation:slideInRight 0.3s ease;display:flex;align-items:center;gap:8px;font-weight:500;font-size:11px;}
+.toast-notification.success{background:linear-gradient(135deg,#0ECB81,#0A9E65);}
+.toast-notification.error{background:linear-gradient(135deg,#F6465D,#D43F52);}
+.toast-notification.info{background:linear-gradient(135deg,#FFD700,#b8860b);color:#1a1a1a;}
+@keyframes slideInRight{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+@media(max-width:768px){.main-content{padding:12px;margin-top:65px;}.page-title{font-size:18px;}.detail-row{flex-direction:column;}.btn{padding:8px 14px;font-size:11px;}.logo-area p{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="logo-area">
+        <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\'fas fa-robot\' style=\'font-size:28px; color:#FFD700;\'></i>'">
+        <div><h2>ABOTRA-PROAI</h2><p>View Report</p></div>
+    </div>
+    <div class="top-bar-right">
+        <button class="back-btn" onclick="window.location.href='admin-reports.html'"><i class="fas fa-arrow-left"></i> Back</button>
+    </div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="main-content">
+    <div class="page-title"><i class="fas fa-flag"></i> Report Details</div>
+    <div id="reportContainer">
+        <div style="text-align:center;padding:40px;">
+            <div class="loading-spinner"></div>
+            <p style="color:#888;margin-top:10px;">Loading report...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-modal-card">
+        <div class="confirm-modal-icon" id="confirmIcon">⚠️</div>
+        <div class="confirm-modal-title" id="confirmTitle">Confirm Action</div>
+        <div class="confirm-modal-subtitle" id="confirmSubtitle">Are you sure?</div>
+        <div class="confirm-modal-details" id="confirmDetails"></div>
+        <div class="confirm-modal-warning" id="confirmWarning" style="display:none;"><i class="fas fa-exclamation-triangle"></i><span>This action cannot be undone!</span></div>
+        <div class="confirm-modal-buttons">
+            <button class="confirm-modal-btn cancel" id="confirmCancel"><i class="fas fa-times"></i> Cancel</button>
+            <button class="confirm-modal-btn confirm" id="confirmAction"><i class="fas fa-check"></i> Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+let currentUser = null;
+let currentAdminEmail = null;
+
+// ============================================================
+// HELPERS
+// ============================================================
+function showToast(message, type) {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+window.closeModal = closeModal;
+window.openModal = openModal;
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+function showConfirmModal(options) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const icon = document.getElementById('confirmIcon');
+        const title = document.getElementById('confirmTitle');
+        const subtitle = document.getElementById('confirmSubtitle');
+        const details = document.getElementById('confirmDetails');
+        const warning = document.getElementById('confirmWarning');
+        const confirmBtn = document.getElementById('confirmAction');
+        const cancelBtn = document.getElementById('confirmCancel');
+        
+        icon.className = 'confirm-modal-icon ' + (options.iconClass || 'warning');
+        icon.textContent = options.icon || '⚠️';
+        title.textContent = options.title || 'Confirm Action';
+        subtitle.textContent = options.subtitle || 'Are you sure?';
+        
+        if (options.details) {
+            let html = '';
+            for (const [key, value] of Object.entries(options.details)) {
+                html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-value">${value}</span></div>`;
+            }
+            details.innerHTML = html;
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+        }
+        
+        if (options.warning) {
+            warning.style.display = 'flex';
+            warning.querySelector('span').textContent = options.warning;
+        } else {
+            warning.style.display = 'none';
+        }
+        
+        confirmBtn.className = 'confirm-modal-btn confirm ' + (options.btnClass || '');
+        confirmBtn.innerHTML = `<i class="fas ${options.btnIcon || 'fa-check'}"></i> ${options.btnText || 'Confirm'}`;
+        
+        modal.classList.add('active');
+        const cleanup = () => { modal.classList.remove('active'); confirmBtn.removeEventListener('click', onConfirm); cancelBtn.removeEventListener('click', onCancel); };
+        const onConfirm = () => { cleanup(); resolve(true); };
+        const onCancel = () => { cleanup(); resolve(false); };
+        confirmBtn.addEventListener('click', onConfirm);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', (e) => { if (e.target === modal) { cleanup(); resolve(false); } });
+    });
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') { document.body.classList.add('light-theme'); }
+}
+initTheme();
+
+// ============================================================
+// CHECK ADMIN
+// ============================================================
+async function checkAdminStatus(user) {
+    if (!user) return false;
+    try {
+        const snapshot = await db.ref('admins').once('value');
+        if (snapshot.exists()) {
+            for (const key in snapshot.val()) {
+                const admin = snapshot.val()[key];
+                if (admin === true && key === user.uid) return true;
+                if (typeof admin === 'object' && (admin.email === user.email || admin.uid === user.uid)) {
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+            }
+        }
+        return false;
+    } catch(error) {
+        console.error('Error checking admin:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// LOAD REPORT
+// ============================================================
+async function loadReport() {
+    const container = document.getElementById('reportContainer');
+    const urlParams = new URLSearchParams(window.location.search);
+    const reportId = urlParams.get('id');
+    
+    if (!currentUser) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Please login to view this report.</p></div>';
+        return;
+    }
+    
+    const isAdmin = await checkAdminStatus(currentUser);
+    if (!isAdmin) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Admin access required.</p></div>';
+        return;
+    }
+    
+    try {
+        if (!reportId || reportId === 'null' || reportId === 'undefined') {
+            window.location.href = 'admin-reports.html';
+            return;
+        }
+        
+        const reportSnapshot = await db.ref(`reports/${reportId}`).once('value');
+        
+        if (!reportSnapshot.exists()) {
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Report Not Found</div>
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Report with ID "${reportId}" was not found.</p>
+                        <button onclick="window.location.href='admin-reports.html'" class="btn btn-back" style="margin-top:15px;"><i class="fas fa-arrow-left"></i> Back to Reports</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        const report = reportSnapshot.val();
+        report.id = reportId;
+        
+        let postData = null;
+        if (report.postId) {
+            try {
+                const postSnapshot = await db.ref(`social_posts/${report.postId}`).once('value');
+                if (postSnapshot.exists()) postData = postSnapshot.val();
+            } catch(e) { console.error('Error fetching post:', e); }
+        }
+        
+        const statusClass = report.status === 'pending' || !report.status ? 'pending' : 
+                           (report.status === 'deleted' ? 'deleted' : 'reviewed');
+        const statusText = report.status === 'pending' || !report.status ? 'Pending' : 
+                           (report.status === 'deleted' ? 'Deleted' : 'Reviewed');
+        
+        let postHtml = '';
+        if (postData) {
+            postHtml = `
+                <div class="post-box">
+                    <div class="author"><i class="fas fa-user-circle"></i> ${escapeHtml(postData.author || 'Unknown')}</div>
+                    <div class="content">${(postData.content || 'No content').replace(/\n/g, '<br>')}</div>
+                    ${postData.image ? `<img src="${postData.image}" class="image" onclick="window.open(this.src)">` : ''}
+                    <div style="margin-top:8px;font-size:11px;color:#888;">
+                        <i class="fas fa-heart"></i> ${postData.likes || 0} likes &nbsp;|&nbsp;
+                        <i class="fas fa-comment"></i> ${postData.commentCount || 0} comments
+                    </div>
+                </div>
+            `;
+        } else {
+            postHtml = `<div style="color:#888;padding:10px 0;"><i class="fas fa-exclamation-triangle"></i> Post no longer exists</div>`;
+        }
+        
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-title"><i class="fas fa-info-circle"></i> Report Information</div>
+                <div class="detail-row"><span class="detail-label"><i class="fas fa-hashtag"></i> Report ID</span><span class="detail-value">${report.id}</span></div>
+                <div class="detail-row"><span class="detail-label"><i class="fas fa-circle"></i> Status</span><span class="detail-value"><span class="status-badge ${statusClass}">${statusText}</span></span></div>
+                <div class="detail-row"><span class="detail-label"><i class="fas fa-user"></i> Reported By</span><span class="detail-value">${escapeHtml(report.reportedByEmail || report.reportedBy || 'Unknown')}</span></div>
+                <div class="detail-row"><span class="detail-label"><i class="fas fa-clock"></i> Reported At</span><span class="detail-value">${report.reportedAt ? new Date(report.reportedAt).toLocaleString() : 'Unknown'}</span></div>
+                ${report.reviewedAt ? `<div class="detail-row"><span class="detail-label"><i class="fas fa-check-circle"></i> Reviewed At</span><span class="detail-value">${new Date(report.reviewedAt).toLocaleString()}</span></div>` : ''}
+                ${report.reviewedBy ? `<div class="detail-row"><span class="detail-label"><i class="fas fa-user-shield"></i> Reviewed By</span><span class="detail-value">${escapeHtml(report.reviewedBy)}</span></div>` : ''}
+            </div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fas fa-exclamation-circle"></i> Reason</div>
+                <div class="report-box">${(report.reason || 'No reason provided').replace(/\n/g, '<br>')}</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fas fa-file-alt"></i> Post Content</div>
+                ${postHtml}
+            </div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fas fa-cog"></i> Actions</div>
+                <div class="actions">
+                    <button class="btn btn-back" onclick="window.location.href='admin-reports.html'"><i class="fas fa-arrow-left"></i> Back</button>
+                    ${!report.status || report.status === 'pending' ? `
+                        <button class="btn btn-delete" id="deleteBtn"><i class="fas fa-trash-alt"></i> Delete Post & Report</button>
+                        <button class="btn btn-ignore" id="ignoreBtn"><i class="fas fa-times"></i> Ignore Report</button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        if (!report.status || report.status === 'pending') {
+            document.getElementById('deleteBtn')?.addEventListener('click', async () => {
+                const confirmed = await showConfirmModal({
+                    title: 'Delete Post & Report?',
+                    subtitle: 'This will permanently delete the post and mark the report as resolved.',
+                    icon: '🗑️', iconClass: 'danger',
+                    details: {
+                        'Author': postData?.author || 'Unknown',
+                        'Content': (postData?.content || '').substring(0, 50) + '...'
+                    },
+                    warning: '⚠️ This action cannot be undone!',
+                    btnText: 'Delete Permanently',
+                    btnIcon: 'fa-trash-alt'
+                });
+                
+                if (confirmed) {
+                    try {
+                        if (report.postId) { await db.ref(`social_posts/${report.postId}`).remove(); }
+                        await db.ref(`reports/${report.id}`).update({ 
+                            status: 'deleted', 
+                            reviewedAt: Date.now(),
+                            reviewedBy: currentAdminEmail
+                        });
+                        showToast('✅ Post and report deleted!', 'success');
+                        setTimeout(() => window.location.href = 'admin-reports.html', 1000);
+                    } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+                }
+            });
+            
+            document.getElementById('ignoreBtn')?.addEventListener('click', async () => {
+                const confirmed = await showConfirmModal({
+                    title: 'Ignore Report?',
+                    subtitle: 'This will mark the report as ignored. The post will remain visible.',
+                    icon: '✅', iconClass: 'success',
+                    details: { 'Action': 'Ignore Report', 'Status': 'Post will remain visible' },
+                    btnText: 'Ignore Report',
+                    btnIcon: 'fa-check',
+                    btnClass: 'confirm-success'
+                });
+                
+                if (confirmed) {
+                    try {
+                        await db.ref(`reports/${report.id}`).update({ 
+                            status: 'ignored', 
+                            reviewedAt: Date.now(),
+                            reviewedBy: currentAdminEmail
+                        });
+                        showToast('✅ Report ignored!', 'success');
+                        setTimeout(() => window.location.href = 'admin-reports.html', 1000);
+                    } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+                }
+            });
+        }
+        
+    } catch(error) {
+        console.error('Error loading report:', error);
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Error</div>
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error: ${error.message}</p>
+                    <button onclick="location.reload()" style="margin-top:15px;padding:8px 20px;background:linear-gradient(135deg,#800000,#FFD700);border:none;border-radius:8px;color:white;cursor:pointer;">Retry</button>
+                    <br>
+                    <button onclick="window.location.href='admin-reports.html'" style="margin-top:10px;padding:8px 20px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#ccc;cursor:pointer;">Back</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+        document.getElementById('reportContainer').innerHTML = `
+            <div class="card">
+                <div class="card-title"><i class="fas fa-lock"></i> Access Denied</div>
+                <div class="empty-state">
+                    <i class="fas fa-lock"></i>
+                    <p>Please login to view this report.</p>
+                    <button onclick="window.location.href='login.html'" style="margin-top:15px;padding:8px 20px;background:linear-gradient(135deg,#800000,#FFD700);border:none;border-radius:8px;color:white;cursor:pointer;">Login</button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    currentUser = user;
+    await loadReport();
+});
+</script>
+</body>
+</html>

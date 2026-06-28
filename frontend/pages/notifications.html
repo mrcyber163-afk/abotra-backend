@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Notifications | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+    background: #050505;
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding-bottom: 30px;
+    position: relative;
+    overflow-x: hidden;
+    font-size: 11px;
+}
+
+body.light-theme {
+    background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
+    color: #1e1e2f;
+}
+
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .notifications-container,
+body.light-theme .notification-card,
+body.light-theme .device-message {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title { color: #800000; }
+body.light-theme .notification-card .message,
+body.light-theme .device-message p { color: #333; }
+body.light-theme .theme-toggle {
+    background: rgba(0,0,0,0.08);
+    border-color: rgba(128,0,0,0.3);
+}
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .action-btn {
+    background: rgba(128,0,0,0.1);
+    color: #800000;
+}
+body.light-theme .action-btn:hover { background: rgba(128,0,0,0.2); }
+body.light-theme .clear-notifications-btn {
+    background: rgba(246,70,93,0.15);
+    color: #F6465D;
+}
+body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3); }
+
+.permission-banner {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(128,0,0,0.1));
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.permission-banner p { font-size: 10px; color: #FFD700; }
+.permission-banner .allow-btn {
+    background: linear-gradient(135deg, #FFD700, #DAA520);
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: #800000;
+    font-weight: 700;
+    font-size: 10px;
+    cursor: pointer;
+}
+.permission-banner .allow-btn:hover { transform: scale(1.02); }
+.permission-banner .later-btn {
+    background: transparent;
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: #FFD700;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.skeleton {
+    animation: skeletonPulse 1s ease-in-out infinite;
+}
+.skeleton-text {
+    height: 10px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%);
+    background-size: 200% 100%;
+    border-radius: 5px;
+    animation: shimmer 1s infinite;
+}
+.skeleton-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.1);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+.skeleton-icon {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.1) 25%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.1) 75%);
+    background-size: 200% 100%;
+    border-radius: 50%;
+    animation: shimmer 1s infinite;
+}
+.skeleton-content { flex: 1; }
+.skeleton-line {
+    height: 9px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.06) 25%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.06) 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    margin: 5px 0;
+    animation: shimmer 1s infinite;
+}
+.skeleton-line.short { width: 35%; }
+.skeleton-line.medium { width: 55%; }
+.skeleton-line.long { width: 75%; }
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+.theme-toggle {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    padding: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.theme-toggle:hover {
+    background: rgba(255,215,0,0.2);
+    transform: scale(1.02);
+}
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: transparent;
+}
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top {
+    background: rgba(255,215,0,0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 500;
+}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
+.notifications-container {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 70px auto 20px;
+    padding: 0 12px;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFD700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.page-title span { display: flex; align-items: center; gap: 6px; }
+.unread-badge {
+    background: #F6465D;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 2px 7px;
+    margin-left: 5px;
+}
+.action-buttons-group { display: flex; gap: 6px; }
+.mark-all-read, .clear-notifications-btn {
+    background: rgba(255,215,0,0.2);
+    border: none;
+    border-radius: 18px;
+    padding: 5px 12px;
+    color: #FFD700;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.mark-all-read:hover, .clear-notifications-btn:hover {
+    background: rgba(255,215,0,0.35);
+}
+.clear-notifications-btn {
+    background: rgba(246,70,93,0.2);
+    color: #F6465D;
+}
+.clear-notifications-btn:hover { background: rgba(246,70,93,0.4); }
+
+.device-message {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.device-message i { font-size: 14px; color: #FFD700; }
+.device-message p { color: #AAAAAA; font-size: 10px; flex: 1; }
+.device-message .device-detail { color: #FFD700; font-weight: 600; }
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    transition: 0.3s;
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+.notification-card:hover {
+    background: rgba(255,215,0,0.08);
+    transform: translateX(3px);
+    border-color: rgba(255,215,0,0.3);
+}
+.notification-card.unread {
+    background: rgba(255,215,0,0.12);
+    border-left: 3px solid #FFD700;
+}
+
+.notification-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.notification-icon.success { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.notification-icon.error { background: rgba(246,70,93,0.2); color: #F6465D; }
+.notification-icon.warning { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.info { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.master-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
+.notification-icon.deposit { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.notification-icon.withdrawal { background: rgba(246,70,93,0.2); color: #F6465D; }
+.notification-icon.transfer { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.p2p { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.kyc { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.notification-icon.trade { background: rgba(255,215,0,0.2); color: #FFD700; }
+
+.notification-content { flex: 1; }
+.notification-title { font-weight: 700; color: #FFD700; font-size: 11px; margin-bottom: 3px; }
+.notification-content .message { color: #FFFFFF; font-size: 10px; line-height: 1.4; margin-bottom: 3px; }
+.notification-content .time { color: #888; font-size: 8px; }
+.notification-action { margin-top: 6px; }
+.action-btn {
+    background: rgba(255,215,0,0.2);
+    border: none;
+    border-radius: 18px;
+    padding: 4px 10px;
+    color: #FFD700;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.action-btn:hover { background: rgba(255,215,0,0.4); }
+.delete-notif-btn {
+    background: rgba(246,70,93,0.15);
+    border: none;
+    border-radius: 18px;
+    padding: 3px 7px;
+    color: #F6465D;
+    font-size: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 5px;
+}
+.delete-notif-btn:hover { background: rgba(246,70,93,0.3); }
+
+.empty-state { text-align: center; padding: 45px 20px; }
+.empty-state i { font-size: 44px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
+.empty-state p { color: #AAAAAA; font-size: 11px; }
+
+.notification-popup {
+    position: fixed;
+    top: 70px;
+    right: 15px;
+    min-width: 240px;
+    max-width: 280px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 99999;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    animation: slideInRight 0.3s ease;
+    border-left: 3px solid;
+}
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup i { font-size: 16px; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; line-height: 1.4; color: #FFFFFF; font-weight: 500; }
+.notification-popup .close-notif { cursor: pointer; opacity: 0.7; transition: 0.3s; font-size: 11px; }
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
+}
+
+@media(max-width: 700px) {
+    .notifications-container { padding: 0 12px; margin-top: 65px; }
+    .page-title { font-size: 16px; flex-direction: column; }
+    .action-buttons-group { width: 100%; justify-content: center; }
+    .device-message { padding: 8px 10px; }
+    .device-message p { font-size: 9px; }
+    .theme-toggle { padding: 6px; }
+    .logo-area h2 { font-size: 13px; }
+    .logo-area p { display: none; }
+    .notification-card { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+    <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+    <div><h2>ABOTRA-PROAI</h2><p>Notifications</p></div>
+</div>
+<div class="top-bar-right">
+    <button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+    <div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="notifications-container">
+<div class="page-title">
+<span><i class="fas fa-bell"></i> Notifications <span id="unreadCountBadge" class="unread-badge" style="display:none;">0</span></span>
+<div class="action-buttons-group">
+<button class="mark-all-read" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+<button class="clear-notifications-btn" id="clearNotificationsBtn"><i class="fas fa-trash-alt"></i> Clear all</button>
+</div>
+</div>
+
+<!-- Push Notification Permission Banner -->
+<div id="permissionBanner" class="permission-banner" style="display:none;">
+<p><i class="fas fa-bell"></i> Allow notifications to get alerts on your phone</p>
+<div>
+<button class="allow-btn" id="allowNotificationsBtn"><i class="fas fa-check"></i> Allow</button>
+<button class="later-btn" id="laterBtn">Later</button>
+</div>
+</div>
+
+<div class="device-message" id="deviceMessage">
+<i class="fas fa-info-circle"></i>
+<p>🔐 Logged in as <span class="device-detail" id="userEmailDisplay">loading...</span> from <span class="device-detail" id="deviceInfo">detecting...</span></p>
+</div>
+
+<div id="notificationsList">
+<!-- Skeletons -->
+<div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-content"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
+<div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-content"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
+<div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-content"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, get, push, query, orderByChild, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let notificationsListener = null;
+let unreadCount = 0;
+let oneSignalInitialized = false;
+
+const ONESIGNAL_APP_ID = "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc";
+
+// ========== ONESIGNAL PUSH NOTIFICATIONS ==========
+async function initOneSignal() {
+    if (oneSignalInitialized) return;
+    try {
+        if (typeof window.OneSignal === 'undefined') {
+            setTimeout(initOneSignal, 1000);
+            return;
+        }
+        
+        await window.OneSignal.Deferred;
+        await window.OneSignal.init({
+            appId: ONESIGNAL_APP_ID,
+            safari_web_id: "web.onesignal.auto.123456789",
+            notifyButton: { enable: false },
+            allowLocalhostAsSecureOrigin: true,
+        });
+        
+        oneSignalInitialized = true;
+        console.log("OneSignal initialized");
+        
+        const isSubscribed = await window.OneSignal.Notifications.permission;
+        const bannerDismissed = localStorage.getItem('onesignal_banner_dismissed');
+        
+        if (isSubscribed !== true && !bannerDismissed) {
+            document.getElementById('permissionBanner').style.display = 'flex';
+        }
+        
+        if (currentUser) {
+            await window.OneSignal.sendTag("user_id", currentUser.uid);
+            await window.OneSignal.sendTag("user_email", currentUser.email);
+            await window.OneSignal.setExternalUserId(currentUser.uid);
+        }
+        
+    } catch (error) {
+        console.error("OneSignal init error:", error);
+    }
+}
+
+async function requestPushPermission() {
+    try {
+        if (typeof window.OneSignal === 'undefined') return;
+        
+        const result = await window.OneSignal.Notifications.requestPermission();
+        if (result === true) {
+            localStorage.setItem('onesignal_banner_dismissed', 'true');
+            document.getElementById('permissionBanner').style.display = 'none';
+            showToast('Notifications enabled! You will receive alerts on your phone.', 'success');
+            
+            if (currentUser) {
+                await window.OneSignal.sendTag("user_id", currentUser.uid);
+                await window.OneSignal.sendTag("user_email", currentUser.email);
+                await window.OneSignal.setExternalUserId(currentUser.uid);
+            }
+        } else {
+            showToast('Notification permission denied', 'info');
+        }
+    } catch (error) {
+        console.error("Permission error:", error);
+        showToast('Could not enable notifications', 'error');
+    }
+}
+
+// Send push notification
+async function sendPushNotification(title, message, link = null) {
+    if (!oneSignalInitialized || !currentUser) return;
+    try {
+        await window.OneSignal.Notifications.sendSelf({
+            title: title,
+            message: message,
+            url: link || window.location.origin + '/notifications.html',
+            icon: 'https://placehold.co/64x64/800000/FFD700?text=AI'
+        });
+        console.log("Push notification sent:", title);
+    } catch(e) {
+        console.log("Push not sent:", e);
+    }
+}
+
+// Add notification with push
+async function addNotificationWithPush(userId, title, message, type = 'info', link = null, actionData = null) {
+    if (!userId) return;
+    
+    const notifRef = push(ref(db, `notifications/${userId}`));
+    await set(notifRef, {
+        id: notifRef.key, title, message, type, read: false,
+        timestamp: Date.now(), date: new Date().toISOString(), link, actionData
+    });
+    
+    if (userId === currentUser?.uid && oneSignalInitialized) {
+        await sendPushNotification(title, message, link);
+    }
+    
+    return notifRef.key;
+}
+
+window.addNotification = addNotificationWithPush;
+
+// ========== ORIGINAL CODE CONTINUES ==========
+function showToast(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
+    document.body.appendChild(toast);
+    toast.querySelector('.close-notif').addEventListener('click', () => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); });
+    setTimeout(() => { if(toast.parentNode) { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); } }, 4000);
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+function detectDevice() {
+    const ua = navigator.userAgent;
+    let device = '';
+    if (/iPhone/i.test(ua)) device = 'iPhone';
+    else if (/iPad/i.test(ua)) device = 'iPad';
+    else if (/Android/i.test(ua)) device = 'Android Device';
+    else if (/Windows/i.test(ua)) device = 'Windows PC';
+    else if (/Mac/i.test(ua)) device = 'Mac Computer';
+    else device = 'Unknown Device';
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) device += ' (Chrome)';
+    else if (/Firefox/i.test(ua)) device += ' (Firefox)';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) device += ' (Safari)';
+    else if (/Edg/i.test(ua)) device += ' (Edge)';
+    return device;
+}
+
+async function markAsRead(notificationId, event) {
+    if (event) event.stopPropagation();
+    if (!currentUser) return;
+    await update(ref(db, `notifications/${currentUser.uid}/${notificationId}`), { read: true });
+    await updateUnreadCountAndBadge();
+    showToast('Marked as read', 'success');
+}
+
+async function markAllAsRead() {
+    if (!currentUser) return;
+    const snapshot = await get(ref(db, `notifications/${currentUser.uid}`));
+    if (snapshot.exists()) {
+        const updates = {};
+        snapshot.forEach(child => { 
+            if (!child.val().read) updates[`${child.key}/read`] = true; 
+        });
+        if (Object.keys(updates).length > 0) {
+            await update(ref(db, `notifications/${currentUser.uid}`), updates);
+            showToast(`${Object.keys(updates).length} marked as read`, 'success');
+            await updateUnreadCountAndBadge();
+        } else {
+            showToast('No unread', 'info');
+        }
+    }
+}
+
+async function clearAllNotifications() {
+    if (!currentUser) return;
+    if (!confirm('⚠️ Delete ALL notifications? This cannot be undone.')) return;
+    
+    try {
+        await remove(ref(db, `notifications/${currentUser.uid}`));
+        showToast('All notifications cleared', 'success');
+        await updateUnreadCountAndBadge();
+        loadNotifications(currentUser.uid);
+    } catch (error) {
+        console.error("Clear error:", error);
+        showToast('Failed to clear', 'error');
+    }
+}
+
+async function deleteSingleNotification(notificationId, event) {
+    if (event) event.stopPropagation();
+    if (!currentUser) return;
+    if (!confirm('Delete this notification?')) return;
+    
+    try {
+        await remove(ref(db, `notifications/${currentUser.uid}/${notificationId}`));
+        showToast('Deleted', 'success');
+        await updateUnreadCountAndBadge();
+        loadNotifications(currentUser.uid);
+    } catch (error) {
+        console.error("Delete error:", error);
+        showToast('Failed to delete', 'error');
+    }
+}
+
+async function updateUnreadCountAndBadge() {
+    if (!currentUser) return;
+    const snapshot = await get(ref(db, `notifications/${currentUser.uid}`));
+    let unread = 0;
+    if (snapshot.exists()) {
+        snapshot.forEach(child => { if (!child.val().read) unread++; });
+    }
+    unreadCount = unread;
+    
+    const badgeSpan = document.getElementById('unreadCountBadge');
+    if (badgeSpan) {
+        if (unread > 0) {
+            badgeSpan.style.display = 'inline-block';
+            badgeSpan.textContent = unread;
+        } else {
+            badgeSpan.style.display = 'none';
+        }
+    }
+    
+    localStorage.setItem('abotra_unread_notifications', unread);
+    return unread;
+}
+
+function getNotificationIcon(type) {
+    const typeMap = {
+        'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
+        'deposit': { icon: 'fas fa-arrow-down', class: 'deposit' },
+        'withdrawal': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
+        'transfer': { icon: 'fas fa-exchange-alt', class: 'transfer' },
+        'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
+        'p2p-order': { icon: 'fas fa-shopping-cart', class: 'p2p' },
+        'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
+        'trade': { icon: 'fas fa-chart-line', class: 'trade' },
+        'success': { icon: 'fas fa-check-circle', class: 'success' },
+        'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
+        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' }
+    };
+    return typeMap[type] || { icon: 'fas fa-bell', class: 'info' };
+}
+
+function timeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    return `${weeks}w ago`;
+}
+
+function getActionButton(notification) {
+    const type = notification.type || '';
+    
+    if (type === 'deposit' || type === 'withdrawal') {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='wallet.html'"><i class="fas fa-wallet"></i> View Wallet</button></div>`;
+    }
+    
+    if (type === 'kyc') {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='account.html'"><i class="fas fa-id-card"></i> View KYC</button></div>`;
+    }
+    
+    if (type === 'trade' || type === 'trade-opened' || type === 'trade-closed') {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='trade-history.html'"><i class="fas fa-chart-line"></i> View Trades</button></div>`;
+    }
+    
+    if (type === 'master-trade') {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='copy-trading.html'"><i class="fas fa-copy"></i> Copy Trade</button></div>`;
+    }
+    
+    if (type === 'p2p' || type === 'p2p-order') {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='p2p-orders.html'"><i class="fas fa-handshake"></i> View Order</button></div>`;
+    }
+    
+    if (notification.link) {
+        return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='${notification.link}'"><i class="fas fa-arrow-right"></i> View</button></div>`;
+    }
+    return '';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function renderNotifications(notifications) {
+    const container = document.getElementById('notificationsList');
+    if (notifications.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>`;
+        return;
+    }
+    
+    container.innerHTML = '';
+    notifications.forEach(notif => {
+        const icon = getNotificationIcon(notif.type);
+        const actionButton = getActionButton(notif);
+        const notifCard = document.createElement('div');
+        notifCard.className = `notification-card ${notif.read ? '' : 'unread'}`;
+        notifCard.onclick = () => markAsRead(notif.id, null);
+        notifCard.innerHTML = `
+            <div class="notification-icon ${icon.class}"><i class="${icon.icon}"></i></div>
+            <div class="notification-content">
+                ${notif.title ? `<div class="notification-title">${escapeHtml(notif.title)}</div>` : ''}
+                <div class="message">${escapeHtml(notif.message || '')}</div>
+                <div class="time"><i class="far fa-clock"></i> ${timeAgo(notif.timestamp)} ${!notif.read ? '<span style="color:#FFD700;"> • Unread</span>' : ''}</div>
+                ${actionButton}
+            </div>
+            <button class="delete-notif-btn" onclick="event.stopPropagation(); window.deleteNotification('${notif.id}')"><i class="fas fa-trash-alt"></i></button>
+        `;
+        container.appendChild(notifCard);
+    });
+}
+
+window.deleteNotification = async function(notificationId) {
+    await deleteSingleNotification(notificationId);
+};
+
+function loadNotifications(userId) {
+    if (!userId) return;
+    const notificationsRef = ref(db, `notifications/${userId}`);
+    
+    if (notificationsListener) notificationsListener();
+    notificationsListener = onValue(notificationsRef, async (snapshot) => {
+        const notifications = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                notifications.push({ id: child.key, ...child.val() });
+            });
+            notifications.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        }
+        renderNotifications(notifications);
+        await updateUnreadCountAndBadge();
+    }, (error) => {
+        console.error("Error loading notifications:", error);
+        document.getElementById('notificationsList').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading.</p></div>';
+    });
+}
+
+async function checkRegistrationAndDevice() {
+    if (!currentUser) return;
+    
+    const currentDevice = detectDevice();
+    const userRef = ref(db, `users/${currentUser.uid}`);
+    const userSnapshot = await get(userRef);
+    const userData = userSnapshot.exists() ? userSnapshot.val() : {};
+    
+    document.getElementById('userEmailDisplay').innerHTML = currentUser.email || 'User';
+    document.getElementById('deviceInfo').innerHTML = currentDevice;
+    
+    const deviceStorageKey = `abotra_device_notified_${currentUser.uid}`;
+    const lastDevice = localStorage.getItem(deviceStorageKey);
+    
+    if (!userData.createdAt) {
+        await update(ref(db, `users/${currentUser.uid}`), { 
+            createdAt: Date.now(),
+            name: currentUser.email?.split('@')[0] || 'User',
+            email: currentUser.email
+        });
+        await addNotificationWithPush(currentUser.uid, '🎉 Welcome!', 'Welcome to ABOTRA-PROAI! Start your trading journey.', 'success', 'dashboard.html');
+        localStorage.setItem(deviceStorageKey, currentDevice);
+    } else if (lastDevice !== currentDevice && lastDevice !== null) {
+        await addNotificationWithPush(currentUser.uid, '🔐 New Device Login', `Login from: ${currentDevice}. If not you, secure your account.`, 'warning', 'security.html');
+        localStorage.setItem(deviceStorageKey, currentDevice);
+    } else if (!lastDevice) {
+        localStorage.setItem(deviceStorageKey, currentDevice);
+    }
+}
+
+document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
+document.getElementById('clearNotificationsBtn').addEventListener('click', clearAllNotifications);
+document.getElementById('allowNotificationsBtn').addEventListener('click', requestPushPermission);
+document.getElementById('laterBtn').addEventListener('click', () => {
+    localStorage.setItem('onesignal_banner_dismissed', 'true');
+    document.getElementById('permissionBanner').style.display = 'none';
+});
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
+    currentUser = user;
+    
+    await checkRegistrationAndDevice();
+    loadNotifications(user.uid);
+    await initOneSignal();
+});
+
+initTheme();
+</script>
+</body>
+</html>

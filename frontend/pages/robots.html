@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>AI Robots | ABOTRA-PROAI - Choose Your Trading Robot</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 11px;
+}
+body.light-theme {
+background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .robot-card {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title { color: #800000; }
+body.light-theme .robot-name { color: #800000; }
+body.light-theme .robot-description { color: #555; }
+body.light-theme .price-value { color: #800000; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .instructions-box {
+background: rgba(255,255,255,0.96);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .instructions-box h3 { color: #800000; }
+body.light-theme .instructions-box li { color: #333; }
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+.skeleton-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 22px;
+    overflow: hidden;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-image {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+.skeleton-content {
+    padding: 18px;
+}
+.skeleton-title {
+    height: 20px;
+    width: 60%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    animation: shimmer 1.5s infinite;
+}
+.skeleton-text {
+    height: 10px;
+    width: 90%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    animation: shimmer 1.5s infinite;
+}
+.skeleton-text.short {
+    width: 40%;
+}
+.skeleton-stats {
+    display: flex;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.skeleton-stat {
+    flex: 1;
+    height: 35px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 8px;
+    animation: shimmer 1.5s infinite;
+}
+.skeleton-button {
+    height: 42px;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 12px;
+    margin-top: 12px;
+    animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.theme-toggle {
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 10px;
+padding: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 16px; color: #FFFFFF; }
+.overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.82);
+backdrop-filter: blur(4px);
+z-index: 1;
+}
+.top-bar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 100;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 10px 18px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-area img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 16px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 8px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ===== CURRENCY TOGGLE BUTTON ===== */
+.currency-toggle-btn {
+background: rgba(255,215,0,0.15);
+border: 1px solid rgba(255,215,0,0.4);
+border-radius: 10px;
+padding: 6px 14px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 10px;
+font-weight: 600;
+white-space: nowrap;
+}
+.currency-toggle-btn:hover {
+background: rgba(255,215,0,0.3);
+transform: scale(1.02);
+}
+.currency-toggle-btn i { font-size: 12px; }
+
+.back-btn-top {
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 10px;
+padding: 6px 10px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 5px;
+font-size: 10px;
+font-weight: 500;
+}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
+.main-content {
+position: relative;
+z-index: 2;
+max-width: 1400px;
+margin: 75px auto 20px;
+padding: 0 15px;
+}
+.page-title {
+text-align: center;
+font-size: 28px;
+font-weight: 800;
+color: #FFD700;
+margin-bottom: 25px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+.robots-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 20px;
+}
+.robot-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+backdrop-filter: blur(10px);
+border-radius: 22px;
+overflow: hidden;
+transition: 0.3s;
+position: relative;
+}
+.robot-card:hover {
+transform: translateY(-6px);
+border-color: #FFD700;
+box-shadow: 0 15px 35px rgba(255,215,0,0.15);
+}
+.robot-image-container {
+position: relative;
+width: 100%;
+height: 180px;
+overflow: hidden;
+}
+.robot-image {
+width: 100%;
+height: 100%;
+object-fit: cover;
+transition: transform 0.5s ease;
+}
+.robot-card:hover .robot-image { transform: scale(1.05); }
+.image-overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2));
+}
+.level-badge {
+position: absolute;
+top: 12px;
+left: 12px;
+background: linear-gradient(135deg, #800000, #FFD700);
+padding: 4px 10px;
+border-radius: 18px;
+font-size: 10px;
+font-weight: 700;
+color: white;
+z-index: 2;
+display: flex;
+align-items: center;
+gap: 4px;
+}
+.hot-badge {
+position: absolute;
+top: 12px;
+right: 12px;
+background: #F6465D;
+padding: 4px 10px;
+border-radius: 18px;
+font-size: 10px;
+font-weight: 700;
+color: white;
+z-index: 2;
+display: flex;
+align-items: center;
+gap: 4px;
+animation: pulse 1.5s infinite;
+}
+.owned-badge {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: rgba(0,0,0,0.85);
+backdrop-filter: blur(10px);
+padding: 6px 12px;
+border-radius: 25px;
+color: #0ECB81;
+font-weight: 700;
+font-size: 11px;
+border: 1px solid #0ECB81;
+z-index: 5;
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.starter-badge {
+position: absolute;
+top: 12px;
+right: 12px;
+background: #0ECB81;
+padding: 4px 10px;
+border-radius: 18px;
+font-size: 10px;
+font-weight: 700;
+color: white;
+z-index: 2;
+display: flex;
+align-items: center;
+gap: 4px;
+}
+@keyframes pulse {
+0% { opacity: 0.7; transform: scale(1); }
+50% { opacity: 1; transform: scale(1.05); }
+100% { opacity: 0.7; transform: scale(1); }
+}
+.robot-info { padding: 18px; }
+.robot-name {
+color: #FFD700;
+font-size: 18px;
+font-weight: 800;
+margin-bottom: 4px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 6px;
+}
+.robot-level {
+font-size: 10px;
+color: #888;
+font-weight: 400;
+background: rgba(255,255,255,0.1);
+padding: 2px 6px;
+border-radius: 18px;
+}
+.robot-description {
+color: #AAAAAA;
+font-size: 11px;
+margin-bottom: 12px;
+line-height: 1.5;
+}
+.stats-row {
+display: flex;
+justify-content: space-between;
+margin-bottom: 12px;
+padding: 8px 0;
+border-top: 1px solid rgba(255,255,255,0.08);
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.stat { text-align: center; flex: 1; }
+.stat-label {
+color: #888;
+font-size: 9px;
+margin-bottom: 3px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 3px;
+}
+.stat-value { color: #FFD700; font-size: 14px; font-weight: 700; }
+.stat-value.positive { color: #0ECB81; }
+.price-section {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 12px;
+}
+.price-label {
+color: #888;
+font-size: 10px;
+display: flex;
+align-items: center;
+gap: 4px;
+}
+.price-value { 
+color: #FFD700; 
+font-size: 22px; 
+font-weight: 800; 
+transition: all 0.3s ease;
+}
+.price-value.currency-updated {
+animation: priceUpdate 0.3s ease;
+}
+@keyframes priceUpdate {
+0% { transform: scale(1); color: #FFD700; }
+50% { transform: scale(1.05); color: #0ECB81; }
+100% { transform: scale(1); color: #FFD700; }
+}
+
+.buy-btn {
+width: 100%;
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+border-radius: 12px;
+padding: 12px;
+color: white;
+font-weight: 700;
+font-size: 12px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+.buy-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 5px 12px rgba(255,215,0,0.3);
+}
+.buy-btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+transform: none;
+}
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 18px 18px 0 0;
+display: flex;
+justify-content: space-around;
+padding: 8px 12px;
+z-index: 100;
+}
+.bottom-nav a {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-decoration: none;
+color: #888;
+font-size: 8px;
+transition: 0.3s;
+gap: 3px;
+}
+.bottom-nav a i { font-size: 18px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup {
+position: fixed;
+top: 75px;
+right: 20px;
+min-width: 250px;
+max-width: 320px;
+padding: 10px 14px;
+border-radius: 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+z-index: 99999;
+backdrop-filter: blur(20px);
+border: 1px solid rgba(255,255,255,0.08);
+box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+animation: slideInRight 0.4s ease;
+border-left: 3px solid;
+}
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+
+/* Instructions Box */
+.instructions-box {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px 24px;
+margin-top: 25px;
+backdrop-filter: blur(10px);
+}
+.instructions-box h3 {
+color: #FFD700;
+font-size: 16px;
+font-weight: 700;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.instructions-box ul {
+list-style: none;
+padding: 0;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px 20px;
+}
+.instructions-box li {
+color: #ccc;
+font-size: 11px;
+padding: 6px 0;
+display: flex;
+align-items: flex-start;
+gap: 8px;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.instructions-box li i {
+color: #FFD700;
+font-size: 12px;
+margin-top: 2px;
+min-width: 16px;
+}
+.instructions-box li .highlight {
+color: #0ECB81;
+font-weight: 600;
+}
+.instructions-box li .warning {
+color: #F6465D;
+font-weight: 600;
+}
+@media(max-width: 700px) {
+.main-content { padding: 0 15px; }
+.page-title { font-size: 24px; }
+.robots-grid { grid-template-columns: 1fr; gap: 15px; }
+.robot-image-container { height: 160px; }
+.theme-toggle { padding: 6px; }
+.logo-area h2 { font-size: 14px; }
+.logo-area p { display: none; }
+.bottom-nav a span { font-size: 7px; }
+.bottom-nav a i { font-size: 16px; }
+.instructions-box ul { grid-template-columns: 1fr; }
+.instructions-box { padding: 15px 16px; }
+.currency-toggle-btn { padding: 4px 10px; font-size: 9px; }
+.currency-toggle-btn i { font-size: 10px; }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 20001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    padding: 20px;
+}
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-card {
+    background: linear-gradient(145deg, #181828, #0E0E18);
+    border-radius: 28px;
+    padding: 24px 20px 20px;
+    max-width: 380px;
+    width: 100%;
+    border: 1px solid rgba(194,122,14,0.4);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-card h3 {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.modal-card p {
+    color: #aaa;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.modal-card .modal-message {
+    color: #ccc;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.modal-btn-confirm {
+    background: linear-gradient(135deg, #FFD700, #C27A0E);
+    color: #1a1a1a;
+}
+.modal-btn-confirm:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px rgba(255,215,0,0.4);
+}
+.modal-btn-cancel {
+    background: rgba(255,255,255,0.08);
+    color: #aaa;
+}
+.modal-btn-cancel:hover {
+    background: rgba(255,255,255,0.15);
+}
+.success-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(145deg, #1a2a1a, #0e1a0e);
+    border: 1px solid rgba(14,203,129,0.4);
+    border-radius: 28px;
+    padding: 30px 35px;
+    z-index: 30000;
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.success-popup i {
+    font-size: 48px;
+    color: #0ECB81;
+    margin-bottom: 12px;
+}
+.success-popup h3 {
+    color: #0ECB81;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.success-popup p {
+    color: #ccc;
+    font-size: 12px;
+    margin-bottom: 16px;
+}
+.success-popup .btn-ok {
+    background: linear-gradient(135deg, #0ECB81, #0A9E65);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 30px;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.success-popup .btn-ok:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(14,203,129,0.4);
+}
+@keyframes popIn {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>AI Trading Robots</p></div>
+</div>
+<div class="top-bar-right">
+<!-- ===== CURRENCY TOGGLE BUTTON + BACK ===== -->
+<button class="currency-toggle-btn" id="currencyToggleBtn">
+    <i class="fas fa-exchange-alt"></i> 
+    <span id="currencyDisplay">USD</span>
+</button>
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'">
+    <i class="fas fa-arrow-left"></i> Back
+</button>
+<div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-sun"></i>
+    <i class="fas fa-moon" style="display:none;"></i>
+</div>
+</div>
+</div>
+<div class="overlay"></div>
+<div class="main-content">
+<div class="page-title"><i class="fas fa-robot"></i> AI Trading Robots</div>
+<div class="robots-grid" id="robotsContainer">
+    <!-- Skeleton Loaders -->
+    <div class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+            <div class="skeleton-stats">
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+            </div>
+            <div class="skeleton-text" style="width: 30%;"></div>
+            <div class="skeleton-button"></div>
+        </div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+            <div class="skeleton-stats">
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+            </div>
+            <div class="skeleton-text" style="width: 30%;"></div>
+            <div class="skeleton-button"></div>
+        </div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+            <div class="skeleton-stats">
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+            </div>
+            <div class="skeleton-text" style="width: 30%;"></div>
+            <div class="skeleton-button"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructions Box -->
+<div class="instructions-box">
+    <h3><i class="fas fa-info-circle"></i> How AI Robots Work</h3>
+    <ul>
+        <li><i class="fas fa-shopping-cart"></i> <span><strong>Purchase Once, Own Forever</strong> — Each robot is a <span class="highlight">permanent purchase</span>. No subscription fees, no hidden costs. Buy it once, and it's yours forever.</span></li>
+        <li><i class="fas fa-wallet"></i> <span>Each robot purchase includes <span class="highlight">automatic trading capital</span> — half of your payment goes to the robot, and half is invested in trading automatically.</span></li>
+        <li><i class="fas fa-calendar-alt"></i> <span>We <span class="highlight">recommend setting your robot to 30 days</span> when activating it. This allows the AI to optimize trading strategies over time and reduces the need to manually restart your bot every day.</span></li>
+        <li><i class="fas fa-play-circle"></i> <span>After purchase, go to the <strong>"AI Bot"</strong> page to <span class="highlight">activate</span> your robot, set your trading percentage, and choose the duration (1-30 days).</span></li>
+        <li><i class="fas fa-chart-line"></i> <span>Each robot generates daily returns based on its level. Higher-level robots offer higher daily profits but require a larger initial investment.</span></li>
+        <li><i class="fas fa-shield-alt"></i> <span>You can <span class="highlight">own multiple robots</span> and run them simultaneously to diversify your trading portfolio and maximize your daily earnings.</span></li>
+        <li><i class="fas fa-question-circle"></i> <span>If you need help, visit the <strong>"AI Tutorial"</strong> page for a step-by-step guide on setting up and managing your AI trading robots.</span></li>
+    </ul>
+</div>
+</div>
+<div class="bottom-nav">
+<a href="trade2.html"><i class="fas fa-graduation-cap"></i><span>AI Tutorial</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+<a href="robots.html" class="active"><i class="fas fa-microchip"></i><span>Robots</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, push, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// API BASE URL
+// ============================================================
+const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
+    ? 'http://localhost:5001' 
+    : 'https://abotra-backend.up.railway.app';
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let userBalance = 0;
+let purchasedRobots = [];
+let robotsData = [];
+let isLoading = true;
+let userCountry = 'Tanzania';
+let currentCurrency = 'USD';
+let localRate = 2800;
+let localSymbol = 'TZS';
+
+// ============================================================
+// COUNTRY & CURRENCY
+// ============================================================
+const countryCurrencies = {
+    'Tanzania': { symbol: 'TZS', rate: 2800 },
+    'Malawi': { symbol: 'MWK', rate: 5600 },
+    'Zambia': { symbol: 'ZMW', rate: 30 },
+    'Kenya': { symbol: 'KES', rate: 140 },
+    'Uganda': { symbol: 'UGX', rate: 3800 },
+    'Nigeria': { symbol: 'NGN', rate: 1500 },
+    'Ghana': { symbol: 'GHS', rate: 15 },
+    'South Africa': { symbol: 'ZAR', rate: 19 },
+    'Congo DRC': { symbol: 'CDF', rate: 2850 },
+    'Burundi': { symbol: 'BIF', rate: 3500 },
+    'Botswana': { symbol: 'BWP', rate: 13 },
+    'Namibia': { symbol: 'NAD', rate: 19 },
+    'Mozambique': { symbol: 'MZN', rate: 64 },
+    'Rwanda': { symbol: 'RWF', rate: 1300 },
+    'Egypt': { symbol: 'EGP', rate: 48 },
+    'Morocco': { symbol: 'MAD', rate: 10 }
+};
+
+// ============================================================
+// ROBOTS DATA
+// ============================================================
+const defaultRobots = [
+    { id: 0, name: "Starter Bot", level: 0, dailyProfit: 3, price: 20, description: "✨ Start your AI trading journey! Perfect for beginners. Low-cost entry with steady 3% daily returns.", hot: false, image: "../assets/images/robot0.png", winRate: 80, isStarter: true, minTrade: 3 },
+    { id: 1, name: "Bronze Bot", level: 1, dailyProfit: 4, price: 60, description: "Entry-level AI bot perfect for beginners learning automated trading. Low risk, steady returns. +4% daily!", hot: false, image: "../assets/images/robot1.png", winRate: 86, isStarter: false, minTrade: 10 },
+    { id: 2, name: "Silver Bot", level: 2, dailyProfit: 5, price: 144, description: "Enhanced AI algorithms for more consistent daily returns. Medium-low risk profile. +5% daily!", hot: false, image: "../assets/images/robot2.png", winRate: 87, isStarter: false, minTrade: 30 },
+    { id: 3, name: "Gold Bot", level: 3, dailyProfit: 7, price: 240, description: "Premium trading with advanced market analysis and higher accuracy. Best seller! +7% daily!", hot: true, image: "../assets/images/robot3.png", winRate: 88, isStarter: false, minTrade: 50 },
+    { id: 4, name: "Platinum Bot", level: 4, dailyProfit: 9, price: 360, description: "Multi-strategy trading bot with real-time market adaptation. Medium-high returns. +9% daily!", hot: false, image: "../assets/images/robot4.png", winRate: 89, isStarter: false, minTrade: 90 },
+    { id: 5, name: "Diamond Bot", level: 5, dailyProfit: 11, price: 480, description: "High-frequency trading with superior risk management. For serious traders. +11% daily!", hot: false, image: "../assets/images/robot5.png", winRate: 90, isStarter: false, minTrade: 120 },
+    { id: 6, name: "Emerald Bot", level: 6, dailyProfit: 15, price: 600, description: "Green energy trading focused on sustainable profit growth. Eco-friendly AI. +15% daily!", hot: false, image: "../assets/images/robot6.png", winRate: 91, isStarter: false, minTrade: 150 },
+    { id: 7, name: "Ruby Bot", level: 7, dailyProfit: 19, price: 900, description: "Aggressive trading bot with high return potential. For experienced investors. +19% daily!", hot: true, image: "../assets/images/robot7.png", winRate: 92, isStarter: false, minTrade: 200 },
+    { id: 8, name: "Sapphire Bot", level: 8, dailyProfit: 23, price: 1120, description: "Institutional-grade AI with deep market insights. Professional trading. +23% daily!", hot: false, image: "../assets/images/robot8.png", winRate: 93, isStarter: false, minTrade: 250 },
+    { id: 9, name: "Onyx Bot", level: 9, dailyProfit: 28, price: 1440, description: "Black box trading with proprietary AI algorithms. Elite performance. +28% daily!", hot: false, image: "../assets/images/robot9.png", winRate: 94, isStarter: false, minTrade: 300 },
+    { id: 10, name: "Legendary Bot", level: 10, dailyProfit: 38, price: 2000, description: "Ultimate AI trading bot - maximum profit potential! The final level. +38% daily!", hot: true, image: "../assets/images/robot10.png", winRate: 95, isStarter: false, minTrade: 500 }
+];
+
+const INVESTED_AMOUNT = {
+    0: 10, 1: 30, 2: 72, 3: 120, 4: 180,
+    5: 240, 6: 300, 7: 450, 8: 560, 9: 720, 10: 1000
+};
+
+// ============================================================
+// ONESIGNAL
+// ============================================================
+const ONESIGNAL_APP_ID = "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc";
+let oneSignalInitialized = false;
+
+async function initOneSignal() {
+    if (oneSignalInitialized) return;
+    try {
+        if (typeof window.OneSignal === 'undefined') { setTimeout(initOneSignal, 1000); return; }
+        await window.OneSignal.Deferred;
+        await window.OneSignal.init({ appId: ONESIGNAL_APP_ID, safari_web_id: "web.onesignal.auto.123456789", notifyButton: { enable: false }, allowLocalhostAsSecureOrigin: true });
+        oneSignalInitialized = true;
+        if (currentUser) {
+            await window.OneSignal.sendTag("user_id", currentUser.uid);
+            await window.OneSignal.sendTag("user_email", currentUser.email);
+            await window.OneSignal.setExternalUserId(currentUser.uid);
+        }
+    } catch(e) { console.error("OneSignal init error:", e); }
+}
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// API CALLS TO BACKEND
+// ============================================================
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('API request error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// LOAD FUNCTIONS
+// ============================================================
+async function loadRobots() {
+    try {
+        const data = await apiRequest('robots', 'GET');
+        if (data.success && data.robots) {
+            robotsData = data.robots;
+        } else {
+            robotsData = [...defaultRobots];
+        }
+    } catch (error) {
+        console.error('Load robots error:', error);
+        robotsData = [...defaultRobots];
+    }
+    renderRobots();
+    return robotsData;
+}
+
+async function loadUserBalance() {
+    if (!currentUser) return 0;
+    try {
+        const data = await apiRequest('user/profile', 'GET');
+        if (data.success && data.user) {
+            userBalance = data.user.balance || 0;
+            return userBalance;
+        }
+    } catch (error) {
+        console.error('Load balance error:', error);
+    }
+    return userBalance;
+}
+
+async function loadPurchasedRobots() {
+    if (!currentUser) return [];
+    try {
+        const data = await apiRequest('robots/my-robots', 'GET');
+        if (data.success && data.robots) {
+            purchasedRobots = data.robots.map(r => r.robotId);
+            return purchasedRobots;
+        }
+    } catch (error) {
+        console.error('Load purchased robots error:', error);
+    }
+    return [];
+}
+
+async function loadUserCountry() {
+    if (!currentUser) return 'Tanzania';
+    try {
+        const data = await apiRequest('user/profile', 'GET');
+        if (data.success && data.user) {
+            userCountry = data.user.country || 'Tanzania';
+            return userCountry;
+        }
+    } catch (error) {
+        console.error('Load country error:', error);
+    }
+    return 'Tanzania';
+}
+
+// ============================================================
+// CURRENCY FUNCTIONS
+// ============================================================
+function getLocalCurrencyInfo(country) {
+    return countryCurrencies[country] || { symbol: 'TZS', rate: 2800 };
+}
+
+function formatPriceInCurrency(usdPrice) {
+    if (currentCurrency === 'USD') {
+        return `$${usdPrice.toFixed(2)}`;
+    }
+    const converted = usdPrice * localRate;
+    const decimals = (localSymbol === 'TZS' || localSymbol === 'MWK' || localSymbol === 'UGX' || localSymbol === 'CDF' || localSymbol === 'BIF') ? 0 : 2;
+    return `${localSymbol} ${converted.toFixed(decimals)}`;
+}
+
+function updateCurrencyDisplay() {
+    const display = document.getElementById('currencyDisplay');
+    if (display) {
+        display.textContent = currentCurrency === 'USD' ? 'USD' : localSymbol;
+    }
+}
+
+function toggleCurrency() {
+    currentCurrency = currentCurrency === 'USD' ? localSymbol : 'USD';
+    updateCurrencyDisplay();
+    updateAllPrices();
+}
+
+function updateAllPrices() {
+    const container = document.getElementById('robotsContainer');
+    if (!container) return;
+    
+    const priceElements = container.querySelectorAll('.price-value');
+    const investedElements = container.querySelectorAll('.invested-value-display');
+    
+    priceElements.forEach(el => {
+        const usdPrice = parseFloat(el.getAttribute('data-usd-price'));
+        if (usdPrice) {
+            el.textContent = formatPriceInCurrency(usdPrice);
+            el.classList.remove('currency-updated');
+            void el.offsetWidth;
+            el.classList.add('currency-updated');
+        }
+    });
+    
+    investedElements.forEach(el => {
+        const usdAmount = parseFloat(el.getAttribute('data-usd-amount'));
+        if (usdAmount) {
+            el.textContent = formatPriceInCurrency(usdAmount);
+            el.classList.remove('currency-updated');
+            void el.offsetWidth;
+            el.classList.add('currency-updated');
+        }
+    });
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    let icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// ============================================================
+// PURCHASE ROBOT - VIA BACKEND API
+// ============================================================
+async function purchaseRobot(robot) {
+    if (!currentUser) {
+        showNotification("Please login first", "error");
+        window.location.href = 'login.html';
+        return;
+    }
+    if (purchasedRobots.includes(robot.id)) {
+        showNotification(`You already own ${robot.name}!`, "error");
+        return;
+    }
+    if (userBalance < robot.price) {
+        showNotification(`Insufficient balance! Need $${robot.price}. Please deposit funds.`, "error");
+        return;
+    }
+    
+    const btn = document.querySelector(`.buy-btn[data-robot-id="${robot.id}"]`);
+    if (btn) { 
+        btn.disabled = true; 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
+    }
+    
+    try {
+        const data = await apiRequest('robots/purchase', 'POST', { robotId: robot.id });
+        
+        if (data.success) {
+            const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
+            purchasedRobots.push(robot.id);
+            userBalance -= robot.price;
+            
+            showSuccessPopup(robot.name, investedAmount, () => {
+                renderRobots();
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Already Owned'; }
+            });
+            renderRobots();
+        } else {
+            showNotification(`❌ ${data.error || 'Purchase failed'}`, 'error');
+            if (btn) btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Purchase error:', error);
+        showNotification('Error purchasing robot. Please try again.', 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ============================================================
+// SUCCESS POPUP
+// ============================================================
+function showSuccessPopup(robotName, investedAmount, callback) {
+    const existing = document.querySelector('.success-popup');
+    if (existing) existing.remove();
+    const popup = document.createElement('div');
+    popup.className = 'success-popup';
+    popup.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <h3>Purchase Successful!</h3>
+        <p>${robotName} added to your collection.<br>💰 <strong>$${investedAmount.toFixed(2)}</strong> invested automatically for trading!</p>
+        <button class="btn-ok" id="successOkBtn">Go to AI Bot</button>
+        <button class="btn-ok" style="background:rgba(255,255,255,0.1); margin-top:8px; color:#ccc;" id="successStayBtn">Stay Here</button>
+    `;
+    document.body.appendChild(popup);
+    document.getElementById('successOkBtn').addEventListener('click', () => {
+        popup.remove();
+        window.location.href = 'auto-bot.html';
+    });
+    document.getElementById('successStayBtn').addEventListener('click', () => {
+        popup.remove();
+        if (callback) callback();
+    });
+    setTimeout(() => {
+        if (popup.parentNode) popup.remove();
+    }, 8000);
+}
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+function showConfirmModal(title, message, onConfirm, onCancel) {
+    const existing = document.querySelector('.modal-overlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal-card">
+            <h3>${title}</h3>
+            <div class="modal-message">${message}</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('active'), 10);
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+        overlay.remove();
+        if (onConfirm) onConfirm();
+    });
+    document.getElementById('modalCancelBtn').addEventListener('click', () => {
+        overlay.remove();
+        if (onCancel) onCancel();
+    });
+}
+
+// ============================================================
+// RENDER ROBOTS
+// ============================================================
+function renderRobots() {
+    const container = document.getElementById('robotsContainer');
+    if (!container) return;
+    
+    if (robotsData.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">Loading robots...</div>';
+        return;
+    }
+    
+    isLoading = false;
+    container.innerHTML = '';
+    
+    robotsData.forEach(robot => {
+        const isOwned = purchasedRobots.includes(robot.id);
+        const profitClass = robot.dailyProfit >= 0 ? 'positive' : 'negative';
+        const winRate = robot.winRate || (85 + robot.level);
+        const isStarter = robot.isStarter === true || robot.id === 0;
+        const minTrade = robot.minTrade || 3;
+        const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
+        const formattedPrice = formatPriceInCurrency(robot.price);
+        const formattedInvested = formatPriceInCurrency(investedAmount);
+        
+        const card = document.createElement('div');
+        card.className = 'robot-card';
+        if (isStarter) {
+            card.style.borderColor = 'rgba(14,203,129,0.4)';
+        }
+        card.innerHTML = `
+            <div class="robot-image-container">
+                <img src="${robot.image}" alt="${robot.name}" class="robot-image" onerror="this.src='https://placehold.co/400x180/800000/FFD700?text=${robot.name.replace(' ', '+')}'">
+                <div class="image-overlay"></div>
+                <div class="level-badge"><i class="fas fa-chart-line"></i> Level ${robot.level}</div>
+                ${robot.hot ? '<div class="hot-badge"><i class="fas fa-fire"></i> HOT</div>' : ''}
+                ${isStarter ? '<div class="starter-badge"><i class="fas fa-star"></i> STARTER</div>' : ''}
+                ${isOwned ? '<div class="owned-badge"><i class="fas fa-check-circle"></i> OWNED</div>' : ''}
+            </div>
+            <div class="robot-info">
+                <div class="robot-name">${robot.name}<span class="robot-level"><i class="fas fa-microchip"></i> AI v${robot.level}.0</span></div>
+                <div class="robot-description">${robot.description}</div>
+                <div class="stats-row">
+                    <div class="stat"><div class="stat-label"><i class="fas fa-chart-line"></i> Daily</div><div class="stat-value ${profitClass}">+${robot.dailyProfit}%</div></div>
+                    <div class="stat"><div class="stat-label"><i class="fas fa-trophy"></i> Win Rate</div><div class="stat-value">${winRate}%</div></div>
+                    <div class="stat"><div class="stat-label"><i class="fas fa-calendar"></i> ROI/Month</div><div class="stat-value">${(robot.dailyProfit * 30)}%</div></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span class="price-label"><i class="fas fa-tag"></i> Price</span>
+                    <span class="price-value" data-usd-price="${robot.price}">${formattedPrice}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:rgba(14,203,129,0.08); padding:4px 10px; border-radius:8px;">
+                    <span style="color:#888; font-size:9px;"><i class="fas fa-coins" style="color:#0ECB81;"></i> Auto Invested</span>
+                    <span class="price-value invested-value-display" data-usd-amount="${investedAmount}" style="color:#0ECB81; font-size:14px;">${formattedInvested}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px;">
+                    <span style="color:#888; font-size:9px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
+                    <span style="color:#FFD700; font-weight:700; font-size:14px;">$${minTrade}</span>
+                </div>
+                ${isStarter && !isOwned ? `<div style="background:rgba(14,203,129,0.1); border-radius:10px; padding:6px 10px; margin-bottom:12px; text-align:center; color:#0ECB81; font-size:10px;"><i class="fas fa-gift"></i> Only ${formattedPrice} - Start Trading Today!</div>` : ''}
+                <button class="buy-btn" data-robot-id="${robot.id}" ${isOwned ? 'disabled' : ''}>${isOwned ? '<i class="fas fa-check"></i> Already Owned' : '<i class="fas fa-shopping-cart"></i> Purchase Robot'}</button>
+            </div>
+        `;
+        const buyBtn = card.querySelector('.buy-btn');
+        if (!isOwned) { 
+            buyBtn.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                showConfirmModal(
+                    'Confirm Purchase',
+                    `Are you sure you want to purchase ${robot.name} for ${formattedPrice}?<br><br>💰 <strong>$${investedAmount.toFixed(2)}</strong> will be auto-invested for trading.`,
+                    () => purchaseRobot(robot)
+                );
+            }); 
+        }
+        container.appendChild(card);
+    });
+    
+    const summaryDiv = document.createElement('div');
+    summaryDiv.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 15px; background: rgba(255,215,0,0.08); border-radius: 18px; margin-top: 10px;';
+    const formattedBalance = formatPriceInCurrency(userBalance);
+    summaryDiv.innerHTML = `<div style="display: flex; justify-content: center; gap: 25px; flex-wrap: wrap;">
+        <div><i class="fas fa-robot" style="color: #FFD700;"></i> <span style="color: #FFD700;">${robotsData.length}</span> <span style="color: #888;">AI Robots</span></div>
+        <div><i class="fas fa-wallet" style="color: #0ECB81;"></i> <span style="color: #0ECB81;">${formattedBalance}</span> <span style="color: #888;">Balance</span></div>
+        <div><i class="fas fa-shopping-cart" style="color: #FFD700;"></i> <span style="color: #FFD700;">${purchasedRobots.length}</span> <span style="color: #888;">/${robotsData.length} Owned</span></div>
+    </div>`;
+    container.appendChild(summaryDiv);
+}
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { 
+            window.location.href = 'login.html'; 
+            return; 
+        }
+        currentUser = user;
+        
+        // Load country for currency
+        const country = await loadUserCountry();
+        const currencyInfo = getLocalCurrencyInfo(country);
+        localRate = currencyInfo.rate;
+        localSymbol = currencyInfo.symbol;
+        updateCurrencyDisplay();
+        
+        // Show skeletons
+        const container = document.getElementById('robotsContainer');
+        container.innerHTML = `
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-stats"><div class="skeleton-stat"></div><div class="skeleton-stat"></div><div class="skeleton-stat"></div></div><div class="skeleton-button"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-stats"><div class="skeleton-stat"></div><div class="skeleton-stat"></div><div class="skeleton-stat"></div></div><div class="skeleton-button"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-stats"><div class="skeleton-stat"></div><div class="skeleton-stat"></div><div class="skeleton-stat"></div></div><div class="skeleton-button"></div></div></div>
+        `;
+        
+        // Load data
+        await loadRobots();
+        await loadUserBalance();
+        await loadPurchasedRobots();
+        renderRobots();
+        await initOneSignal();
+        
+        // Setup currency toggle
+        document.getElementById('currencyToggleBtn').addEventListener('click', toggleCurrency);
+    });
+}
+init();
+</script>
+</body>
+</html>

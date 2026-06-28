@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Forgot Password | ABOTRA-PROAI - Reset Your Password</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+* {
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body {
+background:#050505;
+background-image:url("../assets/images/background.png");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+background-attachment:fixed;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+position:relative;
+transition: background 0.3s ease;
+font-size:12px;
+}
+
+body.light-theme {
+background:#f5f5f5;
+background-image:url("../assets/images/background-light.png");
+}
+
+body.light-theme .overlay {
+background:rgba(255,255,255,0.85);
+backdrop-filter:blur(4px);
+}
+
+body.light-theme .forgot-box {
+background:rgba(255,255,255,0.95);
+border:1px solid rgba(0,0,0,0.08);
+}
+
+body.light-theme .input-box input {
+background:rgba(0,0,0,0.04);
+border:1px solid rgba(0,0,0,0.1);
+color:#1a1a1a;
+}
+
+body.light-theme .input-box input::placeholder {
+color:#999999;
+}
+
+body.light-theme .sub-text {
+color:#666666;
+}
+
+body.light-theme .bottom-text {
+color:#666666;
+}
+
+body.light-theme .bottom-text a {
+color:#800000;
+}
+
+body.light-theme .info-box {
+background:rgba(128,0,0,0.06);
+border-left-color:#800000;
+}
+
+body.light-theme .info-box p {
+color:#555555;
+}
+
+.theme-toggle {
+position:fixed;
+top:20px;
+right:20px;
+z-index:1000;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:50px;
+padding:10px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:0.3s;
+z-index:10000;
+}
+
+.theme-toggle:hover {
+background:rgba(255,215,0,0.2);
+transform:scale(1.05);
+}
+
+.theme-toggle svg {
+width:18px;
+height:18px;
+stroke:#FFD700;
+stroke-width:2;
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+
+body.light-theme .theme-toggle {
+background:rgba(0,0,0,0.1);
+border-color:rgba(128,0,0,0.3);
+}
+
+body.light-theme .theme-toggle svg {
+stroke:#800000;
+}
+
+.overlay {
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.82);
+backdrop-filter:blur(4px);
+z-index:1;
+}
+
+.container {
+position:relative;
+z-index:2;
+width:100%;
+display:flex;
+justify-content:center;
+}
+
+.forgot-box {
+width:100%;
+max-width:400px;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+backdrop-filter:blur(15px);
+border-radius:28px;
+overflow:hidden;
+text-align:center;
+box-shadow:0 15px 40px rgba(0,0,0,0.5);
+padding-bottom:25px;
+}
+
+.logo {
+width:100%;
+height:170px;
+object-fit:cover;
+display:block;
+background:transparent;
+}
+
+h1 {
+color:#FFD700;
+font-size:24px;
+font-weight:800;
+margin-top:12px;
+letter-spacing:1px;
+}
+
+.sub-text {
+color:#BBBBBB;
+font-size:11px;
+margin:6px 0 20px;
+}
+
+.input-box {
+width:100%;
+padding:0 18px;
+margin-bottom:12px;
+position:relative;
+}
+
+.input-box input {
+width:100%;
+height:46px;
+border:none;
+outline:none;
+border-radius:14px;
+padding:0 14px;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+color:#FFFFFF;
+font-size:12px;
+transition:0.3s;
+}
+
+.input-box input:focus {
+border-color:#FFD700;
+box-shadow:0 0 8px rgba(255,215,0,0.2);
+}
+
+.input-box input::placeholder {
+color:#999999;
+font-size:11px;
+}
+
+.button-wrapper {
+display:flex;
+justify-content:center;
+width:100%;
+margin-top:8px;
+}
+
+.reset-btn {
+width:90%;
+height:46px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#800000,#FFD700);
+color:#FFFFFF;
+font-weight:700;
+font-size:13px;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 5px 15px rgba(255,215,0,0.15);
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+}
+
+.reset-btn svg {
+width:16px;
+height:16px;
+stroke:currentColor;
+stroke-width:2;
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+
+.reset-btn:hover {
+transform:translateY(-2px);
+box-shadow:0 8px 20px rgba(255,215,0,0.25);
+}
+
+.reset-btn:disabled {
+opacity:0.6;
+cursor:not-allowed;
+transform:none;
+}
+
+.bottom-text {
+margin-top:18px;
+color:#BBBBBB;
+font-size:11px;
+}
+
+.bottom-text a {
+color:#FFD700;
+text-decoration:none;
+font-weight:700;
+}
+
+.notification {
+position:fixed;
+top:80px;
+right:25px;
+min-width:260px;
+max-width:360px;
+padding:12px 16px;
+border-radius:16px;
+display:flex;
+align-items:center;
+gap:12px;
+z-index:99999;
+backdrop-filter:blur(20px);
+box-shadow:0 15px 35px rgba(0,0,0,0.3);
+animation:slideInRight 0.4s ease;
+border-left:4px solid;
+}
+
+.notification.success { background:linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color:#00FF88; }
+.notification.error { background:linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color:#FF4D4D; }
+.notification.info { background:linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color:#FFD700; }
+.notification svg { width:18px; height:18px; stroke:#FFFFFF; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.notification .message { flex:1; font-size:12px; color:#FFFFFF; font-weight:500; }
+.notification .close-notif { cursor:pointer; opacity:0.7; }
+
+@keyframes slideInRight { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
+@keyframes fadeOut { to { opacity:0; transform:translateX(100%); } }
+
+.info-box {
+margin:16px 18px 0;
+padding:10px;
+background:rgba(255,215,0,0.08);
+border-radius:12px;
+border-left:3px solid #FFD700;
+}
+
+.info-box p {
+font-size:10px;
+color:#AAAAAA;
+line-height:1.5;
+}
+
+.info-box svg {
+width:12px;
+height:12px;
+stroke:#FFD700;
+stroke-width:2;
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+display:inline;
+vertical-align:middle;
+margin-right:4px;
+}
+
+@media(max-width:480px) {
+.logo { height:140px; }
+h1 { font-size:20px; }
+.forgot-box { max-width:100%; margin:0 10px; }
+.notification { right:15px; left:15px; top:70px; }
+.theme-toggle { top:15px; right:15px; padding:8px; }
+.reset-btn { width:90%; height:42px; font-size:12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="theme-toggle" id="themeToggle">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</div>
+
+<div class="overlay"></div>
+
+<div class="container">
+<div class="forgot-box">
+<img src="../assets/images/logo.png" alt="ABOTRA-PROAI" class="logo" onerror="this.src='https://placehold.co/400x170/800000/FFD700?text=ABOTRA-PROAI'">
+<h1>Reset Password</h1>
+<p class="sub-text">Enter your email to receive reset instructions</p>
+
+<div class="input-box">
+<input type="email" id="resetEmail" placeholder="Email Address" autocomplete="email">
+</div>
+
+<div class="button-wrapper">
+<button id="resetBtn" class="reset-btn">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+Send Reset Link
+</button>
+</div>
+
+<p class="bottom-text">
+Remember password? <a href="login.html">Back to Login</a>
+</p>
+
+<div class="info-box">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+<span>Password reset link will be sent to your registered email address. Check your spam folder if you don't see it within 5 minutes.</span>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle svg:first-child').style.display = 'none';
+        document.querySelector('#themeToggle svg:last-child').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle svg:first-child').style.display = 'inline-block';
+        document.querySelector('#themeToggle svg:last-child').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle svg:first-child').style.display = 'inline-block';
+        document.querySelector('#themeToggle svg:last-child').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle svg:first-child').style.display = 'none';
+        document.querySelector('#themeToggle svg:last-child').style.display = 'inline-block';
+    }
+});
+
+function showNotification(msg, type) {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    const n = document.createElement('div');
+    n.className = `notification ${type}`;
+    
+    let icon = '';
+    if (type === 'success') {
+        icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+    } else if (type === 'error') {
+        icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    } else {
+        icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    }
+    
+    n.innerHTML = `${icon}<div class="message">${msg}</div><div class="close-notif"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>`;
+    document.body.appendChild(n);
+    setTimeout(() => { n.style.animation = 'fadeOut 0.3s'; setTimeout(()=>n.remove(),300); }, 5000);
+    n.querySelector('.close-notif').onclick = () => { n.style.animation = 'fadeOut 0.3s'; setTimeout(()=>n.remove(),300); };
+}
+
+async function checkEmailExistsInRTDB(email) {
+    if (!email) return false;
+    try {
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        if (snapshot.exists()) {
+            let emailFound = false;
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                    emailFound = true;
+                }
+            });
+            return emailFound;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking email in RTDB:", error);
+        return false;
+    }
+}
+
+async function resetPassword() {
+    const email = document.getElementById('resetEmail').value.trim();
+    const btn = document.getElementById('resetBtn');
+    
+    if (!email) { showNotification('Please enter your email address', 'error'); return; }
+    if (!email.includes('@') || !email.includes('.')) { showNotification('Please enter a valid email address', 'error'); return; }
+    
+    const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+    if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> Checking email...';
+    
+    try {
+        const emailExists = await checkEmailExistsInRTDB(email);
+        if (!emailExists) {
+            showNotification('No account found with this email address. Please register first.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Send Reset Link';
+            return;
+        }
+        
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> Sending...';
+        
+        await sendPasswordResetEmail(auth, email);
+        showNotification(`✅ Password reset link sent to ${email}! Check your inbox and spam folder.`, 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 4000);
+        
+    } catch (error) {
+        let errorMessage = 'Failed to send reset email.';
+        if (error.code === 'auth/user-not-found') errorMessage = 'No account found with this email address. Please register first.';
+        else if (error.code === 'auth/invalid-email') errorMessage = 'Please enter a valid email address.';
+        else if (error.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Try again later.';
+        else if (error.code === 'auth/network-request-failed') errorMessage = 'Network error. Please check your connection.';
+        showNotification(errorMessage, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Send Reset Link';
+    }
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetPassword);
+document.getElementById('resetEmail').addEventListener('keypress', (e) => { if(e.key === 'Enter') resetPassword(); });
+
+// Add spin animation
+const style = document.createElement('style');
+style.textContent = `
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+`;
+document.head.appendChild(style);
+
+initTheme();
+</script>
+</body>
+</html>

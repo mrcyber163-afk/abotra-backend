@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>KYC Verification | ABOTRA-PROAI - Verify Your Identity</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+<style>
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Inter', sans-serif;
+}
+
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+color: #FFFFFF;
+font-size: 11px;
+}
+
+.status-not-submitted { color: #F6465D !important; font-weight: 700; }
+.status-pending { color: #FFD700 !important; font-weight: 700; }
+.status-verified { color: #0ECB81 !important; font-weight: 700; }
+.status-rejected { color: #F6465D !important; font-weight: 700; }
+
+.input-box input, .input-box select {
+background: rgba(255,255,255,0.08);
+border: 1px solid rgba(255,215,0,0.2);
+color: #FFFFFF;
+transition: all 0.3s ease;
+font-size: 11px;
+}
+
+.input-box input:focus, .input-box select:focus {
+border-color: #FFD700;
+box-shadow: 0 0 8px rgba(255,215,0,0.3);
+}
+
+body.light-theme {
+background: #f5f5f5;
+color: #1a1a1a;
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .kyc-container,
+body.light-theme .kyc-card,
+body.light-theme .tutorial-card,
+body.light-theme .verification-card {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .section-title { color: #800000; }
+body.light-theme .input-box input,
+body.light-theme .input-box select {
+background: rgba(0,0,0,0.05);
+border: 1px solid rgba(0,0,0,0.1);
+color: #1a1a1a;
+}
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+
+.theme-toggle {
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 10px;
+padding: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFD700; }
+
+.overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.82);
+backdrop-filter: blur(4px);
+z-index: 1;
+}
+
+.top-bar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 100;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 8px 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.logo-area {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+.back-btn-top {
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 8px;
+padding: 6px 10px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 5px;
+font-size: 10px;
+font-weight: 500;
+}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
+.kyc-container {
+position: relative;
+z-index: 2;
+max-width: 900px;
+margin: 70px auto 20px;
+padding: 0 12px;
+}
+
+.page-title {
+text-align: center;
+font-size: 20px;
+font-weight: 800;
+color: #FFD700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+.tutorial-card, .verification-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+backdrop-filter: blur(10px);
+border-radius: 24px;
+padding: 20px;
+margin-bottom: 16px;
+}
+
+.section-title {
+color: #FFD700;
+font-size: 14px;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.tutorial-steps {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 15px;
+margin-top: 12px;
+}
+
+.tutorial-step {
+text-align: center;
+padding: 12px;
+background: rgba(255,255,255,0.03);
+border-radius: 14px;
+}
+
+.step-number {
+width: 34px;
+height: 34px;
+background: linear-gradient(135deg, #800000, #FFD700);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 auto 10px;
+font-weight: 800;
+color: white;
+font-size: 13px;
+}
+
+.tutorial-step h4 { font-size: 12px; margin-bottom: 5px; }
+.tutorial-step p { font-size: 10px; color: #AAAAAA; }
+
+.level-selector {
+display: flex;
+gap: 12px;
+margin-bottom: 20px;
+background: rgba(0,0,0,0.3);
+border-radius: 14px;
+padding: 4px;
+}
+
+.level-btn {
+flex: 1;
+padding: 10px;
+border: none;
+border-radius: 10px;
+background: transparent;
+color: #AAAAAA;
+font-weight: 600;
+cursor: pointer;
+transition: 0.3s;
+font-size: 11px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+.level-btn.active {
+background: linear-gradient(135deg, #800000, #FFD700);
+color: white;
+}
+
+.level-info {
+background: rgba(255,215,0,0.08);
+border-radius: 14px;
+padding: 12px;
+margin-bottom: 20px;
+}
+.level-info h4 { font-size: 13px; margin-bottom: 6px; }
+.level-info p { font-size: 10px; }
+.level-info li { font-size: 10px; margin: 4px 0; list-style: none; display: flex; align-items: center; gap: 6px; }
+
+.input-box {
+margin-bottom: 16px;
+}
+
+.input-box input, .input-box select {
+width: 100%;
+height: 44px;
+border: none;
+outline: none;
+border-radius: 12px;
+padding: 0 14px;
+font-size: 11px;
+transition: 0.3s;
+}
+
+.file-upload {
+border: 2px dashed rgba(255,215,0,0.3);
+border-radius: 14px;
+padding: 16px;
+text-align: center;
+cursor: pointer;
+transition: 0.3s;
+margin-bottom: 12px;
+}
+
+.file-upload:hover {
+border-color: #FFD700;
+background: rgba(255,215,0,0.05);
+}
+
+.file-upload i { font-size: 28px; color: #FFD700; margin-bottom: 8px; }
+.file-name { font-size: 10px; color: #0ECB81; margin-top: 6px; }
+
+.camera-section {
+margin: 16px 0;
+border-radius: 18px;
+overflow: hidden;
+background: rgba(0,0,0,0.5);
+}
+
+.camera-container {
+position: relative;
+width: 100%;
+max-width: 350px;
+margin: 0 auto;
+border-radius: 50%;
+overflow: hidden;
+aspect-ratio: 1 / 1;
+}
+
+#cameraVideo {
+width: 100%;
+height: 100%;
+object-fit: cover;
+border-radius: 50%;
+background: #000;
+transform: scaleX(-1);
+}
+
+.face-detection-canvas {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+border-radius: 50%;
+}
+
+.camera-controls {
+display: flex;
+gap: 12px;
+justify-content: center;
+margin-top: 12px;
+}
+
+.camera-btn {
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+border-radius: 40px;
+padding: 8px 18px;
+color: white;
+font-weight: 600;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: 0.3s;
+font-size: 11px;
+}
+
+.camera-btn:hover { transform: translateY(-1px); }
+
+.face-instructions {
+text-align: center;
+margin-top: 12px;
+padding: 10px;
+background: rgba(255,215,0,0.1);
+border-radius: 14px;
+font-size: 10px;
+color: #FFD700;
+}
+
+.face-status {
+text-align: center;
+margin-top: 8px;
+padding: 6px;
+border-radius: 10px;
+font-size: 10px;
+}
+.face-status.success { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.face-status.error { background: rgba(246,70,93,0.2); color: #F6465D; }
+.face-status.progress { background: rgba(255,215,0,0.2); color: #FFD700; }
+
+.selfie-preview { text-align: center; margin-top: 12px; }
+.selfie-preview img {
+width: 80px;
+height: 80px;
+border-radius: 50%;
+object-fit: cover;
+border: 2px solid #0ECB81;
+}
+
+.status-box {
+margin-top: 16px;
+padding: 12px;
+border-radius: 14px;
+text-align: center;
+background: rgba(255,255,255,0.03);
+font-size: 11px;
+}
+
+.submit-btn {
+width: 100%;
+height: 46px;
+border: none;
+border-radius: 12px;
+background: linear-gradient(135deg, #0ECB81, #0A9E65);
+color: white;
+font-weight: 700;
+font-size: 13px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+margin-top: 16px;
+}
+
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 18px 18px 0 0;
+display: flex;
+justify-content: space-around;
+padding: 6px 10px;
+z-index: 100;
+}
+
+.bottom-nav a {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-decoration: none;
+color: #AAAAAA;
+font-size: 7px;
+transition: 0.3s;
+gap: 2px;
+}
+
+.bottom-nav a i {
+font-size: 16px;
+color: #AAAAAA;
+transition: 0.3s;
+}
+
+.bottom-nav a:hover {
+color: #FFD700;
+transform: translateY(-2px);
+}
+
+.bottom-nav a:hover i {
+color: #FFD700;
+}
+
+.bottom-nav a.active {
+color: #FFD700;
+}
+
+.bottom-nav a.active i {
+color: #FFD700;
+text-shadow: 0 0 8px rgba(255,215,0,0.5);
+}
+
+.notification-popup {
+position: fixed;
+top: 70px;
+right: 15px;
+min-width: 260px;
+max-width: 350px;
+padding: 10px 14px;
+border-radius: 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+z-index: 99999;
+backdrop-filter: blur(20px);
+box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+animation: slideInRight 0.3s ease;
+font-size: 10px;
+}
+
+.notification-popup.success { background: linear-gradient(135deg, rgba(14,203,129,0.95), rgba(10,158,101,0.95)); border-left: 4px solid #0ECB81; color: white; }
+.notification-popup.error { background: linear-gradient(135deg, rgba(246,70,93,0.95), rgba(212,63,82,0.95)); border-left: 4px solid #F6465D; color: white; }
+.notification-popup.info { background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(184,134,11,0.95)); border-left: 4px solid #FFD700; color: #1a1a1a; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; line-height: 1.4; }
+.notification-popup i { font-size: 18px; }
+.notification-popup .close-notif { cursor: pointer; opacity: 0.8; transition: 0.2s; font-size: 14px; }
+.notification-popup .close-notif:hover { opacity: 1; transform: scale(1.1); }
+
+@keyframes slideInRight {
+from { opacity: 0; transform: translateX(100%); }
+to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+
+@media(max-width: 700px) {
+.kyc-container { padding: 0 12px; margin-top: 65px; }
+.page-title { font-size: 18px; }
+.tutorial-steps { grid-template-columns: 1fr; }
+.level-btn span { display: none; }
+.notification-popup { right: 10px; left: 10px; min-width: auto; max-width: none; top: 65px; }
+.camera-container { max-width: 260px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>KYC Verification</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='account.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="kyc-container" id="contentContainer">
+<div class="page-title"><i class="fas fa-id-card"></i> KYC Verification</div>
+
+<div class="tutorial-card">
+<div class="section-title"><i class="fas fa-graduation-cap"></i> How to Verify Your Identity</div>
+<div class="tutorial-steps">
+<div class="tutorial-step"><div class="step-number">1</div><h4>Choose Level</h4><p>Basic or Merchant verification</p></div>
+<div class="tutorial-step"><div class="step-number">2</div><h4>Upload ID</h4><p>Clear photo of your ID (Front & Back)</p></div>
+<div class="tutorial-step"><div class="step-number">3</div><h4>Face Verification</h4><p>Look at camera - auto capture when face detected</p></div>
+<div class="tutorial-step"><div class="step-number">4</div><h4>Submit</h4><p>Admin will review within 24-48 hours</p></div>
+</div>
+</div>
+
+<div class="verification-card">
+<div class="level-selector">
+<button class="level-btn active" data-level="basic" onclick="selectLevel('basic')"><i class="fas fa-user"></i> <span>Basic</span></button>
+<button class="level-btn" data-level="merchant" onclick="selectLevel('merchant')"><i class="fas fa-store"></i> <span>Merchant</span></button>
+</div>
+
+<div class="level-info" id="levelInfo">
+<h4><i class="fas fa-info-circle"></i> Basic Verification</h4>
+<p><i class="fas fa-check-circle" style="color:#0ECB81;"></i> FREE verification | Processing time: 24-48 hours</p>
+<ul style="margin-top:8px; list-style:none;">
+<li><i class="fas fa-check" style="color:#0ECB81;"></i> Increase daily withdrawal limit to $5,000</li>
+<li><i class="fas fa-check" style="color:#0ECB81;"></i> Access to all AI trading robots</li>
+<li><i class="fas fa-check" style="color:#0ECB81;"></i> Priority customer support</li>
+</ul>
+</div>
+
+<div class="input-box">
+<select id="documentType">
+<option value="National ID">National ID Card</option>
+<option value="Passport">Passport</option>
+<option value="Driving License">Driving License</option>
+</select>
+</div>
+<div class="input-box"><input type="text" id="fullName" placeholder="Full Name (as shown on document)"></div>
+<div class="input-box"><input type="text" id="dateOfBirth" placeholder="Date of Birth (e.g., 1990-01-15)"></div>
+<div class="input-box"><input type="text" id="country" placeholder="Country of Issue"></div>
+<div class="input-box"><input type="text" id="documentNumber" placeholder="Document Number / ID Number"></div>
+
+<div class="file-upload" onclick="document.getElementById('documentFront').click()">
+<i class="fas fa-id-card"></i><p>Click to upload FRONT side of your document</p>
+<div id="documentFrontName" class="file-name"></div>
+</div>
+<input type="file" id="documentFront" accept="image/*" style="display:none">
+
+<div class="file-upload" onclick="document.getElementById('documentBack').click()">
+<i class="fas fa-id-card"></i><p>Click to upload BACK side of your document</p>
+<div id="documentBackName" class="file-name"></div>
+</div>
+<input type="file" id="documentBack" accept="image/*" style="display:none">
+
+<div class="camera-section">
+<div class="section-title" style="margin-bottom:12px;"><i class="fas fa-camera"></i> Face Verification</div>
+<div class="camera-container">
+<video id="cameraVideo" autoplay playsinline></video>
+<canvas id="faceCanvas" class="face-detection-canvas"></canvas>
+</div>
+<div class="camera-controls">
+<button class="camera-btn" id="startCameraBtn"><i class="fas fa-camera"></i> Start Camera</button>
+<button class="camera-btn" id="retakeSelfieBtn" style="display:none;"><i class="fas fa-redo"></i> Retake Selfie</button>
+</div>
+<div class="face-instructions" id="faceInstructions">
+<i class="fas fa-smile-wink"></i> Position your face in the center circle. Auto-capture when face is detected!
+</div>
+<div class="face-status" id="faceStatus"></div>
+<div class="selfie-preview" id="selfiePreview" style="display:none;">
+<img id="selfiePreviewImg">
+<p style="font-size:9px; color:#0ECB81; margin-top:4px;"><i class="fas fa-check-circle"></i> Selfie captured successfully!</p>
+</div>
+</div>
+
+<div class="status-box">
+<strong>Verification Status:</strong> <span id="kycStatus">Checking...</span>
+</div>
+
+<button class="submit-btn" id="submitKycBtn">
+<i class="fas fa-paper-plane"></i> Submit KYC Application
+</button>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+<a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
+<a href="kyc.html" class="active"><i class="fas fa-id-card"></i><span>Kyc</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, update, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+// ============================================================
+// API BASE URL
+// ============================================================
+const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
+    ? 'http://localhost:5001' 
+    : 'https://abotra-backend.up.railway.app';
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentLevel = 'basic';
+let stream = null;
+let faceModel = null;
+let detectionInterval = null;
+let isCapturing = false;
+let faceDetectedCount = 0;
+let selfieData = null;
+let isCaptureTriggered = false;
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// API CALLS TO BACKEND
+// ============================================================
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('API request error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <div class="popup-message">${message}</div>
+        <div class="close-notif"><i class="fas fa-times"></i></div>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast && toast.parentElement) {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 4000);
+    
+    toast.querySelector('.close-notif').addEventListener('click', () => {
+        if (toast.parentElement) {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }
+    });
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    initTheme();
+});
+
+window.selectLevel = function(level) {
+    currentLevel = level;
+    document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.level-btn[data-level="${level}"]`).classList.add('active');
+    const levelInfo = document.getElementById('levelInfo');
+    if (level === 'basic') {
+        levelInfo.innerHTML = `<h4><i class="fas fa-info-circle"></i> Basic Verification</h4><p><i class="fas fa-check-circle" style="color:#0ECB81;"></i> FREE verification | Processing time: 24-48 hours</p><ul style="margin-top:8px; list-style:none;"><li><i class="fas fa-check" style="color:#0ECB81;"></i> Increase daily withdrawal limit to $5,000</li><li><i class="fas fa-check" style="color:#0ECB81;"></i> Access to all AI trading robots</li><li><i class="fas fa-check" style="color:#0ECB81;"></i> Priority customer support</li></ul>`;
+    } else {
+        levelInfo.innerHTML = `<h4><i class="fas fa-info-circle"></i> Merchant Verification</h4><p><i class="fas fa-dollar-sign" style="color:#FFD700;"></i> For high-volume traders | Processing time: 2-5 business days</p><ul style="margin-top:8px; list-style:none;"><li><i class="fas fa-check" style="color:#0ECB81;"></i> Unlimited daily withdrawals</li><li><i class="fas fa-check" style="color:#0ECB81;"></i> Create P2P advertisements</li><li><i class="fas fa-check" style="color:#0ECB81;"></i> Lowest trading fees (0.05%)</li><li><i class="fas fa-check" style="color:#0ECB81;"></i> API access for automated trading</li></ul><p style="margin-top:8px; color:#FFD700; font-size:10px;"><i class="fas fa-exclamation-triangle"></i> Additional business documents may be required</p>`;
+    }
+};
+
+async function loadFaceDetectionModel() {
+    const statusDiv = document.getElementById('faceStatus');
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading face detection model...';
+    statusDiv.className = 'face-status progress';
+    try {
+        faceModel = await blazeface.load();
+        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Face detection ready! Start camera.';
+        statusDiv.className = 'face-status success';
+    } catch (error) {
+        console.error('Model load error:', error);
+        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Face detection not available.';
+    }
+}
+
+async function startCamera() {
+    try {
+        if (stream) stopCamera();
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user', 
+                width: { ideal: 640 }, 
+                height: { ideal: 480 },
+                frameRate: { ideal: 30 }
+            },
+            audio: false
+        });
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = stream;
+        await video.play();
+        const startBtn = document.getElementById('startCameraBtn');
+        startBtn.style.display = 'none';
+        document.getElementById('retakeSelfieBtn').style.display = 'flex';
+        isCaptureTriggered = false;
+        faceDetectedCount = 0;
+        showNotification('Camera started! Face detection active.', 'success');
+        startFaceDetection();
+    } catch (error) {
+        console.error('Camera error:', error);
+        showNotification('Unable to access camera. Please check permissions and try again.', 'error');
+    }
+}
+
+function stopCamera() {
+    if (detectionInterval) clearInterval(detectionInterval);
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    const startBtn = document.getElementById('startCameraBtn');
+    startBtn.style.display = 'flex';
+    document.getElementById('retakeSelfieBtn').style.display = 'none';
+    const canvas = document.getElementById('faceCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('faceStatus').innerHTML = 'Camera stopped';
+    document.getElementById('faceStatus').className = 'face-status';
+}
+
+function retakeSelfie() {
+    selfieData = null;
+    document.getElementById('selfiePreview').style.display = 'none';
+    document.getElementById('faceStatus').innerHTML = 'Ready for new selfie. Start camera.';
+    document.getElementById('faceStatus').className = 'face-status';
+    isCaptureTriggered = false;
+    faceDetectedCount = 0;
+    startCamera();
+}
+
+async function startFaceDetection() {
+    if (!faceModel) {
+        await loadFaceDetectionModel();
+        if (!faceModel) return;
+    }
+    
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('faceCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusDiv = document.getElementById('faceStatus');
+    
+    if (detectionInterval) clearInterval(detectionInterval);
+    
+    detectionInterval = setInterval(async () => {
+        if (!video.videoWidth || !video.videoHeight) return;
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(canvas.width, canvas.height) * 0.35;
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '12px Inter';
+        ctx.fillStyle = '#FFD700';
+        ctx.shadowBlur = 0;
+        ctx.fillText('Position face here', centerX - 60, centerY - radius - 8);
+        
+        try {
+            const predictions = await faceModel.estimateFaces(video, false);
+            
+            if (predictions.length > 0 && !isCaptureTriggered && !selfieData) {
+                const face = predictions[0];
+                const [x, y] = face.topLeft;
+                const [bottomX, bottomY] = face.bottomRight;
+                const faceWidth = bottomX - x;
+                const faceHeight = bottomY - y;
+                const faceCenterX = x + faceWidth / 2;
+                const faceCenterY = y + faceHeight / 2;
+                
+                const isCentered = Math.abs(faceCenterX - centerX) < canvas.width * 0.12 && Math.abs(faceCenterY - centerY) < canvas.height * 0.12;
+                const isLargeEnough = faceWidth > canvas.width * 0.22 && faceHeight > canvas.height * 0.22;
+                const isGoodLight = faceWidth > 0 && faceHeight > 0;
+                
+                ctx.beginPath();
+                ctx.rect(x, y, faceWidth, faceHeight);
+                ctx.strokeStyle = '#0ECB81';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(14,203,129,0.15)';
+                ctx.fillRect(x, y, faceWidth, faceHeight);
+                
+                if (isCentered && isLargeEnough && isGoodLight) {
+                    faceDetectedCount++;
+                    statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> Face detected! (${faceDetectedCount}/4) - Hold still...`;
+                    statusDiv.className = 'face-status success';
+                    
+                    if (faceDetectedCount >= 4 && !isCaptureTriggered && !selfieData) {
+                        captureSelfie();
+                    }
+                } else {
+                    faceDetectedCount = 0;
+                    if (!isCentered) {
+                        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Center your face in the circle';
+                        statusDiv.className = 'face-status progress';
+                    } else if (!isLargeEnough) {
+                        statusDiv.innerHTML = '<i class="fas fa-arrow-up"></i> Move closer to camera';
+                        statusDiv.className = 'face-status progress';
+                    }
+                }
+            } else if (!isCaptureTriggered && !selfieData) {
+                statusDiv.innerHTML = '<i class="fas fa-face-frown"></i> No face detected. Look at the camera.';
+                statusDiv.className = 'face-status error';
+                faceDetectedCount = 0;
+            }
+        } catch (error) {
+            console.error('Face detection error:', error);
+        }
+    }, 400);
+}
+
+async function captureSelfie() {
+    if (isCaptureTriggered || selfieData) return;
+    isCaptureTriggered = true;
+    
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    const size = Math.min(video.videoWidth, video.videoHeight);
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    const centerX = video.videoWidth / 2;
+    const centerY = video.videoHeight / 2;
+    const cropSize = Math.min(video.videoWidth, video.videoHeight) * 0.8;
+    const startX = centerX - cropSize / 2;
+    const startY = centerY - cropSize / 2;
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(200, 200, 200, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.clip();
+    ctx.translate(400, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, startX, startY, cropSize, cropSize, 0, 0, 400, 400);
+    ctx.restore();
+    
+    selfieData = canvas.toDataURL('image/jpeg', 0.85);
+    const preview = document.getElementById('selfiePreview');
+    const previewImg = document.getElementById('selfiePreviewImg');
+    previewImg.src = selfieData;
+    preview.style.display = 'block';
+    
+    stopCamera();
+    
+    const statusDiv = document.getElementById('faceStatus');
+    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Selfie captured successfully! Click retake if needed.';
+    statusDiv.className = 'face-status success';
+    
+    showNotification('Selfie captured! You can retake if needed.', 'success');
+}
+
+document.getElementById('startCameraBtn').addEventListener('click', () => startCamera());
+document.getElementById('retakeSelfieBtn').addEventListener('click', () => retakeSelfie());
+
+document.getElementById('documentFront').addEventListener('change', function(e) {
+    if (e.target.files[0]) document.getElementById('documentFrontName').innerHTML = `<i class="fas fa-file-image"></i> ${e.target.files[0].name}`;
+});
+document.getElementById('documentBack').addEventListener('change', function(e) {
+    if (e.target.files[0]) document.getElementById('documentBackName').innerHTML = `<i class="fas fa-file-image"></i> ${e.target.files[0].name}`;
+});
+
+function compressImageToBase64(file, maxWidth = 800, quality = 0.6) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function compressSelfieBase64(base64Data, maxWidth = 400, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedBase64);
+        };
+        img.onerror = reject;
+        img.src = base64Data;
+    });
+}
+
+async function loadKYCStatus() {
+    if (!currentUser) return;
+    try {
+        const data = await apiRequest('kyc/status', 'GET');
+        if (data.success && data.status) {
+            const statusSpan = document.getElementById('kycStatus');
+            const submitBtn = document.getElementById('submitKycBtn');
+            if (data.status === 'verified' || data.status === 'approved') {
+                statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> VERIFIED';
+                statusSpan.className = 'status-verified';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Already Verified';
+            } else if (data.status === 'pending') {
+                statusSpan.innerHTML = '<i class="fas fa-clock"></i> PENDING REVIEW';
+                statusSpan.className = 'status-pending';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-clock"></i> Under Review';
+            } else if (data.status === 'rejected') {
+                statusSpan.innerHTML = '<i class="fas fa-times-circle"></i> REJECTED - Please resubmit';
+                statusSpan.className = 'status-rejected';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Resubmit KYC';
+            }
+        }
+    } catch(e) {
+        console.error('Load KYC status error:', e);
+    }
+}
+
+async function loadUserData() {
+    if (!currentUser) return;
+    try {
+        const data = await apiRequest('user/profile', 'GET');
+        if (data.success && data.user) {
+            if (data.user.fullName) document.getElementById('fullName').value = data.user.fullName;
+            if (data.user.country) document.getElementById('country').value = data.user.country;
+        }
+    } catch(e) {
+        console.error('Load user data error:', e);
+    }
+}
+
+document.getElementById('submitKycBtn').addEventListener('click', async () => {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    
+    const fullName = document.getElementById('fullName').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const documentNumber = document.getElementById('documentNumber').value.trim();
+    const documentType = document.getElementById('documentType').value;
+    const dateOfBirth = document.getElementById('dateOfBirth').value.trim();
+    const documentFront = document.getElementById('documentFront').files[0];
+    const documentBack = document.getElementById('documentBack').files[0];
+    
+    if (!fullName) { showNotification('Please enter your full name', 'info'); return; }
+    if (!dateOfBirth) { showNotification('Please enter your date of birth', 'info'); return; }
+    if (!country) { showNotification('Please enter your country', 'info'); return; }
+    if (!documentNumber) { showNotification('Please enter document number', 'info'); return; }
+    if (!documentFront) { showNotification('Upload document front side', 'info'); return; }
+    if (documentType !== 'Passport' && !documentBack) { showNotification('Upload document back side', 'info'); return; }
+    if (!selfieData) { showNotification('Complete face verification first', 'info'); return; }
+    
+    const submitBtn = document.getElementById('submitKycBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
+    try {
+        showNotification('Processing images...', 'info');
+        
+        const compressedFront = await compressImageToBase64(documentFront, 800, 0.6);
+        const compressedBack = documentBack ? await compressImageToBase64(documentBack, 800, 0.6) : null;
+        const compressedSelfie = await compressSelfieBase64(selfieData, 400, 0.8);
+        
+        const kycData = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            fullName: fullName,
+            country: country,
+            documentNumber: documentNumber,
+            documentType: documentType,
+            dateOfBirth: dateOfBirth,
+            level: currentLevel,
+            status: 'pending',
+            submittedAt: Date.now(),
+            date: new Date().toISOString(),
+            documentFront: compressedFront,
+            documentBack: compressedBack,
+            selfie: compressedSelfie
+        };
+        
+        const result = await apiRequest('kyc/submit', 'POST', kycData);
+        
+        if (result.success) {
+            showNotification('KYC submitted successfully! Redirecting...', 'success');
+            
+            document.getElementById('kycStatus').innerHTML = '<i class="fas fa-clock"></i> PENDING REVIEW';
+            document.getElementById('kycStatus').className = 'status-pending';
+            submitBtn.innerHTML = '<i class="fas fa-clock"></i> Pending Review';
+            
+            setTimeout(() => {
+                window.location.href = 'account.html';
+            }, 1500);
+        } else {
+            showNotification('Error: ' + (result.error || 'Submission failed'), 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit KYC Application';
+        }
+        
+    } catch (error) {
+        console.error('KYC Submit Error:', error);
+        showNotification('Error: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit KYC Application';
+    }
+});
+
+async function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { 
+            window.location.href = 'login.html'; 
+            return; 
+        }
+        currentUser = user;
+        
+        await loadUserData();
+        await loadKYCStatus();
+        await loadFaceDetectionModel();
+    });
+}
+
+init();
+</script>
+</body>
+</html>
