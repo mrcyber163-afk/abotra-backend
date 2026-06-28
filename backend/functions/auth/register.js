@@ -2,7 +2,8 @@
 // AUTH/REGISTER.JS - REST API Version (No Admin SDK)
 // ============================================================
 
-const { authSignUp, restGet, restPut, restPost } = require('../firebase');
+// ✅ FIXED: Added restPatch to imports
+const { authSignUp, restGet, restPut, restPost, restPatch } = require('../firebase');
 
 // ============================================================
 // GENERATE UNIQUE REFERRAL CODE
@@ -146,7 +147,7 @@ async function processReferral(referredBy, fullName) {
             return;
         }
 
-        // Update referral count
+        // Update referral count - ✅ restPatch is now available
         const referralCount = (referrerData.referralCount || 0) + 1;
         await restPatch(`users/${referredBy}`, { referralCount });
 
@@ -261,11 +262,105 @@ async function saveGoogleUser(uid, email, fullName, username, referredBy) {
 }
 
 // ============================================================
+// SAVE PHONE USER - REST API Version (NEW)
+// ============================================================
+async function savePhoneUser(uid, fullName, username, phone, phoneRaw, phoneCountryCode, country, referredBy) {
+    try {
+        console.log(`[PHONE] 📱 Saving phone user: ${phone} (${uid})`);
+
+        // Check if user already exists
+        const existingUser = await restGet(`users/${uid}`);
+        
+        if (existingUser) {
+            await restPatch(`users/${uid}`, {
+                lastLogin: Date.now(),
+                lastActive: Date.now(),
+                phone: phone
+            });
+            console.log(`[PHONE] ✅ User updated: ${uid}`);
+            return {
+                success: true,
+                uid: uid,
+                referralCode: existingUser.referralCode,
+                message: 'User updated'
+            };
+        }
+
+        // Generate referral code
+        const referralCode = await generateUniqueReferralCode();
+
+        // Save new user
+        const userData = {
+            uid: uid,
+            fullName: fullName || 'User',
+            username: username || phone,
+            phone: phone,
+            phoneRaw: phoneRaw || phone.replace(/\D/g, ''),
+            phoneCountryCode: phoneCountryCode || '+255',
+            country: country || 'Tanzania',
+            method: 'phone',
+            emailVerified: false,
+            phoneVerified: true,
+            referredBy: referredBy || null,
+            referralCode: referralCode,
+            referralCount: 0,
+            commissionEarned: 0,
+            depositCommissionEarned: 0,
+            botProfitCommissionEarned: 0,
+            affiliateWithdrawn: 0,
+            balance: 0,
+            tradingBalance: 0,
+            totalDeposited: 0,
+            totalWithdrawn: 0,
+            totalProfit: 0,
+            dailyPnL: 0,
+            dailyLoss: 0,
+            winRate: 0,
+            activeTrades: 0,
+            aiScore: 0,
+            status: 'active',
+            isVerified: false,
+            isMerchant: false,
+            isPhoneUser: true,
+            isOnline: false,
+            profilePic: null,
+            registrationIP: 'unknown',
+            userAgent: 'backend',
+            createdAt: Date.now(),
+            lastLogin: Date.now(),
+            lastActive: Date.now(),
+            kycStatus: 'none',
+            subscriptionMultiplier: 1,
+            subscriptionExpiry: 0
+        };
+
+        await restPut(`users/${uid}`, userData);
+        console.log(`[PHONE] ✅ User saved: ${uid}`);
+
+        if (referredBy) {
+            await processReferral(referredBy, fullName);
+        }
+
+        return {
+            success: true,
+            uid: uid,
+            referralCode: referralCode,
+            message: 'Phone account created successfully'
+        };
+
+    } catch (error) {
+        console.error('[PHONE] ❌ Error:', error.message);
+        throw error;
+    }
+}
+
+// ============================================================
 // EXPORTS
 // ============================================================
 module.exports = {
     registerWithEmail,
     saveGoogleUser,
+    savePhoneUser,
     verifyReferralCode,
     generateUniqueReferralCode
 };
