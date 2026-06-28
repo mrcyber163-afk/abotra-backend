@@ -1,402 +1,171 @@
 // ============================================================
-// FIREBASE - REST API Mode with Snapshot Helper
+// FIREBASE - REST API ONLY (No Admin SDK)
 // ============================================================
+
 const axios = require('axios');
-const { Snapshot } = require('./helpers');
 
-let db = null;
+// Firebase REST API endpoints
+const FIREBASE_DB_URL = process.env.FIREBASE_DATABASE_URL || 'https://abotra-proa1-default-rtdb.firebaseio.com';
+const API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM';
+const REST_URL = `${FIREBASE_DB_URL}`;
+
 let initialized = false;
-let mockAuth = null;
 
-// ============================================================
-// INITIALIZE FIREBASE
-// ============================================================
 function initializeFirebase() {
     try {
-        const databaseURL = process.env.FIREBASE_DATABASE_URL;
-        
-        if (!databaseURL) {
-            console.warn('[FIREBASE] ⚠️ FIREBASE_DATABASE_URL missing');
-            initialized = false;
-            return { db: null, initialized: false };
-        }
-        
-        console.log(`[FIREBASE] 🔑 Initializing REST API mode...`);
-        console.log(`[FIREBASE] 📁 Database: ${databaseURL}`);
-        
-        // REST API client with Snapshot support
-        db = {
-            ref: (path) => {
-                const cleanPath = path ? path.replace(/^\/+/, '').replace(/\/+$/, '') : '';
-                
-                return {
-                    once: async (event) => {
-                        try {
-                            if (cleanPath === '.info/connected') {
-                                return new Snapshot(true);
-                            }
-                            const url = `${databaseURL}/${cleanPath}.json`;
-                            console.log(`[FIREBASE] REST GET: ${url}`);
-                            const response = await axios.get(url);
-                            return new Snapshot(response.data);
-                        } catch (error) {
-                            console.error('[FIREBASE] REST GET error:', error.message);
-                            return new Snapshot(null);
-                        }
-                    },
-                    set: async (data) => {
-                        try {
-                            const url = `${databaseURL}/${cleanPath}.json`;
-                            console.log(`[FIREBASE] REST SET: ${url}`);
-                            const response = await axios.put(url, data);
-                            return response.data;
-                        } catch (error) {
-                            console.error('[FIREBASE] REST SET error:', error.message);
-                            throw error;
-                        }
-                    },
-                    update: async (data) => {
-                        try {
-                            const url = `${databaseURL}/${cleanPath}.json`;
-                            console.log(`[FIREBASE] REST UPDATE: ${url}`);
-                            const response = await axios.patch(url, data);
-                            return response.data;
-                        } catch (error) {
-                            console.error('[FIREBASE] REST UPDATE error:', error.message);
-                            throw error;
-                        }
-                    },
-                    remove: async () => {
-                        try {
-                            const url = `${databaseURL}/${cleanPath}.json`;
-                            console.log(`[FIREBASE] REST DELETE: ${url}`);
-                            const response = await axios.delete(url);
-                            return response.data;
-                        } catch (error) {
-                            console.error('[FIREBASE] REST DELETE error:', error.message);
-                            throw error;
-                        }
-                    },
-                    push: async (data) => {
-                        try {
-                            const url = `${databaseURL}/${cleanPath}.json`;
-                            console.log(`[FIREBASE] REST PUSH: ${url}`);
-                            const response = await axios.post(url, data);
-                            return { key: response.data.name };
-                        } catch (error) {
-                            console.error('[FIREBASE] REST PUSH error:', error.message);
-                            throw error;
-                        }
-                    },
-                    child: (childPath) => {
-                        const newPath = cleanPath ? `${cleanPath}/${childPath}` : childPath;
-                        return db.ref(newPath);
-                    },
-                    orderByChild: (field) => {
-                        // Simplified orderByChild for REST API
-                        return {
-                            equalTo: async (value) => {
-                                // For REST API, we do filtering manually
-                                try {
-                                    const url = `${databaseURL}/${cleanPath}.json`;
-                                    const response = await axios.get(url);
-                                    const data = response.data;
-                                    
-                                    if (data && typeof data === 'object') {
-                                        const filtered = {};
-                                        for (const [key, item] of Object.entries(data)) {
-                                            if (item[field] === value) {
-                                                filtered[key] = item;
-                                            }
-                                        }
-                                        return new Snapshot(filtered);
-                                    }
-                                    return new Snapshot(null);
-                                } catch (error) {
-                                    console.error('[FIREBASE] orderByChild error:', error.message);
-                                    return new Snapshot(null);
-                                }
-                            }
-                        };
-                    },
-                    transaction: async (updateFn) => {
-                        try {
-                            const snapshot = await db.ref(cleanPath).once('value');
-                            const currentData = snapshot.val();
-                            const newData = updateFn(currentData);
-                            
-                            if (newData !== undefined && newData !== null) {
-                                await db.ref(cleanPath).set(newData);
-                                return { 
-                                    committed: true, 
-                                    snapshot: new Snapshot(newData) 
-                                };
-                            }
-                            return { 
-                                committed: false, 
-                                snapshot: new Snapshot(currentData) 
-                            };
-                        } catch (error) {
-                            console.error('[FIREBASE] Transaction error:', error.message);
-                            throw error;
-                        }
-                    },
-                    limitToLast: (limit) => {
-                        // Simplified limitToLast for REST API
-                        return {
-                            once: async (event) => {
-                                try {
-                                    const url = `${databaseURL}/${cleanPath}.json`;
-                                    const response = await axios.get(url);
-                                    const data = response.data;
-                                    
-                                    if (data && typeof data === 'object') {
-                                        const keys = Object.keys(data);
-                                        const sorted = keys.sort((a, b) => {
-                                            // Try to sort by timestamp if available
-                                            const aVal = data[a].timestamp || data[a].createdAt || 0;
-                                            const bVal = data[b].timestamp || data[b].createdAt || 0;
-                                            return bVal - aVal;
-                                        });
-                                        const limited = sorted.slice(0, limit);
-                                        const result = {};
-                                        for (const key of limited) {
-                                            result[key] = data[key];
-                                        }
-                                        return new Snapshot(result);
-                                    }
-                                    return new Snapshot(null);
-                                } catch (error) {
-                                    console.error('[FIREBASE] limitToLast error:', error.message);
-                                    return new Snapshot(null);
-                                }
-                            }
-                        };
-                    }
-                };
-            }
-        };
-        
+        console.log('[FIREBASE] Using REST API mode');
         initialized = true;
-        console.log('[FIREBASE] ✅ REST API mode initialized successfully');
-        return { db, initialized: true };
-        
+        return { initialized: true, mode: 'REST' };
     } catch (error) {
-        console.error('[FIREBASE] ❌ Failed to initialize:', error.message);
+        console.error('[FIREBASE] Init error:', error.message);
         initialized = false;
-        return { db: null, initialized: false };
+        return { initialized: false, error: error.message };
     }
 }
 
 // ============================================================
-// GET DATABASE
+// REST API HELPERS
 // ============================================================
-function getDB() {
-    if (!initialized) {
-        const result = initializeFirebase();
-        if (!result.initialized) return null;
-    }
-    return db;
-}
 
-// ============================================================
-// GET AUTH - With Mock for REST API compatibility
-// ============================================================
-function getAuth() {
-    // If we already have a mock auth, return it
-    if (mockAuth) {
-        return mockAuth;
-    }
-    
-    // Check if we have admin auth (Service Account)
+async function restGet(path) {
     try {
-        const admin = require('firebase-admin');
-        if (admin.apps && admin.apps.length > 0) {
-            console.log('[FIREBASE] 🔑 Using Admin SDK Auth (Service Account)');
-            return admin.auth();
-        }
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.get(url);
+        return response.data;
     } catch (error) {
-        // Admin SDK not available, continue to mock
+        console.error(`[FIREBASE] REST GET error:`, error.message);
+        return null;
     }
-    
-    // Create mock auth for REST API mode
-    console.warn('[FIREBASE] ⚠️ Auth not available in REST mode - using mock auth for compatibility');
-    
-    mockAuth = {
-        createUser: async (userData) => {
-            console.log('[AUTH MOCK] Creating user:', userData.email);
-            return {
-                uid: 'mock_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
-                email: userData.email,
-                displayName: userData.displayName || '',
-                emailVerified: false,
-                password: userData.password || '********'
-            };
-        },
-        getUser: async (uid) => {
-            console.log('[AUTH MOCK] Getting user:', uid);
-            try {
-                const db = getDB();
-                if (db) {
-                    const snapshot = await db.ref(`users/${uid}`).once('value');
-                    const userData = snapshot.val();
-                    if (userData) {
-                        return {
-                            uid: uid,
-                            email: userData.email || 'mock@example.com',
-                            displayName: userData.fullName || userData.username || 'Mock User',
-                            emailVerified: userData.emailVerified || false,
-                            disabled: userData.status === 'suspended'
-                        };
-                    }
-                }
-                return {
-                    uid: uid,
-                    email: 'mock@example.com',
-                    displayName: 'Mock User',
-                    emailVerified: false
-                };
-            } catch (error) {
-                console.error('[AUTH MOCK] Error getting user:', error.message);
-                return {
-                    uid: uid,
-                    email: 'mock@example.com',
-                    displayName: 'Mock User',
-                    emailVerified: false
-                };
-            }
-        },
-        getUserByEmail: async (email) => {
-            console.log('[AUTH MOCK] Getting user by email:', email);
-            try {
-                const db = getDB();
-                if (db) {
-                    const snapshot = await db.ref('users')
-                        .orderByChild('email')
-                        .equalTo(email)
-                        .once('value');
-                    const data = snapshot.val();
-                    if (data && typeof data === 'object') {
-                        const uid = Object.keys(data)[0];
-                        const userData = data[uid];
-                        return {
-                            uid: uid,
-                            email: userData.email,
-                            displayName: userData.fullName || userData.username || 'Mock User',
-                            emailVerified: userData.emailVerified || false
-                        };
-                    }
-                }
-                return null;
-            } catch (error) {
-                console.error('[AUTH MOCK] Error getting user by email:', error.message);
-                return null;
-            }
-        },
-        setCustomUserClaims: async (uid, claims) => {
-            console.log('[AUTH MOCK] Setting custom claims for user:', uid, claims);
-            try {
-                const db = getDB();
-                if (db) {
-                    await db.ref(`users/${uid}/claims`).set(claims);
-                }
-                return true;
-            } catch (error) {
-                console.error('[AUTH MOCK] Error setting claims:', error.message);
-                return false;
-            }
-        },
-        updateUser: async (uid, updates) => {
-            console.log('[AUTH MOCK] Updating user:', uid, updates);
-            try {
-                const db = getDB();
-                if (db) {
-                    await db.ref(`users/${uid}`).update(updates);
-                }
-                return { uid, ...updates };
-            } catch (error) {
-                console.error('[AUTH MOCK] Error updating user:', error.message);
-                throw error;
-            }
-        },
-        deleteUser: async (uid) => {
-            console.log('[AUTH MOCK] Deleting user:', uid);
-            try {
-                const db = getDB();
-                if (db) {
-                    await db.ref(`users/${uid}`).remove();
-                }
-                return true;
-            } catch (error) {
-                console.error('[AUTH MOCK] Error deleting user:', error.message);
-                throw error;
-            }
-        },
-        verifyIdToken: async (token) => {
-            console.log('[AUTH MOCK] Verifying token:', token ? `${token.substring(0, 10)}...` : 'null');
-            // For REST mode, we don't verify tokens - just return mock user
-            return {
-                uid: 'mock_user_' + Date.now(),
-                email: 'mock@example.com',
-                email_verified: false,
-                name: 'Mock User',
-                firebase: {
-                    sign_in_provider: 'password',
-                    identities: { email: ['mock@example.com'] }
-                }
-            };
-        }
-    };
-    
-    return mockAuth;
+}
+
+async function restPut(path, data) {
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.put(url, data);
+        return response.data;
+    } catch (error) {
+        console.error(`[FIREBASE] REST PUT error:`, error.message);
+        return null;
+    }
+}
+
+async function restPost(path, data) {
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.post(url, data);
+        return response.data;
+    } catch (error) {
+        console.error(`[FIREBASE] REST POST error:`, error.message);
+        return null;
+    }
+}
+
+async function restPatch(path, data) {
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.patch(url, data);
+        return response.data;
+    } catch (error) {
+        console.error(`[FIREBASE] REST PATCH error:`, error.message);
+        return null;
+    }
+}
+
+async function restDelete(path) {
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.delete(url);
+        return response.data;
+    } catch (error) {
+        console.error(`[FIREBASE] REST DELETE error:`, error.message);
+        return null;
+    }
+}
+
+async function restQuery(path, queryParams) {
+    try {
+        const params = new URLSearchParams(queryParams).toString();
+        const url = `${REST_URL}/${path}.json?${params}`;
+        const response = await axios.get(url);
+        return response.data;
+    } catch (error) {
+        console.error(`[FIREBASE] REST QUERY error:`, error.message);
+        return null;
+    }
 }
 
 // ============================================================
-// CHECK INITIALIZATION
+// AUTH - Using Firebase REST Auth
 // ============================================================
-function isInitialized() {
-    return initialized;
+
+async function authSignUp(email, password) {
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`;
+        const response = await axios.post(url, {
+            email,
+            password,
+            returnSecureToken: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] SignUp error:', error.response?.data || error.message);
+        return null;
+    }
 }
 
-// ============================================================
-// TEST CONNECTION
-// ============================================================
+async function authSignIn(email, password) {
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`;
+        const response = await axios.post(url, {
+            email,
+            password,
+            returnSecureToken: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] SignIn error:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+async function authGetUser(idToken) {
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`;
+        const response = await axios.post(url, { idToken });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] GetUser error:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+function getDB() { return { restGet, restPut, restPost, restPatch, restDelete, restQuery }; }
+function getAuth() { return { authSignUp, authSignIn, authGetUser }; }
+function isInitialized() { return initialized; }
+
 async function testConnection() {
-    if (!initialized) {
-        console.log('[FIREBASE] ⚠️ Not initialized, skipping test');
-        return false;
-    }
     try {
-        const dbInstance = getDB();
-        if (!dbInstance) return false;
-        const testRef = dbInstance.ref('.info/connected');
-        const snapshot = await testRef.once('value');
-        return snapshot.exists() && snapshot.val() === true;
+        await axios.get(`${REST_URL}/.json?shallow=true`);
+        return { success: true };
     } catch (error) {
-        console.error('[FIREBASE] ❌ Connection test failed:', error.message);
-        // Try a simple read instead
-        try {
-            const dbInstance = getDB();
-            if (!dbInstance) return false;
-            const testRef = dbInstance.ref('/');
-            const snapshot = await testRef.once('value');
-            // If we get any data back, connection is working
-            return true;
-        } catch (err) {
-            console.error('[FIREBASE] ❌ Alternate connection test failed:', err.message);
-            return false;
-        }
+        return { success: false, error: error.message };
     }
 }
 
-// ============================================================
-// EXPORTS
-// ============================================================
 module.exports = {
     initializeFirebase,
     getDB,
     getAuth,
     isInitialized,
     testConnection,
-    admin: null // For compatibility
+    // Export REST helpers directly
+    restGet,
+    restPut,
+    restPost,
+    restPatch,
+    restDelete,
+    restQuery,
+    authSignUp,
+    authSignIn,
+    authGetUser
 };
