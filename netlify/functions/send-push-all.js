@@ -1,24 +1,17 @@
 // ============================================================
 // NETLIFY FUNCTION: Send Push to All Users
 // ============================================================
-// Location: netlify/functions/send-push-all.js
-// Endpoint: /.netlify/functions/send-push-all
-// ============================================================
-
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin
 if (!admin.apps.length) {
-    const serviceAccount = {
-        type: "service_account",
-        project_id: process.env.FIREBASE_PROJECT_ID,
-        private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        client_email: process.env.FIREBASE_CLIENT_EMAIL,
-    };
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
-    });
+    try {
+        admin.initializeApp({
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+        console.log('[send-push-all] ✅ Firebase initialized');
+    } catch (error) {
+        console.error('[send-push-all] ❌ Firebase init error:', error);
+    }
 }
 
 exports.handler = async (event, context) => {
@@ -37,15 +30,21 @@ exports.handler = async (event, context) => {
             return { statusCode: 500, body: JSON.stringify({ success: false, error: 'OneSignal not configured.' }) };
         }
 
-        // Get all users if not provided
         let recipients = userIds;
         if (!recipients || recipients.length === 0) {
-            const snapshot = await admin.database().ref('users').once('value');
-            recipients = [];
-            if (snapshot.exists()) {
-                snapshot.forEach(child => {
-                    recipients.push(child.key);
-                });
+            try {
+                const snapshot = await admin.database().ref('users').once('value');
+                recipients = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        recipients.push(child.key);
+                    });
+                }
+            } catch (dbError) {
+                console.error('[send-push-all] Database error:', dbError);
+                if (!recipients || recipients.length === 0) {
+                    return { statusCode: 400, body: JSON.stringify({ success: false, error: 'No users found.' }) };
+                }
             }
         }
 
@@ -53,7 +52,6 @@ exports.handler = async (event, context) => {
             return { statusCode: 400, body: JSON.stringify({ success: false, error: 'No users found.' }) };
         }
 
-        // Send in batches of 1000 (OneSignal limit)
         const batchSize = 1000;
         let successCount = 0;
         let failedCount = 0;
@@ -106,7 +104,7 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('[send-push-all] ❌ Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ success: false, error: error.message })
