@@ -1,4 +1,6 @@
-// functions/streaming/price-stream.js
+// ============================================================
+// PRICE-STREAM.JS - Binance WebSocket with Fallback URLs
+// ============================================================
 const WebSocket = require('ws');
 const { getDB } = require('../firebase');
 const config = require('../config');
@@ -13,18 +15,30 @@ class PriceStream {
         this.maxReconnectAttempts = 50;
         this.listeners = [];
         this.activeSymbols = new Set(['BTCUSDT']);
+        
+        // Multiple Binance URLs
+        this.wsUrls = [
+            'wss://stream.binance.com:9443/ws',
+            'wss://stream.binance.com/ws',
+            'wss://ws-api.binance.com/ws-api/v3',
+            'wss://data-stream.binance.com/stream'
+        ];
+        this.currentUrlIndex = 0;
     }
 
     connect() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
-        console.log('[PRICE] Connecting to Binance...');
         
-        this.ws = new WebSocket(config.BINANCE_WS_URL);
+        const wsUrl = this.wsUrls[this.currentUrlIndex % this.wsUrls.length];
+        console.log(`[PRICE] Connecting to Binance (${wsUrl})...`);
+        
+        this.ws = new WebSocket(wsUrl);
         
         this.ws.on('open', () => {
-            console.log('[PRICE] ✅ Connected to Binance');
+            console.log(`[PRICE] ✅ Connected to Binance (${wsUrl})`);
             this.isConnected = true;
             this.reconnectAttempt = 0;
+            this.currentUrlIndex = 0;
             this.subscribeAll();
         });
 
@@ -44,6 +58,22 @@ class PriceStream {
             this.isConnected = false;
             this.reconnect();
         });
+    }
+
+    reconnect() {
+        if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+            console.log('[PRICE] ⚠️ Max reconnect attempts reached');
+            return;
+        }
+        
+        if (this.reconnectAttempt > 0 && this.reconnectAttempt % 3 === 0) {
+            this.currentUrlIndex++;
+            console.log(`[PRICE] 🔄 Switching to next Binance URL`);
+        }
+        
+        const delay = Math.min(10000, 1000 * Math.pow(1.5, this.reconnectAttempt));
+        this.reconnectAttempt++;
+        setTimeout(() => this.connect(), delay);
     }
 
     handleMessage(message) {
@@ -90,13 +120,6 @@ class PriceStream {
         console.log(`[PRICE] Subscribed to: ${symbols.join(', ')}`);
     }
 
-    reconnect() {
-        if (this.reconnectAttempt >= this.maxReconnectAttempts) return;
-        const delay = Math.min(5000, 1000 * Math.pow(1.5, this.reconnectAttempt));
-        this.reconnectAttempt++;
-        setTimeout(() => this.connect(), delay);
-    }
-
     onPrice(callback) {
         this.listeners.push(callback);
     }
@@ -118,6 +141,8 @@ class PriceStream {
     async updateActiveSymbols() {
         try {
             const db = getDB();
+            if (!db) return;
+            
             const snapshot = await db.ref('trades').once('value');
             const symbols = new Set(['BTCUSDT']);
             
