@@ -1,0 +1,442 @@
+2026-06-28T20:05:13.039756561Z [inf]  Starting Container
+2026-06-28T20:05:13.111804299Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:13.111810459Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:13.111815573Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:13.111821154Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:13.111826776Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:13.111833073Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:13.111839089Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:13.111845051Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:13.111852864Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:13.111858363Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:13.111863073Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:13.111868935Z [err]    errorInfo: {
+2026-06-28T20:05:13.111875365Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:13.111881494Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:13.111887802Z [err]    },
+2026-06-28T20:05:13.111893704Z [err]    codePrefix: 'app'
+2026-06-28T20:05:13.111899842Z [err]  }
+2026-06-28T20:05:13.111906920Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:13.111913674Z [err]          throw error;
+2026-06-28T20:05:13.111919402Z [err]          ^
+2026-06-28T20:05:13.111925874Z [err]  
+2026-06-28T20:05:13.111932275Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:13.112128217Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:13.112135166Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:13.112146397Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:13.112155428Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:13.112167321Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:13.112170217Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:13.112177656Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:13.112187787Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:13.112190688Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:13.112202775Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:13.112203116Z [err]    },
+2026-06-28T20:05:13.112215754Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:13.112218571Z [err]    codePrefix: 'app'
+2026-06-28T20:05:13.112228699Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:13.112231256Z [err]  }
+2026-06-28T20:05:13.112242516Z [err]    errorInfo: {
+2026-06-28T20:05:13.112244665Z [err]  
+2026-06-28T20:05:13.112253515Z [err]  Node.js v18.20.5
+2026-06-28T20:05:14.205712220Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:14.205723373Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:14.205732468Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:14.205739002Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:14.205744789Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:14.205753099Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:14.205758938Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:14.205764896Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:14.205771659Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:14.205781121Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:14.205788153Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:14.205795189Z [err]    errorInfo: {
+2026-06-28T20:05:14.205802876Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:14.205810240Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:14.205816745Z [err]    },
+2026-06-28T20:05:14.205822694Z [err]    codePrefix: 'app'
+2026-06-28T20:05:14.205829389Z [err]  }
+2026-06-28T20:05:14.205835614Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:14.205841183Z [err]          throw error;
+2026-06-28T20:05:14.205846782Z [err]          ^
+2026-06-28T20:05:14.205852387Z [err]  
+2026-06-28T20:05:14.205857072Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:14.207810125Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:14.207820117Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:14.207825536Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:14.207830444Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:14.207835965Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:14.207841489Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:14.207846412Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:14.207871616Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:14.207876954Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:14.207882910Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:14.207887845Z [err]    errorInfo: {
+2026-06-28T20:05:14.207892771Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:14.207898212Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:14.207906412Z [err]    },
+2026-06-28T20:05:14.207912043Z [err]    codePrefix: 'app'
+2026-06-28T20:05:14.207917297Z [err]  }
+2026-06-28T20:05:14.207923651Z [err]  
+2026-06-28T20:05:14.207930562Z [err]  Node.js v18.20.5
+2026-06-28T20:05:15.880935135Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:15.880943626Z [err]          ^
+2026-06-28T20:05:15.880953397Z [err]  
+2026-06-28T20:05:15.880956551Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:15.880960496Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:15.880964810Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:15.880977515Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:15.880979555Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:15.880988283Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:15.880990508Z [err]  }
+2026-06-28T20:05:15.880993463Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:15.880997892Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:15.880998541Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:15.881003736Z [err]          throw error;
+2026-06-28T20:05:15.881015112Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:15.881022900Z [err]    errorInfo: {
+2026-06-28T20:05:15.881026008Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:15.881035474Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:15.881036136Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:15.881041436Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:15.881059309Z [err]    },
+2026-06-28T20:05:15.881071794Z [err]    codePrefix: 'app'
+2026-06-28T20:05:15.881884438Z [err]  }
+2026-06-28T20:05:15.881888398Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:15.881892988Z [err]  
+2026-06-28T20:05:15.881898140Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:15.881899935Z [err]  Node.js v18.20.5
+2026-06-28T20:05:15.881910473Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:15.881916669Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:15.881918713Z [err]    },
+2026-06-28T20:05:15.881926917Z [err]    codePrefix: 'app'
+2026-06-28T20:05:15.881927358Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:15.881928085Z [err]    errorInfo: {
+2026-06-28T20:05:15.881936743Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:15.881937288Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:15.881944047Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:15.881949801Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:15.881955769Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:15.882003365Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:15.882009225Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:16.964924133Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:16.964934434Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:16.964967346Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:16.964969083Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:16.964978395Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:16.964982227Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:16.964987849Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:16.964992895Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:16.964997689Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:16.965002961Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:16.965011378Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:16.965018474Z [err]    errorInfo: {
+2026-06-28T20:05:16.965025223Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:16.965034014Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:16.965043962Z [err]    },
+2026-06-28T20:05:16.965054708Z [err]    codePrefix: 'app'
+2026-06-28T20:05:16.965063999Z [err]  }
+2026-06-28T20:05:16.965070270Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:16.965077485Z [err]          throw error;
+2026-06-28T20:05:16.965084518Z [err]          ^
+2026-06-28T20:05:16.965093982Z [err]  
+2026-06-28T20:05:16.965100639Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:16.966184499Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:16.966194084Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:16.966272990Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:16.966280121Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:16.966286312Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:16.966288092Z [err]    },
+2026-06-28T20:05:16.966294982Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:16.966296201Z [err]    codePrefix: 'app'
+2026-06-28T20:05:16.966301666Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:16.966303619Z [err]  }
+2026-06-28T20:05:16.966307416Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:16.966312385Z [err]  
+2026-06-28T20:05:16.966314262Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:16.966318593Z [err]  Node.js v18.20.5
+2026-06-28T20:05:16.966320912Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:16.966328021Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:16.966334607Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:16.966342128Z [err]    errorInfo: {
+2026-06-28T20:05:17.046479775Z [inf]  Stopping Container
+2026-06-28T20:05:18.144892357Z [err]          throw error;
+2026-06-28T20:05:18.144897912Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:18.144908681Z [err]          ^
+2026-06-28T20:05:18.144912082Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:18.144919864Z [err]  
+2026-06-28T20:05:18.144927563Z [err]    errorInfo: {
+2026-06-28T20:05:18.144928713Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:18.144939980Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:18.144958111Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:18.144970436Z [err]    },
+2026-06-28T20:05:18.144977476Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:18.144980881Z [err]    codePrefix: 'app'
+2026-06-28T20:05:18.144989978Z [err]  }
+2026-06-28T20:05:18.144990708Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:18.144998808Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:18.145009087Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:18.145024478Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:18.145051794Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:18.145059076Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:18.145064753Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:18.145071094Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:18.145078154Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:18.151644403Z [err]  Node.js v18.20.5
+2026-06-28T20:05:18.151673060Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:18.151678527Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:18.151682947Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:18.151687482Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:18.151691386Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:18.151695593Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:18.151699628Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:18.151704145Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:18.151708317Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:18.151712287Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:18.151717284Z [err]    errorInfo: {
+2026-06-28T20:05:18.151721562Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:18.151725453Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:18.151729228Z [err]    },
+2026-06-28T20:05:18.151733926Z [err]    codePrefix: 'app'
+2026-06-28T20:05:18.151739076Z [err]  }
+2026-06-28T20:05:18.151743414Z [err]  
+2026-06-28T20:05:19.875411724Z [err]    codePrefix: 'app'
+2026-06-28T20:05:19.875423285Z [err]  }
+2026-06-28T20:05:19.875433066Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:19.875441928Z [err]          throw error;
+2026-06-28T20:05:19.875454314Z [err]          ^
+2026-06-28T20:05:19.875456790Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:19.875465367Z [err]  
+2026-06-28T20:05:19.875478158Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:19.875483020Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:19.875493720Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:19.875501111Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:19.875508555Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:19.875517215Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:19.875526125Z [err]    errorInfo: {
+2026-06-28T20:05:19.875534546Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:19.875545026Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:19.875553600Z [err]    },
+2026-06-28T20:05:19.875642110Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:19.875649664Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:19.875655867Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:19.875662837Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:19.875671176Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:19.876502715Z [err]    codePrefix: 'app'
+2026-06-28T20:05:19.876513845Z [err]  }
+2026-06-28T20:05:19.876521873Z [err]  
+2026-06-28T20:05:19.876528409Z [err]  Node.js v18.20.5
+2026-06-28T20:05:19.876568362Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:19.876575977Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:19.876584159Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:19.876592981Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:19.876605368Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:19.876615428Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:19.876624670Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:19.876632815Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:19.876661062Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:19.876670565Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:19.876679106Z [err]    errorInfo: {
+2026-06-28T20:05:19.876691393Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:19.876704287Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:19.876716575Z [err]    },
+2026-06-28T20:05:20.910543187Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:20.910554167Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:20.910562023Z [err]  }
+2026-06-28T20:05:20.910563210Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:20.910576546Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:20.910584805Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:20.910586447Z [err]          throw error;
+2026-06-28T20:05:20.910596770Z [err]    errorInfo: {
+2026-06-28T20:05:20.910597880Z [err]          ^
+2026-06-28T20:05:20.910598555Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:20.910605316Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:20.910610259Z [err]  
+2026-06-28T20:05:20.910612213Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:20.910615429Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:20.910620746Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:20.910623186Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:20.910626010Z [err]    },
+2026-06-28T20:05:20.910633085Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:20.910640065Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:20.910646961Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:20.910653236Z [err]    codePrefix: 'app'
+2026-06-28T20:05:20.910656214Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:20.913110687Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:20.913118919Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:20.913125269Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:20.913137479Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:20.913148929Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:20.913156930Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:20.913166497Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:20.913175253Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:20.913185849Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:20.913192092Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:20.913199258Z [err]    errorInfo: {
+2026-06-28T20:05:20.913207128Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:20.913213906Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:20.913221276Z [err]    },
+2026-06-28T20:05:20.913227368Z [err]    codePrefix: 'app'
+2026-06-28T20:05:20.913233201Z [err]  }
+2026-06-28T20:05:20.913239614Z [err]  
+2026-06-28T20:05:20.913248448Z [err]  Node.js v18.20.5
+2026-06-28T20:05:22.859254566Z [err]    codePrefix: 'app'
+2026-06-28T20:05:22.859268460Z [err]  }
+2026-06-28T20:05:22.859275817Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:22.859282686Z [err]          throw error;
+2026-06-28T20:05:22.859289951Z [err]          ^
+2026-06-28T20:05:22.859297855Z [err]  
+2026-06-28T20:05:22.859305769Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:22.859400063Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:22.859407201Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:22.859412905Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:22.859428814Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:22.859435218Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:22.859440989Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:22.859446833Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:22.859452790Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:22.859458679Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:22.859464565Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:22.859470297Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:22.859475997Z [err]    errorInfo: {
+2026-06-28T20:05:22.859481924Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:22.859487748Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:22.859493652Z [err]    },
+2026-06-28T20:05:22.861107004Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:22.861116327Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:22.861118526Z [err]    },
+2026-06-28T20:05:22.861123953Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:22.861130569Z [err]    codePrefix: 'app'
+2026-06-28T20:05:22.861131850Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:22.861139447Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:22.861139556Z [err]  }
+2026-06-28T20:05:22.861148442Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:22.861150289Z [err]  
+2026-06-28T20:05:22.861156527Z [err]  Node.js v18.20.5
+2026-06-28T20:05:22.861158170Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:22.861164115Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:22.861170083Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:22.861175449Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:22.861180704Z [err]    errorInfo: {
+2026-06-28T20:05:22.861186348Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:22.861192190Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:23.984432931Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:23.984433031Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:23.984446263Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:23.984454487Z [err]    codePrefix: 'app'
+2026-06-28T20:05:23.984455613Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:23.984464539Z [err]  }
+2026-06-28T20:05:23.984464766Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:23.984474243Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:23.984474684Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:23.984483524Z [err]          throw error;
+2026-06-28T20:05:23.984487726Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:23.984491952Z [err]          ^
+2026-06-28T20:05:23.984496059Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:23.984501250Z [err]  
+2026-06-28T20:05:23.984505887Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:23.984513777Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:23.984520169Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:23.984526180Z [err]    errorInfo: {
+2026-06-28T20:05:23.984532726Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:23.984541022Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:23.984547444Z [err]    },
+2026-06-28T20:05:23.984618142Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:23.990471547Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:23.990473525Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:23.990482038Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:23.990484978Z [err]    },
+2026-06-28T20:05:23.990489245Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:23.990493439Z [err]    codePrefix: 'app'
+2026-06-28T20:05:23.990497488Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:23.990502095Z [err]  }
+2026-06-28T20:05:23.990503758Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:23.990510491Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:23.990511119Z [err]  
+2026-06-28T20:05:23.990518459Z [err]  Node.js v18.20.5
+2026-06-28T20:05:23.990518699Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:23.990523738Z [err]    errorInfo: {
+2026-06-28T20:05:23.990528215Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:23.990562160Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:23.990566595Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:23.990571445Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:25.151354732Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:25.151362991Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:25.151369514Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:25.151375346Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:25.151380860Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:25.151385893Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:25.151391634Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:25.151399947Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:25.151407665Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:25.151414260Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:25.151420538Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:25.151426773Z [err]    errorInfo: {
+2026-06-28T20:05:25.151433150Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:25.151439660Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:25.151445564Z [err]    },
+2026-06-28T20:05:25.151451280Z [err]    codePrefix: 'app'
+2026-06-28T20:05:25.151458260Z [err]  }
+2026-06-28T20:05:25.157166636Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:25.157169701Z [err]    codePrefix: 'app'
+2026-06-28T20:05:25.157177682Z [err]          throw error;
+2026-06-28T20:05:25.157184081Z [err]  }
+2026-06-28T20:05:25.157187729Z [err]          ^
+2026-06-28T20:05:25.157193901Z [err]  
+2026-06-28T20:05:25.157196265Z [err]  
+2026-06-28T20:05:25.157202466Z [err]  Node.js v18.20.5
+2026-06-28T20:05:25.157205713Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:25.157212480Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:25.157218405Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:25.157224831Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:25.157232674Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:25.157240757Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:25.157249235Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:25.157258411Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:25.157275712Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:25.157393928Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:25.157403075Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:25.157411442Z [err]    errorInfo: {
+2026-06-28T20:05:25.157419221Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:25.157487886Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:25.157496208Z [err]    },
+2026-06-28T20:05:26.977420227Z [err]  [FIREBASE] ❌ Initialization failed: FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:26.977425155Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:26.977429153Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:26.977434209Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:26.977438552Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:26.977445443Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:26.977451073Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:26.977456875Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:26.977462118Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:26.977467802Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:26.977473184Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {
+2026-06-28T20:05:26.977479171Z [err]    errorInfo: {
+2026-06-28T20:05:26.977485095Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:26.977490407Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:26.977494753Z [err]    },
+2026-06-28T20:05:26.977499636Z [err]    codePrefix: 'app'
+2026-06-28T20:05:26.977503638Z [err]  }
+2026-06-28T20:05:26.977507509Z [err]  /app/functions/firebase.js:41
+2026-06-28T20:05:26.977511438Z [err]          throw error;
+2026-06-28T20:05:26.977515346Z [err]          ^
+2026-06-28T20:05:26.977521191Z [err]  
+2026-06-28T20:05:26.977525899Z [err]  FirebaseAppError: Failed to parse private key: Error: Invalid PEM formatted message.
+2026-06-28T20:05:26.978061102Z [err]  }
+2026-06-28T20:05:26.978068157Z [err]  
+2026-06-28T20:05:26.978074144Z [err]  Node.js v18.20.5
+2026-06-28T20:05:26.978078600Z [err]    errorInfo: {
+2026-06-28T20:05:26.978087751Z [err]      code: 'app/invalid-credential',
+2026-06-28T20:05:26.978093956Z [err]      message: 'Failed to parse private key: Error: Invalid PEM formatted message.'
+2026-06-28T20:05:26.978101717Z [err]    },
+2026-06-28T20:05:26.978102638Z [err]      at new ServiceAccount (/app/node_modules/firebase-admin/lib/app/credential-internal.js:153:19)
+2026-06-28T20:05:26.978111850Z [err]    codePrefix: 'app'
+2026-06-28T20:05:26.978112423Z [err]      at new ServiceAccountCredential (/app/node_modules/firebase-admin/lib/app/credential-internal.js:70:15)
+2026-06-28T20:05:26.978120738Z [err]      at Object.cert (/app/node_modules/firebase-admin/lib/app/credential-factory.js:103:54)
+2026-06-28T20:05:26.978127075Z [err]      at initializeFirebase (/app/functions/firebase.js:30:42)
+2026-06-28T20:05:26.978133925Z [err]      at Object.<anonymous> (/app/functions/index.js:7:1)
+2026-06-28T20:05:26.978139240Z [err]      at Module._compile (node:internal/modules/cjs/loader:1364:14)
+2026-06-28T20:05:26.978144620Z [err]      at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+2026-06-28T20:05:26.978151105Z [err]      at Module.load (node:internal/modules/cjs/loader:1203:32)
+2026-06-28T20:05:26.978157599Z [err]      at Module._load (node:internal/modules/cjs/loader:1019:12)
+2026-06-28T20:05:26.978164045Z [err]      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12) {

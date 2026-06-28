@@ -13,11 +13,11 @@ let initialized = false;
 
 function initializeFirebase() {
     try {
-        console.log('[FIREBASE] Using REST API mode');
+        console.log('[FIREBASE] 🔑 Using REST API mode');
         initialized = true;
         return { initialized: true, mode: 'REST' };
     } catch (error) {
-        console.error('[FIREBASE] Init error:', error.message);
+        console.error('[FIREBASE] ❌ Init error:', error.message);
         initialized = false;
         return { initialized: false, error: error.message };
     }
@@ -82,20 +82,8 @@ async function restDelete(path) {
     }
 }
 
-async function restQuery(path, queryParams) {
-    try {
-        const params = new URLSearchParams(queryParams).toString();
-        const url = `${REST_URL}/${path}.json?${params}`;
-        const response = await axios.get(url);
-        return response.data;
-    } catch (error) {
-        console.error(`[FIREBASE] REST QUERY error:`, error.message);
-        return null;
-    }
-}
-
 // ============================================================
-// AUTH - Using Firebase REST Auth
+// AUTH - Firebase REST Auth
 // ============================================================
 
 async function authSignUp(email, password) {
@@ -139,8 +127,28 @@ async function authGetUser(idToken) {
     }
 }
 
-function getDB() { return { restGet, restPut, restPost, restPatch, restDelete, restQuery }; }
-function getAuth() { return { authSignUp, authSignIn, authGetUser }; }
+// ============================================================
+// EXPORTS
+// ============================================================
+
+function getDB() { 
+    return { 
+        restGet, 
+        restPut, 
+        restPost, 
+        restPatch, 
+        restDelete 
+    }; 
+}
+
+function getAuth() { 
+    return { 
+        authSignUp, 
+        authSignIn, 
+        authGetUser 
+    }; 
+}
+
 function isInitialized() { return initialized; }
 
 async function testConnection() {
@@ -164,7 +172,6 @@ module.exports = {
     restPost,
     restPatch,
     restDelete,
-    restQuery,
     authSignUp,
     authSignIn,
     authGetUser
