@@ -203,3 +203,14 @@ try {
 } catch (error) {
     console.error('[ROUTES] ❌ /api/copy-trading error:', error.message);
 }
+
+// ============================================================
+// TRADE ROUTES
+// ============================================================
+try {
+    const tradeRoutes = require('./routes/trade');
+    app.use('/api/trades', tradeRoutes);
+    console.log('[ROUTES] ✅ /api/trades loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/trades error:', error.message);
+}
