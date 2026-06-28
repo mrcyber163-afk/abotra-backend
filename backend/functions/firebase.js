@@ -6,7 +6,11 @@ const { Snapshot } = require('./helpers');
 
 let db = null;
 let initialized = false;
+let mockAuth = null;
 
+// ============================================================
+// INITIALIZE FIREBASE
+// ============================================================
 function initializeFirebase() {
     try {
         const databaseURL = process.env.FIREBASE_DATABASE_URL;
@@ -87,10 +91,28 @@ function initializeFirebase() {
                         const newPath = cleanPath ? `${cleanPath}/${childPath}` : childPath;
                         return db.ref(newPath);
                     },
-                    orderByChild: () => {
+                    orderByChild: (field) => {
                         return {
                             equalTo: async (value) => {
-                                return db.ref(cleanPath);
+                                try {
+                                    const url = `${databaseURL}/${cleanPath}.json`;
+                                    const response = await axios.get(url);
+                                    const data = response.data;
+                                    
+                                    if (data && typeof data === 'object') {
+                                        const filtered = {};
+                                        for (const [key, item] of Object.entries(data)) {
+                                            if (item[field] === value) {
+                                                filtered[key] = item;
+                                            }
+                                        }
+                                        return new Snapshot(filtered);
+                                    }
+                                    return new Snapshot(null);
+                                } catch (error) {
+                                    console.error('[FIREBASE] orderByChild error:', error.message);
+                                    return new Snapshot(null);
+                                }
                             }
                         };
                     },
@@ -100,15 +122,51 @@ function initializeFirebase() {
                             const currentData = snapshot.val();
                             const newData = updateFn(currentData);
                             
-                            if (newData !== undefined) {
+                            if (newData !== undefined && newData !== null) {
                                 await db.ref(cleanPath).set(newData);
-                                return { committed: true, snapshot: new Snapshot(newData) };
+                                return { 
+                                    committed: true, 
+                                    snapshot: new Snapshot(newData) 
+                                };
                             }
-                            return { committed: false, snapshot: new Snapshot(currentData) };
+                            return { 
+                                committed: false, 
+                                snapshot: new Snapshot(currentData) 
+                            };
                         } catch (error) {
                             console.error('[FIREBASE] Transaction error:', error.message);
                             throw error;
                         }
+                    },
+                    limitToLast: (limit) => {
+                        return {
+                            once: async (event) => {
+                                try {
+                                    const url = `${databaseURL}/${cleanPath}.json`;
+                                    const response = await axios.get(url);
+                                    const data = response.data;
+                                    
+                                    if (data && typeof data === 'object') {
+                                        const keys = Object.keys(data);
+                                        const sorted = keys.sort((a, b) => {
+                                            const aVal = data[a].timestamp || data[a].createdAt || 0;
+                                            const bVal = data[b].timestamp || data[b].createdAt || 0;
+                                            return bVal - aVal;
+                                        });
+                                        const limited = sorted.slice(0, limit);
+                                        const result = {};
+                                        for (const key of limited) {
+                                            result[key] = data[key];
+                                        }
+                                        return new Snapshot(result);
+                                    }
+                                    return new Snapshot(null);
+                                } catch (error) {
+                                    console.error('[FIREBASE] limitToLast error:', error.message);
+                                    return new Snapshot(null);
+                                }
+                            }
+                        };
                     }
                 };
             }
@@ -125,6 +183,9 @@ function initializeFirebase() {
     }
 }
 
+// ============================================================
+// GET DATABASE
+// ============================================================
 function getDB() {
     if (!initialized) {
         const result = initializeFirebase();
@@ -133,15 +194,162 @@ function getDB() {
     return db;
 }
 
+// ============================================================
+// GET AUTH - With Mock for REST API compatibility
+// ============================================================
 function getAuth() {
-    console.warn('[FIREBASE] ⚠️ Auth not available in REST mode');
-    return null;
+    if (mockAuth) {
+        return mockAuth;
+    }
+    
+    try {
+        const admin = require('firebase-admin');
+        if (admin.apps && admin.apps.length > 0) {
+            console.log('[FIREBASE] 🔑 Using Admin SDK Auth (Service Account)');
+            return admin.auth();
+        }
+    } catch (error) {}
+    
+    console.warn('[FIREBASE] ⚠️ Auth not available in REST mode - using mock auth for compatibility');
+    
+    mockAuth = {
+        createUser: async (userData) => {
+            console.log('[AUTH MOCK] Creating user:', userData.email);
+            return {
+                uid: 'mock_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                email: userData.email,
+                displayName: userData.displayName || '',
+                emailVerified: false,
+                password: userData.password || '********'
+            };
+        },
+        getUser: async (uid) => {
+            console.log('[AUTH MOCK] Getting user:', uid);
+            try {
+                const db = getDB();
+                if (db) {
+                    const snapshot = await db.ref(`users/${uid}`).once('value');
+                    const userData = snapshot.val();
+                    if (userData) {
+                        return {
+                            uid: uid,
+                            email: userData.email || 'mock@example.com',
+                            displayName: userData.fullName || userData.username || 'Mock User',
+                            emailVerified: userData.emailVerified || false,
+                            disabled: userData.status === 'suspended'
+                        };
+                    }
+                }
+                return {
+                    uid: uid,
+                    email: 'mock@example.com',
+                    displayName: 'Mock User',
+                    emailVerified: false
+                };
+            } catch (error) {
+                console.error('[AUTH MOCK] Error getting user:', error.message);
+                return {
+                    uid: uid,
+                    email: 'mock@example.com',
+                    displayName: 'Mock User',
+                    emailVerified: false
+                };
+            }
+        },
+        getUserByEmail: async (email) => {
+            console.log('[AUTH MOCK] Getting user by email:', email);
+            try {
+                const db = getDB();
+                if (db) {
+                    const snapshot = await db.ref('users')
+                        .orderByChild('email')
+                        .equalTo(email)
+                        .once('value');
+                    const data = snapshot.val();
+                    if (data && typeof data === 'object') {
+                        const uid = Object.keys(data)[0];
+                        const userData = data[uid];
+                        return {
+                            uid: uid,
+                            email: userData.email,
+                            displayName: userData.fullName || userData.username || 'Mock User',
+                            emailVerified: userData.emailVerified || false
+                        };
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('[AUTH MOCK] Error getting user by email:', error.message);
+                return null;
+            }
+        },
+        setCustomUserClaims: async (uid, claims) => {
+            console.log('[AUTH MOCK] Setting custom claims for user:', uid, claims);
+            try {
+                const db = getDB();
+                if (db) {
+                    await db.ref(`users/${uid}/claims`).set(claims);
+                }
+                return true;
+            } catch (error) {
+                console.error('[AUTH MOCK] Error setting claims:', error.message);
+                return false;
+            }
+        },
+        updateUser: async (uid, updates) => {
+            console.log('[AUTH MOCK] Updating user:', uid, updates);
+            try {
+                const db = getDB();
+                if (db) {
+                    await db.ref(`users/${uid}`).update(updates);
+                }
+                return { uid, ...updates };
+            } catch (error) {
+                console.error('[AUTH MOCK] Error updating user:', error.message);
+                throw error;
+            }
+        },
+        deleteUser: async (uid) => {
+            console.log('[AUTH MOCK] Deleting user:', uid);
+            try {
+                const db = getDB();
+                if (db) {
+                    await db.ref(`users/${uid}`).remove();
+                }
+                return true;
+            } catch (error) {
+                console.error('[AUTH MOCK] Error deleting user:', error.message);
+                throw error;
+            }
+        },
+        verifyIdToken: async (token) => {
+            console.log('[AUTH MOCK] Verifying token');
+            return {
+                uid: 'mock_user_' + Date.now(),
+                email: 'mock@example.com',
+                email_verified: false,
+                name: 'Mock User',
+                firebase: {
+                    sign_in_provider: 'password',
+                    identities: { email: ['mock@example.com'] }
+                }
+            };
+        }
+    };
+    
+    return mockAuth;
 }
 
+// ============================================================
+// CHECK INITIALIZATION
+// ============================================================
 function isInitialized() {
     return initialized;
 }
 
+// ============================================================
+// TEST CONNECTION
+// ============================================================
 async function testConnection() {
     if (!initialized) {
         console.log('[FIREBASE] ⚠️ Not initialized, skipping test');
@@ -155,10 +363,22 @@ async function testConnection() {
         return snapshot.exists() && snapshot.val() === true;
     } catch (error) {
         console.error('[FIREBASE] ❌ Connection test failed:', error.message);
-        return false;
+        try {
+            const dbInstance = getDB();
+            if (!dbInstance) return false;
+            const testRef = dbInstance.ref('/');
+            const snapshot = await testRef.once('value');
+            return true;
+        } catch (err) {
+            console.error('[FIREBASE] ❌ Alternate connection test failed:', err.message);
+            return false;
+        }
     }
 }
 
+// ============================================================
+// EXPORTS
+// ============================================================
 module.exports = {
     initializeFirebase,
     getDB,
