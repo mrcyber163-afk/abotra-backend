@@ -214,3 +214,14 @@ try {
 } catch (error) {
     console.error('[ROUTES] ❌ /api/trades error:', error.message);
 }
+
+// ============================================================
+// BOT ROUTES
+// ============================================================
+try {
+    const botRoutes = require('./routes/bot');
+    app.use('/api/bot', botRoutes);
+    console.log('[ROUTES] ✅ /api/bot loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/bot error:', error.message);
+}
