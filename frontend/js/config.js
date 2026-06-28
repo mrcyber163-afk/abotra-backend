@@ -1,10 +1,9 @@
-// ============================================================
-// CONFIG.JS - Backend Configuration
-// ============================================================
+const API_URL = process.env.API_URL || process.env.VITE_API_URL || 'https://abotra-backend-production.up.railway.app';
+
 const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
+    API_URL: API_URL,
+    WS_URL: API_URL.replace('https://', 'wss://'),
+    ENVIRONMENT: process.env.NODE_ENV || 'production',
     VERSION: '2.0.0',
     FIREBASE: {
         apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
@@ -17,10 +16,6 @@ const CONFIG = {
     }
 };
 
-// Make it available globally
 window.CONFIG = CONFIG;
-
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
-}
+if (typeof module !== 'undefined' && module.exports) { module.exports = CONFIG; }
+console.log('[CONFIG] ✅ API_URL:', CONFIG.API_URL);

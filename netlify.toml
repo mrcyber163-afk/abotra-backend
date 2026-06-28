@@ -1,63 +1,58 @@
 [build]
-command = "echo 'No build step required'"
-publish = "."
+  publish = "frontend"
+  functions = "netlify/functions"
 
 [build.environment]
-NODE_VERSION = "18"
+  NODE_VERSION = "18"
 
-# Redirects
-[[redirects]]
-from = "/"
-to = "/index.html"
-status = 200
+[context.production.environment]
+  API_URL = "https://abotra-backend-production.up.railway.app"
+  VITE_API_URL = "https://abotra-backend-production.up.railway.app"
 
 [[redirects]]
-from = "/admin/*"
-to = "/admin/:splat"
-status = 200
+  from = "/"
+  to = "/frontend/index.html"
+  status = 200
 
 [[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/:splat"
-status = 200
+  from = "/pages/*"
+  to = "/frontend/pages/:splat"
+  status = 200
 
-# 404 page
 [[redirects]]
-from = "/*"
-to = "/404.html"
-status = 404
+  from = "/assets/*"
+  to = "/frontend/assets/:splat"
+  status = 200
 
-# Functions
-[functions]
-directory = "functions"
-node_bundler = "esbuild"
+[[redirects]]
+  from = "/admin/*"
+  to = "/frontend/admin/:splat"
+  status = 200
 
-# Headers
-[[headers]]
-for = "/*"
-[headers.values]
-X-Content-Type-Options = "nosniff"
-X-Frame-Options = "DENY"
-X-XSS-Protection = "1; mode=block"
-Referrer-Policy = "strict-origin-when-cross-origin"
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
-[[headers]]
-for = "/manifest.json"
-[headers.values]
-Content-Type = "application/json"
+[[redirects]]
+  from = "/*"
+  to = "/frontend/pages/404.html"
+  status = 404
 
 [[headers]]
-for = "/sw.js"
-[headers.values]
-Content-Type = "application/javascript"
-Service-Worker-Allowed = "/"
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
 
 [[headers]]
-for = "/assets/images/*"
-[headers.values]
-Cache-Control = "public, max-age=31536000, immutable"
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/json"
 
 [[headers]]
-for = "/*.html"
-[headers.values]
-Cache-Control = "public, max-age=3600"
+  for = "/sw.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+    Service-Worker-Allowed = "/"
