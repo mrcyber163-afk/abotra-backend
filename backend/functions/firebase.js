@@ -1,86 +1,55 @@
 // ============================================================
-// FIREBASE ADMIN SDK - Direct Initialization
+// FIREBASE ADMIN SDK - Simplified for Railway
 // ============================================================
-// Location: backend/functions/firebase.js
-// ============================================================
-
 const admin = require('firebase-admin');
 
 let db = null;
 let auth = null;
-let firebaseApp = null;
 let initialized = false;
 
 function initializeFirebase() {
     if (admin.apps.length > 0) {
-        firebaseApp = admin.apps[0];
         db = admin.database();
         auth = admin.auth();
         initialized = true;
-        console.log('[FIREBASE] ✅ Already initialized');
-        return { db, auth, app: firebaseApp };
+        return { db, auth };
     }
     
     try {
-        const projectId = process.env.FIREBASE_PROJECT_ID;
         const databaseURL = process.env.FIREBASE_DATABASE_URL;
         
-        if (!projectId) {
-            throw new Error('FIREBASE_PROJECT_ID is missing');
-        }
         if (!databaseURL) {
             throw new Error('FIREBASE_DATABASE_URL is missing');
         }
         
-        console.log(`[FIREBASE] 🔑 Initializing...`);
-        console.log(`[FIREBASE] 📁 Project: ${projectId}`);
-        console.log(`[FIREBASE] 🌐 Database: ${databaseURL}`);
+        console.log(`[FIREBASE] 🔑 Initializing with databaseURL only...`);
         
-        firebaseApp = admin.initializeApp({
-            databaseURL: databaseURL,
-            projectId: projectId
+        admin.initializeApp({
+            databaseURL: databaseURL
         });
         
         db = admin.database();
         auth = admin.auth();
         initialized = true;
         
-        console.log('[FIREBASE] ✅ Admin SDK initialized successfully');
-        return { db, auth, app: firebaseApp };
+        console.log('[FIREBASE] ✅ Admin SDK initialized');
+        return { db, auth };
         
     } catch (error) {
-        console.error('[FIREBASE] ❌ Initialization failed:', error.message);
+        console.error('[FIREBASE] ❌ Failed:', error.message);
         initialized = false;
         throw error;
     }
 }
 
 function getDB() {
-    if (!db) {
-        const init = initializeFirebase();
-        db = init.db;
-    }
+    if (!db) initializeFirebase();
     return db;
 }
 
 function getAuth() {
-    if (!auth) {
-        const init = initializeFirebase();
-        auth = init.auth;
-    }
+    if (!auth) initializeFirebase();
     return auth;
-}
-
-function getApp() {
-    if (!firebaseApp) {
-        const init = initializeFirebase();
-        firebaseApp = init.app;
-    }
-    return firebaseApp;
-}
-
-function isInitialized() {
-    return initialized;
 }
 
 async function testConnection() {
@@ -88,10 +57,8 @@ async function testConnection() {
         const dbInstance = getDB();
         const testRef = dbInstance.ref('.info/connected');
         const snapshot = await testRef.once('value');
-        console.log('[FIREBASE] ✅ Connection test passed:', snapshot.val());
         return true;
     } catch (error) {
-        console.error('[FIREBASE] ❌ Connection test failed:', error.message);
         return false;
     }
 }
@@ -100,8 +67,6 @@ module.exports = {
     initializeFirebase,
     getDB,
     getAuth,
-    getApp,
-    isInitialized,
     testConnection,
     admin
 };
