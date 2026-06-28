@@ -148,3 +148,25 @@ app.listen(PORT, () => {
     console.log(`[SERVER] 🔗 Health check: http://localhost:${PORT}/api/health`);
     console.log(`[SERVER] 🔥 Firebase mode: ${firebaseInitialized ? 'REST API ✅' : 'DISABLED ❌'}`);
 });
+
+// ============================================================
+// NOTIFICATION ROUTES
+// ============================================================
+try {
+    const notificationRoutes = require('./routes/send-push');
+    app.use('/api/notifications', notificationRoutes);
+    console.log('[ROUTES] ✅ /api/notifications loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/notifications error:', error.message);
+}
+
+// ============================================================
+// PASSWORD CHANGE ROUTES
+// ============================================================
+try {
+    const passwordRoutes = require('./routes/change-password');
+    app.use('/api/admin', passwordRoutes);
+    console.log('[ROUTES] ✅ /api/admin/change-password loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/admin/change-password error:', error.message);
+}
