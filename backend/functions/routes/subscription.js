@@ -4,12 +4,12 @@
 
 const express = require('express');
 const router = express.Router();
-const { restGet, restPut, restPost, restPatch } = require('../firebase');
+const { restGet, restPut, restPost, restPatch, restDelete } = require('../firebase');
 const { authGetUser } = require('../firebase');
 
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer '')) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, error: 'Missing authorization token' });
     }
     const token = authHeader.split('Bearer ')[1];
@@ -100,32 +100,6 @@ router.get('/plans', async (req, res) => {
         res.json({ success: true, plans });
     } catch (error) {
         console.error('[SUBSCRIPTION] Plans error:', error);
-        res.status(400).json({ success: false, error: error.message });
-    }
-});
-
-router.get('/stats', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.uid;
-        const adminList = await restGet('admin');
-        const isAdmin = adminList && (adminList[userId] === true || (adminList.includes && adminList.includes(userId)));
-        if (!isAdmin) return res.status(403).json({ success: false, error: 'Admin only' });
-
-        const stats = { totalSubscriptions: 0, activeSubscriptions: 0, revenue: 0, plans: {} };
-        const data = await restGet('subscriptions');
-        if (data) {
-            Object.values(data).forEach(sub => {
-                stats.totalSubscriptions++;
-                if (sub.expiry > Date.now()) stats.activeSubscriptions++;
-                stats.revenue += sub.price || 0;
-                if (!stats.plans[sub.plan]) stats.plans[sub.plan] = { count: 0, revenue: 0 };
-                stats.plans[sub.plan].count++;
-                stats.plans[sub.plan].revenue += sub.price || 0;
-            });
-        }
-        res.json({ success: true, stats });
-    } catch (error) {
-        console.error('[SUBSCRIPTION] Stats error:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 });

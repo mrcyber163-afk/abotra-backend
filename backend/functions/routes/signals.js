@@ -9,7 +9,7 @@ const { authGetUser } = require('../firebase');
 
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer '')) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, error: 'Missing authorization token' });
     }
     const token = authHeader.split('Bearer ')[1];
