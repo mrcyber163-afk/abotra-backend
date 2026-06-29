@@ -1,3 +1,7 @@
+// ============================================================
+// LEADERBOARD ROUTES - REST API Version
+// ============================================================
+
 const express = require('express');
 const router = express.Router();
 const { restGet } = require('../firebase');

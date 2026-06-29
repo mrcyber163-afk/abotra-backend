@@ -1,10 +1,13 @@
-// functions/routes/kyc.js
+// ============================================================
+// KYC ROUTES - REST API Version (No Admin SDK)
+// ============================================================
+
 const express = require('express');
 const router = express.Router();
-const { getDB, admin } = require('../firebase');
+const { restGet, restPut, restPost, restPatch, restDelete } = require('../firebase');
 
 // ============================================================
-// MIDDLEWARE: Verify Firebase Token
+// MIDDLEWARE: Verify Firebase Token (REST API Version)
 // ============================================================
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -12,11 +15,22 @@ async function verifyToken(req, res, next) {
         return res.status(401).json({ success: false, error: 'Missing authorization token' });
     }
     const token = authHeader.split('Bearer ')[1];
+    
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        req.user = decodedToken;
+        const { authGetUser } = require('../firebase');
+        const userInfo = await authGetUser(token);
+        
+        if (!userInfo || !userInfo.users || userInfo.users.length === 0) {
+            return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+        }
+        
+        req.user = {
+            uid: userInfo.users[0].localId,
+            email: userInfo.users[0].email
+        };
         next();
     } catch (error) {
+        console.error('[KYC] Token verification error:', error);
         return res.status(401).json({ success: false, error: 'Invalid or expired token' });
     }
 }
@@ -26,12 +40,11 @@ async function verifyToken(req, res, next) {
 // ============================================================
 router.get('/status', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
-
-        const kycSnap = await db.ref(`kyc/${userId}`).once('value');
         
-        if (!kycSnap.exists()) {
+        const kycData = await restGet(`kyc/${userId}`);
+        
+        if (!kycData) {
             return res.json({
                 success: true,
                 status: 'not_submitted',
@@ -39,7 +52,6 @@ router.get('/status', verifyToken, async (req, res) => {
             });
         }
 
-        const kycData = kycSnap.val();
         res.json({
             success: true,
             status: kycData.status || 'pending',
@@ -59,7 +71,6 @@ router.get('/status', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/submit', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
         const { 
             fullName, country, documentNumber, documentType, 
@@ -71,13 +82,12 @@ router.post('/submit', verifyToken, async (req, res) => {
         }
 
         // Check if user already has pending/verified KYC
-        const existingKycSnap = await db.ref(`kyc/${userId}`).once('value');
-        if (existingKycSnap.exists()) {
-            const existing = existingKycSnap.val();
-            if (existing.status === 'verified' || existing.status === 'approved') {
+        const existingKyc = await restGet(`kyc/${userId}`);
+        if (existingKyc) {
+            if (existingKyc.status === 'verified' || existingKyc.status === 'approved') {
                 return res.status(400).json({ success: false, error: 'KYC already verified' });
             }
-            if (existing.status === 'pending') {
+            if (existingKyc.status === 'pending') {
                 return res.status(400).json({ success: false, error: 'KYC already pending review' });
             }
         }
@@ -99,11 +109,9 @@ router.post('/submit', verifyToken, async (req, res) => {
             selfie: selfie || ''
         };
 
-        // Save KYC data
-        await db.ref(`kyc/${userId}`).set(kycData);
+        await restPut(`kyc/${userId}`, kycData);
 
-        // Add to pending KYC queue for admin
-        await db.ref(`pendingKyc/${userId}`).set({
+        await restPut(`pendingKyc/${userId}`, {
             uid: userId,
             email: req.user.email,
             fullName: fullName,
@@ -113,8 +121,7 @@ router.post('/submit', verifyToken, async (req, res) => {
             country: country
         });
 
-        // Update user profile
-        await db.ref(`users/${userId}`).update({
+        await restPatch(`users/${userId}`, {
             kycStatus: 'pending',
             kycLevel: level || 'basic',
             kycSubmittedAt: Date.now(),
@@ -122,20 +129,15 @@ router.post('/submit', verifyToken, async (req, res) => {
             country: country
         });
 
-        // Add notification for user
-        const notifRef = db.ref(`notifications/${userId}`).push();
-        await notifRef.set({
-            id: notifRef.key,
+        await restPost(`notifications/${userId}`, {
             title: '📋 KYC Submitted',
             message: `Your ${level || 'basic'} KYC verification has been submitted. Admin will review within 24-48 hours.`,
             type: 'info',
             read: false,
-            timestamp: Date.now(),
-            date: new Date().toISOString()
+            timestamp: Date.now()
         });
 
-        // Add admin notification
-        await db.ref('adminNotifications').push({
+        await restPost(`adminNotifications`, {
             type: 'kyc_pending',
             userId: userId,
             userEmail: req.user.email,
@@ -162,24 +164,23 @@ router.post('/submit', verifyToken, async (req, res) => {
 // ============================================================
 router.get('/admin/pending', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
 
-        // Check if user is admin
-        const adminSnap = await db.ref('admin').once('value');
-        const adminList = adminSnap.val() || [];
-        if (!adminList.includes(userId)) {
+        const adminList = await restGet('admin');
+        const isAdmin = adminList && (adminList[userId] === true || adminList.includes && adminList.includes(userId));
+        
+        if (!isAdmin) {
             return res.status(403).json({ success: false, error: 'Admin access required' });
         }
 
+        const pendingData = await restGet('pendingKyc');
         const pending = [];
-        const snapshot = await db.ref('pendingKyc').once('value');
         
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
+        if (pendingData) {
+            Object.keys(pendingData).forEach(key => {
                 pending.push({
-                    id: child.key,
-                    ...child.val()
+                    id: key,
+                    ...pendingData[key]
                 });
             });
         }
@@ -202,7 +203,6 @@ router.get('/admin/pending', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/admin/approve', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
         const { targetUserId } = req.body;
 
@@ -210,49 +210,39 @@ router.post('/admin/approve', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Target user ID required' });
         }
 
-        // Check if user is admin
-        const adminSnap = await db.ref('admin').once('value');
-        const adminList = adminSnap.val() || [];
-        if (!adminList.includes(userId)) {
+        const adminList = await restGet('admin');
+        const isAdmin = adminList && (adminList[userId] === true || adminList.includes && adminList.includes(userId));
+        
+        if (!isAdmin) {
             return res.status(403).json({ success: false, error: 'Admin access required' });
         }
 
-        // Get KYC data
-        const kycSnap = await db.ref(`kyc/${targetUserId}`).once('value');
-        if (!kycSnap.exists()) {
+        const kycData = await restGet(`kyc/${targetUserId}`);
+        if (!kycData) {
             return res.status(404).json({ success: false, error: 'KYC not found' });
         }
 
-        const kycData = kycSnap.val();
-        
-        // Update KYC status
-        await db.ref(`kyc/${targetUserId}`).update({
+        await restPatch(`kyc/${targetUserId}`, {
             status: 'verified',
             reviewedAt: Date.now(),
             reviewedBy: userId,
             reviewedByEmail: req.user.email
         });
 
-        // Update user profile
-        await db.ref(`users/${targetUserId}`).update({
+        await restPatch(`users/${targetUserId}`, {
             kycStatus: 'verified',
             isVerified: true,
             kycVerifiedAt: Date.now()
         });
 
-        // Remove from pending
-        await db.ref(`pendingKyc/${targetUserId}`).remove();
+        await restDelete(`pendingKyc/${targetUserId}`);
 
-        // Add notification for user
-        const notifRef = db.ref(`notifications/${targetUserId}`).push();
-        await notifRef.set({
-            id: notifRef.key,
+        await restPost(`notifications/${targetUserId}`, {
             title: '✅ KYC Approved!',
-            message: `Your KYC verification has been approved! You now have full access to all features.`,
+            message: 'Your KYC verification has been approved! You now have full access to all features.',
             type: 'success',
             read: false,
-            timestamp: Date.now(),
-            date: new Date().toISOString()
+            timestamp: Date.now()
         });
 
         res.json({
@@ -271,7 +261,6 @@ router.post('/admin/approve', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/admin/reject', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
         const { targetUserId, reason } = req.body;
 
@@ -279,21 +268,19 @@ router.post('/admin/reject', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Target user ID required' });
         }
 
-        // Check if user is admin
-        const adminSnap = await db.ref('admin').once('value');
-        const adminList = adminSnap.val() || [];
-        if (!adminList.includes(userId)) {
+        const adminList = await restGet('admin');
+        const isAdmin = adminList && (adminList[userId] === true || adminList.includes && adminList.includes(userId));
+        
+        if (!isAdmin) {
             return res.status(403).json({ success: false, error: 'Admin access required' });
         }
 
-        // Get KYC data
-        const kycSnap = await db.ref(`kyc/${targetUserId}`).once('value');
-        if (!kycSnap.exists()) {
+        const kycData = await restGet(`kyc/${targetUserId}`);
+        if (!kycData) {
             return res.status(404).json({ success: false, error: 'KYC not found' });
         }
 
-        // Update KYC status
-        await db.ref(`kyc/${targetUserId}`).update({
+        await restPatch(`kyc/${targetUserId}`, {
             status: 'rejected',
             rejectedReason: reason || 'No reason provided',
             reviewedAt: Date.now(),
@@ -301,25 +288,19 @@ router.post('/admin/reject', verifyToken, async (req, res) => {
             reviewedByEmail: req.user.email
         });
 
-        // Update user profile
-        await db.ref(`users/${targetUserId}`).update({
+        await restPatch(`users/${targetUserId}`, {
             kycStatus: 'rejected',
             isVerified: false
         });
 
-        // Remove from pending
-        await db.ref(`pendingKyc/${targetUserId}`).remove();
+        await restDelete(`pendingKyc/${targetUserId}`);
 
-        // Add notification for user
-        const notifRef = db.ref(`notifications/${targetUserId}`).push();
-        await notifRef.set({
-            id: notifRef.key,
+        await restPost(`notifications/${targetUserId}`, {
             title: '❌ KYC Rejected',
             message: `Your KYC verification was rejected. Reason: ${reason || 'No reason provided'}. Please resubmit with correct documents.`,
             type: 'error',
             read: false,
-            timestamp: Date.now(),
-            date: new Date().toISOString()
+            timestamp: Date.now()
         });
 
         res.json({
@@ -338,12 +319,11 @@ router.post('/admin/reject', verifyToken, async (req, res) => {
 // ============================================================
 router.get('/my-data', verifyToken, async (req, res) => {
     try {
-        const db = getDB();
         const userId = req.user.uid;
 
-        const kycSnap = await db.ref(`kyc/${userId}`).once('value');
+        const kycData = await restGet(`kyc/${userId}`);
         
-        if (!kycSnap.exists()) {
+        if (!kycData) {
             return res.json({
                 success: true,
                 data: null,
@@ -351,9 +331,6 @@ router.get('/my-data', verifyToken, async (req, res) => {
             });
         }
 
-        const kycData = kycSnap.val();
-        
-        // Remove sensitive image data before sending
         const sanitized = {
             fullName: kycData.fullName,
             country: kycData.country,
@@ -378,7 +355,4 @@ router.get('/my-data', verifyToken, async (req, res) => {
     }
 });
 
-// ============================================================
-// EXPORT
-// ============================================================
 module.exports = router;
