@@ -7,6 +7,8 @@
 [context.production.environment]
   API_URL = "https://abotra-backend-production.up.railway.app"
   VITE_API_URL = "https://abotra-backend-production.up.railway.app"
+  API_BASE_URL = "https://abotra-backend-production.up.railway.app"
+  NODE_ENV = "production"
 
 [[redirects]]
   from = "/"
