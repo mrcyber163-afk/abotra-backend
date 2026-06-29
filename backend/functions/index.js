@@ -302,3 +302,14 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`[SERVER] 🚀 Running on port ${PORT}`);
 });
+
+// ============================================================
+// TRADE ROUTES
+// ============================================================
+try {
+    const tradeRoutes = require('./routes/trade');
+    app.use('/api/trades', tradeRoutes);
+    console.log('[ROUTES] ✅ /api/trades loaded');
+} catch (error) {
+    console.error('[ROUTES] ❌ /api/trades error:', error.message);
+}
