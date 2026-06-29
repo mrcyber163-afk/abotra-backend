@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
 <script>
 const CONFIG = {
     API_URL: 'https://abotra-backend-production.up.railway.app',
@@ -247,15 +244,15 @@ body.light-theme .bottom-nav { background: rgba(255,255,255,0.96); border-top: 1
 
 <script type="module">
 // ============================================================
-// CONFIG - From global
+// CONFIG
 // ============================================================
 const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
 
 // ============================================================
-// FIREBASE
+// FIREBASE - Only for Auth
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, set, update, push, get, runTransaction, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -269,7 +266,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 const auth = getAuth(app);
 
 let currentUser = null;
@@ -277,15 +273,14 @@ let currentPrice = 0;
 let tradingBalance = 0;
 let userDailyLoss = 0;
 let positionsMap = new Map();
-let risk = {
-    dailyLossLimit: 500, maxOpenTrades: 10, maxLeverage: 100,
-    minTradeAmount: 3, maxTradeAmount: 10000,
-    tradingEnabled: true, allowBuy: true, allowSell: true, maintenanceMode: false
-};
 let selectedCoin = { symbol: 'BTC', name: 'Bitcoin', price: 0, image: '' };
 
+const risk = {
+    dailyLossLimit: 500, maxOpenTrades: 10, maxLeverage: 100,
+    minTradeAmount: 3, maxTradeAmount: 10000
+};
+
 function formatUsd(v) { return `$${parseFloat(v || 0).toFixed(2)}`; }
-function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
 function showNotification(msg, type) {
     const existing = document.querySelector('.notification-popup');
@@ -299,57 +294,29 @@ function showNotification(msg, type) {
 }
 
 // ============================================================
-// ✅ FIXED: API HELPER - Auto refresh token and handle errors
+// API HELPER
 // ============================================================
 async function getFreshToken() {
     return new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             unsubscribe();
-            if (!user) { 
-                reject(new Error('No user logged in')); 
-                return; 
-            }
-            try { 
-                // ✅ Force refresh token - this gets a NEW token
-                const token = await user.getIdToken(true); 
-                resolve(token); 
-            } catch (error) { 
-                reject(error); 
-            }
+            if (!user) { reject(new Error('No user logged in')); return; }
+            try { const token = await user.getIdToken(true); resolve(token); } 
+            catch (error) { reject(error); }
         });
     });
 }
 
-async function apiRequest(endpoint, method, body = null, retryCount = 0) {
+async function apiRequest(endpoint, method, body = null) {
     try {
-        // ✅ Always get fresh token
         const token = await getFreshToken();
-        
         const options = { 
             method, 
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${token}` 
-            } 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } 
         };
         if (body) options.body = JSON.stringify(body);
-        
         const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        const data = await response.json();
-        
-        // ✅ If token expired or invalid, retry once with new token
-        if ((data.error && (data.error.includes('token') || data.error.includes('expired') || data.error.includes('invalid') || data.error.includes('auth'))) && retryCount < 1) {
-            console.log('[API] Token expired, refreshing and retrying...');
-            // Force logout and re-login if token is invalid
-            if (data.error.includes('invalid') || data.error.includes('auth')) {
-                await signOut(auth);
-                window.location.href = 'login.html';
-                return null;
-            }
-            return await apiRequest(endpoint, method, body, retryCount + 1);
-        }
-        
-        return data;
+        return await response.json();
     } catch (error) { 
         console.error('[API] Error:', error); 
         return { success: false, error: error.message || 'Network error' }; 
@@ -362,16 +329,13 @@ async function apiRequest(endpoint, method, body = null, retryCount = 0) {
 async function openTradeViaAPI(type, margin, leverage, symbol, tp, sl) {
     try {
         const data = await apiRequest('trades/open', 'POST', {
-            type, 
-            margin, 
-            leverage, 
-            symbol: symbol || 'BTC/USDT',
-            takeProfit: tp || null, 
-            stopLoss: sl || null
+            type, margin, leverage, symbol: symbol || 'BTC/USDT',
+            takeProfit: tp || null, stopLoss: sl || null
         });
         if (data && data.success) { 
             showNotification(`✅ ${type} trade opened!`, 'success'); 
             await loadTradingData();
+            await fetchPrice();
         } else { 
             showNotification(`❌ ${data?.error || 'Trade failed'}`, 'error'); 
         }
@@ -388,6 +352,7 @@ async function closeTradeViaAPI(tradeId) {
         if (data && data.success) { 
             showNotification(`✅ Trade closed! PnL: $${data.pnl?.toFixed(2) || '0'}`, 'success'); 
             await loadTradingData();
+            await fetchPrice();
         } else { 
             showNotification(`❌ ${data?.error || 'Close failed'}`, 'error'); 
         }
@@ -421,33 +386,44 @@ async function moveTradingBalance() {
 }
 
 // ============================================================
-// ✅ FIXED: LOAD TRADING DATA - Including history
+// LOAD TRADING DATA
 // ============================================================
 async function loadTradingData() {
     if (!currentUser) return;
     
     try {
+        console.log('[TRADE] Loading trading data...');
+        
         // 1. Load user profile
         const userData = await apiRequest('user/profile', 'GET');
+        console.log('[TRADE] User data:', userData);
+        
         if (userData && userData.success && userData.user) {
             tradingBalance = userData.user.tradingBalance || 0;
             userDailyLoss = userData.user.dailyLoss || 0;
+            console.log('[TRADE] Trading balance:', tradingBalance);
             updateUI();
         }
         
         // 2. Load open positions
         const positionsData = await apiRequest('trades/open', 'GET');
-        if (positionsData && positionsData.success && positionsData.trades) {
+        console.log('[TRADE] Positions:', positionsData);
+        
+        if (positionsData && positionsData.success) {
             positionsMap = new Map();
-            positionsData.trades.forEach(trade => { 
-                positionsMap.set(trade.id, trade); 
-            });
+            if (positionsData.trades) {
+                positionsData.trades.forEach(trade => { 
+                    positionsMap.set(trade.id, trade); 
+                });
+            }
             renderPositions();
             updateUI();
         }
         
-        // 3. ✅ Load stats (includes total, winning, losing, etc)
+        // 3. Load stats
         const statsData = await apiRequest('trades/stats', 'GET');
+        console.log('[TRADE] Stats:', statsData);
+        
         if (statsData && statsData.success && statsData.stats) {
             const s = statsData.stats;
             document.getElementById('statTotalTrades').innerText = s.total || 0;
@@ -459,15 +435,8 @@ async function loadTradingData() {
             document.getElementById('statNetPnL').innerText = formatUsd(s.netPnl || 0);
         }
         
-        // 4. ✅ Load trade history separately (for trade-history.html page)
-        // This is stored in localStorage for the trade-history page to use
-        const historyData = await apiRequest('trades/history', 'GET');
-        if (historyData && historyData.success && historyData.trades) {
-            localStorage.setItem('abotra_trade_history', JSON.stringify(historyData.trades));
-        }
-        
     } catch (error) {
-        console.error('Load trading data error:', error);
+        console.error('[TRADE] Load error:', error);
     }
 }
 
@@ -509,7 +478,6 @@ function renderPositions() {
     for (let [id, trade] of positionsMap) {
         let pnl = 0;
         const positionSize = (trade.margin * trade.leverage) / trade.entryPrice;
-        
         if (trade.type === 'BUY') {
             pnl = (currentPrice - trade.entryPrice) * positionSize;
         } else {
@@ -547,7 +515,6 @@ function renderPositions() {
     }
     
     container.innerHTML = html;
-    
     document.querySelectorAll('.position-close-btn').forEach(btn => {
         btn.onclick = (e) => { 
             const tid = btn.getAttribute('data-id'); 
@@ -578,26 +545,6 @@ async function fetchPrice() {
 // COIN SELECTION
 // ============================================================
 function loadSelectedCoin() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const symbolParam = urlParams.get('symbol');
-    if (symbolParam) {
-        const savedCoin = localStorage.getItem('selectedCoin');
-        if (savedCoin) { 
-            try { 
-                const coinData = JSON.parse(savedCoin); 
-                if (coinData.symbol === symbolParam) { 
-                    selectedCoin = coinData; 
-                    updateCoinDisplay(coinData); 
-                    updateChartSymbol(coinData.symbol); 
-                    return; 
-                } 
-            } catch(e) {} 
-        }
-        selectedCoin = { symbol: symbolParam, name: symbolParam, price: 0, image: '' };
-        updateCoinDisplay(selectedCoin); 
-        updateChartSymbol(symbolParam); 
-        return;
-    }
     const savedCoin = localStorage.getItem('selectedCoin');
     if (savedCoin) { 
         try { 
@@ -613,14 +560,9 @@ function loadSelectedCoin() {
 }
 
 function updateCoinDisplay(coin) {
-    const symbolDisplay = document.getElementById('selectedCoinSymbol');
-    const nameDisplay = document.getElementById('selectedCoinName');
-    const iconDisplay = document.getElementById('selectedCoinIcon');
-    if (symbolDisplay) symbolDisplay.textContent = coin.symbol || 'BTC';
-    if (nameDisplay) nameDisplay.textContent = coin.name || 'Bitcoin';
-    if (iconDisplay) { 
-        iconDisplay.innerHTML = `<span style="font-size:16px;font-weight:700;">${coin.symbol?.substring(0, 2) || '₿'}</span>`; 
-    }
+    document.getElementById('selectedCoinSymbol').textContent = coin.symbol || 'BTC';
+    document.getElementById('selectedCoinName').textContent = coin.name || 'Bitcoin';
+    document.getElementById('selectedCoinIcon').innerHTML = `<span style="font-size:16px;font-weight:700;">${coin.symbol?.substring(0, 2) || '₿'}</span>`;
 }
 
 function updateChartSymbol(symbol) {
@@ -695,15 +637,6 @@ function showCustomModal() {
     document.body.appendChild(overlay);
     setTimeout(() => overlay.classList.add('active'), 10);
     
-    const amountInput = overlay.querySelector('#customAmount');
-    amountInput.addEventListener('input', function() {
-        const val = parseFloat(this.value) || 0;
-        const fee = val * 0.01; const total = val + fee;
-        overlay.querySelector('#previewMargin').textContent = `$${val.toFixed(2)}`;
-        overlay.querySelector('#previewFee').textContent = `$${fee.toFixed(2)}`;
-        overlay.querySelector('#previewTotal').textContent = `$${total.toFixed(2)}`;
-    });
-    
     overlay.querySelector('#modalConfirm').onclick = () => {
         let amt = parseFloat(overlay.querySelector('#customAmount').value);
         if (!isNaN(amt) && amt >= risk.minTradeAmount && amt <= risk.maxTradeAmount) currentMargin = amt;
@@ -742,9 +675,10 @@ document.getElementById('leverageBtn')?.addEventListener('click', (e) => {
 
 // Add & Move
 document.getElementById('addUsdtBtn')?.addEventListener('click', async () => {
-    const snap = await get(ref(db, `users/${currentUser.uid}`));
-    const mainBal = snap.val()?.balance || 0;
+    const userData = await apiRequest('user/profile', 'GET');
+    const mainBal = userData?.user?.balance || 0;
     if (mainBal <= 0) return showNotification('No main balance', 'error');
+    
     const ov = document.createElement('div');
     ov.className = 'modal-overlay';
     ov.innerHTML = `<div class="modal-card"><h3><i class="fas fa-plus-circle"></i> Add USDT</h3><p>Main Balance: <strong style="color:#C27A0E;">$${mainBal.toFixed(2)}</strong></p><input id="addAmount" type="number" min="1" max="${mainBal}" value="10" step="1"><div class="modal-buttons"><button class="modal-btn cancel" id="addCancel">Cancel</button><button class="modal-btn confirm" id="addConfirm">Add</button></div></div>`;
@@ -766,6 +700,7 @@ document.getElementById('moveUsdtBtn')?.addEventListener('click', async () => {
     }
     const bal = tradingBalance; 
     if (bal <= 0) return;
+    
     const ov = document.createElement('div');
     ov.className = 'modal-overlay';
     ov.innerHTML = `<div class="modal-card"><h3><i class="fas fa-exchange-alt"></i> Move to Main</h3><p>Move <strong style="color:#C27A0E;">$${bal.toFixed(2)}</strong> to main balance?</p><div class="modal-buttons"><button class="modal-btn cancel" id="moveCancel">Cancel</button><button class="modal-btn confirm" id="moveConfirm">Confirm</button></div></div>`;
@@ -818,38 +753,6 @@ document.getElementById('globalIncreaseBtn')?.addEventListener('click', () => {
 });
 
 // ============================================================
-// LISTENERS
-// ============================================================
-function setupListeners() {
-    if (window.tradesUnsubscribe) { 
-        try { off(window.tradesUnsubscribe); } catch(e) {} 
-    }
-    window.tradesUnsubscribe = onValue(ref(db, `trades/${currentUser.uid}`), async (snap) => {
-        const newMap = new Map();
-        if (snap.exists()) { 
-            snap.forEach(ch => { 
-                if (ch.val().status === 'open') newMap.set(ch.key, ch.val()); 
-            }); 
-        }
-        positionsMap = newMap;
-        renderPositions();
-        updateUI();
-    });
-    
-    if (window.balanceUnsub) { 
-        try { off(window.balanceUnsub); } catch(e) {} 
-    }
-    window.balanceUnsub = onValue(ref(db, `users/${currentUser.uid}`), async (snap) => {
-        if (snap.exists()) { 
-            const d = snap.val(); 
-            tradingBalance = d.tradingBalance || 0; 
-            userDailyLoss = d.dailyLoss || 0; 
-            updateUI(); 
-        }
-    });
-}
-
-// ============================================================
 // INIT
 // ============================================================
 onAuthStateChanged(auth, async (user) => {
@@ -858,17 +761,18 @@ onAuthStateChanged(auth, async (user) => {
         return; 
     }
     currentUser = user;
+    console.log('[TRADE] User logged in:', currentUser.uid);
+    
     loadSelectedCoin();
     await loadTradingData();
-    setupListeners();
-    fetchPrice();
+    await fetchPrice();
     
-    setInterval(() => {
-        fetchPrice();
+    setInterval(async () => {
+        await fetchPrice();
     }, 5000);
     
-    setInterval(() => {
-        loadTradingData();
+    setInterval(async () => {
+        await loadTradingData();
     }, 30000);
     
     initTheme();
