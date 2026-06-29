@@ -7,6 +7,9 @@ const router = express.Router();
 const { restGet, restPut, restPost, restPatch } = require('../firebase');
 const { authGetUser } = require('../firebase');
 
+// ============================================================
+// MIDDLEWARE: Verify Token
+// ============================================================
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,32 +29,29 @@ async function verifyToken(req, res, next) {
 }
 
 // ============================================================
-// GET TRADE HISTORY
+// 1. ✅ GET OPEN TRADES
 // ============================================================
-router.get('/history', verifyToken, async (req, res) => {
+router.get('/open', verifyToken, async (req, res) => {
     try {
         const userId = req.user.uid;
-        const { limit = 100 } = req.query;
         const trades = [];
-
         const data = await restGet(`trades/${userId}`);
         if (data) {
             Object.keys(data).forEach(key => {
-                trades.push({ id: key, ...data[key] });
+                if (data[key].status === 'open') {
+                    trades.push({ id: key, ...data[key] });
+                }
             });
         }
-
-        trades.sort((a, b) => (b.openTime || b.createdAt || 0) - (a.openTime || a.createdAt || 0));
-        res.json({ success: true, trades: trades.slice(0, parseInt(limit)) });
-
+        res.json({ success: true, trades });
     } catch (error) {
-        console.error('[TRADE] History error:', error);
+        console.error('[TRADE] Get open error:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// OPEN TRADE
+// 2. ✅ OPEN TRADE (BUY/SELL)
 // ============================================================
 router.post('/open', verifyToken, async (req, res) => {
     try {
@@ -62,7 +62,6 @@ router.post('/open', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Missing required fields' });
         }
 
-        // Get price
         const symbolBinance = (symbol || 'BTC/USDT').replace('/USDT', '').toUpperCase() + 'USDT';
         const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolBinance}`);
         const priceData = await priceRes.json();
@@ -71,7 +70,6 @@ router.post('/open', verifyToken, async (req, res) => {
         }
         const currentPrice = parseFloat(priceData.price);
 
-        // Get user data
         const userData = await restGet(`users/${userId}`);
         if (!userData) {
             return res.status(404).json({ success: false, error: 'User not found' });
@@ -82,7 +80,7 @@ router.post('/open', verifyToken, async (req, res) => {
         const totalCost = margin + openFee;
 
         if (totalCost > tradingBalance) {
-            return res.status(400).json({ success: false, error: `Insufficient balance` });
+            return res.status(400).json({ success: false, error: `Insufficient balance. Need $${totalCost.toFixed(2)}, have $${tradingBalance.toFixed(2)}` });
         }
 
         const tradeId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 6);
@@ -107,13 +105,12 @@ router.post('/open', verifyToken, async (req, res) => {
         await restPut(`trades/${userId}/${tradeId}`, tradeData);
         await restPatch(`users/${userId}`, { tradingBalance: tradingBalance - totalCost });
 
-        // Add to transactions feed
         await restPost(`transactionsFeed`, {
             type: 'trade_open', uid: userId, symbol: symbol || 'BTC/USDT',
             amount: margin, fee: openFee, timestamp: Date.now()
         });
 
-        res.json({ success: true, message: 'Trade opened', trade: tradeData });
+        res.json({ success: true, message: 'Trade opened', trade: tradeData, newBalance: tradingBalance - totalCost });
 
     } catch (error) {
         console.error('[TRADE] Open error:', error);
@@ -122,7 +119,7 @@ router.post('/open', verifyToken, async (req, res) => {
 });
 
 // ============================================================
-// CLOSE TRADE
+// 3. ✅ CLOSE TRADE
 // ============================================================
 router.post('/:tradeId/close', verifyToken, async (req, res) => {
     try {
@@ -168,29 +165,7 @@ router.post('/:tradeId/close', verifyToken, async (req, res) => {
 });
 
 // ============================================================
-// GET OPEN TRADES
-// ============================================================
-router.get('/open', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.uid;
-        const trades = [];
-        const data = await restGet(`trades/${userId}`);
-        if (data) {
-            Object.keys(data).forEach(key => {
-                if (data[key].status === 'open') {
-                    trades.push({ id: key, ...data[key] });
-                }
-            });
-        }
-        res.json({ success: true, trades });
-    } catch (error) {
-        console.error('[TRADE] Get open error:', error);
-        res.status(400).json({ success: false, error: error.message });
-    }
-});
-
-// ============================================================
-// GET STATS
+// 4. ✅ GET STATS
 // ============================================================
 router.get('/stats', verifyToken, async (req, res) => {
     try {
@@ -226,12 +201,13 @@ router.get('/stats', verifyToken, async (req, res) => {
 });
 
 // ============================================================
-// ADD TRADING BALANCE
+// 5. ✅ ADD TRADING BALANCE
 // ============================================================
 router.post('/add', verifyToken, async (req, res) => {
     try {
         const userId = req.user.uid;
         const { amount } = req.body;
+
         if (!amount || amount <= 0) {
             return res.status(400).json({ success: false, error: 'Invalid amount' });
         }
@@ -243,15 +219,35 @@ router.post('/add', verifyToken, async (req, res) => {
 
         const mainBalance = userData.balance || 0;
         if (mainBalance < amount) {
-            return res.status(400).json({ success: false, error: 'Insufficient main balance' });
+            return res.status(400).json({ 
+                success: false, 
+                error: `Insufficient main balance. Need $${amount}, have $${mainBalance}` 
+            });
         }
 
+        const newMainBalance = mainBalance - amount;
+        const newTradingBalance = (userData.tradingBalance || 0) + amount;
+
         await restPatch(`users/${userId}`, {
-            balance: mainBalance - amount,
-            tradingBalance: (userData.tradingBalance || 0) + amount
+            balance: newMainBalance,
+            tradingBalance: newTradingBalance
         });
 
-        res.json({ success: true, amount, newTradingBalance: (userData.tradingBalance || 0) + amount });
+        await restPost(`transactionsFeed`, {
+            type: 'transfer_to_trading',
+            uid: userId,
+            amount: amount,
+            timestamp: Date.now()
+        });
+
+        res.json({
+            success: true,
+            message: `Added $${amount.toFixed(2)} to trading balance`,
+            amount: amount,
+            newTradingBalance: newTradingBalance,
+            newMainBalance: newMainBalance
+        });
+
     } catch (error) {
         console.error('[TRADE] Add error:', error);
         res.status(400).json({ success: false, error: error.message });
@@ -259,11 +255,12 @@ router.post('/add', verifyToken, async (req, res) => {
 });
 
 // ============================================================
-// MOVE TRADING BALANCE
+// 6. ✅ MOVE TRADING BALANCE
 // ============================================================
 router.post('/move', verifyToken, async (req, res) => {
     try {
         const userId = req.user.uid;
+
         const userData = await restGet(`users/${userId}`);
         if (!userData) {
             return res.status(404).json({ success: false, error: 'User not found' });
@@ -271,7 +268,10 @@ router.post('/move', verifyToken, async (req, res) => {
 
         const tradingBalance = userData.tradingBalance || 0;
         if (tradingBalance <= 0) {
-            return res.status(400).json({ success: false, error: 'No trading balance to move' });
+            return res.status(400).json({ 
+                success: false, 
+                error: 'No trading balance to move' 
+            });
         }
 
         // Check for open positions
@@ -283,17 +283,110 @@ router.post('/move', verifyToken, async (req, res) => {
             });
         }
         if (hasOpen) {
-            return res.status(400).json({ success: false, error: 'Close all positions first' });
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Cannot move balance while open positions exist. Close all positions first.' 
+            });
         }
 
+        const newMainBalance = (userData.balance || 0) + tradingBalance;
+
         await restPatch(`users/${userId}`, {
-            balance: (userData.balance || 0) + tradingBalance,
+            balance: newMainBalance,
             tradingBalance: 0
         });
 
-        res.json({ success: true, amount: tradingBalance });
+        await restPost(`transactionsFeed`, {
+            type: 'transfer_to_main',
+            uid: userId,
+            amount: tradingBalance,
+            timestamp: Date.now()
+        });
+
+        res.json({
+            success: true,
+            message: `Moved $${tradingBalance.toFixed(2)} to main balance`,
+            amount: tradingBalance,
+            newMainBalance: newMainBalance
+        });
+
     } catch (error) {
         console.error('[TRADE] Move error:', error);
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// 7. ✅ GET TRADE HISTORY
+// ============================================================
+router.get('/history', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        const { limit = 100 } = req.query;
+        const trades = [];
+
+        const data = await restGet(`trades/${userId}`);
+        if (data) {
+            Object.keys(data).forEach(key => {
+                trades.push({ id: key, ...data[key] });
+            });
+        }
+
+        trades.sort((a, b) => (b.openTime || b.createdAt || 0) - (a.openTime || a.createdAt || 0));
+        res.json({ success: true, trades: trades.slice(0, parseInt(limit)) });
+
+    } catch (error) {
+        console.error('[TRADE] History error:', error);
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// 8. ✅ CLOSE ALL TRADES
+// ============================================================
+router.post('/close-all', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        const tradesData = await restGet(`trades/${userId}`);
+        let closed = 0;
+
+        if (tradesData) {
+            for (const [key, trade] of Object.entries(tradesData)) {
+                if (trade.status === 'open') {
+                    const symbolBinance = trade.symbol.replace('/USDT', '').toUpperCase() + 'USDT';
+                    const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolBinance}`);
+                    const priceData = await priceRes.json();
+                    const currentPrice = parseFloat(priceData.price);
+
+                    let pnl = 0;
+                    const positionSize = (trade.margin * trade.leverage) / trade.entryPrice;
+                    if (trade.type === 'BUY') {
+                        pnl = (currentPrice - trade.entryPrice) * positionSize;
+                    } else {
+                        pnl = (trade.entryPrice - currentPrice) * positionSize;
+                    }
+
+                    const closeFee = Math.abs(pnl) * 0.005;
+                    const netPnl = pnl - closeFee;
+
+                    await restPatch(`trades/${userId}/${key}`, {
+                        status: 'closed', closePrice: currentPrice, closeTime: Date.now(),
+                        pnl: netPnl, closeFee: closeFee, isActive: false
+                    });
+
+                    const userData = await restGet(`users/${userId}`);
+                    const newBalance = (userData.tradingBalance || 0) + trade.margin + trade.openFee + netPnl;
+                    await restPatch(`users/${userId}`, { tradingBalance: newBalance });
+
+                    closed++;
+                }
+            }
+        }
+
+        res.json({ success: true, message: `Closed ${closed} positions`, closed });
+
+    } catch (error) {
+        console.error('[TRADE] Close all error:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 });
