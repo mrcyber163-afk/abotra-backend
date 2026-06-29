@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Deposit | ABOTRA-PROAI - Add Funds</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; min-height: 100vh; padding-bottom: 75px; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); color: #1e1e2f; }
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar, body.light-theme .wallet-card, body.light-theme .network-card, body.light-theme .input-box input, body.light-theme .input-box select, body.light-theme .input-box textarea { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); color: #1e1e2f; }
+body.light-theme .top-bar h2, body.light-theme .page-title, body.light-theme .wallet-title, body.light-theme .network-name { color: #800000; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .network-card.selected { background: rgba(128,0,0,0.1); border-color: #800000; }
+body.light-theme .buy-usdt-btn { background: rgba(128,0,0,0.1); border-color: #800000; color: #800000; }
+
+.skeleton-wallet-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 16px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-title {
+height: 18px;
+width: 150px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-select {
+height: 46px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 12px;
+margin-top: 12px;
+margin-bottom: 16px;
+}
+.skeleton-network-card {
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 14px;
+padding: 12px;
+height: 90px;
+animation: pulseOpacity 1.5s ease-in-out infinite;
+}
+.skeleton-input {
+height: 46px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-bottom: 16px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-submit-btn {
+width: 100%;
+height: 48px;
+background: linear-gradient(90deg, rgba(14,203,129,0.2) 25%, rgba(14,203,129,0.4) 50%, rgba(14,203,129,0.2) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-top: 8px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-note {
+height: 36px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 10px;
+margin-top: 12px;
+animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 1; }
+}
+@keyframes pulseOpacity {
+0%, 100% { opacity: 0.5; }
+50% { opacity: 0.8; }
+}
+
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 12px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+.main-content { position: relative; z-index: 2; max-width: 900px; margin: 70px auto 20px; padding: 0 12px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.tab-selector { display: flex; gap: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 4px; flex-wrap: wrap; }
+.tab-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 10px; background: transparent; color: #AAAAAA; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 80px; }
+.tab-btn.active { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
+.tab-btn .tab-icon { width: 20px; height: 20px; object-fit: contain; display: inline-block; }
+.deposit-container { max-width: 650px; margin: 0 auto; }
+.wallet-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 16px; position: relative; }
+.wallet-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.wallet-title .title-icon { width: 24px; height: 24px; object-fit: contain; }
+.input-box { width: 100%; margin-bottom: 16px; }
+.input-box input, .input-box select, .input-box textarea { width: 100%; height: 46px; border: none; outline: none; border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #FFFFFF; font-size: 11px; transition: 0.3s; }
+.input-box textarea { height: 70px; padding: 10px 14px; resize: vertical; }
+.input-box input:focus, .input-box select:focus, .input-box textarea:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+.input-box input:disabled { opacity: 0.6; cursor: not-allowed; }
+.networks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 16px; }
+.network-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; cursor: pointer; }
+.network-card:hover { background: rgba(255,215,0,0.08); transform: translateY(-2px); }
+.network-card.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
+.network-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+.network-logo { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; }
+.network-logo img { width: 35px; height: 35px; object-fit: contain; }
+.network-logo i { font-size: 20px; color: #FFD700; }
+.network-details { flex: 1; min-width: 0; }
+.network-name { color: #FFD700; font-weight: 700; font-size: 11px; margin-bottom: 4px; }
+.network-number { color: #AAAAAA; font-size: 10px; font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; word-break: break-all; }
+.network-number span { background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 5px; display: inline-block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+.network-number .copy-number-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 2px 6px; color: #FFD700; cursor: pointer; font-size: 9px; white-space: nowrap; }
+.network-account-name { color: #0ECB81; font-size: 10px; margin-top: 3px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.network-account-name span { background: rgba(14,203,129,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+.network-select-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,215,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.network-card.selected .network-select-radio { border-color: #FFD700; }
+.network-card.selected .network-select-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #FFD700; }
+.country-selector { margin-bottom: 16px; }
+.country-selector select { width: 100%; height: 46px; border: none; outline: none; border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.2); color: #FFFFFF; font-size: 11px; cursor: pointer; }
+.submit-btn { width: 100%; height: 48px; border: none; border-radius: 12px; background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
+.buy-usdt-btn { width: 100%; background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 14px; padding: 14px; margin-bottom: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; font-weight: 700; font-size: 13px; }
+.buy-usdt-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.3); }
+.buy-usdt-btn i { font-size: 16px; }
+
+.wallet-address-box {
+background: rgba(0,0,0,0.3);
+border-radius: 12px;
+padding: 12px 14px;
+margin: 12px 0;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+flex-wrap: wrap;
+}
+.wallet-address-box .address {
+color: #FFD700;
+font-family: monospace;
+font-size: 12px;
+word-break: break-all;
+flex: 1;
+}
+.wallet-address-box .copy-btn {
+background: rgba(255,215,0,0.2);
+border: none;
+border-radius: 6px;
+padding: 4px 10px;
+color: #FFD700;
+cursor: pointer;
+font-size: 10px;
+white-space: nowrap;
+}
+.binance-order-details {
+background: rgba(255,215,0,0.05);
+border-radius: 12px;
+padding: 12px;
+margin: 10px 0;
+border: 1px solid rgba(255,215,0,0.15);
+}
+.binance-order-details .row {
+display: flex;
+justify-content: space-between;
+padding: 4px 0;
+font-size: 11px;
+color: #AAAAAA;
+}
+.binance-order-details .row .label { color: #888; }
+.binance-order-details .row .value { color: #FFD700; font-weight: 600; }
+.binance-order-details .row .value .order-id { font-family: monospace; }
+
+.qr-placeholder {
+width: 120px;
+height: 120px;
+margin: 10px auto;
+background: rgba(255,255,255,0.05);
+border: 2px dashed rgba(255,215,0,0.3);
+border-radius: 16px;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #888;
+font-size: 10px;
+text-align: center;
+padding: 10px;
+}
+.qr-placeholder i {
+font-size: 30px;
+color: #FFD700;
+margin-bottom: 6px;
+display: block;
+}
+#binanceQrContainer img {
+width: 120px;
+height: 120px;
+border-radius: 12px;
+display: block;
+margin: 0 auto;
+}
+
+.kyc-status-badge {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 4px 12px;
+border-radius: 20px;
+font-size: 10px;
+font-weight: 600;
+}
+.kyc-status-badge.verified {
+background: rgba(14,203,129,0.2);
+color: #0ECB81;
+border: 1px solid rgba(14,203,129,0.3);
+}
+.kyc-status-badge.pending {
+background: rgba(255,215,0,0.2);
+color: #FFD700;
+border: 1px solid rgba(255,215,0,0.3);
+}
+.kyc-status-badge.rejected {
+background: rgba(255,77,77,0.2);
+color: #FF4D4D;
+border: 1px solid rgba(255,77,77,0.3);
+}
+.kyc-status-badge.not-submitted {
+background: rgba(255,255,255,0.05);
+color: #888;
+border: 1px solid rgba(255,255,255,0.1);
+}
+.kyc-status-badge.approved {
+background: rgba(14,203,129,0.2);
+color: #0ECB81;
+border: 1px solid rgba(14,203,129,0.3);
+}
+
+.kyc-lock-overlay {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.85);
+backdrop-filter: blur(8px);
+border-radius: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 10;
+padding: 20px;
+text-align: center;
+}
+.kyc-lock-overlay i {
+font-size: 40px;
+color: #FFD700;
+margin-bottom: 12px;
+}
+.kyc-lock-overlay h4 {
+color: #FFD700;
+font-size: 16px;
+margin-bottom: 8px;
+}
+.kyc-lock-overlay p {
+color: #AAAAAA;
+font-size: 11px;
+max-width: 300px;
+}
+.kyc-lock-overlay .btn-kyc {
+margin-top: 16px;
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+padding: 10px 24px;
+border-radius: 30px;
+color: white;
+font-weight: 600;
+font-size: 12px;
+cursor: pointer;
+transition: 0.3s;
+}
+.kyc-lock-overlay .btn-kyc:hover {
+transform: scale(1.05);
+}
+
+.deposit-steps {
+display: flex;
+justify-content: space-between;
+margin: 16px 0;
+padding: 0 4px;
+position: relative;
+}
+.deposit-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 10%;
+right: 10%;
+height: 2px;
+background: rgba(255,255,255,0.1);
+z-index: 0;
+}
+.deposit-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
+flex: 1;
+position: relative;
+z-index: 1;
+cursor: default;
+}
+.deposit-step .step-circle {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 13px;
+font-weight: 700;
+background: rgba(255,255,255,0.05);
+border: 2px solid rgba(255,255,255,0.1);
+color: #888;
+transition: 0.3s;
+}
+.deposit-step.active .step-circle {
+background: #FFD700;
+border-color: #FFD700;
+color: #1a1a1a;
+box-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+.deposit-step.completed .step-circle {
+background: #0ECB81;
+border-color: #0ECB81;
+color: white;
+}
+.deposit-step .step-label {
+font-size: 8px;
+color: #888;
+text-align: center;
+max-width: 60px;
+}
+.deposit-step.active .step-label {
+color: #FFD700;
+}
+.deposit-step.completed .step-label {
+color: #0ECB81;
+}
+
+.binance-account-info {
+background: rgba(255,215,0,0.05);
+border-radius: 12px;
+padding: 12px;
+margin: 10px 0;
+border: 1px solid rgba(255,215,0,0.1);
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 8px;
+}
+.binance-account-info .user-details {
+display: flex;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+.binance-account-info .user-details .name {
+color: #FFFFFF;
+font-weight: 600;
+font-size: 12px;
+}
+.binance-account-info .user-details .email {
+color: #888;
+font-size: 10px;
+}
+
+.instructions-box {
+background: rgba(255,215,0,0.06);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 14px;
+padding: 14px 16px;
+margin-top: 12px;
+backdrop-filter: blur(10px);
+}
+.instructions-box h4 {
+color: #FFD700;
+font-size: 12px;
+font-weight: 700;
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.instructions-box .step {
+color: #CCCCCC;
+font-size: 10px;
+padding: 3px 0;
+display: flex;
+align-items: flex-start;
+gap: 8px;
+line-height: 1.5;
+}
+.instructions-box .step i {
+color: #0ECB81;
+font-size: 12px;
+margin-top: 2px;
+min-width: 16px;
+}
+.instructions-box .step .highlight {
+color: #FFD700;
+font-weight: 600;
+}
+.instructions-box .step .warning {
+color: #F6465D;
+font-weight: 600;
+}
+.instructions-box .step .number {
+color: #0ECB81;
+font-weight: 700;
+}
+
+body.light-theme .instructions-box {
+background: rgba(255,215,0,0.06);
+border-color: rgba(128,0,0,0.2);
+}
+body.light-theme .instructions-box .step {
+color: #444;
+}
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 16px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup { position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; z-index: 99999; backdrop-filter: blur(20px); box-shadow: 0 12px 28px rgba(0,0,0,0.3); animation: slideInRight 0.3s ease; border-left: 3px solid; font-size: 10px; }
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+@media(max-width: 700px) { .main-content { padding: 0 12px; margin-top: 65px; } .page-title { font-size: 18px; } .tab-btn span { display: none; } .tab-btn { padding: 8px; min-width: 60px; font-size: 9px; } .bottom-nav a span { font-size: 6px; } .bottom-nav a i { font-size: 14px; } .networks-grid { grid-template-columns: 1fr; } .buy-usdt-btn { padding: 12px; font-size: 12px; } .wallet-address-box { flex-direction: column; align-items: stretch; } .wallet-address-box .copy-btn { align-self: flex-end; } .tab-btn .tab-label { display: none; } .deposit-steps { flex-wrap: wrap; gap: 8px; } .deposit-steps::before { display: none; } .deposit-step { flex: 0 0 45%; } .binance-account-info { flex-direction: column; align-items: stretch; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>Deposit Funds</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="main-content">
+<div class="page-title"><i class="fas fa-plus-circle"></i> Deposit Funds</div>
+
+<div class="tab-selector">
+<button class="tab-btn active" data-tab="mobile"><i class="fas fa-mobile-alt"></i> <span class="tab-label">Mobile Money</span></button>
+<button class="tab-btn" data-tab="binance"><img src="../assets/icons/binance.png" alt="Binance" class="tab-icon" onerror="this.style.display='none';"> <span class="tab-label">Binance USDT</span></button>
+<button class="tab-btn" data-tab="p2p"><i class="fas fa-exchange-alt"></i> <span class="tab-label">User Transfer</span></button>
+</div>
+
+<!-- SKELETON SECTION -->
+<div id="skeletonContent">
+<div class="skeleton-wallet-card">
+<div class="skeleton-title"></div>
+<div class="skeleton-select"></div>
+<div class="auto-payment-note" style="background: transparent; padding: 0;"><div class="skeleton-note" style="height: 36px;"></div></div>
+</div>
+<div class="skeleton-wallet-card" style="margin-top: 16px;">
+<div class="skeleton-title"></div>
+<div class="skeleton-grid">
+<div class="skeleton-network-card"></div>
+<div class="skeleton-network-card"></div>
+</div>
+<div class="skeleton-input"></div>
+<div class="skeleton-input"></div>
+<div class="skeleton-input"></div>
+<div class="skeleton-input"></div>
+<div class="skeleton-submit-btn"></div>
+<div class="skeleton-note"></div>
+</div>
+</div>
+
+<!-- REAL CONTENT -->
+<div id="realContent" style="display: none;">
+
+<!-- ===== MOBILE MONEY TAB ===== -->
+<div id="mobileTab" class="deposit-container">
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-globe-africa"></i> Your Country</div>
+<div class="country-selector">
+<select id="countrySelect">
+<option value="">-- Select Country --</option>
+<option value="Tanzania">🇹🇿 Tanzania</option>
+<option value="Malawi">🇲🇼 Malawi</option>
+<option value="Zambia">🇿🇲 Zambia</option>
+<option value="Congo DRC">🇨🇩 Congo DRC</option>
+<option value="Burundi">🇧🇮 Burundi</option>
+<option value="Kenya">🇰🇪 Kenya</option>
+<option value="Botswana">🇧🇼 Botswana</option>
+<option value="Namibia">🇳🇦 Namibia</option>
+<option value="Mozambique">🇲🇿 Mozambique</option>
+<option value="Nigeria">🇳🇬 Nigeria</option>
+</select>
+</div>
+<div class="auto-payment-note"><i class="fas fa-info-circle"></i> Your country is auto-detected from your profile. Select a payment network below to see deposit details.</div>
+</div>
+
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-globe-africa"></i> Mobile Money Deposit</div>
+<div id="mobileNetworksContainer" class="networks-grid"><div style="text-align:center; padding:20px; color:#888;">Select your country first</div></div>
+
+<!-- Instructions Box -->
+<div id="instructionsContainer" style="display:none;">
+<div class="instructions-box" id="instructionsBox">
+<h4><i class="fas fa-info-circle"></i> <span id="instructionsTitle">Payment Instructions</span></h4>
+<div id="instructionsContent"></div>
+</div>
+</div>
+
+<div class="input-box"><input type="tel" id="senderPhone" placeholder="Your Phone Number (that sent payment)"></div>
+<div class="input-box"><input type="text" id="senderName" placeholder="Your Full Name (as registered)"></div>
+<div class="input-box"><input type="number" id="mobileAmount" placeholder="Amount (USDT) - Minimum $10" step="1" min="10"></div>
+<div class="input-box"><input type="text" id="mobileLocalAmount" placeholder="Local Currency Amount" readonly></div>
+<div class="input-box"><input type="text" id="transactionId" placeholder="Transaction ID / Reference Number (Optional)"></div>
+<button class="submit-btn" id="submitMobileBtn"><i class="fas fa-paper-plane"></i> Submit Mobile Deposit</button>
+<div class="auto-payment-note"><i class="fas fa-clock"></i> Send payment to the number shown above, then submit your details. Admin will verify and approve within 24 hours.</div>
+</div>
+</div>
+
+<!-- ===== BINANCE USDT TAB ===== -->
+<div id="binanceTab" class="deposit-container" style="display:none;">
+<div class="wallet-card" style="position:relative;">
+
+<!-- KYC Lock Overlay -->
+<div id="kycLockOverlay" class="kyc-lock-overlay" style="display:none;">
+<i class="fas fa-lock"></i>
+<h4>KYC Required</h4>
+<p>Complete your KYC verification to enable Binance USDT deposits.</p>
+<button class="btn-kyc" onclick="window.location.href='kyc.html'">Complete KYC</button>
+</div>
+
+<div class="wallet-title">
+<img src="../assets/icons/binance.png" alt="Binance" class="title-icon" onerror="this.style.display='none';">
+USDT TRC20 Auto Deposit
+</div>
+
+<!-- KYC Status Display -->
+<div id="kycStatusDisplay" class="binance-account-info">
+<div class="user-details">
+<span class="name" id="userDisplayName">Loading...</span>
+<span class="email" id="userDisplayEmail">-</span>
+</div>
+<span id="kycStatusBadge" class="kyc-status-badge not-submitted">⏳ Checking KYC...</span>
+</div>
+
+<div class="auto-payment-note" style="margin-bottom:12px;">
+<i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified automatically and balance is credited after admin approval.
+</div>
+
+<!-- Step Progress -->
+<div class="deposit-steps">
+<div class="deposit-step active" id="step1">
+<div class="step-circle">1</div>
+<span class="step-label">Create Order</span>
+</div>
+<div class="deposit-step" id="step2">
+<div class="step-circle">2</div>
+<span class="step-label">Send USDT</span>
+</div>
+<div class="deposit-step" id="step3">
+<div class="step-circle">3</div>
+<span class="step-label">Paste TXID</span>
+</div>
+<div class="deposit-step" id="step4">
+<div class="step-circle">4</div>
+<span class="step-label">Wait Verify</span>
+</div>
+</div>
+
+<!-- Generate Order Section -->
+<div id="binanceOrderSection">
+<div class="input-box">
+<input type="number" id="usdtAmount" placeholder="Enter Amount (Minimum 10 USDT)" step="1" min="10">
+</div>
+<button class="submit-btn" id="createBinanceOrderBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);">
+<i class="fas fa-file-invoice"></i> Generate Deposit Order
+</button>
+</div>
+
+<!-- Order Details -->
+<div id="binanceOrderDetails" style="display:none;">
+<div style="background:rgba(14,203,129,0.1); border-radius:12px; padding:10px; margin:12px 0; text-align:center; border:1px solid rgba(14,203,129,0.3);">
+<i class="fas fa-check-circle" style="color:#0ECB81; font-size:16px;"></i>
+<span style="color:#0ECB81; font-weight:600; font-size:11px;"> Order Created! Send USDT to the address below.</span>
+</div>
+
+<div class="binance-order-details">
+<div class="row"><span class="label">Network</span><span class="value">TRC20</span></div>
+<div class="row"><span class="label">Order ID</span><span class="value"><span class="order-id" id="binanceOrderId">---</span></span></div>
+<div class="row"><span class="label">Order Expiry</span><span class="value" id="binanceOrderExpiry">2 Hours</span></div>
+<div class="row"><span class="label">Amount</span><span class="value" id="binanceOrderAmount">$0.00</span></div>
+</div>
+
+<div class="wallet-address-box">
+<span class="address" id="binanceWalletAddress">TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D</span>
+<button class="copy-btn" id="copyWalletAddress"><i class="fas fa-copy"></i> Copy</button>
+</div>
+
+<div id="binanceQrContainer" style="text-align:center; margin:10px 0;">
+<div class="qr-placeholder">
+<i class="fas fa-qrcode"></i>
+QR Code<br><span style="font-size:8px;">(Coming Soon)</span>
+</div>
+</div>
+
+<div class="input-box">
+<input type="text" id="txHash" placeholder="Paste Transaction Hash (TXID)">
+</div>
+
+<button class="submit-btn" id="verifyBinanceDepositBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);">
+<i class="fas fa-check-double"></i> Submit for Verification
+</button>
+
+<div class="auto-payment-note" style="margin-top:8px;">
+<i class="fas fa-clock"></i> After sending USDT, paste the TXID and submit. Admin will verify and approve your deposit.
+</div>
+<div class="auto-payment-note" style="background:rgba(255,215,0,0.08); color:#FFD700; margin-top:6px;">
+<i class="fas fa-info-circle"></i> Your balance will be credited after admin verification. Please wait for confirmation.
+</div>
+<div class="auto-payment-note" style="background:rgba(255,77,77,0.1); color:#FF4D4D; margin-top:6px;">
+<i class="fas fa-exclamation-triangle"></i> Order expires in 2 hours. Please complete the transaction before expiry.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== USER TRANSFER (P2P) TAB ===== -->
+<div id="p2pTab" class="deposit-container" style="display:none;">
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-users"></i> Transfer USDT from Another User</div>
+<button class="buy-usdt-btn" id="buyUsdtBtn">
+<i class="fas fa-shopping-cart"></i> Buy USDT Now <i class="fas fa-arrow-right"></i>
+</button>
+<div class="auto-payment-note" style="margin-bottom:12px;">
+<i class="fas fa-info-circle"></i> Click the button above to buy USDT from trusted merchants on our P2P Market
+</div>
+<div class="auto-payment-note" style="background: rgba(14,203,129,0.1);">
+<i class="fas fa-shield-alt"></i> All P2P transactions are secured and verified by ABOTRA-PROAI escrow system
+</div>
+<div class="auto-payment-note" style="margin-top:12px;">
+<i class="fas fa-exchange-alt"></i> After buying USDT from P2P market, you can make a mobile money deposit using the numbers above
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="market.html"><i class="fa-solid fa-chart-line"></i><span>Market</span></a>
+<a href="trade.html"><i class="fa-solid fa-arrow-trend-up"></i><span>Trade</span></a>
+<a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const API_BASE_URL = 'https://abotra-backend.up.railway.app';
+
+// ============================================================
+// FIREBASE CLIENT SDK
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentUserData = null;
+let currentKycData = null;
+let selectedCountry = "";
+let selectedNetwork = null;
+let exchangeRates = {};
+let mobileNetworksData = {};
+let currentOrderId = null;
+let currentStep = 1;
+
+const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
+const ORDER_EXPIRY_HOURS = 2;
+const MIN_DEPOSIT_USDT = 10;
+
+const DEFAULT_EXCHANGE_RATES = {
+    'Tanzania': 2800,
+    'Malawi': 5600,
+    'Zambia': 30,
+    'Congo DRC': 2850,
+    'Burundi': 3500,
+    'Kenya': 140,
+    'Botswana': 13,
+    'Namibia': 19,
+    'Mozambique': 64,
+    'Nigeria': 1500
+};
+
+// ============================================================
+// PAYMENT INSTRUCTIONS - UPDATED WITH Mixx By Yas
+// ============================================================
+const PAYMENT_INSTRUCTIONS = {
+    'Tanzania': {
+        'M-Pesa Tanzania': {
+            title: '📱 M-Pesa Tanzania - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150*00#</span> or open M-Pesa app',
+                'Select <span class="highlight">"Lipa kwa M-Pesa"</span> (Pay with M-Pesa)',
+                'Enter Business Number: <span class="highlight">61105668</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference Number: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN',
+                'Wait for confirmation SMS'
+            ]
+        },
+        'Mixx By Yas': {
+            title: '📱 Mixx By Yas - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150*01#</span> or open Mixx By Yas app',
+                'Select <span class="highlight">"Malipo"</span> (Payments)',
+                'Enter Business Number: <span class="highlight">61105668</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Description: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Airtel Money Tanzania': {
+            title: '📱 Airtel Money Tanzania - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150*60#</span>',
+                'Select <span class="highlight">"Lipa kwa Airtel Money"</span>',
+                'Enter Business Number: <span class="highlight">61105668</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Description: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Malawi': {
+        'TNM Mpamba': {
+            title: '📱 TNM Mpamba - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Send Money"</span>',
+                'Enter Account Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Airtel Money Malawi': {
+            title: '📱 Airtel Money Malawi - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Make Payment"</span>',
+                'Enter Account Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Zambia': {
+        'MTN Mobile Money': {
+            title: '📱 MTN Mobile Money - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*222#</span>',
+                'Select <span class="highlight">"Pay Bill"</span>',
+                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Airtel Money Zambia': {
+            title: '📱 Airtel Money Zambia - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*115#</span>',
+                'Select <span class="highlight">"Pay Bill"</span>',
+                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Kenya': {
+        'M-Pesa Kenya': {
+            title: '📱 M-Pesa Kenya - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*334#</span>',
+                'Select <span class="highlight">"Lipa na M-Pesa"</span>',
+                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference Number: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Airtel Money Kenya': {
+            title: '📱 Airtel Money Kenya - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150*100#</span>',
+                'Select <span class="highlight">"Pay Bill"</span>',
+                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Nigeria': {
+        'M-Pesa Nigeria': {
+            title: '📱 M-Pesa Nigeria - Payment Instructions',
+            steps: [
+                'Open M-Pesa app',
+                'Select <span class="highlight">"Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Airtel Money Nigeria': {
+            title: '📱 Airtel Money Nigeria - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*223#</span>',
+                'Select <span class="highlight">"Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'MTN Mobile Money': {
+            title: '📱 MTN Mobile Money - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*223#</span>',
+                'Select <span class="highlight">"MoMo Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Botswana': {
+        'Orange Money': {
+            title: '📱 Orange Money - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*112#</span>',
+                'Select <span class="highlight">"Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'BTC Mobile Money': {
+            title: '📱 BTC Mobile Money - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*112#</span>',
+                'Select <span class="highlight">"Make Payment"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Namibia': {
+        'MTC Mobile Money': {
+            title: '📱 MTC Mobile Money - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*160#</span>',
+                'Select <span class="highlight">"Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Mozambique': {
+        'M-Pesa Mozambique': {
+            title: '📱 M-Pesa Mozambique - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Send Money"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Vodacom M-Pesa': {
+            title: '📱 Vodacom M-Pesa - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Send Money"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Congo DRC': {
+        'M-Pesa Congo': {
+            title: '📱 M-Pesa Congo - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Send Money"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    },
+    'Burundi': {
+        'Lumicash': {
+            title: '📱 Lumicash - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*142#</span>',
+                'Select <span class="highlight">"Pay"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        },
+        'Ecocash Burundi': {
+            title: '📱Ecocash Burundi - Payment Instructions',
+            steps: [
+                'Dial <span class="highlight">*150#</span>',
+                'Select <span class="highlight">"Send Money"</span>',
+                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
+                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
+                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
+                'Confirm by entering your PIN'
+            ]
+        }
+    }
+};
+
+// ============================================================
+// NOTIFICATION FUNCTIONS
+// ============================================================
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 5000);
+}
+
+async function addNotification(userId, title, message, type = 'info') {
+    if (!userId) return;
+    const notifRef = push(ref(db, `notifications/${userId}`));
+    await set(notifRef, { title, message, type, read: false, timestamp: Date.now() });
+}
+
+async function addAdminNotification(title, message, type = 'info') {
+    const adminNotifRef = push(ref(db, 'adminNotifications'));
+    await set(adminNotifRef, { title, message, type, read: false, timestamp: Date.now() });
+}
+
+async function addDepositLog(userId, action, details) {
+    const logRef = push(ref(db, `deposit_logs`));
+    await set(logRef, {
+        userId,
+        action,
+        details: typeof details === 'string' ? details : JSON.stringify(details),
+        timestamp: Date.now()
+    });
+}
+
+// ============================================================
+// KYC FUNCTIONS
+// ============================================================
+async function loadKYCData(userId) {
+    try {
+        const kycRef = ref(db, `kyc/${userId}/status`);
+        const snapshot = await get(kycRef);
+        if (snapshot.exists()) {
+            const status = snapshot.val();
+            const fullName = currentUserData?.fullName || currentUserData?.displayName || 'User';
+            currentKycData = { status, fullName };
+            return currentKycData;
+        }
+        
+        const userRef = ref(db, `users/${userId}`);
+        const userSnap = await get(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.val();
+            if (userData.kycVerified === true || userData.isVerified === true) {
+                currentKycData = { status: 'verified', fullName: userData.fullName || userData.displayName || 'User' };
+                return currentKycData;
+            }
+            if (userData.kycStatus) {
+                currentKycData = { status: userData.kycStatus, fullName: userData.fullName || userData.displayName || 'User' };
+                return currentKycData;
+            }
+        }
+        currentKycData = { status: 'not-submitted', fullName: currentUserData?.fullName || currentUserData?.displayName || 'User' };
+        return currentKycData;
+    } catch (error) {
+        console.error('Error loading KYC:', error);
+        currentKycData = { status: 'not-submitted', fullName: currentUserData?.fullName || 'User' };
+        return currentKycData;
+    }
+}
+
+async function loadUserData(userId) {
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            currentUserData = snapshot.val();
+            return currentUserData;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error loading user data:', error);
+        return null;
+    }
+}
+
+function checkKYCStatus(kycData) {
+    if (!kycData) return { status: 'not-submitted', label: 'Not Submitted', class: 'not-submitted' };
+    let status = typeof kycData === 'string' ? kycData : (kycData.status || 'not-submitted');
+    if (status === 'verified' || status === 'approved' || status === true) {
+        return { status: 'verified', label: '✓ Verified', class: 'verified' };
+    }
+    if (status === 'pending') return { status: 'pending', label: '⏳ Pending', class: 'pending' };
+    if (status === 'rejected') return { status: 'rejected', label: '✗ Rejected', class: 'rejected' };
+    return { status: 'not-submitted', label: 'Not Submitted', class: 'not-submitted' };
+}
+
+function getKycFullName(kycData) {
+    if (!kycData) return currentUserData?.fullName || currentUserData?.displayName || 'User';
+    if (typeof kycData === 'string') return currentUserData?.fullName || 'User';
+    return kycData.fullName || currentUserData?.fullName || currentUserData?.displayName || 'User';
+}
+
+function updateKYCUI() {
+    if (!currentKycData && !currentUserData) return;
+    const kycStatus = checkKYCStatus(currentKycData);
+    const fullName = getKycFullName(currentKycData);
+    const email = currentUser?.email || 'No email';
+    
+    document.getElementById('userDisplayName').textContent = fullName;
+    document.getElementById('userDisplayEmail').textContent = email;
+    
+    const badge = document.getElementById('kycStatusBadge');
+    badge.className = `kyc-status-badge ${kycStatus.class}`;
+    badge.textContent = kycStatus.label;
+    
+    const isVerified = kycStatus.status === 'verified';
+    const lockOverlay = document.getElementById('kycLockOverlay');
+    lockOverlay.style.display = isVerified ? 'none' : 'flex';
+    
+    document.getElementById('usdtAmount').disabled = !isVerified;
+    document.getElementById('createBinanceOrderBtn').disabled = !isVerified;
+    document.getElementById('txHash').disabled = !isVerified;
+    document.getElementById('verifyBinanceDepositBtn').disabled = !isVerified;
+}
+
+// ============================================================
+// MOBILE MONEY FUNCTIONS
+// ============================================================
+document.getElementById('buyUsdtBtn')?.addEventListener('click', () => {
+    window.location.href = 'p2p-market.html';
+});
+
+async function loadExchangeRates() {
+    try {
+        const ratesRef = ref(db, 'exchangeRates');
+        const snapshot = await get(ratesRef);
+        if (snapshot.exists()) {
+            exchangeRates = snapshot.val();
+        } else {
+            exchangeRates = { ...DEFAULT_EXCHANGE_RATES };
+        }
+    } catch (error) {
+        console.error('Error loading exchange rates:', error);
+        exchangeRates = { ...DEFAULT_EXCHANGE_RATES };
+    }
+}
+
+function loadMobileNetworksFromSettings() {
+    const settingsRef = ref(db, 'paymentMethods/mobileMoney');
+    onValue(settingsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            mobileNetworksData = snapshot.val();
+        } else {
+            mobileNetworksData = {};
+        }
+        renderMobileNetworks();
+    });
+}
+
+function updateMobileLocalAmount() {
+    const usd = parseFloat(document.getElementById('mobileAmount').value) || 0;
+    if (selectedNetwork && selectedCountry) {
+        const rate = exchangeRates[selectedCountry] || 2800;
+        const currency = getCurrency(selectedCountry);
+        const localAmount = usd * rate;
+        document.getElementById('mobileLocalAmount').value = `${localAmount.toFixed(0)} ${currency}`;
+    } else {
+        document.getElementById('mobileLocalAmount').value = '';
+    }
+}
+
+function getCurrency(country) {
+    const currencies = {
+        'Tanzania': 'TZS',
+        'Malawi': 'MWK',
+        'Zambia': 'ZMW',
+        'Congo DRC': 'CDF',
+        'Burundi': 'BIF',
+        'Kenya': 'KES',
+        'Botswana': 'BWP',
+        'Namibia': 'NAD',
+        'Mozambique': 'MZN',
+        'Nigeria': 'NGN'
+    };
+    return currencies[country] || 'USD';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getPaymentInstructions(country, networkName, amount, accountNumber, orderId) {
+    const countryInstructions = PAYMENT_INSTRUCTIONS[country];
+    if (!countryInstructions) return null;
+    const networkInstructions = countryInstructions[networkName];
+    if (!networkInstructions) return null;
+    const currency = getCurrency(country);
+    const localAmount = amount * (exchangeRates[country] || 2800);
+    
+    let stepsHtml = '';
+    networkInstructions.steps.forEach((step) => {
+        let formattedStep = step
+            .replace(/\[AMOUNT\]/g, `${localAmount.toFixed(0)} ${currency}`)
+            .replace(/\[ACCOUNT_NUMBER\]/g, accountNumber || 'N/A')
+            .replace(/\[ORDER_ID\]/g, orderId || 'N/A');
+        stepsHtml += `<div class="step"><i class="fas fa-circle"></i> <span>${formattedStep}</span></div>`;
+    });
+    
+    return { title: networkInstructions.title, stepsHtml };
+}
+
+function renderMobileNetworks() {
+    const container = document.getElementById('mobileNetworksContainer');
+    if (!container) return;
+    if (!selectedCountry) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Select your country first</div>';
+        document.getElementById('instructionsContainer').style.display = 'none';
+        return;
+    }
+    
+    const networks = mobileNetworksData[selectedCountry] || [];
+    if (networks.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No payment methods configured for this country. Please contact support.</div>';
+        document.getElementById('instructionsContainer').style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = '';
+    networks.forEach((network) => {
+        const card = document.createElement('div');
+        card.className = 'network-card';
+        const number = network.number || '';
+        const accountName = network.accountName || network.receiverName || '';
+        const hasNumber = number && number !== '';
+        
+        let logoHtml = '';
+        const logoFilename = network.logo;
+        if (logoFilename) {
+            const logoPath = `../assets/icons/${logoFilename}`;
+            logoHtml = `<img src="${logoPath}" alt="${network.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'${network.fallbackIcon || 'fas fa-mobile-alt'}\\' style=\\'font-size:20px; color:#FFD700;\\'></i>'">`;
+        } else {
+            const iconName = network.name.toLowerCase().includes('mpesa') ? 'fas fa-mobile-alt' : 'fas fa-mobile-alt';
+            logoHtml = `<i class="${iconName}" style="font-size:20px; color:#FFD700;"></i>`;
+        }
+        
+        card.innerHTML = `
+            <div class="network-left">
+                <div class="network-logo">${logoHtml}</div>
+                <div class="network-details">
+                    <div class="network-name">${escapeHtml(network.name)}</div>
+                    <div class="network-number">
+                        ${hasNumber ? `<span>${escapeHtml(number)}</span><button class="copy-number-btn" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(number)}'); showNotification('Number copied!', 'success');"><i class="fas fa-copy"></i> Copy</button>` : '<span style="color:#F6465D;">⚠️ Not configured</span>'}
+                    </div>
+                    ${accountName ? `<div class="network-account-name"><i class="fas fa-user"></i> <span>${escapeHtml(accountName)}</span></div>` : ''}
+                </div>
+            </div>
+            <div class="network-select-radio"></div>
+        `;
+        
+        if (hasNumber) {
+            card.onclick = () => {
+                document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedNetwork = network;
+                updateMobileLocalAmount();
+                updateInstructions();
+            };
+        } else {
+            card.style.opacity = '0.5';
+            card.style.cursor = 'not-allowed';
+        }
+        container.appendChild(card);
+    });
+}
+
+function updateInstructions() {
+    const container = document.getElementById('instructionsContainer');
+    const content = document.getElementById('instructionsContent');
+    const title = document.getElementById('instructionsTitle');
+    
+    if (!selectedNetwork || !selectedCountry) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    const amount = parseFloat(document.getElementById('mobileAmount').value) || 0;
+    if (amount < 10) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    const instructions = getPaymentInstructions(
+        selectedCountry,
+        selectedNetwork.name,
+        amount,
+        selectedNetwork.number,
+        'DEP-' + Date.now().toString().substring(0, 8)
+    );
+    
+    if (instructions) {
+        title.textContent = instructions.title.replace('📱 ', '');
+        content.innerHTML = instructions.stepsHtml;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+document.getElementById('mobileAmount').addEventListener('input', updateInstructions);
+
+async function loadUserCountry() {
+    if (!currentUser) return;
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            if (userData.country && userData.country !== 'Not selected' && userData.country !== '') {
+                selectedCountry = userData.country;
+                document.getElementById('countrySelect').value = selectedCountry;
+                renderMobileNetworks();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user country:', error);
+    }
+}
+
+async function saveUserCountry(country) {
+    if (!currentUser || !country) return;
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        await update(userRef, { country });
+    } catch (error) {
+        console.error('Error saving country:', error);
+    }
+}
+
+document.getElementById('countrySelect').addEventListener('change', async (e) => {
+    selectedCountry = e.target.value;
+    selectedNetwork = null;
+    if (selectedCountry && currentUser) await saveUserCountry(selectedCountry);
+    renderMobileNetworks();
+    updateMobileLocalAmount();
+    document.getElementById('instructionsContainer').style.display = 'none';
+});
+
+// ============================================================
+// PROCESS MOBILE DEPOSIT - VIA BACKEND API
+// ============================================================
+async function processMobileDeposit() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    if (!selectedNetwork) { showNotification('Please select a payment network', 'error'); return; }
+    if (!selectedCountry) { showNotification('Please select your country', 'error'); return; }
+    
+    const kycStatus = checkKYCStatus(currentKycData);
+    if (kycStatus.status !== 'verified') {
+        showNotification('Complete KYC to enable deposits', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(document.getElementById('mobileAmount').value);
+    const phone = document.getElementById('senderPhone').value.trim();
+    const name = document.getElementById('senderName').value.trim();
+    const transactionId = document.getElementById('transactionId').value.trim();
+    
+    if (!amount || amount < 10) { showNotification('Minimum deposit is $10', 'error'); return; }
+    if (!phone) { showNotification('Please enter your phone number', 'error'); return; }
+    if (!name) { showNotification('Please enter your name', 'error'); return; }
+    
+    const btn = document.getElementById('submitMobileBtn');
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
+    try {
+        const rate = exchangeRates[selectedCountry] || 2800;
+        const localAmount = amount * rate;
+        const depositId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 8);
+        const kycName = getKycFullName(currentKycData);
+        
+        const depositData = {
+            id: depositId,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            kycName: kycName,
+            amount: amount,
+            localAmount: localAmount,
+            method: 'mobile_money',
+            country: selectedCountry,
+            network: selectedNetwork.name,
+            accountNumber: selectedNetwork.number,
+            accountName: selectedNetwork.accountName || selectedNetwork.receiverName || '',
+            phone: phone,
+            senderName: name,
+            transactionId: transactionId || 'N/A',
+            status: 'pending',
+            createdAt: Date.now()
+        };
+
+        // ✅ User writes to /deposits/{userId}/{depositId}
+        const depositRef = ref(db, `deposits/${currentUser.uid}/${depositId}`);
+        await set(depositRef, depositData);
+
+        // ✅ User writes to /user_deposits/{userId}/{depositId}
+        const userDepositRef = ref(db, `user_deposits/${currentUser.uid}/${depositId}`);
+        await set(userDepositRef, depositData);
+
+        await addDepositLog(currentUser.uid, 'mobile_deposit_submitted', {
+            amount: amount,
+            network: selectedNetwork.name,
+            depositId: depositId
+        });
+        
+        await addNotification(currentUser.uid, '📱 Mobile Deposit Submitted', 
+            `Your mobile deposit of $${amount.toFixed(2)} has been submitted. Admin will verify within 24 hours.`, 'info');
+        await addAdminNotification('💰 New Deposit Request', 
+            `${currentUser.email} deposited $${amount.toFixed(2)} via ${selectedNetwork.name}. Waiting for approval.`, 'info');
+        
+        showNotification('✅ Mobile deposit submitted successfully! Please wait for admin verification.', 'success');
+        
+        document.getElementById('mobileAmount').value = '';
+        document.getElementById('senderPhone').value = '';
+        document.getElementById('senderName').value = '';
+        document.getElementById('transactionId').value = '';
+        document.getElementById('mobileLocalAmount').value = '';
+        selectedNetwork = null;
+        document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('instructionsContainer').style.display = 'none';
+        
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        
+    } catch (error) { 
+        console.error("Deposit error:", error);
+        showNotification('Error processing deposit: ' + error.message, 'error'); 
+    } finally {
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Mobile Deposit';
+    }
+}
+
+document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
+
+// ============================================================
+// BINANCE USDT FUNCTIONS
+// ============================================================
+function updateStep(step) {
+    currentStep = step;
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step${i}`);
+        el.classList.remove('active', 'completed');
+        if (i < step) el.classList.add('completed');
+        if (i === step) el.classList.add('active');
+    }
+}
+
+async function checkExistingTxHash(txHash) {
+    if (!txHash) return false;
+    try {
+        const depositsRef = ref(db, 'binance_deposits');
+        const snapshot = await get(depositsRef);
+        if (snapshot.exists()) {
+            const allDeposits = snapshot.val();
+            for (const userId in allDeposits) {
+                for (const orderId in allDeposits[userId]) {
+                    if (allDeposits[userId][orderId].txHash === txHash) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    } catch (error) {
+        console.error('Error checking TXID:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// CREATE BINANCE ORDER - FIXED
+// ============================================================
+async function createBinanceOrder() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    
+    const kycStatus = checkKYCStatus(currentKycData);
+    if (kycStatus.status !== 'verified') {
+        showNotification('Complete KYC to enable deposits', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(document.getElementById('usdtAmount').value);
+    if (!amount || amount < MIN_DEPOSIT_USDT) { 
+        showNotification(`Minimum deposit is ${MIN_DEPOSIT_USDT} USDT`, 'error'); 
+        return; 
+    }
+    
+    const btn = document.getElementById('createBinanceOrderBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Order...';
+    
+    try {
+        const kycName = getKycFullName(currentKycData);
+        const orderId = 'ORD_' + Date.now().toString() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        const expiryTime = Date.now() + (ORDER_EXPIRY_HOURS * 60 * 60 * 1000);
+        
+        const orderData = {
+            orderId: orderId,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            kycName: kycName,
+            amount: amount,
+            walletAddress: BINANCE_WALLET_ADDRESS,
+            network: 'TRC20',
+            status: 'pending',
+            txHash: null,
+            createdAt: Date.now(),
+            expiryAt: expiryTime
+        };
+
+        // ✅ User writes to /binance_deposits/{userId}/{orderId}
+        const orderRef = ref(db, `binance_deposits/${currentUser.uid}/${orderId}`);
+        await set(orderRef, orderData);
+
+        // ✅ Also write to /deposits for admin visibility
+        const depositRef = ref(db, `deposits/${currentUser.uid}/${orderId}`);
+        await set(depositRef, {
+            id: orderId,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            kycName: kycName,
+            amount: amount,
+            method: 'binance_usdt',
+            network: 'TRC20',
+            walletAddress: BINANCE_WALLET_ADDRESS,
+            status: 'pending',
+            createdAt: Date.now()
+        });
+
+        await addDepositLog(currentUser.uid, 'binance_order_created', {
+            orderId: orderId,
+            amount: amount
+        });
+        
+        currentOrderId = orderId;
+        
+        document.getElementById('binanceOrderDetails').style.display = 'block';
+        document.getElementById('binanceOrderId').textContent = orderId;
+        document.getElementById('binanceOrderAmount').textContent = `$${amount.toFixed(2)}`;
+        document.getElementById('binanceOrderExpiry').textContent = `${ORDER_EXPIRY_HOURS} Hours`;
+        
+        const qrContainer = document.getElementById('binanceQrContainer');
+        qrContainer.innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${BINANCE_WALLET_ADDRESS}" 
+                 alt="QR Code for USDT TRC20 Deposit" 
+                 style="width:150px; height:150px; border-radius:12px; display:block; margin:0 auto; background:white; padding:10px;">
+            <p style="color:#888; font-size:9px; margin-top:6px;">Scan to send USDT TRC20</p>
+        `;
+        
+        updateStep(2);
+        
+        showNotification('✅ Deposit order created! Send USDT to the address provided.', 'success');
+        btn.innerHTML = '<i class="fas fa-check"></i> Order Created';
+        btn.disabled = true;
+        
+    } catch (error) {
+        console.error('Create order error:', error);
+        showNotification('Error creating order: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Deposit Order';
+    }
+}
+
+document.getElementById('createBinanceOrderBtn').addEventListener('click', createBinanceOrder);
+
+document.getElementById('copyWalletAddress')?.addEventListener('click', () => {
+    const address = document.getElementById('binanceWalletAddress').textContent;
+    navigator.clipboard.writeText(address);
+    showNotification('Wallet address copied!', 'success');
+});
+
+// ============================================================
+// VERIFY BINANCE DEPOSIT - FIXED
+// ============================================================
+async function verifyBinanceDeposit() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    if (!currentOrderId) { showNotification('Please create an order first', 'error'); return; }
+    
+    const txHash = document.getElementById('txHash').value.trim();
+    if (!txHash || txHash.length < 10) { showNotification('Please enter a valid Transaction Hash (TXID)', 'error'); return; }
+    
+    const isDuplicate = await checkExistingTxHash(txHash);
+    if (isDuplicate) {
+        showNotification('❌ This TXID has already been used. Please check and try again.', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('verifyBinanceDepositBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
+    try {
+        const orderRef = ref(db, `binance_deposits/${currentUser.uid}/${currentOrderId}`);
+        const orderSnapshot = await get(orderRef);
+        if (!orderSnapshot.exists()) {
+            showNotification('Order not found', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
+            return;
+        }
+        
+        const orderData = orderSnapshot.val();
+        
+        if (orderData.expiryAt && Date.now() > orderData.expiryAt) {
+            showNotification('❌ Order has expired. Please create a new order.', 'error');
+            await update(orderRef, { status: 'expired' });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
+            return;
+        }
+        
+        // ✅ Update /binance_deposits
+        await update(orderRef, {
+            txHash: txHash,
+            status: 'pending_verification',
+            submittedAt: Date.now()
+        });
+
+        // ✅ Update /deposits
+        const depositRef = ref(db, `deposits/${currentUser.uid}/${currentOrderId}`);
+        const depositSnap = await get(depositRef);
+        if (depositSnap.exists()) {
+            await update(depositRef, {
+                txHash: txHash,
+                status: 'pending_verification',
+                submittedAt: Date.now()
+            });
+        }
+
+        await addDepositLog(currentUser.uid, 'binance_deposit_submitted', {
+            orderId: currentOrderId,
+            txHash: txHash,
+            amount: orderData.amount
+        });
+        
+        await addNotification(currentUser.uid, '💰 Binance USDT Deposit Submitted', 
+            `Your deposit of $${orderData.amount} has been submitted. Admin will verify and approve.`, 'info');
+        await addAdminNotification('📊 New Binance Deposit', 
+            `${currentUser.email} deposited $${orderData.amount} USDT via TRC20. TXID: ${txHash}`, 'info');
+        
+        updateStep(4);
+        showNotification('✅ Deposit submitted for verification! Admin will approve soon.', 'success');
+        
+        btn.innerHTML = '<i class="fas fa-check"></i> Submitted';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Submit deposit error:', error);
+        showNotification('Error submitting deposit: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
+    }
+}
+
+document.getElementById('verifyBinanceDepositBtn').addEventListener('click', verifyBinanceDeposit);
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab) {
+    document.getElementById('mobileTab').style.display = tab === 'mobile' ? 'block' : 'none';
+    document.getElementById('binanceTab').style.display = tab === 'binance' ? 'block' : 'none';
+    document.getElementById('p2pTab').style.display = tab === 'p2p' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(btn => { 
+        btn.classList.remove('active'); 
+        if (btn.getAttribute('data-tab') === tab) btn.classList.add('active'); 
+    });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => 
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')))
+);
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+    const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+    if (document.body.classList.contains('light-theme')) {
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    } else {
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    
+    document.getElementById('skeletonContent').style.display = 'block';
+    document.getElementById('realContent').style.display = 'none';
+    
+    await loadUserData(user.uid);
+    await loadKYCData(user.uid);
+    await loadExchangeRates();
+    await loadUserCountry();
+    loadMobileNetworksFromSettings();
+    
+    setTimeout(() => {
+        updateKYCUI();
+        updateStep(1);
+        document.getElementById('skeletonContent').style.display = 'none';
+        document.getElementById('realContent').style.display = 'block';
+    }, 800);
+});
+
+initTheme();
+</script>
+</body>
+</html>

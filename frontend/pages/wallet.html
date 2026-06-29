@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Wallet | ABOTRA-PROAI - Your Funds</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Inter', sans-serif;
+}
+
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 11px;
+}
+
+/* LIGHT THEME */
+body.light-theme {
+background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
+}
+
+body.light-theme .overlay {
+background: rgba(255,255,255,0.85);
+}
+
+body.light-theme .top-bar,
+body.light-theme .wallet-container,
+body.light-theme .wallet-card,
+body.light-theme .transfer-card,
+body.light-theme .history-card {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .wallet-title,
+body.light-theme .section-title {
+color: #800000;
+}
+
+body.light-theme .wallet-balance {
+color: #800000;
+}
+
+body.light-theme .history-card {
+border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+body.light-theme .history-left .type {
+color: #333;
+}
+
+body.light-theme .history-left .date {
+color: #777;
+}
+
+body.light-theme .history-right .amount {
+color: #333;
+}
+
+body.light-theme .theme-toggle {
+background: rgba(0,0,0,0.08);
+border-color: rgba(128,0,0,0.3);
+}
+
+body.light-theme .theme-toggle i {
+color: #800000;
+}
+
+body.light-theme .bottom-nav {
+background: rgba(255,255,255,0.95);
+border-top: 1px solid rgba(128,0,0,0.2);
+}
+
+body.light-theme .bottom-nav a {
+color: #888;
+}
+
+body.light-theme .bottom-nav a.active {
+color: #800000;
+}
+
+/* Skeleton Loading Styles */
+.skeleton-wallet-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 16px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-wallet-title {
+height: 14px;
+width: 100px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 5px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-wallet-balance {
+height: 34px;
+width: 130px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 7px;
+margin: 0 auto 12px auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-action-buttons {
+display: flex;
+gap: 12px;
+justify-content: center;
+margin-top: 8px;
+}
+.skeleton-btn {
+width: 85px;
+height: 36px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 40px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-transfer-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px;
+padding: 16px;
+margin-bottom: 16px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-transfer-title {
+height: 14px;
+width: 110px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 5px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-input {
+height: 40px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 10px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-transfer-btn {
+height: 40px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 10px;
+margin-top: 4px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-section-title {
+height: 16px;
+width: 130px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 5px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-history-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 0;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.skeleton-history-left {
+display: flex;
+flex-direction: column;
+gap: 4px;
+}
+.skeleton-history-type {
+height: 12px;
+width: 70px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-history-date {
+height: 8px;
+width: 85px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-history-right {
+text-align: right;
+}
+.skeleton-history-amount {
+height: 12px;
+width: 60px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+margin-bottom: 4px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-history-status {
+height: 8px;
+width: 50px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 3px;
+animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 1; }
+}
+
+/* THEME TOGGLE - ICON ONLY */
+.theme-toggle {
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 10px;
+padding: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+
+.theme-toggle:hover {
+background: rgba(255,215,0,0.2);
+transform: scale(1.05);
+}
+
+.theme-toggle i {
+font-size: 15px;
+color: #FFFFFF;
+}
+
+.overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.82);
+backdrop-filter: blur(4px);
+z-index: 1;
+}
+
+/* TOP BAR */
+.top-bar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 100;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 8px 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.logo-area {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.logo-area img {
+width: 32px;
+height: 32px;
+border-radius: 8px;
+object-fit: cover;
+}
+
+.logo-area h2 {
+color: #FFD700;
+font-size: 14px;
+margin-bottom: 2px;
+}
+
+.logo-area p {
+color: #AAAAAA;
+font-size: 7px;
+}
+
+.top-bar-right {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.back-btn-top {
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 8px;
+padding: 6px 10px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 5px;
+font-size: 9px;
+font-weight: 500;
+}
+
+.back-btn-top:hover {
+background: rgba(255,215,0,0.3);
+}
+
+/* MAIN CONTAINER */
+.wallet-container {
+position: relative;
+z-index: 2;
+max-width: 600px;
+margin: 70px auto 20px;
+padding: 0 12px;
+}
+
+/* PAGE TITLE */
+.page-title {
+text-align: center;
+font-size: 20px;
+font-weight: 800;
+color: #FFD700;
+margin-bottom: 16px;
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+/* WALLET CARD */
+.wallet-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+backdrop-filter: blur(10px);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 16px;
+}
+
+.wallet-title {
+color: #FFD700;
+font-size: 11px;
+font-weight: 600;
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.wallet-balance {
+color: #FFD700;
+font-size: 30px;
+font-weight: 800;
+text-align: center;
+padding: 8px 0;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+display: flex;
+gap: 12px;
+justify-content: center;
+margin-top: 8px;
+}
+
+.wallet-btn {
+padding: 8px 18px;
+border: none;
+border-radius: 40px;
+font-weight: 700;
+font-size: 11px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.wallet-btn.deposit {
+background: linear-gradient(135deg, #0ECB81, #0A9E65);
+color: white;
+}
+
+.wallet-btn.withdraw {
+background: linear-gradient(135deg, #F6465D, #D43F52);
+color: white;
+}
+
+.wallet-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* INTERNAL TRANSFER CARD */
+.transfer-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px;
+padding: 16px;
+margin-bottom: 16px;
+}
+
+.input-box {
+margin-bottom: 12px;
+}
+
+.input-box input,
+.input-box select {
+width: 100%;
+height: 40px;
+border: none;
+outline: none;
+border-radius: 10px;
+padding: 0 12px;
+background: rgba(255,255,255,0.08);
+border: 1px solid rgba(255,255,255,0.1);
+color: #FFFFFF;
+font-size: 11px;
+}
+
+.input-box input:focus,
+.input-box select:focus {
+border-color: #FFD700;
+box-shadow: 0 0 8px rgba(255,215,0,0.2);
+}
+
+.input-box select option {
+background: #1a1a1a;
+color: white;
+}
+
+.transfer-btn {
+width: 100%;
+height: 40px;
+border: none;
+border-radius: 10px;
+background: linear-gradient(135deg, #800000, #FFD700);
+color: white;
+font-weight: 700;
+font-size: 11px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+.transfer-btn:hover {
+transform: translateY(-2px);
+}
+
+.transfer-btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+transform: none;
+}
+
+/* HISTORY SECTION */
+.section-title {
+color: #FFD700;
+font-size: 12px;
+font-weight: 700;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+#historyContainer {
+max-height: 400px;
+overflow-y: auto;
+}
+
+.history-card {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 0;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.history-left {
+display: flex;
+flex-direction: column;
+gap: 3px;
+}
+
+.history-left .type {
+color: #FFFFFF;
+font-size: 11px;
+font-weight: 500;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.history-left .date {
+color: #888;
+font-size: 9px;
+}
+
+.history-right {
+text-align: right;
+}
+
+.history-right .amount {
+font-size: 12px;
+font-weight: 700;
+}
+
+.history-right .amount.positive {
+color: #0ECB81;
+}
+
+.history-right .amount.negative {
+color: #F6465D;
+}
+
+.history-right .status {
+font-size: 8px;
+margin-top: 3px;
+}
+
+.status-pending { color: #FFD700; }
+.status-completed { color: #0ECB81; }
+.status-failed { color: #F6465D; }
+
+/* LOADING STATE */
+.loading-container {
+text-align: center;
+padding: 35px 20px;
+}
+.loading-spinner {
+width: 30px;
+height: 30px;
+border: 2px solid rgba(255,215,0,0.2);
+border-top: 2px solid #FFD700;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+margin: 0 auto 12px auto;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+/* EMPTY STATE */
+.empty-state {
+text-align: center;
+padding: 35px 20px;
+}
+
+.empty-state i {
+font-size: 38px;
+color: rgba(255,215,0,0.3);
+margin-bottom: 12px;
+}
+
+.empty-state p {
+color: #AAAAAA;
+font-size: 10px;
+}
+
+/* BOTTOM NAVIGATION */
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 18px 18px 0 0;
+display: flex;
+justify-content: space-around;
+padding: 6px 10px;
+z-index: 100;
+}
+
+.bottom-nav a {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-decoration: none;
+color: #888;
+font-size: 7px;
+transition: 0.3s;
+gap: 2px;
+}
+
+.bottom-nav a i {
+font-size: 16px;
+}
+
+.bottom-nav a.active {
+color: #FFD700;
+}
+
+/* NOTIFICATION POPUP */
+.notification-popup {
+position: fixed;
+top: 70px;
+right: 15px;
+min-width: 240px;
+max-width: 300px;
+padding: 8px 12px;
+border-radius: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+z-index: 99999;
+backdrop-filter: blur(20px);
+box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+animation: slideInRight 0.3s ease;
+border-left: 3px solid;
+}
+
+.notification-popup.success {
+background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08));
+border-left-color: #00FF88;
+}
+
+.notification-popup.error {
+background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08));
+border-left-color: #FF4D4D;
+}
+
+.notification-popup.info {
+background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08));
+border-left-color: #FFD700;
+}
+
+.notification-popup i {
+font-size: 18px;
+}
+
+.notification-popup .popup-message {
+flex: 1;
+font-size: 10px;
+color: #FFFFFF;
+font-weight: 500;
+}
+
+@keyframes slideInRight {
+from { opacity: 0; transform: translateX(100%); }
+to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+from { opacity: 1; transform: translateX(0); }
+to { opacity: 0; transform: translateX(100%); }
+}
+
+/* RESPONSIVE */
+@media(max-width: 500px) {
+.wallet-container {
+padding: 0 12px;
+margin-top: 65px;
+}
+.page-title {
+font-size: 18px;
+}
+.wallet-balance {
+font-size: 24px;
+}
+.wallet-btn {
+padding: 6px 14px;
+font-size: 10px;
+}
+.theme-toggle {
+padding: 8px;
+}
+.logo-area h2 {
+font-size: 13px;
+}
+.logo-area p {
+display: none;
+}
+.bottom-nav a span {
+font-size: 6px;
+}
+.bottom-nav a i {
+font-size: 14px;
+}
+.history-card {
+padding: 8px 0;
+}
+.history-left .type {
+font-size: 10px;
+}
+.history-right .amount {
+font-size: 11px;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div>
+<h2>ABOTRA-PROAI</h2>
+<p>My Wallet</p>
+</div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'">
+<i class="fas fa-arrow-left"></i> Back
+</button>
+<div class="theme-toggle" id="themeToggle">
+<i class="fas fa-sun"></i>
+<i class="fas fa-moon" style="display:none;"></i>
+</div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="wallet-container">
+<div class="page-title">
+<i class="fas fa-wallet"></i> My Wallet
+</div>
+
+<!-- SKELETON SECTION -->
+<div id="skeletonContainer">
+    <div class="skeleton-wallet-card">
+        <div class="skeleton-wallet-title"></div>
+        <div class="skeleton-wallet-balance"></div>
+        <div class="skeleton-action-buttons">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn"></div>
+        </div>
+    </div>
+    <div class="skeleton-transfer-card">
+        <div class="skeleton-transfer-title"></div>
+        <div class="skeleton-input"></div>
+        <div class="skeleton-input"></div>
+        <div class="skeleton-input"></div>
+        <div class="skeleton-transfer-btn"></div>
+    </div>
+    <div class="skeleton-wallet-card">
+        <div class="skeleton-section-title"></div>
+        <div class="skeleton-history-item">
+            <div class="skeleton-history-left">
+                <div class="skeleton-history-type"></div>
+                <div class="skeleton-history-date"></div>
+            </div>
+            <div class="skeleton-history-right">
+                <div class="skeleton-history-amount"></div>
+                <div class="skeleton-history-status"></div>
+            </div>
+        </div>
+        <div class="skeleton-history-item">
+            <div class="skeleton-history-left">
+                <div class="skeleton-history-type"></div>
+                <div class="skeleton-history-date"></div>
+            </div>
+            <div class="skeleton-history-right">
+                <div class="skeleton-history-amount"></div>
+                <div class="skeleton-history-status"></div>
+            </div>
+        </div>
+        <div class="skeleton-history-item">
+            <div class="skeleton-history-left">
+                <div class="skeleton-history-type"></div>
+                <div class="skeleton-history-date"></div>
+            </div>
+            <div class="skeleton-history-right">
+                <div class="skeleton-history-amount"></div>
+                <div class="skeleton-history-status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REAL CONTENT -->
+<div id="realContent" style="display: none;">
+    <!-- BALANCE CARD -->
+    <div class="wallet-card">
+        <div class="wallet-title">
+            <i class="fas fa-coins"></i> Available Balance
+        </div>
+        <div class="wallet-balance" id="walletBalance">
+            <div class="loading-spinner" style="width:28px;height:28px;margin:8px auto;"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="wallet-btn deposit" onclick="window.location.href='deposit.html'">
+                <i class="fas fa-plus-circle"></i> Deposit
+            </button>
+            <button class="wallet-btn withdraw" onclick="window.location.href='withdraw.html'">
+                <i class="fas fa-minus-circle"></i> Withdraw
+            </button>
+        </div>
+    </div>
+
+    <!-- INTERNAL TRANSFER CARD -->
+    <div class="transfer-card">
+        <div class="wallet-title">
+            <i class="fas fa-exchange-alt"></i> Internal Transfer
+        </div>
+        <div class="input-box">
+            <input type="email" id="transferEmail" placeholder="Recipient Email Address">
+        </div>
+        <div class="input-box">
+            <input type="number" id="transferAmount" placeholder="Amount (USDT)" step="0.01" min="1">
+        </div>
+        <div class="input-box">
+            <input type="text" id="transferNote" placeholder="Note (Optional)">
+        </div>
+        <button class="transfer-btn" id="transferBtn">
+            <i class="fas fa-paper-plane"></i> Send Transfer
+        </button>
+    </div>
+
+    <!-- TRANSACTION HISTORY -->
+    <div class="wallet-card">
+        <div class="section-title">
+            <i class="fas fa-history"></i> Transaction History
+        </div>
+        <div id="historyContainer">
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>No transactions yet</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="trade.html"><i class="fa-solid fa-chart-line"></i><span>Trade</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P</span></a>
+<a href="wallet.html" class="active"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, get, update, push, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, query as fsQuery, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const firestore = getFirestore(app);
+const auth = getAuth(app);
+
+// ========== GLOBAL VARIABLES ==========
+let currentUser = null;
+let allTransactions = [];
+let rtdbBalanceListener = null;
+
+// ========== THEME TOGGLE ==========
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+// ========== SHOW NOTIFICATION ==========
+function showNotification(message, type, duration = 4000) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ========== ADD NOTIFICATION ==========
+async function addNotification(userId, title, message, type = 'info') {
+    if (!userId) return;
+    const notificationRef = push(ref(db, `notifications/${userId}`));
+    await set(notificationRef, {
+        title: title,
+        message: message,
+        type: type,
+        read: false,
+        timestamp: Date.now()
+    });
+}
+
+// ========== LOAD WALLET BALANCE FROM RTDB ==========
+async function loadWalletBalanceFromRTDB() {
+    if (!currentUser) return 0;
+    try {
+        const userRTDBRef = ref(db, `users/${currentUser.uid}`);
+        const snapshot = await get(userRTDBRef);
+        if (snapshot.exists()) {
+            const balance = snapshot.val().balance || 0;
+            document.getElementById('walletBalance').innerHTML = `$${balance.toFixed(2)}`;
+            return balance;
+        } else {
+            await set(ref(db, `users/${currentUser.uid}`), {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                balance: 0,
+                createdAt: Date.now()
+            });
+            document.getElementById('walletBalance').innerHTML = `$0.00`;
+            return 0;
+        }
+    } catch (error) {
+        console.error("Error loading balance:", error);
+        return 0;
+    }
+}
+
+// ========== SETUP REAL-TIME BALANCE LISTENER ==========
+function setupRealtimeBalance() {
+    if (!currentUser) return;
+    if (rtdbBalanceListener) off(rtdbBalanceListener);
+    const userRTDBRef = ref(db, `users/${currentUser.uid}`);
+    rtdbBalanceListener = onValue(userRTDBRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const balance = snapshot.val().balance || 0;
+            document.getElementById('walletBalance').innerHTML = `$${balance.toFixed(2)}`;
+        }
+    });
+}
+
+// ========== LOAD TRANSACTION HISTORY ==========
+async function loadTransactionHistory() {
+    if (!currentUser) return;
+    allTransactions = [];
+    
+    // Load deposits
+    const depositsRef = ref(db, `deposits/${currentUser.uid}`);
+    const depositsSnapshot = await get(depositsRef);
+    if (depositsSnapshot.exists()) {
+        depositsSnapshot.forEach(child => {
+            const deposit = child.val();
+            if (deposit.status === 'approved' || deposit.status === 'completed') {
+                allTransactions.push({
+                    id: child.key,
+                    type: 'deposit',
+                    amount: deposit.amount,
+                    status: 'completed',
+                    timestamp: deposit.approvedAt || deposit.createdAt || Date.now(),
+                    method: deposit.method || 'Bank Transfer'
+                });
+            } else if (deposit.status === 'pending') {
+                allTransactions.push({
+                    id: child.key,
+                    type: 'deposit',
+                    amount: deposit.amount,
+                    status: 'pending',
+                    timestamp: deposit.createdAt || Date.now(),
+                    method: deposit.method || 'Bank Transfer'
+                });
+            }
+        });
+    }
+    
+    // Load withdrawals
+    const withdrawalsRef = ref(db, `withdrawals/${currentUser.uid}`);
+    const withdrawalsSnapshot = await get(withdrawalsRef);
+    if (withdrawalsSnapshot.exists()) {
+        withdrawalsSnapshot.forEach(child => {
+            const withdrawal = child.val();
+            allTransactions.push({
+                id: child.key,
+                type: 'withdraw',
+                amount: withdrawal.amount,
+                status: withdrawal.status || 'pending',
+                timestamp: withdrawal.createdAt || Date.now(),
+                method: withdrawal.method || 'Bank Transfer'
+            });
+        });
+    }
+    
+    // Load received transfers
+    const receivedRef = ref(db, `transfers/received/${currentUser.uid}`);
+    const receivedSnapshot = await get(receivedRef);
+    if (receivedSnapshot.exists()) {
+        receivedSnapshot.forEach(child => {
+            const transfer = child.val();
+            allTransactions.push({
+                id: child.key,
+                type: 'transfer_received',
+                amount: transfer.amount,
+                sender: transfer.senderEmail,
+                status: 'completed',
+                timestamp: transfer.timestamp || Date.now()
+            });
+        });
+    }
+    
+    // Load sent transfers
+    const sentRef = ref(db, `transfers/sent/${currentUser.uid}`);
+    const sentSnapshot = await get(sentRef);
+    if (sentSnapshot.exists()) {
+        sentSnapshot.forEach(child => {
+            const transfer = child.val();
+            allTransactions.push({
+                id: child.key,
+                type: 'transfer_sent',
+                amount: transfer.amount,
+                recipient: transfer.recipientEmail,
+                status: transfer.status || 'completed',
+                timestamp: transfer.timestamp || Date.now()
+            });
+        });
+    }
+    
+    // Sort by timestamp (newest first)
+    allTransactions.sort((a, b) => b.timestamp - a.timestamp);
+    renderHistory();
+}
+
+// ========== RENDER HISTORY ==========
+function renderHistory() {
+    const container = document.getElementById('historyContainer');
+    if (allTransactions.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No transactions yet</p></div>`;
+        return;
+    }
+    container.innerHTML = '';
+    allTransactions.slice(0, 50).forEach(tx => {
+        const isPositive = tx.type === 'deposit' || tx.type === 'transfer_received';
+        const amountClass = isPositive ? 'positive' : 'negative';
+        const amountPrefix = isPositive ? '+' : '-';
+        let typeIcon = '', typeText = '';
+        switch(tx.type) {
+            case 'deposit': typeIcon = '<i class="fas fa-arrow-down" style="color:#0ECB81;"></i>'; typeText = 'Deposit'; break;
+            case 'withdraw': typeIcon = '<i class="fas fa-arrow-up" style="color:#F6465D;"></i>'; typeText = 'Withdrawal'; break;
+            case 'transfer_received': typeIcon = '<i class="fas fa-exchange-alt" style="color:#0ECB81;"></i>'; typeText = `Received from ${tx.sender ? tx.sender.split('@')[0] : 'User'}`; break;
+            case 'transfer_sent': typeIcon = '<i class="fas fa-exchange-alt" style="color:#F6465D;"></i>'; typeText = `Sent to ${tx.recipient ? tx.recipient.split('@')[0] : 'User'}`; break;
+            default: typeIcon = '<i class="fas fa-receipt"></i>'; typeText = 'Transaction';
+        }
+        let statusClass = tx.status === 'pending' ? 'status-pending' : (tx.status === 'completed' ? 'status-completed' : 'status-failed');
+        let statusText = tx.status === 'pending' ? 'Pending' : (tx.status === 'completed' ? 'Completed' : 'Failed');
+        const date = new Date(tx.timestamp);
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        const txCard = document.createElement('div');
+        txCard.className = 'history-card';
+        txCard.innerHTML = `
+            <div class="history-left"><div class="type">${typeIcon} ${typeText}</div><div class="date">${formattedDate}</div></div>
+            <div class="history-right"><div class="amount ${amountClass}">${amountPrefix}$${Math.abs(tx.amount).toFixed(2)}</div><div class="status ${statusClass}">${statusText}</div></div>
+        `;
+        container.appendChild(txCard);
+    });
+}
+
+// ========== FIND USER BY EMAIL ==========
+async function findUserByEmail(email) {
+    if (!email) return null;
+    const searchEmail = email.toLowerCase().trim();
+    try {
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        if (snapshot.exists()) {
+            let found = null;
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.email && user.email.toLowerCase() === searchEmail) {
+                    found = { uid: child.key, email: user.email, balance: user.balance || 0 };
+                }
+            });
+            if (found) return found;
+        }
+        return null;
+    } catch (error) { console.error("Error finding user:", error); return null; }
+}
+
+// ========== SEND TRANSFER ==========
+async function sendTransfer() {
+    const recipientEmail = document.getElementById('transferEmail').value.trim().toLowerCase();
+    const amount = parseFloat(document.getElementById('transferAmount').value);
+    const note = document.getElementById('transferNote').value;
+    
+    if (!recipientEmail) { showNotification('Enter recipient email', 'error'); return; }
+    if (!amount || amount <= 0) { showNotification('Enter valid amount', 'error'); return; }
+    if (amount < 1) { showNotification('Minimum $1', 'error'); return; }
+    if (recipientEmail === currentUser.email.toLowerCase()) { showNotification('Cannot transfer to yourself', 'error'); return; }
+    
+    const currentBalance = await loadWalletBalanceFromRTDB();
+    if (amount > currentBalance) { showNotification('Insufficient balance', 'error'); return; }
+    
+    const transferBtn = document.getElementById('transferBtn');
+    transferBtn.disabled = true;
+    transferBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking recipient...';
+    
+    try {
+        const recipient = await findUserByEmail(recipientEmail);
+        if (!recipient) { 
+            showNotification(`User "${recipientEmail}" not found`, 'error'); 
+            transferBtn.disabled = false; 
+            transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+            return; 
+        }
+        
+        transferBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        const senderRTDBRef = ref(db, `users/${currentUser.uid}`);
+        const recipientRTDBRef = ref(db, `users/${recipient.uid}`);
+        const senderSnap = await get(senderRTDBRef);
+        const recipientSnap = await get(recipientRTDBRef);
+        
+        const senderBalance = senderSnap.exists() ? (senderSnap.val().balance || 0) : 0;
+        const recipientBalance = recipientSnap.exists() ? (recipientSnap.val().balance || 0) : 0;
+        
+        if (senderBalance < amount) { 
+            showNotification('Insufficient balance', 'error'); 
+            transferBtn.disabled = false; 
+            transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+            return; 
+        }
+        
+        // Update balances
+        await update(senderRTDBRef, { balance: senderBalance - amount });
+        await update(recipientRTDBRef, { balance: recipientBalance + amount });
+        
+        const transferId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        const transferData = {
+            id: transferId,
+            amount: amount,
+            senderId: currentUser.uid,
+            senderEmail: currentUser.email,
+            recipientId: recipient.uid,
+            recipientEmail: recipient.email,
+            note: note || '',
+            timestamp: Date.now(),
+            status: 'completed'
+        };
+        
+        // Save to both sent and received paths
+        await set(ref(db, `transfers/sent/${currentUser.uid}/${transferId}`), transferData);
+        await set(ref(db, `transfers/received/${recipient.uid}/${transferId}`), transferData);
+        
+        // Add notifications
+        await addNotification(currentUser.uid, 'Transfer Sent', `You sent $${amount.toFixed(2)} to ${recipient.email}.`, 'info');
+        await addNotification(recipient.uid, 'Transfer Received', `You received $${amount.toFixed(2)} from ${currentUser.email}.`, 'success');
+        
+        showNotification(`$${amount.toFixed(2)} sent to ${recipient.email}!`, 'success');
+        
+        document.getElementById('transferEmail').value = '';
+        document.getElementById('transferAmount').value = '';
+        document.getElementById('transferNote').value = '';
+        
+        await loadTransactionHistory();
+        
+    } catch (error) { 
+        console.error("Transfer error:", error); 
+        showNotification('Error processing transfer', 'error'); 
+    } finally { 
+        transferBtn.disabled = false; 
+        transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+    }
+}
+
+// ========== INITIALIZE ==========
+async function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'login.html'; return; }
+        currentUser = user;
+        
+        document.getElementById('skeletonContainer').style.display = 'block';
+        document.getElementById('realContent').style.display = 'none';
+        
+        await loadWalletBalanceFromRTDB();
+        setupRealtimeBalance();
+        await loadTransactionHistory();
+        setInterval(loadTransactionHistory, 30000);
+        
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 1500);
+    });
+}
+
+document.getElementById('transferBtn').addEventListener('click', sendTransfer);
+init();
+</script>
+</body>
+</html>

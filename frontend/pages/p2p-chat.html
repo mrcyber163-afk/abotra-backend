@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>P2P Chat | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0',
+    VAPID_PUBLIC_KEY: 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+    background: #050505;
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding-bottom: 75px;
+    position: relative;
+    transition: background 0.3s ease;
+    font-size: 11px;
+}
+
+body.light-theme {
+    background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .order-info-card,
+body.light-theme .chat-container {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2 { color: #800000; }
+body.light-theme .order-label,
+body.light-theme .chat-message.system .chat-message-text { color: #666; }
+body.light-theme .order-value { color: #800000; }
+body.light-theme .chat-message-other { background: #e9ecef; }
+body.light-theme .chat-message-other .chat-message-text { color: #111 !important; }
+body.light-theme .chat-message-own { background: #dcf8c5; }
+body.light-theme .chat-message-own .chat-message-text { color: #111 !important; }
+body.light-theme .chat-input-area input {
+    background: white;
+    color: #333;
+    border-color: #ddd;
+}
+body.light-theme .bottom-nav {
+    background: rgba(255,255,255,0.95);
+    border-top: 1px solid rgba(128,0,0,0.2);
+}
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .theme-toggle {
+    background: rgba(0,0,0,0.08);
+    border-color: rgba(128,0,0,0.3);
+}
+body.light-theme .theme-toggle i { color: #800000; }
+
+/* ===== SYSTEM MESSAGE - GOLDEN THEME ===== */
+.chat-message-system {
+    align-self: center;
+    max-width: 92%;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    border: 2px solid #FFD700;
+}
+
+/* DARK THEME - Golden background with dark text */
+body:not(.light-theme) .chat-message-system {
+    background: linear-gradient(135deg, #1a1a0a, #2a1a00);
+    border-color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-body {
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-header {
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-time {
+    color: #aa8800;
+}
+body:not(.light-theme) .chat-message-system .system-body .copy-number {
+    background: rgba(255,215,0,0.2);
+    border-color: rgba(255,215,0,0.4);
+    color: #FFD700;
+}
+body:not(.light-theme) .chat-message-system .system-body .copy-number:hover {
+    background: rgba(255,215,0,0.35);
+}
+
+/* LIGHT THEME - Golden text on light background */
+body.light-theme .chat-message-system {
+    background: linear-gradient(135deg, #fff8e1, #ffecb3);
+    border-color: #B8860B;
+}
+body.light-theme .chat-message-system .system-body {
+    color: #8B6914;
+}
+body.light-theme .chat-message-system .system-header {
+    color: #B8860B;
+}
+body.light-theme .chat-message-system .system-time {
+    color: #aa8800;
+}
+body.light-theme .chat-message-system .system-body .copy-number {
+    background: rgba(184,134,11,0.15);
+    border-color: rgba(184,134,11,0.3);
+    color: #8B6914;
+}
+body.light-theme .chat-message-system .system-body .copy-number:hover {
+    background: rgba(184,134,11,0.3);
+}
+
+.chat-message-system .system-header {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chat-message-system .system-header i { font-size: 12px; }
+.chat-message-system .system-body {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.chat-message-system .system-body .highlight {
+    font-weight: 700;
+}
+.chat-message-system .system-body .copy-number {
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.3s;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+}
+.chat-message-system .system-body .copy-number:hover {
+    transform: scale(1.02);
+}
+.chat-message-system .system-body .copy-number i { font-size: 10px; }
+.chat-message-system .system-time {
+    font-size: 8px;
+    margin-top: 6px;
+    text-align: right;
+    border-top: 1px solid rgba(255,215,0,0.15);
+    padding-top: 4px;
+}
+
+/* Skeleton Loading Animations */
+.skeleton-order-card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.skeleton-row {
+    height: 16px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%);
+    background-size: 200% 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    animation: shimmer 1.5s infinite;
+}
+.skeleton-row.short { width: 40%; }
+.skeleton-row.medium { width: 60%; }
+.skeleton-row.large { width: 80%; }
+.skeleton-chat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 20px;
+    height: 580px;
+    animation: pulseGlow 1.5s ease-in-out infinite;
+}
+.skeleton-message {
+    display: flex;
+    padding: 10px 12px;
+    gap: 10px;
+}
+.skeleton-avatar {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,215,0,0.1);
+    border-radius: 50%;
+}
+.skeleton-text {
+    flex: 1;
+}
+.skeleton-line {
+    height: 9px;
+    background: rgba(255,215,0,0.08);
+    border-radius: 5px;
+    margin-bottom: 6px;
+}
+.skeleton-line.short { width: 30%; }
+.skeleton-line.medium { width: 60%; }
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-area img { 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 10px; 
+    object-fit: cover;
+    background: transparent;
+}
+.logo-area h2 { color: #FFD700; font-size: 16px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 8px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+.back-btn {
+    background: rgba(255,215,0,0.15);
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    color: #FFD700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+}
+.back-btn:hover {
+    background: rgba(255,215,0,0.3);
+    transform: translateX(-3px);
+}
+.theme-toggle {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 16px; color: #FFFFFF; }
+
+.main-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 75px auto 20px;
+    padding: 0 15px;
+}
+
+.order-info-card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 18px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.order-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+.order-label { color: #aaa; font-size: 10px; }
+.order-value { color: #FFD700; font-weight: 600; }
+
+.chat-container {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 620px;
+}
+.chat-header {
+    background: linear-gradient(135deg, #800000, #FFD700);
+    padding: 10px 14px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+    min-height: 0;
+}
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 16px;
+    position: relative;
+}
+.chat-message-own { 
+    align-self: flex-end; 
+    background: linear-gradient(135deg, #FFD700, #FFA500); 
+    border-bottom-right-radius: 4px; 
+}
+.chat-message-own .chat-message-text { color: #1a1a1a !important; }
+.chat-message-other { 
+    align-self: flex-start; 
+    background: linear-gradient(135deg, #0ECB81, #0A9E65); 
+    border-bottom-left-radius: 4px; 
+}
+.chat-message-other .chat-message-text { color: white !important; }
+
+.message-tick {
+    font-size: 10px;
+    margin-left: 4px;
+    color: #888;
+}
+.message-tick.delivered { color: #34B7F1; }
+.message-tick.seen { color: #34B7F1; }
+
+.chat-message-text { font-size: 11px; line-height: 1.4; word-wrap: break-word; }
+.chat-message-time { 
+    font-size: 8px; 
+    opacity: 0.7; 
+    margin-top: 3px; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 4px;
+}
+.chat-message-own .chat-message-time { color: #1a1a1a; }
+
+.chat-input-area {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(255,215,0,0.1);
+    flex-shrink: 0;
+}
+.chat-input-area input {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 25px;
+    padding: 8px 14px;
+    color: #FFFFFF;
+    font-size: 11px;
+    outline: none;
+}
+.chat-input-area input:focus { border-color: #FFD700; }
+.chat-input-area button {
+    background: linear-gradient(135deg,#800000,#FFD700);
+    border: none;
+    border-radius: 25px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 11px;
+}
+.image-upload-btn {
+    background: rgba(255,215,0,0.2);
+    border: none;
+    border-radius: 25px;
+    padding: 8px 12px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.image-upload-btn:hover { background: rgba(255,215,0,0.4); }
+
+.chat-image {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid #FFD700;
+    margin-top: 3px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.btn-paid, .btn-release, .btn-dispute, .btn-extend, .btn-cancel {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 11px;
+}
+.btn-paid { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.btn-paid-disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.btn-release { background: linear-gradient(135deg, #FFD700, #B8860B); color: #800000; }
+.btn-dispute { background: linear-gradient(135deg, #F6465D, #D43F52); color: white; }
+.btn-extend { background: rgba(255,215,0,0.2); color: #FFD700; border: 1px solid #FFD700; }
+.btn-cancel { background: rgba(128,128,128,0.3); color: #ff9999; border: 1px solid #ff5555; }
+
+.countdown-timer {
+    background: rgba(0,0,0,0.5);
+    border-radius: 18px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.countdown-timer.warning {
+    background: rgba(246,70,93,0.3);
+    color: #F6465D;
+    animation: pulseWarning 1s infinite;
+}
+@keyframes pulseWarning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,215,0,0.2);
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 12px;
+    z-index: 100;
+}
+.bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #888;
+    font-size: 8px;
+    gap: 3px;
+    transition: 0.3s;
+}
+.bottom-nav a i { font-size: 18px; }
+.bottom-nav a:hover { color: #FFD700; transform: translateY(-2px); }
+.bottom-nav a.active { color: #FFD700; }
+
+/* ===== PUSH NOTIFICATION STYLES ===== */
+.notification-popup {
+    position: fixed;
+    top: 75px;
+    right: 20px;
+    min-width: 280px;
+    max-width: 380px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    backdrop-filter: blur(20px);
+    animation: slideInRight 0.4s ease;
+    border-left: 4px solid;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.notification-popup.success { background: linear-gradient(135deg, rgba(14,203,129,0.2), rgba(14,203,129,0.08)); border-left-color: #0ECB81; color: white; }
+.notification-popup.error { background: linear-gradient(135deg, rgba(255,77,77,0.2), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; color: white; }
+.notification-popup.info { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.08)); border-left-color: #FFD700; color: white; }
+.notification-popup .notif-icon { font-size: 18px; }
+.notification-popup .notif-content { flex: 1; }
+.notification-popup .notif-title { font-weight: 700; font-size: 12px; margin-bottom: 2px; }
+.notification-popup .notif-body { font-size: 10px; opacity: 0.9; }
+.notification-popup .notif-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.notification-popup .notif-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: white;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.notification-popup .notif-btn:hover { background: rgba(255,255,255,0.3); }
+.notification-popup .notif-close {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.3s;
+    font-size: 14px;
+}
+.notification-popup .notif-close:hover { opacity: 1; }
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.modal-container {
+    background: linear-gradient(145deg, #1e1e2e, #161626);
+    border-radius: 24px;
+    max-width: 380px;
+    width: 90%;
+    border: 1px solid rgba(255,215,0,0.3);
+}
+.modal-header { 
+    padding: 14px 16px; 
+    border-bottom: 1px solid rgba(255,215,0,0.2); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+.modal-header h3 { color: #FFD700; font-size: 16px; }
+.modal-close { 
+    background: none; 
+    border: none; 
+    color: #888; 
+    font-size: 20px; 
+    cursor: pointer;
+}
+.modal-body { padding: 16px; }
+.modal-body p { color: #ccc; font-size: 12px; }
+.modal-body textarea { 
+    width: 100%; 
+    padding: 10px; 
+    background: rgba(255,255,255,0.08); 
+    border: 1px solid rgba(255,215,0,0.3); 
+    border-radius: 14px; 
+    color: white; 
+    min-height: 90px;
+    font-family: inherit;
+    font-size: 11px;
+}
+.modal-footer { 
+    padding: 12px 16px; 
+    display: flex; 
+    gap: 12px; 
+}
+.modal-btn { 
+    flex: 1; 
+    padding: 8px; 
+    border: none; 
+    border-radius: 12px; 
+    font-weight: 600; 
+    cursor: pointer;
+    font-size: 11px;
+}
+.modal-btn-primary { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.modal-btn-secondary { background: rgba(255,215,0,0.2); color: #FFD700; }
+.modal-btn-danger { background: linear-gradient(135deg, #F6465D, #D43F52); color: white; }
+
+@media(max-width: 600px) {
+    .chat-container { height: 520px; }
+    .chat-message { max-width: 95%; }
+    .order-info-row { flex-direction: column; gap: 3px; }
+    .action-buttons { flex-direction: column; }
+    .notification-popup { right: 10px; left: 10px; min-width: auto; }
+}
+</style>
+</head>
+<body>
+<div class="overlay"></div>
+<div class="top-bar">
+<div class="logo-area">
+    <img src="../assets/images/logo.png" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+    <div><h2>ABOTRA-PROAI</h2><p>P2P Chat</p></div>
+</div>
+<div class="top-bar-right">
+    <a href="p2p-order.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+    <div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+<div class="main-content">
+<div id="appContainer">
+    <div class="skeleton-order-card">
+        <div class="skeleton-row medium"></div>
+        <div class="skeleton-row large"></div>
+        <div class="skeleton-row short"></div>
+        <div class="skeleton-row medium"></div>
+    </div>
+    <div class="skeleton-chat">
+        <div class="skeleton-message">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-text">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
+        <div class="skeleton-message" style="justify-content: flex-end;">
+            <div class="skeleton-text" style="align-items: flex-end;">
+                <div class="skeleton-line short" style="margin-left: auto;"></div>
+                <div class="skeleton-line medium" style="margin-left: auto;"></div>
+            </div>
+            <div class="skeleton-avatar"></div>
+        </div>
+        <div class="skeleton-message">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-text">
+                <div class="skeleton-line large"></div>
+                <div class="skeleton-line medium"></div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 12px; display: flex; gap: 8px;">
+        <div class="skeleton-row" style="flex:1; height: 40px;"></div>
+        <div class="skeleton-row" style="flex:1; height: 40px;"></div>
+    </div>
+</div>
+</div>
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="trade.html"><i class="fa-solid fa-chart-line"></i><span>Trade</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+</div>
+
+<div id="confirmationModal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3><i class="fas fa-question-circle"></i> Confirm</h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div><div class="modal-body"><p id="modalMessage" style="color:#ccc;"></p></div><div class="modal-footer"><button class="modal-btn modal-btn-secondary" onclick="closeModal()">Cancel</button><button class="modal-btn modal-btn-primary" id="modalConfirmBtn">Confirm</button></div></div></div>
+<div id="disputeModal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3><i class="fas fa-gavel"></i> Open Dispute</h3><button class="modal-close" onclick="closeDisputeModal()"><i class="fas fa-times"></i></button></div><div class="modal-body"><textarea id="disputeReason" placeholder="Describe the issue..."></textarea></div><div class="modal-footer"><button class="modal-btn modal-btn-secondary" onclick="closeDisputeModal()">Cancel</button><button class="modal-btn modal-btn-danger" id="submitDisputeBtn">Submit</button></div></div></div>
+<div id="imageModal" class="modal-overlay"><div class="modal-container" style="max-width:90%; background:transparent;"><div class="modal-header"><h3><i class="fas fa-image"></i> Image</h3><button class="modal-close" onclick="closeImageModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" style="text-align:center;"><img id="fullscreenImage" style="max-width:100%; max-height:70vh; border-radius:16px;"></div></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, update, push, get, set, off, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let orderData = null;
+let chatUnsubscribe = null;
+let countdownInterval = null;
+let paymentMessageSent = false;
+let swRegistration = null;
+let pushSubscription = null;
+
+const ORDER_TIMEOUT_MINUTES = 30;
+const API_BASE_URL = 'https://abotra-backend-production.up.railway.app';
+
+function formatNumber(n) { return (n || 0).toLocaleString('en-US'); }
+
+function formatTime(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+}
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+async function registerServiceWorker() {
+    try {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            });
+            console.log('[SW] Service Worker registered:', registration);
+            swRegistration = registration;
+            return registration;
+        }
+    } catch (error) {
+        console.warn('[SW] Service Worker registration failed:', error);
+    }
+    return null;
+}
+
+// ============================================================
+// REQUEST PUSH PERMISSION
+// ============================================================
+async function requestPushPermission() {
+    try {
+        if (!('Notification' in window)) {
+            console.log('[NOTIF] Notifications not supported');
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            console.log('[NOTIF] Permission already granted');
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            console.log('[NOTIF] Permission denied by user');
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        console.log('[NOTIF] Permission result:', permission);
+        return permission === 'granted';
+    } catch (error) {
+        console.warn('[NOTIF] Permission request failed:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// SUBSCRIBE TO PUSH
+// ============================================================
+async function subscribeToPush() {
+    try {
+        if (!swRegistration) return null;
+        
+        const applicationServerKey = CONFIG.VAPID_PUBLIC_KEY;
+        if (!applicationServerKey) {
+            console.warn('[PUSH] No VAPID key configured');
+            return null;
+        }
+        
+        const subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        });
+        
+        console.log('[PUSH] Subscribed successfully:', subscription.endpoint);
+        pushSubscription = subscription;
+        
+        // Send subscription to backend
+        try {
+            const token = await getFirebaseToken();
+            const response = await fetch(`${CONFIG.API_URL}/api/notifications/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    subscription: subscription,
+                    userId: currentUser?.uid
+                })
+            });
+            console.log('[PUSH] Subscription saved to backend:', response.ok);
+        } catch (e) {
+            console.warn('[PUSH] Failed to save subscription:', e);
+        }
+        
+        return subscription;
+    } catch (error) {
+        console.warn('[PUSH] Subscription failed:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// DEVICE PUSH NOTIFICATION (Shows on device - APK)
+// ============================================================
+function sendDevicePushNotification(title, body, type = 'info', action = null, actionData = null) {
+    // Browser Notification API - Shows on device
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const options = {
+                body: body,
+                icon: '../assets/images/logo.png',
+                badge: '../assets/images/logo.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: Date.now().toString(),
+                data: {
+                    url: window.location.href,
+                    action: action,
+                    actionData: actionData
+                }
+            };
+            
+            if (action === 'extend') {
+                options.actions = [
+                    { action: 'extend', title: '⏰ Extend Time' },
+                    { action: 'close', title: 'Close' }
+                ];
+            }
+            
+            const notif = new Notification(title, options);
+            
+            notif.onclick = (event) => {
+                event.preventDefault();
+                window.focus();
+                if (action === 'extend') {
+                    const extendBtn = document.getElementById('extendBtn');
+                    if (extendBtn) extendBtn.click();
+                }
+            };
+            
+            notif.onaction = (event) => {
+                if (event.action === 'extend') {
+                    const extendBtn = document.getElementById('extendBtn');
+                    if (extendBtn) extendBtn.click();
+                }
+            };
+            
+            console.log('[NOTIF] Device notification sent:', title);
+        } catch (e) {
+            console.warn('[NOTIF] Device notification error:', e);
+        }
+    }
+    
+    // Also show in-app notification
+    showInAppNotification(body, type, title, action, actionData);
+}
+
+// ============================================================
+// IN-APP NOTIFICATION (Inside the app)
+// ============================================================
+function showInAppNotification(message, type = 'info', title = '', action = null, actionData = null) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-triangle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    let actionsHtml = '';
+    if (action) {
+        let actionText = '';
+        if (action === 'extend') {
+            actionText = '⏰ Extend Time';
+        } else if (action === 'view') {
+            actionText = '👁️ View';
+        }
+        if (actionText) {
+            actionsHtml = `<div class="notif-actions"><button class="notif-btn" onclick="window.handleNotifAction('${action}')">${actionText}</button></div>`;
+        }
+    }
+    
+    toast.innerHTML = `
+        <div class="notif-icon"><i class="fas ${iconMap[type] || 'fa-info-circle'}"></i></div>
+        <div class="notif-content">
+            ${title ? `<div class="notif-title">${title}</div>` : ''}
+            <div class="notif-body">${message}</div>
+            ${actionsHtml}
+        </div>
+        <div class="notif-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 8000);
+}
+
+window.handleNotifAction = function(action) {
+    if (action === 'extend') {
+        const extendBtn = document.getElementById('extendBtn');
+        if (extendBtn) extendBtn.click();
+    }
+    const notif = document.querySelector('.notification-popup');
+    if (notif) notif.remove();
+};
+
+// ============================================================
+// INIT PUSH NOTIFICATIONS
+// ============================================================
+async function initPushNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const hasPermission = await requestPushPermission();
+        if (!hasPermission) {
+            console.log('[PUSH] No permission, skipping subscription');
+            return;
+        }
+        
+        const registration = await registerServiceWorker();
+        if (!registration) {
+            console.log('[PUSH] No service worker, skipping');
+            return;
+        }
+        
+        const subscription = await subscribeToPush();
+        if (subscription) {
+            console.log('[PUSH] Push notifications ready!');
+        }
+    } catch (error) {
+        console.warn('[PUSH] Initialization failed:', error);
+    }
+}
+
+// ============================================================
+// WRAPPER: sendPushNotification
+// ============================================================
+function sendPushNotification(title, body, type = 'info', action = null, actionData = null) {
+    sendDevicePushNotification(title, body, type, action, actionData);
+}
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function openModal(message, callback) {
+    window.pendingCallback = callback;
+    document.getElementById('modalMessage').innerText = message;
+    document.getElementById('confirmationModal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('confirmationModal').style.display = 'none'; }
+document.getElementById('modalConfirmBtn').addEventListener('click', () => { if(window.pendingCallback) window.pendingCallback(); closeModal(); });
+
+function openDisputeModal() { document.getElementById('disputeReason').value = ''; document.getElementById('disputeModal').style.display = 'flex'; }
+function closeDisputeModal() { document.getElementById('disputeModal').style.display = 'none'; }
+function openImageModal(url) { document.getElementById('fullscreenImage').src = url; document.getElementById('imageModal').style.display = 'flex'; }
+function closeImageModal() { document.getElementById('imageModal').style.display = 'none'; }
+
+window.closeModal = closeModal;
+window.closeDisputeModal = closeDisputeModal;
+window.closeImageModal = closeImageModal;
+window.openImageModal = openImageModal;
+window.copyText = (text) => { 
+    navigator.clipboard.writeText(text); 
+    sendPushNotification('Copied!', '📋 Account number copied to clipboard', 'success');
+};
+
+// ============================================================
+// SYSTEM MESSAGE FUNCTIONS
+// ============================================================
+async function sendSystemMessage(orderId, msg, isPaymentMsg = false) {
+    const chatRef = ref(db, `p2p_chat/${orderId}`);
+    const newMsgRef = push(chatRef);
+    await set(newMsgRef, { 
+        sender: 'system', 
+        message: msg, 
+        timestamp: Date.now(), 
+        isSystem: true,
+        isPaymentMessage: isPaymentMsg,
+        delivered: true,
+        seen: true
+    });
+}
+
+async function getMerchantPaymentDetailsFromOrder(order) {
+    let bankName = "";
+    let accountNumber = "";
+    let accountName = "";
+    
+    if (order.merchantPaymentDetails && typeof order.merchantPaymentDetails === 'string') {
+        const lines = order.merchantPaymentDetails.split('\n');
+        for (const line of lines) {
+            if (line.toLowerCase().startsWith('bank:')) {
+                bankName = line.substring(5).trim();
+            } else if (line.toLowerCase().startsWith('account:')) {
+                accountNumber = line.substring(8).trim();
+            } else if (line.toLowerCase().startsWith('name:')) {
+                accountName = line.substring(5).trim();
+            }
+        }
+    }
+    
+    if (!bankName && order.merchantBankName) {
+        bankName = order.merchantBankName;
+    }
+    if (!accountNumber && order.merchantAccountNumber) {
+        accountNumber = order.merchantAccountNumber;
+    }
+    if (!accountName && order.merchantAccountName) {
+        accountName = order.merchantAccountName;
+    }
+    
+    if (!accountNumber) {
+        return null;
+    }
+    
+    if (!bankName) bankName = "Bank Transfer";
+    if (!accountName) accountName = "Merchant Account";
+    
+    return { bankName, accountNumber, accountName };
+}
+
+function formatPaymentMessage(order, paymentDetails) {
+    const rate = order.rate || 2800;
+    const currency = order.currency || 'TZS';
+    const localAmount = order.amount * rate;
+    const formattedLocalAmount = formatNumber(localAmount);
+    const { bankName, accountNumber, accountName } = paymentDetails;
+    
+    return `
+╔══════════════════════════════════════════╗
+║          📋 PAYMENT INSTRUCTIONS          ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  💰 AMOUNT TO PAY:                       ║
+║     ${formattedLocalAmount} ${currency}                         ║
+║     (${formatNumber(order.amount)} USDT @ ${formatNumber(rate)} ${currency}/USDT)     ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║  🏦 BANK DETAILS:                        ║
+║                                          ║
+║     Bank: ${bankName.padEnd(30)} ║
+║     Account: 📋 ${accountNumber.padEnd(30)} ║
+║     Name: ${accountName.padEnd(30)} ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║  📝 INSTRUCTIONS:                        ║
+║                                          ║
+║     1. Transfer EXACT amount to above    ║
+║     2. Use your phone as reference       ║
+║     3. Upload payment screenshot         ║
+║     4. Click "I HAVE PAID" after transfer║
+║     5. Wait for seller to release USDT   ║
+║                                          ║
+║     ⏰ Complete within ${ORDER_TIMEOUT_MINUTES} minutes   ║
+║                                          ║
+╚══════════════════════════════════════════╝
+    `;
+}
+
+async function sendPaymentInstructions(orderId) {
+    if (!orderData || paymentMessageSent) return;
+    
+    const paymentDetails = await getMerchantPaymentDetailsFromOrder(orderData);
+    
+    if (!paymentDetails) {
+        const errorMessage = `
+╔══════════════════════════════════════════╗
+║          ⚠️ PAYMENT DETAILS MISSING       ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  Please contact customer support to      ║
+║  complete this transaction.              ║
+║                                          ║
+║  Order #: ${orderData.id?.slice(-8) || 'N/A'}                    ║
+║                                          ║
+╚══════════════════════════════════════════╝
+        `;
+        await sendSystemMessage(orderId, errorMessage, true);
+        paymentMessageSent = true;
+        return;
+    }
+    
+    const formattedMessage = formatPaymentMessage(orderData, paymentDetails);
+    await sendSystemMessage(orderId, formattedMessage, true);
+    paymentMessageSent = true;
+}
+
+async function checkForImageProof(orderId) {
+    const chatRef = ref(db, `p2p_chat/${orderId}`);
+    const snapshot = await get(chatRef);
+    let hasImage = false;
+    if (snapshot.exists()) {
+        snapshot.forEach(msg => {
+            const msgVal = msg.val();
+            if (msgVal.isImage && msgVal.senderId === currentUser?.uid) hasImage = true;
+        });
+    }
+    return hasImage;
+}
+
+async function markAsPaid(orderId) {
+    const hasImageProof = await checkForImageProof(orderId);
+    if (!hasImageProof) {
+        sendPushNotification('Payment Proof Required', 'Please upload a payment screenshot first!', 'error');
+        return;
+    }
+    await update(ref(db, `p2p_orders/${orderId}`), { status: 'paid', paidAt: Date.now() });
+    await sendSystemMessage(orderId, '✅ Buyer marked as PAID. Seller, please verify and release USDT.');
+    sendPushNotification('Payment Confirmed', 'You marked the payment as PAID. Waiting for seller to release USDT.', 'success');
+    setTimeout(() => window.location.reload(), 1500);
+}
+
+async function releaseUSDT(orderId) {
+    if (orderData.merchantUserId !== currentUser.uid) {
+        sendPushNotification('Not Authorized', 'You are not authorized to release this USDT.', 'error');
+        return;
+    }
+    
+    try {
+        const buyerRef = ref(db, `users/${orderData.buyerId}`);
+        const buyerSnap = await get(buyerRef);
+        const buyerCurrentBalance = buyerSnap.val()?.balance || 0;
+        const newBuyerBalance = buyerCurrentBalance + orderData.amount;
+        await update(buyerRef, { balance: newBuyerBalance });
+        
+        if (orderData.merchantId) {
+            const merchantRef = ref(db, `merchants/${orderData.merchantId}`);
+            const merchantSnap = await get(merchantRef);
+            const merchantCurrentBalance = merchantSnap.val()?.balance || 0;
+            const newMerchantBalance = merchantCurrentBalance - orderData.amount;
+            await update(merchantRef, { balance: newMerchantBalance });
+        }
+        
+        await update(ref(db, `p2p_orders/${orderId}`), { status: 'completed', completedAt: Date.now() });
+        await sendSystemMessage(orderId, `✅ ${formatNumber(orderData.amount)} USDT released! Trade completed. Funds added to your balance.`);
+        sendPushNotification('USDT Released', `${formatNumber(orderData.amount)} USDT has been released and added to buyer's balance.`, 'success');
+        setTimeout(() => window.location.reload(), 1500);
+        
+    } catch (error) {
+        console.error("Release USDT error:", error);
+        sendPushNotification('Error', 'Error releasing USDT. Please try again.', 'error');
+    }
+}
+
+async function openDispute(orderId, reason) {
+    await update(ref(db, `p2p_orders/${orderId}`), { status: 'disputed', disputeReason: reason, disputeOpenedAt: Date.now() });
+    await push(ref(db, 'adminDisputes'), { orderId, amount: orderData.amount, buyerId: orderData.buyerId, sellerId: orderData.merchantUserId, reason, timestamp: Date.now(), status: 'pending' });
+    await sendSystemMessage(orderId, `⚖️ Dispute opened: ${reason.substring(0, 150)}... Admin will review within 24 hours.`);
+    sendPushNotification('Dispute Opened', 'Your dispute has been submitted. Admin will review within 24 hours.', 'info');
+    setTimeout(() => window.location.reload(), 1500);
+}
+
+async function cancelOrder(orderId) {
+    await update(ref(db, `p2p_orders/${orderId}`), { status: 'cancelled', cancelledAt: Date.now(), cancelledBy: currentUser.uid });
+    await sendSystemMessage(orderId, `❌ Order cancelled by ${currentUser.uid === orderData.buyerId ? 'buyer' : 'seller'}.`);
+    sendPushNotification('Order Cancelled', 'Your order has been cancelled.', 'error');
+    setTimeout(() => window.location.href = 'p2p-order.html', 1500);
+}
+
+async function extendTime(orderId) {
+    const newExpiry = Date.now() + (ORDER_TIMEOUT_MINUTES * 60 * 1000);
+    await update(ref(db, `p2p_orders/${orderId}`), { 
+        extendedAt: Date.now(),
+        extendedBy: currentUser.uid,
+        newExpiryAt: newExpiry,
+        extendCount: (orderData.extendCount || 0) + 1
+    });
+    await sendSystemMessage(orderId, `⏰ Time extended by ${ORDER_TIMEOUT_MINUTES} minutes!`);
+    sendPushNotification('Time Extended', `Payment time extended by ${ORDER_TIMEOUT_MINUTES} minutes.`, 'success');
+    if (countdownInterval) clearInterval(countdownInterval);
+    startCountdown(orderId);
+}
+
+function startCountdown(orderId) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    const countdownElement = document.getElementById('countdownTimer');
+    if (!countdownElement) return;
+    
+    let expiryTime = orderData.newExpiryAt || (orderData.createdAtMillis + (ORDER_TIMEOUT_MINUTES * 60 * 1000));
+    let notifiedAt5 = false;
+    let notifiedAt2 = false;
+    
+    countdownInterval = setInterval(async () => {
+        const now = Date.now();
+        const remaining = expiryTime - now;
+        
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            countdownElement.innerHTML = '<i class="fas fa-hourglass-end"></i> Expired';
+            countdownElement.classList.add('warning');
+            
+            if (orderData.status === 'pending') {
+                await update(ref(db, `p2p_orders/${orderId}`), { status: 'expired', expiredAt: Date.now() });
+                await sendSystemMessage(orderId, `⏰ Order expired after ${ORDER_TIMEOUT_MINUTES} minutes without payment.`);
+                sendPushNotification('Order Expired', 'Your order has expired. Please create a new order.', 'error');
+                setTimeout(() => window.location.reload(), 2000);
+            }
+            return;
+        }
+        
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        countdownElement.innerHTML = `<i class="fas fa-hourglass-half"></i> ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (remaining < 5 * 60 * 1000 && !notifiedAt5) {
+            notifiedAt5 = true;
+            sendPushNotification('⏰ Time Running Out', 'Only 5 minutes remaining to complete payment!', 'warning', 'extend');
+        }
+        
+        if (remaining < 2 * 60 * 1000 && !notifiedAt2) {
+            notifiedAt2 = true;
+            sendPushNotification('⏰ Urgent! Time Almost Up', 'Only 2 minutes remaining! Extend time now.', 'error', 'extend');
+        }
+        
+        if (remaining < 5 * 60 * 1000) {
+            countdownElement.classList.add('warning');
+        } else {
+            countdownElement.classList.remove('warning');
+        }
+    }, 1000);
+}
+
+async function sendMessage(orderId) {
+    const input = document.getElementById('messageInput');
+    const msg = input?.value.trim();
+    if (!msg) return;
+    
+    const chatRef = ref(db, `p2p_chat/${orderId}`);
+    const newMsgRef = push(chatRef);
+    
+    await set(newMsgRef, { 
+        senderId: currentUser.uid, 
+        message: msg, 
+        timestamp: Date.now(),
+        delivered: true,
+        seen: false
+    });
+    
+    // Send push notification to other party
+    const partnerId = orderData.buyerId === currentUser.uid ? orderData.merchantUserId : orderData.buyerId;
+    if (partnerId) {
+        const partnerName = orderData.buyerId === currentUser.uid ? 'Seller' : 'Buyer';
+        sendPushNotification('💬 New Message', `${partnerName}: ${msg.substring(0, 50)}...`, 'info', 'view');
+    }
+    
+    if (input) input.value = '';
+}
+
+async function uploadImageMessage(orderId, file) {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { 
+        sendPushNotification('Image too large!', 'Maximum size is 2MB', 'error');
+        return; 
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const chatRef = ref(db, `p2p_chat/${orderId}`);
+        const newMsgRef = push(chatRef);
+        
+        await set(newMsgRef, {
+            senderId: currentUser.uid,
+            message: '📷 Payment Proof',
+            imageData: ev.target.result,
+            timestamp: Date.now(),
+            isImage: true,
+            delivered: true,
+            seen: false
+        });
+        
+        sendPushNotification('Payment Proof Uploaded', 'You uploaded a payment screenshot.', 'success');
+        const paidBtn = document.getElementById('paidBtn');
+        if (paidBtn) { 
+            paidBtn.disabled = false; 
+            paidBtn.classList.remove('btn-paid-disabled'); 
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function setupChatListener(orderId) {
+    if (chatUnsubscribe) {
+        off(chatUnsubscribe);
+        chatUnsubscribe = null;
+    }
+    
+    const chatRef = ref(db, `p2p_chat/${orderId}`);
+    const chatQuery = query(chatRef, orderByChild('timestamp'));
+    
+    let lastMessageCount = 0;
+    
+    chatUnsubscribe = onValue(chatQuery, (snapshot) => {
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        
+        if (!snapshot.exists()) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No messages yet. Start the conversation!</div>';
+            return;
+        }
+        
+        const messages = [];
+        snapshot.forEach(child => {
+            messages.push({ id: child.key, ...child.val() });
+        });
+        
+        messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        
+        if (messages.length > lastMessageCount && lastMessageCount > 0) {
+            const newMessages = messages.slice(lastMessageCount);
+            for (const msg of newMessages) {
+                if (msg.senderId !== currentUser?.uid && !msg.isSystem) {
+                    const senderName = orderData.buyerId === currentUser.uid ? 'Seller' : 'Buyer';
+                    sendPushNotification('💬 New Message', `${senderName}: ${msg.message?.substring(0, 60) || 'New message'}`, 'info', 'view');
+                }
+            }
+        }
+        lastMessageCount = messages.length;
+        
+        container.innerHTML = '';
+        
+        for (const msg of messages) {
+            const isSystem = msg.isSystem === true;
+            const isOwn = msg.senderId === currentUser?.uid;
+            
+            let msgClass = '';
+            if (isSystem) {
+                msgClass = 'chat-message-system';
+            } else if (isOwn) {
+                msgClass = 'chat-message-own';
+            } else {
+                msgClass = 'chat-message-other';
+            }
+            
+            const timeStr = formatTime(msg.timestamp);
+            
+            const div = document.createElement('div');
+            div.className = `chat-message ${msgClass}`;
+            
+            if (isSystem) {
+                const rawMessage = msg.message || '';
+                let accountNumberToCopy = null;
+                const accountMatch = rawMessage.match(/Account:\s*📋\s*([\d\s]+)/);
+                if (accountMatch && accountMatch[1]) {
+                    accountNumberToCopy = accountMatch[1].trim();
+                }
+                
+                let formattedMessage = escapeHtml(rawMessage).replace(/\n/g, '<br>');
+                
+                if (accountNumberToCopy) {
+                    const accountRegex = /Account:\s*📋\s*([\d\s]+)/;
+                    formattedMessage = formattedMessage.replace(
+                        accountRegex,
+                        `Account: 📋 <span class="copy-number" onclick="window.copyText('${accountNumberToCopy}')">${accountNumberToCopy} <i class="fas fa-copy"></i></span>`
+                    );
+                }
+                
+                div.innerHTML = `
+                    <div class="system-header"><i class="fas fa-robot"></i> SYSTEM</div>
+                    <div class="system-body">${formattedMessage}</div>
+                    <div class="system-time">${timeStr}</div>
+                `;
+            } else {
+                let tickHtml = '';
+                if (isOwn) {
+                    if (msg.seen === true) {
+                        tickHtml = `<span class="message-tick seen"><i class="fas fa-check-double"></i></span>`;
+                    } else if (msg.delivered === true) {
+                        tickHtml = `<span class="message-tick delivered"><i class="fas fa-check"></i></span>`;
+                    } else {
+                        tickHtml = `<span class="message-tick"><i class="fas fa-clock"></i></span>`;
+                    }
+                }
+                
+                if (msg.isImage && msg.imageData) {
+                    div.innerHTML = `
+                        <img src="${escapeHtml(msg.imageData)}" class="chat-image" onclick="openImageModal('${escapeHtml(msg.imageData).replace(/'/g, "\\'")}')">
+                        <div class="chat-message-time">
+                            <span>${timeStr}</span>
+                            ${tickHtml}
+                        </div>
+                    `;
+                } else {
+                    let messageText = escapeHtml(msg.message || '').replace(/\n/g, '<br>');
+                    div.innerHTML = `
+                        <div class="chat-message-text">${messageText}</div>
+                        <div class="chat-message-time">
+                            <span>${timeStr}</span>
+                            ${tickHtml}
+                        </div>
+                    `;
+                }
+            }
+            container.appendChild(div);
+        }
+        container.scrollTop = container.scrollHeight;
+    });
+}
+
+async function loadOrderAndChat() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');
+    if (!orderId) { 
+        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>No order ID provided</p><a href="p2p-order.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
+        return; 
+    }
+    
+    const orderSnap = await get(ref(db, `p2p_orders/${orderId}`));
+    if (!orderSnap.exists()) { 
+        document.getElementById('appContainer').innerHTML = '<div style="text-align:center; padding:60px;"><i class="fas fa-exclamation-triangle"></i><p>Order not found</p><a href="p2p-order.html" class="back-btn" style="display:inline-flex; margin-top:20px;"><i class="fas fa-arrow-left"></i> Back to Orders</a></div>'; 
+        return; 
+    }
+    
+    orderData = { id: orderId, ...orderSnap.val() };
+    const isBuyer = orderData.buyerId === currentUser.uid;
+    const isSeller = orderData.merchantUserId === currentUser.uid;
+    const statusMap = { pending:'Awaiting Payment', paid:'Payment Sent - Awaiting Release', completed:'Completed', disputed:'Disputed', cancelled:'Cancelled', expired:'Expired' };
+    const formattedAmount = formatNumber(orderData.amount);
+    const rate = orderData.rate || 2800;
+    const totalLocal = formatNumber(orderData.amount * rate);
+    const currency = orderData.currency || 'TZS';
+    const hasImageProof = await checkForImageProof(orderId);
+    
+    let partnerName = 'Trader';
+    if (isBuyer && orderData.merchantName) {
+        partnerName = orderData.merchantName;
+    } else if (isSeller && orderData.buyerName) {
+        partnerName = orderData.buyerName;
+    }
+    
+    let timeRemaining = '';
+    if (orderData.status === 'pending') {
+        const expiryTime = orderData.newExpiryAt || (orderData.createdAtMillis + (ORDER_TIMEOUT_MINUTES * 60 * 1000));
+        const remaining = expiryTime - Date.now();
+        if (remaining > 0) {
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            timeRemaining = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    const container = document.getElementById('appContainer');
+    container.innerHTML = `
+        <div class="order-info-card">
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-hashtag"></i> Order #:</span><span class="order-value">${orderId.slice(-8)}</span></div>
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-coins"></i> Amount:</span><span class="order-value">${formattedAmount} USDT</span></div>
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-chart-line"></i> Rate:</span><span class="order-value">${formatNumber(rate)} ${currency}/USDT</span></div>
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-calculator"></i> Total to Pay:</span><span class="order-value">${totalLocal} ${currency}</span></div>
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-info-circle"></i> Status:</span><span class="order-value">${statusMap[orderData.status] || orderData.status}</span></div>
+            <div class="order-info-row"><span class="order-label"><i class="fas fa-user-friends"></i> Partner:</span><span class="order-value">${escapeHtml(partnerName)}</span></div>
+            ${orderData.status === 'pending' && timeRemaining ? `<div class="order-info-row"><span class="order-label"><i class="fas fa-hourglass-half"></i> Time Remaining:</span><span class="order-value"><span id="countdownTimer" class="countdown-timer">${timeRemaining}</span></span></div>` : ''}
+        </div>
+        <div class="chat-container">
+            <div class="chat-header">
+                <i class="fab fa-whatsapp"></i> Trade Chat
+                ${(orderData.status === 'pending' || orderData.status === 'paid') ? '<small style="font-size:9px;"><i class="fas fa-lock"></i> Encrypted</small>' : ''}
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="messageInput" placeholder="Type a message..." ${orderData.status === 'expired' || orderData.status === 'cancelled' || orderData.status === 'completed' ? 'disabled' : ''}>
+                <button class="image-upload-btn" id="imageUploadBtn" ${orderData.status === 'expired' || orderData.status === 'cancelled' || orderData.status === 'completed' ? 'disabled' : ''}><i class="fas fa-camera"></i></button>
+                <button id="sendMsgBtn" ${orderData.status === 'expired' || orderData.status === 'cancelled' || orderData.status === 'completed' ? 'disabled' : ''}><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+        <div id="actionButtons"></div>
+    `;
+    
+    if (orderData.status === 'pending' && timeRemaining) {
+        startCountdown(orderId);
+    }
+    
+    if (isBuyer && orderData.status === 'pending' && !paymentMessageSent) {
+        setTimeout(async () => {
+            await sendPaymentInstructions(orderId);
+        }, 1500);
+    }
+    
+    setupChatListener(orderId);
+    
+    const actionsDiv = document.getElementById('actionButtons');
+    if (!actionsDiv) return;
+    
+    if (orderData.status === 'pending') {
+        if (isBuyer) {
+            actionsDiv.innerHTML = `<div class="action-buttons">
+                <button class="btn-paid" id="paidBtn"><i class="fas fa-check-circle"></i> I HAVE PAID</button>
+                <button class="btn-extend" id="extendBtn"><i class="fas fa-clock"></i> Extend Time</button>
+                <button class="btn-cancel" id="cancelBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>
+                <button class="btn-dispute" id="disputeBtn"><i class="fas fa-gavel"></i> Dispute</button>
+            </div>`;
+            
+            const paidBtn = document.getElementById('paidBtn');
+            if (paidBtn) {
+                if (hasImageProof) { 
+                    paidBtn.disabled = false; 
+                    paidBtn.classList.remove('btn-paid-disabled'); 
+                } else { 
+                    paidBtn.disabled = true; 
+                    paidBtn.classList.add('btn-paid-disabled'); 
+                    paidBtn.title = "Upload payment proof first (click camera icon)"; 
+                }
+                paidBtn.addEventListener('click', () => openModal('Confirm you have made the payment?', () => markAsPaid(orderId)));
+            }
+            document.getElementById('extendBtn')?.addEventListener('click', () => openModal(`Extend time by ${ORDER_TIMEOUT_MINUTES} minutes?`, () => extendTime(orderId)));
+            document.getElementById('cancelBtn')?.addEventListener('click', () => openModal('Cancel this order? This action cannot be undone.', () => cancelOrder(orderId)));
+            document.getElementById('disputeBtn')?.addEventListener('click', openDisputeModal);
+        } else if (isSeller) {
+            actionsDiv.innerHTML = `<div class="action-buttons">
+                <button class="btn-cancel" id="cancelBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>
+                <button class="btn-dispute" id="disputeBtn"><i class="fas fa-gavel"></i> Dispute</button>
+            </div>`;
+            document.getElementById('cancelBtn')?.addEventListener('click', () => openModal('Cancel this order?', () => cancelOrder(orderId)));
+            document.getElementById('disputeBtn')?.addEventListener('click', openDisputeModal);
+        }
+    } else if (orderData.status === 'paid') {
+        if (isSeller) {
+            actionsDiv.innerHTML = `<div class="action-buttons">
+                <button class="btn-release" id="releaseBtn"><i class="fas fa-dollar-sign"></i> RELEASE USDT</button>
+                <button class="btn-dispute" id="disputeBtn"><i class="fas fa-gavel"></i> Dispute</button>
+            </div>`;
+            document.getElementById('releaseBtn')?.addEventListener('click', () => openModal(`Release ${formattedAmount} USDT to buyer?`, () => releaseUSDT(orderId)));
+            document.getElementById('disputeBtn')?.addEventListener('click', openDisputeModal);
+        } else if (isBuyer) {
+            actionsDiv.innerHTML = `<div class="action-buttons">
+                <button class="btn-dispute" id="disputeBtn"><i class="fas fa-gavel"></i> Dispute</button>
+            </div>`;
+            document.getElementById('disputeBtn')?.addEventListener('click', openDisputeModal);
+        }
+    } else if (orderData.status === 'completed') {
+        actionsDiv.innerHTML = `<div style="background:rgba(14,203,129,0.15); border-radius:16px; padding:15px; text-align:center; color:#0ECB81;"><i class="fas fa-check-circle"></i> Trade Completed Successfully!</div>`;
+    } else if (orderData.status === 'expired') {
+        actionsDiv.innerHTML = `<div style="background:rgba(246,70,93,0.15); border-radius:16px; padding:15px; text-align:center; color:#F6465D;"><i class="fas fa-hourglass-end"></i> Order Expired</div>`;
+    } else if (orderData.status === 'cancelled') {
+        actionsDiv.innerHTML = `<div style="background:rgba(128,128,128,0.15); border-radius:16px; padding:15px; text-align:center; color:#aaa;"><i class="fas fa-ban"></i> Order Cancelled</div>`;
+    }
+    
+    const sendBtn = document.getElementById('sendMsgBtn');
+    if (sendBtn) sendBtn.addEventListener('click', () => sendMessage(orderId));
+    
+    const msgInput = document.getElementById('messageInput');
+    if (msgInput) msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(orderId); });
+    
+    const imageUploadBtn = document.getElementById('imageUploadBtn');
+    if (imageUploadBtn) {
+        imageUploadBtn.addEventListener('click', () => {
+            if (orderData.status !== 'pending') {
+                sendPushNotification('Cannot Upload', 'Order is no longer pending', 'error');
+                return;
+            }
+            const input = document.createElement('input');
+            input.type = 'file'; 
+            input.accept = 'image/*';
+            input.onchange = (e) => { if (e.target.files[0]) uploadImageMessage(orderId, e.target.files[0]); };
+            input.click();
+        });
+    }
+    
+    const submitDisputeBtn = document.getElementById('submitDisputeBtn');
+    if (submitDisputeBtn) {
+        const newBtn = submitDisputeBtn.cloneNode(true);
+        submitDisputeBtn.parentNode.replaceChild(newBtn, submitDisputeBtn);
+        newBtn.onclick = () => {
+            const reason = document.getElementById('disputeReason').value.trim();
+            if (reason) { 
+                closeDisputeModal(); 
+                openDispute(orderId, reason); 
+            } else { 
+                sendPushNotification('Reason Required', 'Please enter a reason for the dispute', 'error'); 
+            }
+        };
+    }
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle')?.addEventListener('click', () => {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    }
+});
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    
+    // Initialize push notifications
+    setTimeout(async () => {
+        await initPushNotifications();
+    }, 2000);
+    
+    await loadOrderAndChat();
+});
+
+initTheme();
+
+window.addEventListener('beforeunload', () => { 
+    if (chatUnsubscribe) {
+        off(chatUnsubscribe);
+        chatUnsubscribe = null;
+    }
+    if (countdownInterval) clearInterval(countdownInterval);
+});
+</script>
+</body>
+</html>

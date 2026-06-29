@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Subscription | ABOTRA-PROAI - Unlock Premium Features</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 10px;
+}
+
+body.light-theme {
+background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
+}
+
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .subscription-container,
+body.light-theme .plan-card,
+body.light-theme .current-plan-card,
+body.light-theme .payment-modal-content {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .plan-name,
+body.light-theme .current-plan-title { color: #800000; }
+body.light-theme .plan-price { color: #800000; }
+body.light-theme .feature-text { color: #555; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+
+.skeleton-balance-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px;
+padding: 10px;
+margin-bottom: 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-balance-label {
+height: 10px;
+width: 80px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-balance-amount {
+height: 20px;
+width: 60px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-current-plan {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 20px;
+padding: 18px;
+margin-bottom: 22px;
+text-align: center;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-current-title {
+height: 14px;
+width: 100px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin: 0 auto 6px auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-current-name {
+height: 20px;
+width: 90px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin: 0 auto 5px auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-current-expiry {
+height: 9px;
+width: 110px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+margin: 0 auto 6px auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-current-status {
+height: 20px;
+width: 60px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 16px;
+margin: 0 auto;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-plans-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 18px;
+margin-bottom: 22px;
+}
+.skeleton-plan-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-plan-name {
+height: 20px;
+width: 80px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin-bottom: 6px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-plan-price {
+height: 28px;
+width: 95px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin-bottom: 3px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-plan-period {
+height: 9px;
+width: 60px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+margin-bottom: 10px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-multiplier {
+height: 32px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 8px;
+margin: 10px 0;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-feature {
+height: 9px;
+width: 90%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 4px;
+margin: 6px 0;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-btn {
+height: 38px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 10px;
+margin-top: 14px;
+animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 1; }
+}
+
+.theme-toggle {
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 10px;
+padding: 6px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.02); }
+.theme-toggle i { font-size: 14px; color: #FFFFFF; }
+
+.overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.82);
+backdrop-filter: blur(4px);
+z-index: 1;
+}
+
+.top-bar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 100;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 8px 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 1px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top {
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 8px;
+padding: 5px 8px;
+color: #FFD700;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+gap: 4px;
+font-size: 9px;
+font-weight: 500;
+}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
+.subscription-container {
+position: relative;
+z-index: 2;
+max-width: 1200px;
+margin: 65px auto 20px;
+padding: 0 15px;
+}
+
+.page-title {
+text-align: center;
+font-size: 20px;
+font-weight: 800;
+color: #FFD700;
+margin-bottom: 6px;
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+.page-subtitle {
+text-align: center;
+color: #AAAAAA;
+font-size: 10px;
+margin-bottom: 20px;
+}
+
+.current-plan-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.3);
+backdrop-filter: blur(10px);
+border-radius: 20px;
+padding: 18px;
+margin-bottom: 22px;
+text-align: center;
+}
+
+.current-plan-title {
+color: #FFD700;
+font-size: 13px;
+font-weight: 700;
+margin-bottom: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+.current-plan-name {
+font-size: 18px;
+font-weight: 800;
+color: #FFD700;
+margin-bottom: 6px;
+}
+
+.current-plan-expiry {
+color: #AAAAAA;
+font-size: 9px;
+margin-bottom: 10px;
+}
+
+.current-plan-status {
+display: inline-block;
+padding: 3px 10px;
+border-radius: 16px;
+font-size: 9px;
+font-weight: 600;
+}
+.status-active { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.status-expired { background: rgba(246,70,93,0.2); color: #F6465D; }
+
+.multiplier-badge {
+display: inline-block;
+background: rgba(255,215,0,0.2);
+border-radius: 50px;
+padding: 2px 6px;
+font-size: 8px;
+color: #FFD700;
+margin-left: 6px;
+}
+
+.balance-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px;
+padding: 10px 14px;
+margin-bottom: 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.balance-label { color: #AAAAAA; font-size: 9px; display: flex; align-items: center; gap: 5px; }
+.balance-amount { color: #FFD700; font-size: 16px; font-weight: 800; }
+
+.plans-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 18px;
+margin-bottom: 22px;
+}
+
+.plan-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+backdrop-filter: blur(10px);
+border-radius: 20px;
+padding: 20px;
+transition: 0.3s;
+position: relative;
+overflow: hidden;
+}
+.plan-card:hover {
+transform: translateY(-3px);
+border-color: #FFD700;
+box-shadow: 0 10px 30px rgba(255,215,0,0.1);
+}
+.plan-card.popular { border: 2px solid #FFD700; }
+
+.popular-badge {
+position: absolute;
+top: 10px;
+right: -30px;
+background: #FFD700;
+color: #800000;
+font-size: 9px;
+font-weight: 700;
+padding: 3px 30px;
+transform: rotate(45deg);
+}
+
+.plan-name { color: #FFD700; font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.plan-price { color: #FFD700; font-size: 20px; font-weight: 800; margin-bottom: 3px; }
+.plan-price small { font-size: 9px; font-weight: 400; color: #AAAAAA; }
+.plan-period { color: #888; font-size: 8px; margin-bottom: 14px; }
+
+.profit-multiplier {
+background: rgba(14,203,129,0.15);
+border-radius: 8px;
+padding: 5px;
+text-align: center;
+margin: 10px 0;
+}
+.profit-multiplier span { color: #0ECB81; font-size: 12px; font-weight: 800; }
+
+.plan-features {
+list-style: none;
+margin: 16px 0;
+}
+.plan-features li {
+padding: 5px 0;
+color: #CCCCCC;
+font-size: 9px;
+display: flex;
+align-items: center;
+gap: 6px;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.plan-features li i { font-size: 9px; width: 14px; }
+.plan-features li .fa-check-circle { color: #0ECB81; }
+.plan-features li .fa-times-circle { color: #F6465D; }
+
+.subscribe-btn {
+width: 100%;
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+border-radius: 10px;
+padding: 9px;
+color: white;
+font-weight: 700;
+font-size: 10px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 5px;
+}
+.subscribe-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,215,0,0.3); }
+.subscribe-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.payment-modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.95);
+z-index: 20000;
+align-items: center;
+justify-content: center;
+}
+.payment-modal-content {
+background: rgba(10,10,10,0.98);
+backdrop-filter: blur(15px);
+border: 1px solid rgba(255,215,0,0.3);
+border-radius: 20px;
+padding: 18px;
+max-width: 400px;
+width: 90%;
+}
+
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 14px;
+}
+.modal-header h3 { color: #FFD700; font-size: 16px; }
+.close-modal { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
+
+.payment-methods {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin: 14px 0;
+}
+.payment-method {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 8px;
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 12px;
+cursor: pointer;
+transition: 0.3s;
+}
+.payment-method:hover { background: rgba(255,215,0,0.1); border-color: #FFD700; }
+.payment-method i { font-size: 18px; color: #FFD700; }
+.payment-method .method-info { flex: 1; }
+.payment-method .method-name { color: white; font-weight: 600; font-size: 11px; }
+.payment-method .method-desc { color: #888; font-size: 8px; }
+.payment-method.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
+
+.pay-btn {
+width: 100%;
+background: linear-gradient(135deg, #0ECB81, #0A9E65);
+border: none;
+border-radius: 10px;
+padding: 9px;
+color: white;
+font-weight: 700;
+font-size: 11px;
+cursor: pointer;
+margin-top: 14px;
+}
+.pay-btn:hover { transform: translateY(-2px); }
+
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px 16px 0 0;
+display: flex;
+justify-content: space-around;
+padding: 6px 10px;
+z-index: 100;
+flex-wrap: wrap;
+}
+.bottom-nav a {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-decoration: none;
+color: #888;
+font-size: 7px;
+transition: 0.3s;
+gap: 2px;
+}
+.bottom-nav a i { font-size: 15px; }
+.bottom-nav a.active { color: #FFD700; }
+
+.notification-popup {
+position: fixed;
+top: 65px;
+right: 15px;
+min-width: 240px;
+max-width: 300px;
+padding: 8px 12px;
+border-radius: 12px;
+display: flex;
+align-items: center;
+gap: 8px;
+z-index: 99999;
+backdrop-filter: blur(20px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+border-left: 4px solid;
+}
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup i { font-size: 14px; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
+
+@keyframes slideInRight {
+from { opacity: 0; transform: translateX(100%); }
+to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+from { opacity: 1; transform: translateX(0); }
+to { opacity: 0; transform: translateX(100%); }
+}
+
+@media(max-width: 700px) {
+.subscription-container { padding: 0 15px; }
+.page-title { font-size: 18px; }
+.plans-grid { grid-template-columns: 1fr; }
+.plan-card { padding: 15px; }
+.theme-toggle { padding: 6px; }
+.logo-area h2 { font-size: 12px; }
+.logo-area p { display: none; }
+.bottom-nav a span { font-size: 6px; }
+.bottom-nav a i { font-size: 13px; }
+.bottom-nav { flex-wrap: wrap; gap: 3px; }
+.bottom-nav a { flex: 1; min-width: 45px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div>
+<h2>ABOTRA-PROAI</h2>
+<p>Subscription Plans</p>
+</div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'">
+<i class="fas fa-arrow-left"></i> Back
+</button>
+<div class="theme-toggle" id="themeToggle">
+<i class="fas fa-sun"></i>
+<i class="fas fa-moon" style="display:none;"></i>
+</div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="subscription-container">
+<div class="page-title">
+<i class="fas fa-crown"></i> Subscription Plans
+</div>
+<div class="page-subtitle">
+Choose the perfect plan to unlock premium AI trading features and boost your profits!
+</div>
+
+<div id="skeletonContainer">
+    <div class="skeleton-balance-card">
+        <div class="skeleton-balance-label"></div>
+        <div class="skeleton-balance-amount"></div>
+    </div>
+    <div class="skeleton-current-plan">
+        <div class="skeleton-current-title"></div>
+        <div class="skeleton-current-name"></div>
+        <div class="skeleton-current-expiry"></div>
+        <div class="skeleton-current-status"></div>
+    </div>
+    <div class="skeleton-plans-grid">
+        <div class="skeleton-plan-card">
+            <div class="skeleton-plan-name"></div>
+            <div class="skeleton-plan-price"></div>
+            <div class="skeleton-plan-period"></div>
+            <div class="skeleton-multiplier"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-btn"></div>
+        </div>
+        <div class="skeleton-plan-card">
+            <div class="skeleton-plan-name"></div>
+            <div class="skeleton-plan-price"></div>
+            <div class="skeleton-plan-period"></div>
+            <div class="skeleton-multiplier"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-btn"></div>
+        </div>
+        <div class="skeleton-plan-card">
+            <div class="skeleton-plan-name"></div>
+            <div class="skeleton-plan-price"></div>
+            <div class="skeleton-plan-period"></div>
+            <div class="skeleton-multiplier"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-feature"></div>
+            <div class="skeleton-btn"></div>
+        </div>
+    </div>
+</div>
+
+<div id="realContent" style="display: none;">
+    <div class="balance-card">
+        <div class="balance-label">
+            <i class="fas fa-wallet"></i> Your Balance
+        </div>
+        <div class="balance-amount" id="userBalanceDisplay">$0.00</div>
+    </div>
+
+    <div class="current-plan-card" id="currentPlanCard">
+        <div class="current-plan-title">
+            <i class="fas fa-id-card"></i> Your Current Plan
+        </div>
+        <div class="current-plan-name" id="currentPlanName">Free Plan</div>
+        <div class="current-plan-expiry" id="currentPlanExpiry">Basic features only</div>
+        <div class="current-plan-status" id="currentPlanStatus" class="status-active">Active</div>
+    </div>
+
+    <div class="plans-grid" id="plansGrid"></div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="trade2.html"><i class="fas fa-graduation-cap"></i><span>AI Tutorial</span></a>
+<a href="trade.html"><i class="fa-solid fa-chart-line"></i><span>Trade</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Trade</span></a>
+<a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
+<a href="subscriptions.html" class="active"><i class="fas fa-crown"></i><span>Plans</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<div id="paymentModal" class="payment-modal">
+<div class="payment-modal-content">
+<div class="modal-header">
+<h3 id="modalPlanName">Complete Payment</h3>
+<button class="close-modal" onclick="closePaymentModal()">&times;</button>
+</div>
+<div id="modalPlanDetails"></div>
+<div class="payment-methods">
+<div class="payment-method" onclick="selectPaymentMethod('balance')">
+<i class="fas fa-wallet"></i>
+<div class="method-info">
+<div class="method-name">Account Balance</div>
+<div class="method-desc">Pay directly from your ABOTRA balance</div>
+</div>
+</div>
+<div class="payment-method" onclick="selectPaymentMethod('mobile_money')">
+<i class="fas fa-mobile-alt"></i>
+<div class="method-info">
+<div class="method-name">Deposit via Mobile Number</div>
+<div class="method-desc">Add funds using your mobile money account</div>
+</div>
+</div>
+<div class="payment-method" onclick="selectPaymentMethod('p2p')">
+<i class="fas fa-handshake"></i>
+<div class="method-info">
+<div class="method-name">P2P Transfer</div>
+<div class="method-desc">Buy USDT from trusted merchants</div>
+</div>
+</div>
+</div>
+<button class="pay-btn" id="confirmPaymentBtn">Confirm Payment</button>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, set, get, update, onValue, off, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+// ============================================================
+// API BASE URL
+// ============================================================
+const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
+    ? 'http://localhost:5001' 
+    : 'https://abotra-backend.up.railway.app';
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// PLAN DATA
+// ============================================================
+const plans = [
+    { id: 1, name: "BASIC", price: 10, multiplier: 1.5, features: ["Up to $10,000 monthly volume", "1 AI Robot active", "Basic support", "2% trading fee", "<strong>1.5x profit multiplier</strong> on all AI robots"], notFeatures: ["Priority support", "Advanced analytics"], popular: false },
+    { id: 2, name: "PRO", price: 30, multiplier: 3, features: ["Up to $50,000 monthly volume", "3 AI Robots active", "Priority support", "1% trading fee", "<strong>3x profit multiplier</strong> on all AI robots", "Advanced analytics", "API access"], notFeatures: [], popular: true },
+    { id: 3, name: "VIP", price: 100, multiplier: 5, features: ["Unlimited monthly volume", "7 AI Robots active", "24/7 Dedicated support", "0.5% trading fee", "<strong>5x profit multiplier</strong> on all AI robots", "Advanced analytics + AI predictions", "Full API access + Webhooks", "Early access to new features", "Monthly consultation call"], notFeatures: [], popular: false }
+];
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// API CALLS TO BACKEND
+// ============================================================
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('API request error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let userData = null;
+let pendingSubscription = null;
+let selectedPaymentMethod = null;
+let rtdbBalanceListener = null;
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+// ============================================================
+// NOTIFICATION FUNCTIONS
+// ============================================================
+function showNotification(message, type, duration = 4000) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+async function addNotification(userId, title, message, type = 'info') {
+    if (!userId) return;
+    try {
+        await apiRequest('notifications', 'POST', { userId, title, message, type });
+    } catch(e) {
+        console.error('Add notification error:', e);
+    }
+}
+
+// ============================================================
+// GET USER BALANCE
+// ============================================================
+async function getUserBalance() {
+    if (!currentUser) return 0;
+    try {
+        const data = await apiRequest('user/profile', 'GET');
+        if (data.success && data.user) {
+            return data.user.balance || 0;
+        }
+        return 0;
+    } catch (error) {
+        console.error("Error getting balance:", error);
+        return 0;
+    }
+}
+
+// ============================================================
+// SETUP REALTIME BALANCE
+// ============================================================
+function setupRealtimeBalance() {
+    if (!currentUser) return;
+    if (rtdbBalanceListener) { off(rtdbBalanceListener); }
+    
+    const rtdbRef = ref(db, `users/${currentUser.uid}`);
+    rtdbBalanceListener = onValue(rtdbRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const balance = snapshot.val().balance || 0;
+            document.getElementById('userBalanceDisplay').innerHTML = `$${balance.toFixed(2)}`;
+        }
+    }, (error) => {
+        console.error('RTDB listener error:', error);
+    });
+}
+
+// ============================================================
+// UPDATE USER BALANCE
+// ============================================================
+async function updateUserBalance(amount, operation) {
+    if (!currentUser) return false;
+    try {
+        const data = await apiRequest('user/balance', 'PUT', { 
+            amount, 
+            operation 
+        });
+        return data.success;
+    } catch (error) {
+        console.error("Error updating balance:", error);
+        return false;
+    }
+}
+
+// ============================================================
+// LOAD USER SUBSCRIPTION
+// ============================================================
+async function loadUserSubscription() {
+    if (!currentUser) return { plan: "Free Plan", multiplier: 1, expiry: null };
+    try {
+        const data = await apiRequest('user/subscription', 'GET');
+        if (data.success && data.subscription) {
+            const sub = data.subscription;
+            if (sub.expiry > Date.now()) {
+                return { plan: sub.plan, multiplier: sub.multiplier, expiry: sub.expiry };
+            }
+        }
+    } catch (error) {
+        console.error("Error loading subscription:", error);
+    }
+    return { plan: "Free Plan", multiplier: 1, expiry: null };
+}
+
+// ============================================================
+// RENDER PLANS
+// ============================================================
+function renderPlans(currentPlan) {
+    const grid = document.getElementById('plansGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    plans.forEach(plan => {
+        const isCurrent = currentPlan.plan === plan.name;
+        const isHigher = currentPlan.multiplier >= plan.multiplier;
+        const card = document.createElement('div');
+        card.className = `plan-card ${plan.popular ? 'popular' : ''}`;
+        
+        let featuresHtml = '';
+        plan.features.forEach(f => {
+            featuresHtml += `<li><i class="fas fa-check-circle"></i> ${f}</li>`;
+        });
+        plan.notFeatures.forEach(f => {
+            featuresHtml += `<li><i class="fas fa-times-circle"></i> ${f}</li>`;
+        });
+        
+        card.innerHTML = `
+            ${plan.popular ? '<div class="popular-badge">POPULAR</div>' : ''}
+            <div class="plan-name">${plan.name}</div>
+            <div class="plan-price">$${plan.price} <small>/month</small></div>
+            <div class="plan-period">Billed monthly</div>
+            <div class="profit-multiplier">
+                <span>✨ Profit Multiplier: ${plan.multiplier}x</span>
+            </div>
+            <ul class="plan-features">
+                ${featuresHtml}
+            </ul>
+            <button class="subscribe-btn" data-plan="${plan.name}" data-price="${plan.price}" data-multiplier="${plan.multiplier}" ${isHigher || isCurrent ? 'disabled' : ''}>
+                ${isCurrent ? '<i class="fas fa-check"></i> Current Plan' : (isHigher ? '<i class="fas fa-check"></i> Already Have Better' : '<i class="fas fa-shopping-cart"></i> Subscribe')}
+            </button>
+        `;
+        
+        const btn = card.querySelector('.subscribe-btn');
+        if (!isHigher && !isCurrent) {
+            btn.addEventListener('click', () => initiateSubscription(plan.name, plan.price, plan.multiplier));
+        }
+        
+        grid.appendChild(card);
+    });
+}
+
+// ============================================================
+// UPDATE CURRENT PLAN DISPLAY
+// ============================================================
+function updateCurrentPlanDisplay(plan) {
+    document.getElementById('currentPlanName').innerHTML = `${plan.plan} ${plan.plan !== "Free Plan" ? `<span class="multiplier-badge">${plan.multiplier}x Profit</span>` : ''}`;
+    if (plan.expiry) {
+        document.getElementById('currentPlanExpiry').innerHTML = `Expires: ${new Date(plan.expiry).toLocaleDateString()}`;
+        document.getElementById('currentPlanStatus').innerHTML = 'Active';
+        document.getElementById('currentPlanStatus').className = 'current-plan-status status-active';
+    } else {
+        document.getElementById('currentPlanExpiry').innerHTML = plan.plan === "Free Plan" ? 'Basic features only<br>No profit multiplier' : 'No active subscription';
+        document.getElementById('currentPlanStatus').innerHTML = 'Active';
+        document.getElementById('currentPlanStatus').className = 'current-plan-status status-active';
+    }
+}
+
+// ============================================================
+// INITIATE SUBSCRIPTION
+// ============================================================
+window.initiateSubscription = function(plan, price, multiplier) {
+    if (!currentUser) {
+        showNotification('Please login first', 'error');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    pendingSubscription = { plan, price, multiplier };
+    document.getElementById('modalPlanName').innerHTML = `${plan} Plan - $${price}/month`;
+    document.getElementById('modalPlanDetails').innerHTML = `
+        <p style="color:#AAAAAA; margin-bottom:10px; font-size:10px;">Complete payment to activate your ${plan} subscription</p>
+        <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;">
+                <span>Plan:</span><span style="color:#FFD700;">${plan}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;">
+                <span>Price:</span><span style="color:#FFD700;">$${price}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;">
+                <span>Profit Multiplier:</span><span style="color:#0ECB81;">${multiplier}x</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-top:5px; border-top:1px solid rgba(255,255,255,0.1); font-size:10px;">
+                <span>Duration:</span><span style="color:#FFD700;">30 days</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('paymentModal').style.display = 'flex';
+    selectedPaymentMethod = null;
+    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+};
+
+// ============================================================
+// SELECT PAYMENT METHOD
+// ============================================================
+window.selectPaymentMethod = function(method) {
+    selectedPaymentMethod = method;
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+};
+
+// ============================================================
+// CLOSE PAYMENT MODAL
+// ============================================================
+window.closePaymentModal = function() {
+    document.getElementById('paymentModal').style.display = 'none';
+    pendingSubscription = null;
+    selectedPaymentMethod = null;
+};
+
+// ============================================================
+// ACTIVATE SUBSCRIPTION
+// ============================================================
+async function activateSubscription(plan, price, multiplier) {
+    if (!currentUser) return;
+    
+    // Check if user has deposit history for mobile money
+    if (selectedPaymentMethod === 'mobile_money') {
+        closePaymentModal();
+        showNotification('Please deposit via mobile money first. Redirecting...', 'info');
+        setTimeout(() => {
+            window.location.href = 'deposit.html';
+        }, 1500);
+        return;
+    }
+    
+    // Handle balance and P2P
+    if (selectedPaymentMethod === 'balance' || selectedPaymentMethod === 'p2p') {
+        const currentBalance = await getUserBalance();
+        if (currentBalance < price) {
+            showNotification(`Insufficient balance! Need $${price}. Please deposit funds first.`, 'error');
+            closePaymentModal();
+            return;
+        }
+        
+        closePaymentModal();
+        showNotification('Processing subscription...', 'info');
+        
+        try {
+            // Deduct balance via backend
+            const updated = await updateUserBalance(price, 'subtract');
+            if (!updated) {
+                showNotification('Failed to update balance. Please try again.', 'error');
+                return;
+            }
+            
+            const duration = 30 * 24 * 60 * 60 * 1000;
+            const expiry = Date.now() + duration;
+            
+            const subscriptionData = {
+                plan: plan,
+                price: price,
+                multiplier: multiplier,
+                status: 'active',
+                expiry: expiry,
+                purchasedAt: Date.now(),
+                date: new Date().toISOString(),
+                paymentMethod: selectedPaymentMethod
+            };
+            
+            // Save subscription via backend
+            const result = await apiRequest('user/subscription', 'POST', subscriptionData);
+            
+            if (result.success) {
+                await addNotification(currentUser.uid, 'Subscription Activated', 
+                    `${plan} plan activated! ${multiplier}x profit multiplier applied to all your AI robots for 30 days.`, 'success');
+                
+                showNotification(`✅ ${plan} subscription activated! ${multiplier}x profit multiplier applied!`, 'success');
+                
+                const newPlan = await loadUserSubscription();
+                updateCurrentPlanDisplay(newPlan);
+                renderPlans(newPlan);
+                
+                setTimeout(() => {
+                    window.location.href = 'auto-bot.html';
+                }, 2000);
+            } else {
+                showNotification(result.error || 'Failed to activate subscription', 'error');
+            }
+            
+        } catch (error) {
+            console.error("Subscription error:", error);
+            showNotification('Failed to activate subscription. Please try again.', 'error');
+        }
+        return;
+    }
+    
+    closePaymentModal();
+    showNotification('Please select a payment method', 'error');
+}
+
+// ============================================================
+// CONFIRM PAYMENT
+// ============================================================
+document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+    if (!selectedPaymentMethod) {
+        showNotification('Please select a payment method', 'error');
+        return;
+    }
+    if (!pendingSubscription) return;
+    await activateSubscription(pendingSubscription.plan, pendingSubscription.price, pendingSubscription.multiplier);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+    initTheme();
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        currentUser = user;
+        
+        document.getElementById('skeletonContainer').style.display = 'block';
+        document.getElementById('realContent').style.display = 'none';
+        
+        const [currentPlan, balance] = await Promise.all([
+            loadUserSubscription(),
+            getUserBalance()
+        ]);
+        
+        document.getElementById('userBalanceDisplay').innerHTML = `$${balance.toFixed(2)}`;
+        updateCurrentPlanDisplay(currentPlan);
+        renderPlans(currentPlan);
+        
+        setupRealtimeBalance();
+        
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 800);
+    });
+}
+
+init();
+</script>
+</body>
+</html>

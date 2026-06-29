@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Pro Terminal | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+body {
+    background: #0A0A0F;
+    background-image: url("../assets/images/background.png");
+    background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
+    min-height: 100vh; padding-bottom: 70px; color: #E0E0E0; font-size: 11px;
+}
+body.light-theme {
+    background: #F7F9FC;
+    background-image: url("../assets/images/background-light.png");
+    color: #1E1E2F;
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.88); backdrop-filter: blur(4px);}
+body.light-theme .top-bar, body.light-theme .price-card, body.light-theme .chart-container,
+body.light-theme .position-card, body.light-theme .risk-info-card, body.light-theme .balance-panel,
+body.light-theme .stats-card { background: rgba(255,255,255,0.96); border: 1px solid rgba(0,0,0,0.08);}
+body.light-theme .risk-value, body.light-theme .balance-amount, body.light-theme .coin-name,
+body.light-theme .positions-title, body.light-theme .stat-value { color: #C27A0E; }
+body.light-theme .live-price { color: #C27A0E; }
+body.light-theme .price-change.positive { color: #0A9E65; }
+body.light-theme .price-change.negative { color: #E84C3D; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.96); border-top: 1px solid rgba(0,0,0,0.08); }
+.overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1; pointer-events: none;}
+.top-bar {
+    position: fixed; top:0; left:0; right:0; z-index: 100;
+    background: rgba(12,12,18,0.92); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(194,122,14,0.3);
+    padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 30px; height: 30px; border-radius: 10px; object-fit: cover; background: transparent; padding: 2px; }
+.logo-area h2 { color: #C27A0E; font-size: 14px; font-weight: 700; }
+.logo-area p { font-size: 8px; color: #aaa; margin-top: -2px; }
+.top-bar-right { display: flex; gap: 8px; align-items: center; }
+.back-btn-top { background: rgba(194,122,14,0.18); border: none; border-radius: 40px; padding: 4px 10px; color: #C27A0E; font-weight: 600; font-size: 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.theme-toggle { background: rgba(194,122,14,0.18); border: none; border-radius: 40px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #C27A0E; font-size: 12px; }
+.main-content { position: relative; z-index: 2; max-width: 720px; margin: 72px auto 16px; padding: 0 12px; }
+.stats-card { background: rgba(20,20,28,0.75); backdrop-filter: blur(8px); border: 1px solid rgba(194,122,14,0.3); border-radius: 20px; padding: 10px 10px; margin-bottom: 14px; }
+.stats-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+.stat-item { flex: 1; min-width: 55px; text-align: center; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 6px 4px; }
+.stat-label { font-size: 7px; color: #aaa; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+.stat-value { font-size: 12px; font-weight: 800; color: #C27A0E; }
+.risk-info-card { display: flex; flex-wrap: wrap; background: rgba(16,16,22,0.7); border: 1px solid rgba(194,122,14,0.3); border-radius: 20px; padding: 8px 10px; margin-bottom: 12px; gap: 4px; justify-content: space-around; }
+.risk-item { text-align: center; flex: 1; min-width: 55px; }
+.risk-label { font-size: 7px; color: #8e8e9e; }
+.risk-value { font-size: 11px; font-weight: 800; color: #C27A0E; }
+.price-card { background: rgba(16,16,22,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(194,122,14,0.4); border-radius: 24px; padding: 14px 14px; margin-bottom: 14px; text-align: center; }
+.coin-name { font-size: 12px; font-weight: 600; color: #C27A0E; margin-bottom: 6px; display: flex; gap: 6px; justify-content: center; align-items: center; }
+.live-price { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #FFF; margin: 2px 0; }
+.price-change { font-size: 10px; font-weight: 600; margin-top: 2px; }
+.price-change.positive { color: #0ECB81; }
+.price-change.negative { color: #F6465D; }
+.connection-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.5); border-radius: 30px; padding: 2px 10px; font-size: 8px; margin-top: 6px; }
+.chart-container { background: rgba(12,12,18,0.7); border-radius: 24px; border: 1px solid rgba(194,122,14,0.3); overflow: hidden; margin-bottom: 14px; }
+.chart-header { padding: 8px 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0,0,0,0.4); }
+.chart-header-left { font-size: 10px; display: flex; align-items: center; gap: 6px; }
+.trading-account-label { color: #aaa; }
+.trading-account-amount { color: #C27A0E; font-weight: 700; }
+.chart-header-right { display: flex; gap: 4px; flex-wrap: wrap; }
+.chart-header-btn { padding: 4px 10px; border-radius: 30px; font-weight: 700; font-size: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border: none; transition: 0.2s; }
+.chart-header-btn.sell { background: rgba(246,70,93,0.2); color: #F6465D; border: 1px solid rgba(246,70,93,0.4);}
+.chart-header-btn.buy { background: rgba(14,203,129,0.2); color: #0ECB81; border: 1px solid rgba(14,203,129,0.4);}
+.chart-header-btn.customize, .chart-header-btn.leverage, .chart-header-btn.move { background: rgba(194,122,14,0.2); color: #C27A0E; border: 1px solid rgba(194,122,14,0.4);}
+.chart-header-btn.add { background: rgba(0,123,255,0.2); color: #3b82f6; border-color: rgba(59,130,246,0.4);}
+.chart-header-btn:hover { transform: translateY(-1px); filter: brightness(1.05);}
+.chart-box { width: 100%; height: 350px; background: #0A0A10; }
+.chart-box iframe { width: 100%; height: 100%; border: none; }
+.positions-main-card { background: rgba(16,16,22,0.7); border-radius: 24px; border: 1px solid rgba(194,122,14,0.3); overflow: hidden; margin-bottom: 16px; }
+.balance-panel { display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(194,122,14,0.2); }
+.balance-row { display: flex; align-items: baseline; gap: 4px; background: rgba(0,0,0,0.15); padding: 3px 10px; border-radius: 30px; justify-content: space-between; }
+.balance-row .balance-label { font-size: 8px; color: #aaa; letter-spacing: 0.5px; }
+.balance-row .balance-dots { flex: 1; color: #444; font-size: 8px; letter-spacing: 1px; text-align: center; padding: 0 4px; overflow: hidden; white-space: nowrap; }
+.balance-row .balance-amount { font-size: 11px; font-weight: 800; color: #C27A0E; }
+.positions-header { display: flex; justify-content: space-between; padding: 8px 14px; background: rgba(0,0,0,0.2); align-items: center; flex-wrap: wrap; gap: 6px; }
+.positions-title { font-weight: 800; font-size: 11px; color: #C27A0E; }
+.positions-dots { background: rgba(194,122,14,0.2); border: none; border-radius: 30px; padding: 2px 10px; color: #C27A0E; cursor: pointer; font-size: 10px; }
+.positions-right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.btn-trade-history {
+    background: linear-gradient(135deg, #0ECB81, #0A9E65) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 4px 12px !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(14,203,129,0.3) !important;
+    text-decoration: none !important;
+    letter-spacing: 0.3px !important;
+}
+.btn-trade-history:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 16px rgba(14,203,129,0.5) !important; }
+.btn-trade-history i { font-size: 9px !important; }
+#positionsContainer { max-height: 340px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.position-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(194,122,14,0.2); border-radius: 16px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+.position-symbol-btc { font-weight: 800; font-size: 10px; color: #C27A0E; }
+.position-symbol { font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 30px; margin-left: 4px;}
+.position-symbol.buy { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.position-symbol.sell { background: rgba(246,70,93,0.2); color: #F6465D; }
+.position-details { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; font-size: 7px; color: #aaa; padding-left: 4px; }
+.position-detail-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.position-detail-row .detail-label { color: #888; font-size: 7px; }
+.position-detail-row .detail-value { color: #ddd; font-size: 8px; font-weight: 600; }
+.position-pnl-right { font-weight: 800; font-size: 11px; text-align: right;}
+.pnl-positive { color: #0ECB81; }
+.pnl-negative { color: #F6465D; }
+.position-close-btn { background: rgba(246,70,93,0.2); border: none; border-radius: 30px; padding: 2px 10px; color: #F6465D; font-size: 8px; cursor: pointer; margin-left: 6px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,16,0.96); backdrop-filter: blur(16px); border-top: 1px solid rgba(194,122,14,0.3); display: flex; justify-content: space-around; padding: 6px 10px 10px; z-index: 100; border-radius: 20px 20px 0 0; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; gap: 2px; }
+.bottom-nav a i { font-size: 15px; }
+.bottom-nav a.active { color: #C27A0E; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 20001; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease; padding: 16px; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-card { background: linear-gradient(145deg, #181828, #0E0E18); border-radius: 24px; padding: 20px 16px 16px; max-width: 380px; width: 100%; border: 1px solid rgba(194,122,14,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+.modal-card h3 { color: #C27A0E; font-size: 15px; font-weight: 700; margin-bottom: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.modal-card p { color: #aaa; font-size: 10px; text-align: center; margin-bottom: 10px; }
+.modal-card input[type="number"], .modal-card input[type="text"] { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(194,122,14,0.3); border-radius: 12px; color: #fff; font-size: 12px; font-weight: 500; outline: none; transition: border-color 0.3s; margin-bottom: 8px; }
+.modal-card input:focus { border-color: #C27A0E; background: rgba(255,255,255,0.1); }
+.modal-card label { display: block; color: #aaa; font-size: 9px; font-weight: 600; margin-bottom: 3px; margin-top: 4px; }
+.modal-card .tp-sl-row { display: flex; gap: 10px; }
+.modal-card .tp-sl-row .input-group { flex: 1; }
+.modal-buttons, .modal-card .modal-buttons { display: flex; gap: 8px; margin-top: 12px; }
+.modal-btn, .modal-card .modal-btn { flex: 1; padding: 10px; border: none; border-radius: 30px; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; }
+.modal-btn.confirm, .modal-card .modal-btn.confirm { background: linear-gradient(135deg, #C27A0E, #E8A317); color: #fff; }
+.modal-btn.confirm:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(194,122,14,0.4); }
+.modal-btn.cancel, .modal-card .modal-btn.cancel { background: rgba(255,255,255,0.08); color: #aaa; }
+.modal-btn.cancel:hover { background: rgba(255,255,255,0.15); }
+.modal-card .close-sel { background: rgba(246,70,93,0.2); border: none; border-radius: 30px; padding: 4px 12px; color: #F6465D; font-size: 9px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.modal-card .close-sel:hover { background: #F6465D; color: #fff; }
+.modal-card #closeSelCancel { width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: none; border-radius: 30px; color: #888; font-size: 10px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+.modal-card #closeSelCancel:hover { background: rgba(255,255,255,0.12); }
+.modal-card .select-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 4px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(194,122,14,0.1); }
+.modal-card .select-item span { font-size: 10px; color: #ccc; }
+.modal-card .select-item .close-sel { font-size: 8px; padding: 2px 10px; }
+.notification-popup { position: fixed; top: 68px; right: 14px; background: #1A1A2A; border-left: 4px solid; padding: 10px 14px; border-radius: 14px; z-index: 20002; backdrop-filter: blur(20px); font-size: 10px; font-weight: 500; animation: slideIn 0.3s ease; max-width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.notification-popup i { margin-right: 8px; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+.global-menu-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 20000; display: flex; align-items: flex-end; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease; }
+.global-menu-modal.active { visibility: visible; opacity: 1; }
+.global-menu-content { background: #101018; width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 20px 16px 24px; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+.global-menu-modal.active .global-menu-content { transform: translateY(0); }
+.global-menu-btn { width: 100%; padding: 12px 14px; background: rgba(194,122,14,0.12); border: none; border-radius: 30px; color: #C27A0E; margin-bottom: 8px; font-weight: 600; font-size: 11px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.global-menu-btn:hover { background: rgba(194,122,14,0.25); transform: scale(1.01); }
+.global-menu-btn.danger { color: #F6465D; background: rgba(246,70,93,0.15); }
+.global-menu-btn.danger:hover { background: rgba(246,70,93,0.25); }
+.global-menu-content h3 { color: #C27A0E; font-size: 16px; font-weight: 700; }
+@media(max-width: 480px) {
+    .modal-card { padding: 14px 12px; max-width: 100%; margin: 8px; border-radius: 20px; }
+    .modal-card h3 { font-size: 14px; }
+    .modal-card input[type="number"] { padding: 8px 10px; font-size: 11px; }
+    .modal-btn { padding: 8px; font-size: 10px; }
+    .modal-card .tp-sl-row { flex-direction: column; gap: 4px; }
+    .global-menu-content { padding: 16px 12px 20px; }
+    .global-menu-btn { padding: 10px 12px; font-size: 10px; }
+    .notification-popup { top: 64px; right: 8px; left: 8px; max-width: none; font-size: 9px; padding: 8px 12px; }
+    .chart-header { flex-direction: column; align-items: stretch; }
+    .chart-header-right { justify-content: center; }
+    .stats-grid { gap: 4px; }
+    .stat-item { min-width: 40px; padding: 4px 2px; }
+    .stat-value { font-size: 10px; }
+    .btn-trade-history { padding: 3px 8px !important; font-size: 7px !important; }
+    .btn-trade-history i { font-size: 7px !important; }
+    .positions-header { flex-direction: column; align-items: stretch; gap: 4px; }
+    .positions-right { justify-content: space-between; }
+}
+</style>
+</head>
+<body>
+<div class="top-bar"><div class="logo-area"><img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/44x44/800000/FFD700?text=AI'"><div><h2>ABOTRA-PROAI</h2><p>Trade Manually</p></div></div><div class="top-bar-right"><button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button><div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></div></div></div>
+<div class="overlay"></div>
+<div class="main-content">
+    <div id="realContent">
+        <div class="stats-card"><div class="stats-grid">
+            <div class="stat-item"><div class="stat-label">Total Trades</div><div class="stat-value" id="statTotalTrades">0</div></div>
+            <div class="stat-item"><div class="stat-label">Open</div><div class="stat-value" id="statOpenTrades">0</div></div>
+            <div class="stat-item"><div class="stat-label">Closed</div><div class="stat-value" id="statClosedTrades">0</div></div>
+            <div class="stat-item"><div class="stat-label">Winning</div><div class="stat-value" id="statWinning">0</div></div>
+            <div class="stat-item"><div class="stat-label">Losing</div><div class="stat-value" id="statLosing">0</div></div>
+            <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value" id="statWinRate">0%</div></div>
+            <div class="stat-item"><div class="stat-label">Net PnL</div><div class="stat-value" id="statNetPnL">$0</div></div>
+        </div></div>
+        <div class="risk-info-card" id="riskInfoCard">
+            <div class="risk-item"><div class="risk-label">📉 Daily Loss</div><div class="risk-value" id="dailyLoss">$0.00</div></div>
+            <div class="risk-item"><div class="risk-label">⚠️ Loss Limit</div><div class="risk-value" id="dailyLossLimit">$500</div></div>
+            <div class="risk-item"><div class="risk-label">📊 Open Trades</div><div class="risk-value" id="openTradesCount">0</div></div>
+            <div class="risk-item"><div class="risk-label">🎯 Max Trades</div><div class="risk-value" id="maxTrades">10</div></div>
+            <div class="risk-item"><div class="risk-label">📈 Max Leverage</div><div class="risk-value" id="maxLeverageDisplay">100x</div></div>
+        </div>
+        <div class="price-card">
+            <div class="coin-name">
+                <span id="selectedCoinIcon">₿</span>
+                <span id="selectedCoinSymbol">BTC</span>/USDT
+                <span id="connStatusBadge" class="connection-badge"><i class="fas fa-circle" style="font-size: 7px;"></i> <span id="connText">Live</span></span>
+            </div>
+            <div class="live-price" id="livePrice">$0.00</div>
+            <div class="price-change" id="priceChange"></div>
+            <div style="font-size:8px;color:#888;margin-top:4px;" id="selectedCoinName">Bitcoin</div>
+        </div>
+        <div class="chart-container"><div class="chart-header"><div class="chart-header-left"><span class="trading-account-label"><i class="fas fa-wallet"></i> Trading:</span><span class="trading-account-amount" id="tradingAccountHeader">$0.00</span></div><div class="chart-header-right"><button id="sellBtnTop" class="chart-header-btn sell"><i class="fas fa-arrow-down"></i> SELL</button><button id="buyBtnTop" class="chart-header-btn buy"><i class="fas fa-arrow-up"></i> BUY</button><button id="customizeBtn" class="chart-header-btn customize"><i class="fas fa-sliders-h"></i> <span id="customizeAmountDisplay">$10</span></button><button id="leverageBtn" class="chart-header-btn leverage"><i class="fas fa-chart-line"></i> <span id="currentLeverage">1x</span></button><button id="addUsdtBtn" class="chart-header-btn add"><i class="fas fa-plus"></i> ADD</button><button id="moveUsdtBtn" class="chart-header-btn move"><i class="fas fa-arrow-right"></i> MOVE</button></div></div><div class="chart-box"><iframe id="tradingviewChart" src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=15&theme=dark" width="100%" height="100%" frameborder="0"></iframe></div></div>
+        <div class="positions-main-card"><div class="balance-panel" id="balancePanel"></div>
+            <div class="positions-header">
+                <span class="positions-title"><i class="fas fa-chart-simple"></i> OPEN POSITIONS</span>
+                <div class="positions-right">
+                    <button onclick="window.location.href='trade-history.html'" class="btn-trade-history"><i class="fas fa-history"></i> Trade History</button>
+                    <button class="positions-dots" id="globalMenuBtn">•••</button>
+                </div>
+            </div>
+            <div id="positionsContainer"><div style="text-align:center;padding:20px;color:#888;font-size:10px;">No open positions</div></div>
+        </div>
+    </div>
+</div>
+<div class="bottom-nav">
+    <a href="trade2.html"><i class="fas fa-graduation-cap"></i><span>Tutorial</span></a>
+    <a href="candles.html" class="active"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="3" x2="6" y2="21" stroke="currentColor" stroke-width="2"/><rect x="4" y="7" width="4" height="8" fill="currentColor"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="2"/><rect x="10" y="5" width="4" height="10" fill="currentColor"/><line x1="18" y1="3" x2="18" y2="21" stroke="currentColor" stroke-width="2"/><rect x="16" y="10" width="4" height="7" fill="currentColor"/></svg><span>Candles</span></a>
+    <a href="trade.html" class="nav-btn"><svg width="12" height="12" viewBox="0 0 24 24"><polyline points="3,17 9,11 13,15 21,7" stroke="currentColor" stroke-width="2" fill="none"/></svg><span>Trade</span></a>
+    <a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Trade</span></a>
+    <a href="trade2.html"><i class="fas fa-graduation-cap"></i><span>AI Tutorial</span></a>
+</div>
+<div id="globalMenuModal" class="global-menu-modal"><div class="global-menu-content"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><h3 style="color:#C27A0E; font-size:16px;"><i class="fas fa-sliders-h"></i> Manage</h3><button id="globalMenuCloseBtn" style="background:none; border:none; color:#C27A0E; font-size:18px; cursor:pointer;"><i class="fas fa-times"></i></button></div><button id="globalClosePositionBtn" class="global-menu-btn"><i class="fas fa-times-circle"></i> Close a Position</button><button id="globalIncreaseBtn" class="global-menu-btn"><i class="fas fa-plus-circle"></i> Increase Investment</button><button id="globalCloseAllBtn" class="global-menu-btn danger"><i class="fas fa-ban"></i> Close All Positions</button></div></div>
+
+<script type="module">
+// ============================================================
+// CONFIG - From global
+// ============================================================
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
+
+// ============================================================
+// FIREBASE
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, push, get, runTransaction, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentPrice = 0;
+let tradingBalance = 0;
+let userDailyLoss = 0;
+let positionsMap = new Map();
+let risk = {
+    dailyLossLimit: 500, maxOpenTrades: 10, maxLeverage: 100,
+    minTradeAmount: 3, maxTradeAmount: 10000,
+    tradingEnabled: true, allowBuy: true, allowSell: true, maintenanceMode: false
+};
+let selectedCoin = { symbol: 'BTC', name: 'Bitcoin', price: 0, image: '' };
+
+function formatUsd(v) { return `$${parseFloat(v || 0).toFixed(2)}`; }
+function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+function showNotification(msg, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.style.borderLeftColor = type === 'success' ? '#0ECB81' : type === 'error' ? '#F6465D' : '#C27A0E';
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i> ${msg}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3200);
+}
+
+// ============================================================
+// API HELPER
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) { reject(new Error('No user logged in')); return; }
+            try { const token = await user.getIdToken(true); resolve(token); } catch (error) { reject(error); }
+        });
+    });
+}
+
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+        if (body) options.body = JSON.stringify(body);
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        return await response.json();
+    } catch (error) { console.error('API error:', error); return { success: false, error: error.message }; }
+}
+
+// ============================================================
+// TRADE FUNCTIONS
+// ============================================================
+async function openTradeViaAPI(type, margin, leverage, symbol, tp, sl) {
+    try {
+        const data = await apiRequest('trades/open', 'POST', {
+            type, margin, leverage, symbol: symbol || 'BTC/USDT',
+            takeProfit: tp || null, stopLoss: sl || null
+        });
+        if (data.success) { showNotification(`✅ ${type} trade opened!`, 'success'); }
+        else { showNotification(`❌ ${data.error || 'Trade failed'}`, 'error'); }
+        return data;
+    } catch (error) { showNotification('❌ Failed to open trade', 'error'); return { success: false }; }
+}
+
+async function closeTradeViaAPI(tradeId) {
+    try {
+        const data = await apiRequest(`trades/${tradeId}/close`, 'POST');
+        if (data.success) { showNotification(`✅ Trade closed! PnL: $${data.pnl?.toFixed(2) || '0'}`, 'success'); }
+        else { showNotification(`❌ ${data.error || 'Close failed'}`, 'error'); }
+        return data;
+    } catch (error) { showNotification('❌ Failed to close trade', 'error'); return { success: false }; }
+}
+
+async function addTradingBalance(amount) {
+    const data = await apiRequest('trading/add', 'POST', { amount });
+    if (data.success) showNotification(`✅ Added $${amount} to trading balance`, 'success');
+    else showNotification(`❌ ${data.error || 'Failed to add'}`, 'error');
+    return data;
+}
+
+async function moveTradingBalance() {
+    const data = await apiRequest('trading/move', 'POST');
+    if (data.success) showNotification(`✅ Moved $${data.amount?.toFixed(2) || '0'} to main balance`, 'success');
+    else showNotification(`❌ ${data.error || 'Failed to move'}`, 'error');
+    return data;
+}
+
+// ============================================================
+// UI FUNCTIONS
+// ============================================================
+function updateUI() {
+    let used = 0; for (let t of positionsMap.values()) used += t.margin || 0;
+    const equity = tradingBalance + used; const free = Math.max(0, equity - used);
+    const marginLvl = used > 0 ? (equity / used) * 100 : 0;
+    const panel = document.getElementById('balancePanel');
+    if (panel) {
+        panel.innerHTML = `
+            <div class="balance-row"><span class="balance-label">Balance</span><span class="balance-dots">.........................................</span><span class="balance-amount">${formatUsd(tradingBalance)}</span></div>
+            <div class="balance-row"><span class="balance-label">Equity</span><span class="balance-dots">.........................................</span><span class="balance-amount">${formatUsd(equity)}</span></div>
+            <div class="balance-row"><span class="balance-label">Free Margin</span><span class="balance-dots">.........................................</span><span class="balance-amount">${formatUsd(free)}</span></div>
+            <div class="balance-row"><span class="balance-label">Used Margin</span><span class="balance-dots">.........................................</span><span class="balance-amount">${formatUsd(used)}</span></div>
+            <div class="balance-row"><span class="balance-label">Margin Lvl</span><span class="balance-dots">.........................................</span><span class="balance-amount">${marginLvl.toFixed(1)}%</span></div>
+        `;
+    }
+    document.getElementById('tradingAccountHeader').innerText = formatUsd(tradingBalance);
+    document.getElementById('openTradesCount').innerText = positionsMap.size;
+    document.getElementById('dailyLoss').innerText = formatUsd(userDailyLoss);
+}
+
+function renderPositions() {
+    const container = document.getElementById('positionsContainer');
+    if (!container) return;
+    if (positionsMap.size === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:16px;color:#888;font-size:10px;">No open positions</div>';
+        return;
+    }
+    let html = '';
+    for (let [id, trade] of positionsMap) {
+        const pnl = (currentPrice - trade.entryPrice) * ((trade.margin * trade.leverage) / trade.entryPrice);
+        const symbol = trade.symbol || 'BTC/USDT';
+        const openFee = trade.openFee || 0;
+        html += `<div class="position-card"><div class="position-left"><div><span class="position-symbol-btc">${symbol}</span> <span class="position-symbol ${trade.type.toLowerCase()}">${trade.type}</span> <span style="font-size:8px;">${trade.leverage}x</span></div>
+            <div class="position-details">
+                <div class="position-detail-row"><span class="detail-label">Margin</span><span class="detail-value">$${trade.margin.toFixed(2)}</span></div>
+                <div class="position-detail-row"><span class="detail-label">Entry</span><span class="detail-value">$${trade.entryPrice.toFixed(2)}</span></div>
+                ${trade.takeProfit ? `<div class="position-detail-row"><span class="detail-label">TP</span><span class="detail-value">$${trade.takeProfit}</span></div>` : ''}
+                ${trade.stopLoss ? `<div class="position-detail-row"><span class="detail-label">SL</span><span class="detail-value">$${trade.stopLoss}</span></div>` : ''}
+                <div class="position-detail-row"><span class="detail-label">Fee</span><span class="detail-value" style="color:#F6465D;">$${openFee.toFixed(2)}</span></div>
+            </div></div>
+            <div><div class="position-pnl-right ${pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</div><button class="position-close-btn" data-id="${id}">Close</button></div></div>`;
+    }
+    container.innerHTML = html;
+    document.querySelectorAll('.position-close-btn').forEach(btn => {
+        btn.onclick = (e) => { const tid = btn.getAttribute('data-id'); closeTradeViaAPI(tid); };
+    });
+}
+
+// ============================================================
+// LISTENERS
+// ============================================================
+function setupListeners() {
+    if (window.tradesUnsubscribe) { try { off(window.tradesUnsubscribe); } catch(e) {} }
+    window.tradesUnsubscribe = onValue(ref(db, `trades/${currentUser.uid}`), async (snap) => {
+        const newMap = new Map();
+        if (snap.exists()) { snap.forEach(ch => { if (ch.val().status === 'open') newMap.set(ch.key, ch.val()); }); }
+        positionsMap = newMap;
+        renderPositions();
+        updateUI();
+        // Update stats
+        const statsData = await apiRequest('trades/stats', 'GET');
+        if (statsData.success && statsData.stats) {
+            const s = statsData.stats;
+            document.getElementById('statTotalTrades').innerText = s.total || 0;
+            document.getElementById('statOpenTrades').innerText = s.open || 0;
+            document.getElementById('statClosedTrades').innerText = s.closed || 0;
+            document.getElementById('statWinning').innerText = s.winning || 0;
+            document.getElementById('statLosing').innerText = s.losing || 0;
+            document.getElementById('statWinRate').innerText = `${s.winRate || 0}%`;
+            document.getElementById('statNetPnL').innerText = formatUsd(s.netPnl || 0);
+        }
+    });
+    if (window.balanceUnsub) { try { off(window.balanceUnsub); } catch(e) {} }
+    window.balanceUnsub = onValue(ref(db, `users/${currentUser.uid}`), async (snap) => {
+        if (snap.exists()) { const d = snap.val(); tradingBalance = d.tradingBalance || 0; userDailyLoss = d.dailyLoss || 0; updateUI(); }
+    });
+}
+
+// ============================================================
+// TRADE BUTTONS
+// ============================================================
+let currentMargin = 10, currentLeverage = 1, currentTakeProfit = null, currentStopLoss = null;
+
+document.getElementById('buyBtnTop')?.addEventListener('click', () => {
+    openTradeViaAPI('BUY', currentMargin, currentLeverage, selectedCoin.symbol, currentTakeProfit, currentStopLoss);
+});
+document.getElementById('sellBtnTop')?.addEventListener('click', () => {
+    openTradeViaAPI('SELL', currentMargin, currentLeverage, selectedCoin.symbol, currentTakeProfit, currentStopLoss);
+});
+
+// Customize Modal
+function showCustomModal() {
+    const margin = currentMargin;
+    const openFee = margin * 0.01;
+    const totalCost = margin + openFee;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal-card">
+            <h3><i class="fas fa-sliders-h"></i> Customize Trade</h3>
+            <label>Margin (USDT) Min $${risk.minTradeAmount}</label>
+            <input id="customAmount" type="number" value="${currentMargin}" min="${risk.minTradeAmount}" max="${risk.maxTradeAmount}" step="1">
+            <div class="tp-sl-row">
+                <div class="input-group"><label>Take Profit (TP)</label><input id="tpInput" type="number" step="0.1" placeholder="Optional"></div>
+                <div class="input-group"><label>Stop Loss (SL)</label><input id="slInput" type="number" step="0.1" placeholder="Optional"></div>
+            </div>
+            <div style="background:rgba(255,215,0,0.08); border-radius:12px; padding:10px; margin:8px 0;">
+                <div style="display:flex; justify-content:space-between; font-size:9px; color:#aaa; padding:2px 0;">
+                    <span>Margin:</span><span style="color:#FFD700; font-weight:600;" id="previewMargin">$${margin.toFixed(2)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:9px; color:#aaa; padding:2px 0;">
+                    <span>Open Fee (1%):</span><span style="color:#F6465D; font-weight:600;" id="previewFee">$${openFee.toFixed(2)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:9px; color:#aaa; padding:2px 0; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px;">
+                    <span><strong>Total Cost:</strong></span><span style="color:#0ECB81; font-weight:700;" id="previewTotal">$${totalCost.toFixed(2)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:9px; color:#aaa; padding:2px 0;">
+                    <span>Leverage:</span><span style="color:#FFD700; font-weight:600;">${currentLeverage}x</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="modalCancel">Cancel</button>
+                <button class="modal-btn confirm" id="modalConfirm">Save</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('active'), 10);
+    const amountInput = overlay.querySelector('#customAmount');
+    amountInput.addEventListener('input', function() {
+        const val = parseFloat(this.value) || 0;
+        const fee = val * 0.01; const total = val + fee;
+        overlay.querySelector('#previewMargin').textContent = `$${val.toFixed(2)}`;
+        overlay.querySelector('#previewFee').textContent = `$${fee.toFixed(2)}`;
+        overlay.querySelector('#previewTotal').textContent = `$${total.toFixed(2)}`;
+    });
+    overlay.querySelector('#modalConfirm').onclick = () => {
+        let amt = parseFloat(overlay.querySelector('#customAmount').value);
+        if (!isNaN(amt) && amt >= risk.minTradeAmount && amt <= risk.maxTradeAmount) currentMargin = amt;
+        currentTakeProfit = overlay.querySelector('#tpInput').value ? parseFloat(overlay.querySelector('#tpInput').value) : null;
+        currentStopLoss = overlay.querySelector('#slInput').value ? parseFloat(overlay.querySelector('#slInput').value) : null;
+        document.getElementById('customizeAmountDisplay').innerHTML = `$${currentMargin}`;
+        overlay.remove();
+    };
+    overlay.querySelector('#modalCancel').onclick = () => overlay.remove();
+}
+document.getElementById('customizeBtn')?.addEventListener('click', showCustomModal);
+
+// Leverage
+document.getElementById('leverageBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const levs = [1, 2, 3, 5, 10, 20, 50, 100];
+    let div = document.createElement('div');
+    div.style.cssText = 'position:fixed; background:#12121C; border-radius:24px; padding:6px; z-index:20010; border:1px solid #C27A0E; box-shadow:0 8px 32px rgba(0,0,0,0.6);';
+    levs.forEach(l => {
+        let btn = document.createElement('button');
+        btn.innerText = `${l}x`;
+        btn.style.cssText = 'display:block; width:100%; padding:6px 14px; background:none; border:none; border-radius:10px; color:#C27A0E; font-size:11px; font-weight:600; cursor:pointer; transition:0.2s;';
+        btn.onmouseover = () => { btn.style.background = 'rgba(194,122,14,0.15)'; };
+        btn.onmouseout = () => { btn.style.background = 'none'; };
+        btn.onclick = () => { currentLeverage = l; document.getElementById('currentLeverage').innerText = `${l}x`; div.remove(); };
+        div.appendChild(btn);
+    });
+    const rect = e.target.closest('#leverageBtn').getBoundingClientRect();
+    div.style.top = `${rect.bottom + 4}px`;
+    div.style.left = `${Math.min(rect.left, window.innerWidth - 80)}px`;
+    document.body.appendChild(div);
+    setTimeout(() => {
+        document.addEventListener('click', function remove(e) { if (!div.contains(e.target)) { div.remove(); document.removeEventListener('click', remove); } });
+    }, 10);
+});
+
+// Add & Move
+document.getElementById('addUsdtBtn')?.addEventListener('click', async () => {
+    const snap = await get(ref(db, `users/${currentUser.uid}`));
+    const mainBal = snap.val()?.balance || 0;
+    if (mainBal <= 0) return showNotification('No main balance', 'error');
+    const ov = document.createElement('div');
+    ov.className = 'modal-overlay';
+    ov.innerHTML = `<div class="modal-card"><h3><i class="fas fa-plus-circle"></i> Add USDT</h3><p>Main Balance: <strong style="color:#C27A0E;">$${mainBal.toFixed(2)}</strong></p><input id="addAmount" type="number" min="1" max="${mainBal}" value="10" step="1"><div class="modal-buttons"><button class="modal-btn cancel" id="addCancel">Cancel</button><button class="modal-btn confirm" id="addConfirm">Add</button></div></div>`;
+    document.body.appendChild(ov);
+    setTimeout(() => ov.classList.add('active'), 10);
+    ov.querySelector('#addConfirm').onclick = async () => {
+        let amt = parseFloat(ov.querySelector('#addAmount').value);
+        if (amt < 1) return;
+        await addTradingBalance(amt);
+        ov.remove();
+    };
+    ov.querySelector('#addCancel').onclick = () => ov.remove();
+});
+
+document.getElementById('moveUsdtBtn')?.addEventListener('click', async () => {
+    if (positionsMap.size > 0) { showNotification('Close all positions first', 'error'); return; }
+    const bal = tradingBalance; if (bal <= 0) return;
+    const ov = document.createElement('div');
+    ov.className = 'modal-overlay';
+    ov.innerHTML = `<div class="modal-card"><h3><i class="fas fa-exchange-alt"></i> Move to Main</h3><p>Move <strong style="color:#C27A0E;">$${bal.toFixed(2)}</strong> to main balance?</p><div class="modal-buttons"><button class="modal-btn cancel" id="moveCancel">Cancel</button><button class="modal-btn confirm" id="moveConfirm">Confirm</button></div></div>`;
+    document.body.appendChild(ov);
+    setTimeout(() => ov.classList.add('active'), 10);
+    ov.querySelector('#moveConfirm').onclick = async () => {
+        await moveTradingBalance();
+        ov.remove();
+    };
+    ov.querySelector('#moveCancel').onclick = () => ov.remove();
+});
+
+// Global Menu
+document.getElementById('globalMenuBtn')?.addEventListener('click', () => { document.getElementById('globalMenuModal').classList.add('active'); });
+document.getElementById('globalMenuCloseBtn')?.addEventListener('click', () => { document.getElementById('globalMenuModal').classList.remove('active'); });
+document.getElementById('globalCloseAllBtn')?.addEventListener('click', async () => {
+    document.getElementById('globalMenuModal').classList.remove('active');
+    for (let [id, trade] of positionsMap) { await closeTradeViaAPI(id); }
+});
+document.getElementById('globalClosePositionBtn')?.addEventListener('click', () => {
+    document.getElementById('globalMenuModal').classList.remove('active');
+    if (positionsMap.size === 0) return;
+    let html = '<div class="modal-card"><h3><i class="fas fa-times-circle"></i> Select Position</h3><div style="max-height:200px;overflow-y:auto;margin:6px 0;">';
+    for (let [id, trade] of positionsMap) {
+        html += `<div class="select-item"><span>${trade.symbol || 'BTC/USDT'} | ${trade.type} | $${trade.margin} | ${trade.leverage}x</span><button class="close-sel" data-id="${id}">Close</button></div>`;
+    }
+    html += `</div><button id="closeSelCancel" class="close-modal-btn">Cancel</button></div>`;
+    const ov = document.createElement('div');
+    ov.className = 'modal-overlay';
+    ov.innerHTML = html;
+    document.body.appendChild(ov);
+    setTimeout(() => ov.classList.add('active'), 10);
+    ov.querySelectorAll('.close-sel').forEach(btn => {
+        btn.onclick = () => { const tid = btn.getAttribute('data-id'); closeTradeViaAPI(tid); ov.remove(); };
+    });
+    ov.querySelector('#closeSelCancel')?.addEventListener('click', () => ov.remove());
+});
+document.getElementById('globalIncreaseBtn')?.addEventListener('click', () => {
+    document.getElementById('globalMenuModal').classList.remove('active');
+    if (positionsMap.size === 0) return;
+    const id = Array.from(positionsMap.keys())[0];
+    const trade = positionsMap.get(id);
+    if (trade) showNotification(`Increase margin for ${trade.symbol} - via backend`, 'info');
+});
+
+// ============================================================
+// LOAD FUNCTIONS
+// ============================================================
+function loadSelectedCoin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const symbolParam = urlParams.get('symbol');
+    if (symbolParam) {
+        const savedCoin = localStorage.getItem('selectedCoin');
+        if (savedCoin) { try { const coinData = JSON.parse(savedCoin); if (coinData.symbol === symbolParam) { selectedCoin = coinData; updateCoinDisplay(coinData); updateChartSymbol(coinData.symbol); return; } } catch(e) {} }
+        selectedCoin = { symbol: symbolParam, name: symbolParam, price: 0, image: '' };
+        updateCoinDisplay(selectedCoin); updateChartSymbol(symbolParam); return;
+    }
+    const savedCoin = localStorage.getItem('selectedCoin');
+    if (savedCoin) { try { selectedCoin = JSON.parse(savedCoin); updateCoinDisplay(selectedCoin); updateChartSymbol(selectedCoin.symbol); return; } catch(e) {} }
+    selectedCoin = { symbol: 'BTC', name: 'Bitcoin', price: 0, image: '' };
+    updateCoinDisplay(selectedCoin); updateChartSymbol('BTC');
+}
+
+function updateCoinDisplay(coin) {
+    const symbolDisplay = document.getElementById('selectedCoinSymbol');
+    const nameDisplay = document.getElementById('selectedCoinName');
+    const iconDisplay = document.getElementById('selectedCoinIcon');
+    if (symbolDisplay) symbolDisplay.textContent = coin.symbol || 'BTC';
+    if (nameDisplay) nameDisplay.textContent = coin.name || 'Bitcoin';
+    if (iconDisplay) { iconDisplay.innerHTML = `<span style="font-size:16px;font-weight:700;">${coin.symbol?.substring(0, 2) || '₿'}</span>`; }
+}
+
+function updateChartSymbol(symbol) {
+    const chartFrame = document.getElementById('tradingviewChart');
+    if (chartFrame) {
+        const cleanSymbol = symbol.toUpperCase();
+        const baseSymbol = cleanSymbol === 'BTC' ? 'BTCUSDT' : `${cleanSymbol}USDT`;
+        chartFrame.src = `https://s.tradingview.com/widgetembed/?symbol=BINANCE:${baseSymbol}&interval=15&theme=dark`;
+    }
+}
+
+async function fetchPrice() {
+    try {
+        const symbol = selectedCoin.symbol || 'BTC';
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+        const data = await response.json();
+        if (data.price) { currentPrice = parseFloat(data.price); document.getElementById('livePrice').innerText = '$' + currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2}); }
+    } catch (error) { console.error('Price fetch error:', error); }
+}
+
+// Theme
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') document.body.classList.add('light-theme');
+}
+document.getElementById('themeToggle').onclick = () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+};
+
+// ============================================================
+// INIT
+// ============================================================
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    loadSelectedCoin();
+    // Fetch initial data
+    const userData = await apiRequest('user/profile', 'GET');
+    if (userData.success && userData.user) {
+        tradingBalance = userData.user.tradingBalance || 0;
+        userDailyLoss = userData.user.dailyLoss || 0;
+        updateUI();
+    }
+    const positionsData = await apiRequest('trades/open', 'GET');
+    if (positionsData.success && positionsData.trades) {
+        positionsMap = new Map();
+        positionsData.trades.forEach(trade => { positionsMap.set(trade.id, trade); });
+        renderPositions(); updateUI();
+    }
+    setupListeners();
+    fetchPrice();
+    setInterval(fetchPrice, 5000);
+    initTheme();
+});
+</script>
+</body>
+</html>

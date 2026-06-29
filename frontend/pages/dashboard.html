@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Dashboard | ABOTRA-PROAI - AI Trading Platform</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- CONFIG - Backend Connection                                     -->
+<!-- ============================================================ -->
+<script>
+// ============================================================
+// CONFIG - Production Settings
+// ============================================================
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+/* STYLES ZAKO ZOTE HAPA (sijabadilisha, zile zile ulizonazo) */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+background:#050505;
+background-image:url("../assets/images/background.png");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+background-attachment:fixed;
+min-height:100vh;
+padding-bottom:75px;
+position:relative;
+transition:background 0.3s ease;
+font-size:11px;
+}
+
+body.light-theme {
+background:#f5f5f5;
+background-image:url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background:rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .balance-card,
+body.light-theme .card,
+body.light-theme .big-card,
+body.light-theme .events-box,
+body.light-theme .post-card,
+body.light-theme .market-card,
+body.light-theme .chat-message,
+body.light-theme .transactions-box {
+background:rgba(255,255,255,0.95);
+border:1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .balance-card h1,
+body.light-theme .card h3,
+body.light-theme .big-card h3,
+body.light-theme .events-title,
+body.light-theme .post-author,
+body.light-theme .market-name {
+color:#800000;
+}
+body.light-theme .balance-card p,
+body.light-theme .card p,
+body.light-theme .post-time,
+body.light-theme .market-change,
+body.light-theme .chat-message .msg-text,
+body.light-theme .post-content,
+body.light-theme .event,
+body.light-theme .market-price,
+body.light-theme .chat-username,
+body.light-theme .transaction-item {
+color:#1e1e2f !important;
+}
+body.light-theme .chat-message-own {
+background:linear-gradient(135deg, #80000020, #FFD70020) !important;
+}
+body.light-theme .theme-toggle,
+body.light-theme .notif-top-btn,
+body.light-theme .logout-top-btn {
+background:rgba(0,0,0,0.08);
+border-color:rgba(128,0,0,0.3);
+}
+body.light-theme .bottom-nav {
+background:rgba(255,255,255,0.95);
+border-top:1px solid rgba(128,0,0,0.2);
+}
+body.light-theme .bottom-nav a { color:#888; }
+body.light-theme .bottom-nav a.active { color:#800000; }
+body.light-theme .follow-btn { background:rgba(128,0,0,0.1); border-color:#800000; color:#800000; }
+body.light-theme .follow-btn.following { background:#800000; color:white; }
+
+/* ===== FLAG BADGE ===== */
+.flag-badge {
+position: absolute;
+top: 12px;
+left: 12px;
+background: rgba(0,0,0,0.6);
+backdrop-filter: blur(8px);
+border-radius: 10px;
+padding: 4px 8px;
+display: flex;
+align-items: center;
+gap: 6px;
+z-index: 5;
+border: 1px solid rgba(255,215,0,0.3);
+}
+.flag-badge img {
+width: 20px;
+height: 20px;
+border-radius: 4px;
+object-fit: cover;
+border: 1px solid #FFD700;
+}
+body.light-theme .flag-badge {
+background: rgba(255,255,255,0.8);
+border-color: rgba(128,0,0,0.3);
+}
+
+/* ===== POST ZOOM (EXPAND) ===== */
+.post-card {
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+cursor: pointer;
+}
+.post-card.expanded {
+transform: scale(1.02);
+box-shadow: 0 8px 40px rgba(255,215,0,0.3);
+z-index: 50;
+position: relative;
+border-color: #FFD700;
+}
+.post-card .post-content,
+.post-card .post-image {
+transition: all 0.3s ease;
+}
+.post-card.expanded .post-content {
+font-size: 12px;
+line-height: 1.8;
+}
+.post-card.expanded .post-image {
+max-height: 400px;
+}
+.post-card.expanded .post-header .post-time {
+font-size: 10px;
+}
+.post-card.expanded .post-actions button {
+font-size: 11px;
+}
+
+/* ===== POST ZOOM MODAL (FULL SCREEN) ===== */
+.post-zoom-modal {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.92);
+backdrop-filter: blur(16px);
+z-index: 50000;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 20px;
+animation: zoomFadeIn 0.3s ease;
+}
+.post-zoom-modal.active {
+display: flex;
+}
+@keyframes zoomFadeIn {
+from { opacity: 0; transform: scale(0.95); }
+to { opacity: 1; transform: scale(1); }
+}
+.post-zoom-content {
+background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+border-radius: 24px;
+max-width: 600px;
+width: 100%;
+max-height: 90vh;
+overflow-y: auto;
+padding: 24px;
+border: 1px solid rgba(255,215,0,0.3);
+position: relative;
+}
+.post-zoom-close {
+position: sticky;
+top: 0;
+float: right;
+background: rgba(255,215,0,0.15);
+border: none;
+border-radius: 50%;
+width: 36px;
+height: 36px;
+color: #FFD700;
+font-size: 18px;
+cursor: pointer;
+transition: 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 10;
+}
+.post-zoom-close:hover {
+background: rgba(255,215,0,0.35);
+transform: rotate(90deg);
+}
+.post-zoom-content .post-author {
+font-size: 16px;
+}
+.post-zoom-content .post-content {
+font-size: 14px;
+line-height: 1.8;
+color: #FFFFFF;
+}
+.post-zoom-content .post-image {
+max-height: 400px;
+width: 100%;
+object-fit: contain;
+border-radius: 12px;
+margin: 12px 0;
+border: 1px solid rgba(255,215,0,0.2);
+}
+.post-zoom-content .post-time {
+font-size: 11px;
+color: #888;
+}
+.post-zoom-content .post-actions {
+border-top: 1px solid rgba(255,215,0,0.15);
+padding-top: 12px;
+margin-top: 12px;
+}
+.post-zoom-content .post-actions button {
+font-size: 12px;
+}
+body.light-theme .post-zoom-content {
+background: linear-gradient(145deg, #ffffff, #f5f5f5);
+border-color: rgba(128,0,0,0.2);
+}
+body.light-theme .post-zoom-content .post-content {
+color: #1a1a1a;
+}
+
+.skeleton {
+    animation: skeletonPulse 1s ease-in-out infinite;
+}
+.skeleton-text {
+    height: 12px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: shimmer 1s infinite;
+}
+.skeleton-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.1);
+    border-radius: 16px;
+    padding: 15px;
+}
+.skeleton-market {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    margin-bottom: 8px;
+}
+.skeleton-line {
+    height: 10px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.06) 25%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.06) 75%);
+    background-size: 200% 100%;
+    border-radius: 5px;
+    margin: 6px 0;
+    animation: shimmer 1s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    background: #1E90FF;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    font-size: 8px;
+    color: white;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.verified-badge i { font-size: 7px; color: white; }
+
+.top-bar {
+position:fixed; top:0; left:0; right:0; z-index:100;
+background:rgba(10,10,10,0.95);
+backdrop-filter:blur(12px);
+border-bottom:1px solid rgba(255,215,0,0.2);
+padding:8px 14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+.logo-area { display:flex; align-items:center; gap:8px; }
+.logo-area img { width:32px; height:32px; border-radius:8px; object-fit:cover; }
+.logo-area h2 { color:#FFD700; font-size:14px; margin-bottom:2px; }
+.logo-area p { color:#AAAAAA; font-size:7px; }
+.top-bar-right { display:flex; align-items:center; gap:6px; }
+.theme-toggle, .notif-top-btn, .logout-top-btn {
+background:rgba(0,0,0,0.7);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:8px;
+padding:6px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:0.3s;
+text-decoration:none;
+position:relative;
+}
+.theme-toggle:hover, .notif-top-btn:hover, .logout-top-btn:hover {
+background:rgba(255,215,0,0.2);
+transform:scale(1.02);
+}
+.theme-toggle i, .notif-top-btn i, .logout-top-btn i { font-size:14px; color:#FFFFFF; }
+.top-notif-badge {
+position:absolute;
+top:-4px;
+right:-4px;
+background:#F6465D;
+color:white;
+font-size:8px;
+font-weight:bold;
+border-radius:50%;
+min-width:14px;
+height:14px;
+display:none;
+align-items:center;
+justify-content:center;
+padding:0 2px;
+}
+.overlay {
+position:fixed;
+top:0; left:0; width:100%; height:100%;
+background:rgba(0,0,0,0.82);
+backdrop-filter:blur(4px);
+z-index:1;
+}
+.main-content {
+position:relative;
+z-index:2;
+max-width:1200px;
+margin:70px auto 20px;
+padding:0 10px;
+}
+.balance-card {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,215,0,0.2);
+backdrop-filter:blur(10px);
+border-radius:18px;
+padding:14px 12px;
+margin-bottom:12px;
+text-align:center;
+position:relative;
+}
+.balance-header { display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+.balance-header p { color:#BBBBBB; font-size:10px; }
+.balance-actions { display:flex; gap:8px; align-items:center; }
+#toggleBalance {
+background:rgba(255,215,0,0.2);
+border:none;
+border-radius:50%;
+width:28px;
+height:28px;
+cursor:pointer;
+color:#FFD700;
+font-size:10px;
+transition:0.3s;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+#toggleBalance:hover { background:rgba(255,215,0,0.4); transform:scale(1.05); }
+
+#exchangeCurrencyBtn {
+background:rgba(255,215,0,0.2);
+border:1px solid rgba(255,215,0,0.4);
+border-radius:20px;
+padding:0 12px;
+height:28px;
+cursor:pointer;
+color:#FFD700;
+font-size:9px;
+font-weight:600;
+transition:0.3s;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+white-space:nowrap;
+}
+#exchangeCurrencyBtn i { font-size:10px; }
+#exchangeCurrencyBtn:hover { background:rgba(255,215,0,0.4); transform:scale(1.02); }
+
+.balance-card h1 {
+color:#FFD700;
+font-size:28px;
+margin-bottom:12px;
+font-weight:800;
+transition:all 0.3s ease;
+}
+.balance-up { animation:balanceUp 0.5s ease; }
+.balance-down { animation:balanceDown 0.5s ease; }
+@keyframes balanceUp {
+0% { color:#FFD700; transform:scale(1); }
+50% { color:#0ECB81; transform:scale(1.03); text-shadow:0 0 8px #0ECB81; }
+100% { color:#FFD700; transform:scale(1); }
+}
+@keyframes balanceDown {
+0% { color:#FFD700; transform:scale(1); }
+50% { color:#F6465D; transform:scale(0.98); }
+100% { color:#FFD700; transform:scale(1); }
+}
+.balance-buttons { display:flex; gap:12px; justify-content:center; }
+.balance-buttons button {
+border:none;
+border-radius:40px;
+padding:8px 22px;
+color:white;
+font-weight:700;
+cursor:pointer;
+transition:0.3s;
+font-size:11px;
+display:flex;
+align-items:center;
+gap:5px;
+}
+.balance-buttons button:first-child { background:linear-gradient(135deg,#0ECB81,#0A9E65); }
+.balance-buttons button:last-child { background:linear-gradient(135deg,#F6465D,#D43F52); }
+
+/* ===== ACTION BUTTONS ROW - INCLUDING WHATSAPP ===== */
+.action-buttons-row {
+display:flex;
+justify-content:space-between;
+gap:6px;
+margin-bottom:12px;
+flex-wrap:wrap;
+}
+.action-btn {
+flex:1;
+min-width:65px;
+background:linear-gradient(135deg, rgba(128,0,0,0.8), rgba(255,215,0,0.6));
+border:none;
+border-radius:25px;
+padding:6px 3px;
+color:white;
+font-weight:600;
+font-size:9px;
+cursor:pointer;
+transition:0.3s;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:2px;
+text-align:center;
+}
+.action-btn i { font-size:12px; }
+.action-btn:hover {
+transform:translateY(-2px);
+background:linear-gradient(135deg,#800000,#FFD700);
+box-shadow:0 3px 10px rgba(255,215,0,0.3);
+}
+.action-btn span { font-size:8px; }
+
+/* ===== WHATSAPP BUTTON - GREEN ===== */
+.action-btn.whatsapp {
+background:linear-gradient(135deg, #25D366, #128C7E) !important;
+border:1px solid rgba(37,211,102,0.3);
+color:white !important;
+}
+.action-btn.whatsapp:hover {
+background:linear-gradient(135deg, #128C7E, #075E54) !important;
+box-shadow:0 3px 10px rgba(37,211,102,0.4);
+transform:translateY(-2px);
+}
+.action-btn.whatsapp i { color:white; }
+.action-btn.whatsapp span { color:white; }
+
+.stats-grid {
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:8px;
+margin-bottom:12px;
+max-width:400px;
+margin-left:auto;
+margin-right:auto;
+}
+.card {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+border-radius:14px;
+padding:10px;
+text-align:center;
+transition:transform 0.2s;
+}
+.card:hover { transform:translateY(-2px); }
+.card h3 { color:#FFD700; font-size:10px; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:3px; }
+.card p { color:white; font-size:16px; font-weight:700; }
+.card .trend-up { color:#0ECB81; font-size:9px; margin-top:3px; display:flex; align-items:center; justify-content:center; gap:2px; }
+.card .trend-down { color:#F6465D; font-size:9px; margin-top:3px; display:flex; align-items:center; justify-content:center; gap:2px; }
+
+.big-card {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,215,0,0.2);
+backdrop-filter:blur(10px);
+border-radius:14px;
+padding:12px;
+margin-bottom:12px;
+text-align:center;
+}
+.big-card h3 { color:#FFD700; font-size:12px; margin-bottom:6px; }
+.big-card p { color:white; font-size:24px; font-weight:800; }
+.big-card .sub-text { color:#888; font-size:9px; margin-top:3px; }
+
+.market-section { margin-bottom:12px; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px; }
+.section-header h3 { color:#FFD700; font-size:12px; }
+.market-header-right { display:flex; align-items:center; gap:10px; }
+.live-badge {
+display:inline-flex;
+align-items:center;
+gap:4px;
+background:rgba(14,203,129,0.15);
+padding:2px 6px;
+border-radius:20px;
+font-size:9px;
+color:#0ECB81;
+}
+.live-dot {
+width:5px;
+height:5px;
+background:#0ECB81;
+border-radius:50%;
+animation:livePulse 1.5s infinite;
+}
+@keyframes livePulse {
+0% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(14,203,129,0.7); }
+70% { opacity:0.7; transform:scale(1.1); box-shadow:0 0 0 5px rgba(14,203,129,0); }
+100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(14,203,129,0); }
+}
+.explore-btn {
+background:rgba(255,215,0,0.15);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:20px;
+padding:4px 10px;
+color:#FFD700;
+font-size:9px;
+text-decoration:none;
+transition:0.3s;
+display:flex;
+align-items:center;
+gap:4px;
+}
+.explore-btn:hover { background:rgba(255,215,0,0.3); transform:translateY(-1px); }
+.market-grid {
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:6px;
+}
+.market-card {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:12px;
+padding:8px 10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+transition:all 0.2s ease;
+}
+.market-card.glowing {
+animation:cardGlow 1s ease;
+border-color:rgba(14,203,129,0.8);
+box-shadow:0 0 12px rgba(14,203,129,0.5);
+}
+@keyframes cardGlow {
+0% { border-color:rgba(255,215,0,0.3); }
+50% { border-color:#0ECB81; box-shadow:0 0 15px #0ECB81; }
+100% { border-color:rgba(255,215,0,0.3); }
+}
+.market-left { display:flex; align-items:center; gap:8px; }
+.market-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; font-size:11px; flex-shrink:0; background:linear-gradient(135deg, #800000, #FFD700); overflow:hidden; }
+.market-icon img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.market-icon .fallback { display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-weight:bold; color:white; font-size:11px; }
+.market-name { font-weight:600; font-size:11px; color:#FFFFFF; }
+.market-price { font-size:11px; font-weight:600; color:#FFFFFF; text-align:right; }
+.market-change { font-size:9px; text-align:right; }
+.positive { color:#0ECB81; }
+.negative { color:#F6465D; }
+
+.slideshow-section { margin-bottom:12px; position:relative; }
+.slideshow-section h3 { color:#FFD700; font-size:11px; margin-bottom:6px; }
+.carousel-container { position:relative; overflow:hidden; border-radius:14px; }
+.carousel-track { display:flex; transition:transform 0.5s ease-in-out; }
+.carousel-slide { min-width:100%; position:relative; cursor:pointer; }
+.carousel-slide img { width:100%; height:130px; object-fit:cover; border-radius:14px; }
+.carousel-caption {
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+background:linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+padding:12px 10px 6px;
+border-radius:0 0 14px 14px;
+color:white;
+font-weight:600;
+font-size:10px;
+}
+.carousel-btn {
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+background:rgba(0,0,0,0.6);
+border:none;
+border-radius:50%;
+width:26px;
+height:26px;
+cursor:pointer;
+color:white;
+font-size:12px;
+transition:0.3s;
+z-index:10;
+}
+.carousel-btn:hover { background:rgba(255,215,0,0.8); color:#800000; }
+.carousel-prev { left:6px; }
+.carousel-next { right:6px; }
+.carousel-dots { display:flex; justify-content:center; gap:5px; margin-top:6px; }
+.carousel-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer; transition:0.3s; }
+.carousel-dot.active { background:#FFD700; width:14px; border-radius:3px; }
+
+.transactions-box {
+background:rgba(0,0,0,0.4);
+border:1px solid rgba(255,215,0,0.25);
+border-radius:14px;
+padding:10px;
+margin-bottom:12px;
+overflow:hidden;
+backdrop-filter:blur(8px);
+}
+.transactions-title {
+color: #FFD700;
+font-weight: 700;
+font-size: 10px;
+margin-bottom:6px;
+display: flex;
+align-items: center;
+gap: 6px;
+padding-bottom: 4px;
+border-bottom: 1px solid rgba(255,215,0,0.2);
+}
+.transactions-scroll {
+overflow: hidden;
+white-space: nowrap;
+position: relative;
+}
+.transactions-scroll-inner {
+display: inline-block;
+animation: scrollTransactions 25s linear infinite;
+}
+.transaction-item {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 4px 12px;
+background: rgba(255,215,0,0.08);
+border-radius: 30px;
+margin-right: 12px;
+white-space: nowrap;
+}
+.transaction-item i { font-size: 9px; }
+.transaction-details { font-size: 9px; font-weight: 500; color: #FFD700; }
+.transaction-amount { font-weight: 700; font-size: 9px; }
+.transaction-amount.positive { color: #0ECB81; }
+.transaction-amount.negative { color: #F6465D; }
+.transaction-time { font-size: 8px; color: #888; }
+@keyframes scrollTransactions {
+0% { transform: translateX(0); }
+100% { transform: translateX(-50%); }
+}
+.transactions-scroll:hover .transactions-scroll-inner {
+animation-play-state: paused;
+}
+
+.chat-section { margin-bottom:12px; }
+.chat-container {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,215,0,0.2);
+border-radius:14px;
+overflow:hidden;
+}
+.chat-messages {
+height:300px;
+overflow-y:auto;
+padding:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+background:rgba(0,0,0,0.2);
+}
+.chat-message {
+display:flex;
+flex-direction:column;
+max-width:85%;
+padding:6px 10px;
+border-radius:14px;
+position:relative;
+}
+.chat-message-own { 
+align-self:flex-end; 
+background:linear-gradient(135deg, #FFD700, #FFA500); 
+border-bottom-right-radius:3px; 
+}
+.chat-message-own .chat-username,
+.chat-message-own .chat-message-text,
+.chat-message-own .chat-message-time {
+color: #1a1a1a !important;
+}
+.chat-message-other { 
+align-self:flex-start; 
+background:linear-gradient(135deg, #0ECB81, #0A9E65); 
+border-bottom-left-radius:3px; 
+}
+.chat-message-other .chat-username,
+.chat-message-other .chat-message-text,
+.chat-message-other .chat-message-time {
+color: white !important;
+}
+.chat-username { 
+font-weight:700; 
+font-size:9px; 
+margin-bottom:2px; 
+display:flex; 
+align-items:center; 
+gap:4px; 
+flex-wrap:wrap;
+color: #FFD700 !important;
+}
+.chat-message-text { font-size:10px; line-height:1.4; word-wrap:break-word; }
+.chat-message-time { font-size:7px; opacity:0.7; margin-top:2px; display:flex; justify-content:flex-end; gap:6px; align-items:center; }
+.delete-chat-btn, .reply-chat-btn { background:transparent; border:none; cursor:pointer; font-size:8px; padding:2px 5px; border-radius:4px; transition:0.2s; }
+.delete-chat-btn { color:#F6465D; }
+.reply-chat-btn { color:#FFD700; }
+.delete-chat-btn:hover, .reply-chat-btn:hover { background:rgba(255,255,255,0.1); }
+
+.chat-input-area {
+display:flex;
+gap:6px;
+padding:10px;
+background:rgba(0,0,0,0.3);
+border-top:1px solid rgba(255,215,0,0.1);
+}
+.chat-input-area input {
+flex:1;
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:25px;
+padding:8px 12px;
+color:#FFFFFF;
+font-size:10px;
+outline:none;
+}
+.chat-input-area input:focus { border-color:#FFD700; }
+.chat-input-area button {
+background:linear-gradient(135deg,#800000,#FFD700);
+border:none;
+border-radius:25px;
+padding:8px 16px;
+color:white;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+font-size:10px;
+}
+
+.reply-indicator {
+background:rgba(255,215,0,0.15);
+padding:4px 8px;
+margin:0 10px 8px 10px;
+border-radius:8px;
+font-size:9px;
+color:#FFD700;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+.reply-indicator span i { margin-right:4px; }
+.cancel-reply { background:rgba(255,255,255,0.1); border:none; color:#888; cursor:pointer; padding:2px 6px; border-radius:4px; font-size:8px; }
+
+.social-section { margin-bottom:12px; }
+.social-container {
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,215,0,0.2);
+border-radius:14px;
+overflow:hidden;
+}
+.create-post {
+padding:10px;
+background:rgba(0,0,0,0.2);
+border-bottom:1px solid rgba(255,215,0,0.1);
+}
+.create-post textarea { 
+width:100%; 
+background:rgba(255,255,255,0.08); 
+border:1px solid rgba(255,215,0,0.2); 
+border-radius:12px; 
+padding:8px; 
+color:#FFFFFF; 
+font-size:10px; 
+resize:none; 
+margin-bottom:8px;
+font-family: inherit;
+}
+.post-actions-row { display:flex; gap:6px; align-items:center; }
+.image-upload-label { 
+background:rgba(255,215,0,0.15); 
+border:1px solid rgba(255,215,0,0.3); 
+border-radius:25px; 
+padding:6px 12px; 
+cursor:pointer; 
+color:#FFD700; 
+font-size:9px; 
+display:flex; 
+align-items:center; 
+gap:5px; 
+transition:0.3s;
+}
+.image-upload-label:hover { background:rgba(255,215,0,0.3); }
+.post-btn { 
+background:linear-gradient(135deg,#800000,#FFD700); 
+border:none; 
+border-radius:25px; 
+padding:6px 16px; 
+color:white; 
+font-weight:600; 
+cursor:pointer; 
+font-size:10px; 
+transition:0.3s;
+}
+.posts-container {
+padding:10px;
+display:flex;
+flex-direction:column;
+gap:10px;
+max-height:500px;
+overflow-y:auto;
+}
+.post-card { 
+background:rgba(20,20,30,0.95);
+border:1px solid rgba(255,215,0,0.2);
+border-radius:14px;
+padding:10px;
+transition:all 0.3s ease;
+cursor:pointer;
+}
+.post-card:hover { transform:translateY(-1px); border-color:rgba(255,215,0,0.4); }
+.post-card-own { background:linear-gradient(135deg, rgba(255,215,0,0.08), rgba(128,0,0,0.08)); border-left:3px solid #FFD700; }
+.post-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.post-author-wrapper { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.post-author { color:#FFD700; font-weight:600; font-size:11px; }
+.post-time { color:#aaa; font-size:8px; margin-left:auto; }
+.post-content { color:#FFFFFF; font-size:10px; line-height:1.4; background:rgba(0,0,0,0.2); padding:8px; border-radius:10px; margin-bottom:8px; word-wrap:break-word; }
+.post-image { max-width:100%; max-height:180px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,215,0,0.3); object-fit:cover; cursor:pointer; }
+.post-actions { display:flex; gap:10px; margin-top:4px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.1); flex-wrap:wrap; }
+.post-actions button { background:transparent; border:none; color:#aaa; cursor:pointer; font-size:9px; display:flex; align-items:center; gap:3px; transition:0.2s; padding:2px 5px; border-radius:5px; }
+.post-actions button:hover { color:#FFD700; background:rgba(255,215,0,0.1); }
+.delete-post-btn { color:#F6465D !important; }
+.report-post-btn { color:#FF9800 !important; }
+.follow-btn { background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; padding:2px 8px; font-size:8px; color:#FFD700; cursor:pointer; margin-left:5px; }
+.follow-btn.following { background:#FFD700; color:#800000; }
+
+.comments-modal {
+position:fixed;
+top:0; left:0; right:0; bottom:0;
+background:rgba(0,0,0,0.9);
+backdrop-filter:blur(8px);
+z-index:20000;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+.comments-modal-card {
+background:linear-gradient(145deg, #1a1a2e, #0f0f1a);
+border-radius:24px;
+width:90%;
+max-width:500px;
+max-height:85vh;
+display:flex;
+flex-direction:column;
+border:1px solid rgba(255,215,0,0.3);
+}
+.comments-header { display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-bottom:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
+.comments-header h3 { color:#FFD700; font-size:16px; display:flex; align-items:center; gap:6px; }
+.close-comments { background:none; border:none; color:#888; font-size:20px; cursor:pointer; }
+.comments-list { 
+flex:1; 
+overflow-y:auto; 
+padding:12px 15px; 
+display:flex; 
+flex-direction:column; 
+gap:12px;
+max-height:60vh;
+min-height:200px;
+}
+.comment-item { 
+background:rgba(255,255,255,0.05); 
+border-radius:14px; 
+padding:10px;
+border-left:2px solid rgba(255,215,0,0.3);
+}
+.comment-author { 
+color:#FFD700; 
+font-weight:600; 
+font-size:11px; 
+margin-bottom:4px; 
+display:flex; 
+align-items:center; 
+gap:6px; 
+flex-wrap:wrap; 
+}
+.comment-text { color:#ccc; font-size:11px; margin-bottom:5px; word-wrap:break-word; }
+.comment-time { color:#666; font-size:9px; }
+.comment-reply-btn { background:transparent; border:none; color:#888; font-size:9px; cursor:pointer; }
+.comment-reply-btn:hover { color:#FFD700; }
+.comment-input-area { 
+display:flex; 
+gap:8px; 
+padding:12px 15px; 
+border-top:1px solid rgba(255,255,255,0.1);
+flex-shrink:0;
+}
+.comment-input-area input { 
+flex:1; 
+background:rgba(255,255,255,0.1); 
+border:1px solid rgba(255,215,0,0.3); 
+border-radius:22px; 
+padding:8px 12px; 
+color:#FFFFFF; 
+font-size:11px; 
+}
+.comment-input-area input:focus { border-color:#FFD700; outline:none; }
+.comment-input-area button { 
+background:linear-gradient(135deg,#800000,#FFD700); 
+border:none; 
+border-radius:22px; 
+padding:8px 16px; 
+color:white; 
+font-weight:600; 
+cursor:pointer; 
+font-size:11px; 
+}
+.comment-input-area button:hover { transform:scale(1.02); }
+
+.report-modal {
+position:fixed;
+top:0; left:0; right:0; bottom:0;
+background:rgba(0,0,0,0.9);
+backdrop-filter:blur(12px);
+z-index:20000;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+.report-modal-card {
+background:linear-gradient(145deg, #1e1e2e, #14141f);
+border-radius:24px;
+width:90%;
+max-width:450px;
+border:1px solid rgba(255,215,0,0.3);
+}
+.report-modal-header { padding:15px 20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; }
+.report-modal-header h3 { color:#FFD700; font-size:18px; display:flex; align-items:center; gap:8px; }
+.close-report-modal { background:none; border:none; color:#888; font-size:20px; cursor:pointer; }
+.report-modal-body { padding:20px; }
+.report-reason-label { color:#FFD700; font-size:12px; margin-bottom:8px; display:block; }
+.report-reason-textarea { width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,215,0,0.2); border-radius:14px; padding:10px 12px; color:#FFFFFF; font-size:11px; min-height:80px; }
+.report-modal-footer { padding:12px 20px 20px; display:flex; gap:12px; }
+.report-modal-btn { flex:1; padding:10px; border:none; border-radius:14px; font-weight:700; cursor:pointer; }
+.report-modal-btn.cancel { background:rgba(255,255,255,0.1); color:#ccc; }
+.report-modal-btn.submit { background:linear-gradient(135deg,#F6465D,#D43F52); color:white; }
+
+.delete-modal {
+position:fixed;
+top:0; left:0; right:0; bottom:0;
+background:rgba(0,0,0,0.85);
+backdrop-filter:blur(12px);
+z-index:20000;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+.delete-modal-card {
+background:linear-gradient(145deg, #1e1e2e, #14141f);
+border-radius:24px;
+padding:25px;
+max-width:400px;
+width:90%;
+text-align:center;
+border:1px solid rgba(255,215,0,0.3);
+}
+.delete-modal-card h3 { color:#FFD700; font-size:20px; margin-bottom:10px; }
+.modal-warning { background:rgba(246,70,93,0.15); border-radius:14px; padding:10px; margin:12px 0; color:#F6465D; font-size:11px; }
+.modal-buttons { display:flex; gap:12px; margin-top:16px; }
+.modal-btn { flex:1; padding:10px; border:none; border-radius:14px; font-weight:700; cursor:pointer; }
+.modal-btn.cancel { background:rgba(255,255,255,0.1); color:#ccc; }
+.modal-btn.confirm { background:linear-gradient(135deg, #F6465D, #D43F52); color:white; }
+
+.bottom-nav {
+position:fixed; bottom:0; left:0; right:0;
+background:rgba(10,10,10,0.95);
+backdrop-filter:blur(12px);
+border-top:1px solid rgba(255,215,0,0.2);
+border-radius:18px 18px 0 0;
+display:flex;
+justify-content:space-around;
+padding:6px 8px;
+z-index:100;
+}
+.bottom-nav a { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:#888; font-size:8px; transition:0.3s; gap:2px; }
+.bottom-nav a i { font-size:14px; }
+.bottom-nav a.active { color:#FFD700; }
+
+.notification-popup {
+position:fixed; top:70px; right:15px;
+min-width:220px;
+padding:8px 12px;
+border-radius:12px;
+display:flex;
+align-items:center;
+gap:8px;
+z-index:99999;
+backdrop-filter:blur(20px);
+box-shadow:0 12px 28px rgba(0,0,0,0.3);
+animation:slideInRight 0.3s ease;
+border-left:3px solid;
+font-size:10px;
+}
+.notification-popup.success { background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.08)); border-left-color:#00FF88; }
+.notification-popup.error { background:linear-gradient(135deg,rgba(255,77,77,0.15),rgba(255,77,77,0.08)); border-left-color:#FF4D4D; }
+.notification-popup.info { background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,215,0,0.08)); border-left-color:#FFD700; }
+@keyframes slideInRight { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
+
+.notif-permission-btn {
+background:rgba(255,215,0,0.15);
+border:1px solid #FFD700;
+border-radius:20px;
+padding:4px 10px;
+font-size:9px;
+color:#FFD700;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:5px;
+}
+
+@media(max-width:600px){
+.stats-grid { grid-template-columns:repeat(2,1fr); }
+.balance-card h1 { font-size:24px; }
+.market-grid { grid-template-columns:1fr; }
+.action-btn { min-width:calc(33% - 6px); }
+.action-btn.whatsapp { min-width:calc(33% - 6px); }
+.carousel-slide img { height:100px; }
+.chat-message { max-width:95%; }
+.section-header { flex-direction:column; align-items:flex-start; }
+.market-header-right { width:100%; justify-content:space-between; }
+.post-actions-row { flex-wrap:wrap; }
+.flag-badge { top: 8px; left: 8px; padding: 3px 6px; }
+.flag-badge img { width: 16px; height: 16px; }
+.balance-actions { gap:4px; }
+#toggleBalance { width: 24px; height: 24px; font-size: 9px; }
+#exchangeCurrencyBtn { padding: 0 8px; height: 24px; font-size: 8px; }
+#exchangeCurrencyBtn i { font-size: 9px; }
+.comments-modal-card { max-height:90vh; width:95%; }
+.comments-list { max-height:50vh; }
+.post-zoom-content { padding: 16px; margin: 10px; }
+.post-zoom-content .post-content { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>AI Trading Platform</p></div>
+</div>
+<div class="top-bar-right">
+<button id="notifPermissionBtn" class="notif-permission-btn" style="display:none;"><i class="fas fa-bell"></i> Enable Notifications</button>
+<div class="notif-top-btn" id="notifTopBtn"><i class="fa-solid fa-bell"></i><span class="top-notif-badge" id="topNotificationBadge">0</span></div>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+<div class="logout-top-btn" id="logoutBtnTop"><i class="fa-solid fa-right-from-bracket"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="main-content">
+    <div class="balance-card">
+        <div class="flag-badge" id="flagBadge" style="display: none;">
+            <img id="countryFlagImg" src="" alt="flag">
+        </div>
+        <div class="balance-header">
+            <p>BALANCE</p>
+            <div class="balance-actions">
+                <button id="toggleBalance"><i class="fas fa-eye-slash"></i></button>
+                <span style="color:#555; font-size:12px; letter-spacing:2px;"></span>
+                <button id="exchangeCurrencyBtn"><i class="fas fa-exchange-alt"></i> <span id="exchangeBtnText">View</span></button>
+            </div>
+        </div>
+        <h1 id="userBalance">••••••</h1>
+        <div class="balance-buttons">
+            <button onclick="window.location.href='deposit.html'"><i class="fas fa-plus-circle"></i> Deposit</button>
+            <button onclick="window.location.href='withdraw.html'"><i class="fas fa-minus-circle"></i> Withdraw</button>
+        </div>
+    </div>
+
+    <!-- ===== ACTION BUTTONS ROW WITH WHATSAPP ===== -->
+    <div class="action-buttons-row">
+        <button class="action-btn" onclick="window.location.href='p2p-order.html'"><i class="fas fa-handshake"></i><span>P2P Order</span></button>
+        <button class="action-btn" onclick="window.location.href='market.html'"><i class="fas fa-store"></i><span>Market</span></button>
+        <button class="action-btn" onclick="window.location.href='auto-bot.html'"><i class="fas fa-robot"></i><span>Auto Trade</span></button>
+        <button class="action-btn" onclick="window.location.href='robots.html'"><i class="fas fa-microchip"></i><span>Buy AI Bot</span></button>
+        <button class="action-btn" onclick="window.location.href='affiliate.html'"><i class="fas fa-user-plus"></i><span>Invite</span></button>
+        <button class="action-btn" onclick="window.location.href='subscriptions.html'"><i class="fas fa-crown"></i><span>Subscribe</span></button>
+        <button class="action-btn" onclick="window.location.href='copy-trading.html'"><i class="fas fa-copy"></i><span>Copy Trade</span></button>
+        <button class="action-btn" onclick="window.location.href='wallet.html'"><i class="fa-solid fa-wallet"></i><span>Wallet</span></button>
+        <button class="action-btn whatsapp" id="whatsappGroupBtn" style="display:none;" onclick="openWhatsAppGroup()">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card"><h3><i class="fas fa-calendar-day"></i> Daily PnL</h3><p id="dailyPnL">$0.00</p><div id="dailyTrend" class="trend-up"><i class="fas fa-chart-line"></i> Today</div></div>
+        <div class="card"><h3><i class="fas fa-trophy"></i> Win Rate</h3><p id="winRate">0%</p><div class="trend-up"><i class="fas fa-percent"></i> Success rate</div></div>
+    </div>
+
+    <div class="big-card"><h3><i class="fas fa-brain"></i> AI Performance Score</h3><p id="aiScore">0<span style="font-size:12px;">/100</span></p><div class="sub-text">Based on win rate & trading performance</div></div>
+
+    <div class="slideshow-section">
+        <h3>Promotions & Events</h3>
+        <div class="carousel-container">
+            <button class="carousel-btn carousel-prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-slide"><img src="../assets/images/slide1.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=+20%25+Bonus+on+Deposit'"><div class="carousel-caption">20% Bonus on First Deposit!</div></div>
+                <div class="carousel-slide"><img src="../assets/images/slide2.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=AI+Robot+Sale'"><div class="carousel-caption">AI Robots - 30% OFF!</div></div>
+                <div class="carousel-slide"><img src="../assets/images/slide3.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=Referral+Bonus'"><div class="carousel-caption">Refer & Earn $50 USDT!</div></div>
+                <div class="carousel-slide"><img src="../assets/images/slide4.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=Trading+Competition'"><div class="carousel-caption">Trading Competition - Win $10,000!</div></div>
+                <div class="carousel-slide"><img src="../assets/images/slide5.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=New+Feature+Launch'"><div class="carousel-caption">New Feature: Copy Trading!</div></div>
+                <div class="carousel-slide"><img src="../assets/images/slide6.jpeg" onerror="this.src='https://placehold.co/600x150/800000/FFD700?text=VIP+Rewards'"><div class="carousel-caption">VIP Rewards - Up to 50% Cashback</div></div>
+            </div>
+            <button class="carousel-btn carousel-next" id="carouselNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <div class="market-section">
+        <div class="section-header">
+            <h3><i class="fas fa-chart-line"></i> Live Market</h3>
+            <div class="market-header-right">
+                <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+                <a href="market.html" class="explore-btn"><i class="fas fa-chart-simple"></i> Explore More Markets</a>
+            </div>
+        </div>
+        <div class="market-grid" id="marketGrid">
+            <div class="skeleton-market"><div><div class="skeleton-line" style="width:60px;"></div><div class="skeleton-line" style="width:40px;"></div></div><div><div class="skeleton-line" style="width:50px;"></div></div></div>
+            <div class="skeleton-market"><div><div class="skeleton-line" style="width:60px;"></div><div class="skeleton-line" style="width:40px;"></div></div><div><div class="skeleton-line" style="width:50px;"></div></div></div>
+        </div>
+    </div>
+
+    <div class="transactions-box">
+        <div class="transactions-title">
+            <i class="fas fa-bolt"></i> Live Transactions
+            <span style="margin-left:auto; font-size:9px; color:#888;"><i class="fas fa-arrow-right"></i> Scrolling</span>
+        </div>
+        <div class="transactions-scroll" id="transactionsScroll">
+            <div class="transactions-scroll-inner" id="transactionsInner">
+                <div class="transaction-item"><i class="fas fa-spinner fa-pulse"></i> Loading transactions...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-section">
+        <div class="section-header"><h3><i class="fas fa-comments"></i> Live Chat</h3></div>
+        <div class="chat-container">
+            <div id="replyIndicator" class="reply-indicator" style="display:none;">
+                <span><i class="fas fa-reply"></i> Replying to <strong id="replyingToName"></strong></span>
+                <button class="cancel-reply" id="cancelReplyBtn"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="skeleton-card"><div class="skeleton-line" style="width:60%;"></div><div class="skeleton-line" style="width:40%;"></div></div>
+                <div class="skeleton-card"><div class="skeleton-line" style="width:50%;"></div><div class="skeleton-line" style="width:30%;"></div></div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendChatBtn"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="social-section">
+        <div class="section-header"><h3><i class="fas fa-users"></i> Community Feed</h3></div>
+        <div class="social-container">
+            <div class="create-post">
+                <textarea id="postContent" placeholder="Share your trading success..."></textarea>
+                <input type="file" id="postImage" accept="image/*" style="display:none;">
+                <div class="post-actions-row">
+                    <label class="image-upload-label" id="imageUploadLabel"><i class="fas fa-image"></i> Add Image</label>
+                    <button class="post-btn" id="createPostBtn"><i class="fas fa-paper-plane"></i> Post</button>
+                </div>
+                <img id="imagePreview" style="max-width:100%; margin-top:6px; display:none; border-radius:8px;">
+            </div>
+            <div class="posts-container" id="postsContainer">
+                <div class="skeleton-card"><div class="skeleton-line" style="width:70%;"></div><div class="skeleton-line" style="width:90%;"></div><div class="skeleton-line" style="width:50%;"></div></div>
+                <div class="skeleton-card"><div class="skeleton-line" style="width:60%;"></div><div class="skeleton-line" style="width:80%;"></div><div class="skeleton-line" style="width:40%;"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== POST ZOOM MODAL ===== -->
+<div class="post-zoom-modal" id="postZoomModal">
+    <div class="post-zoom-content" id="postZoomContent">
+        <button class="post-zoom-close" id="postZoomClose">&times;</button>
+        <div id="postZoomBody"></div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="leaderboard.html"><i class="fas fa-trophy"></i><span>Leaderboard</span></a>
+    <a href="trade.html"><i class="fa-solid fa-arrow-trend-up"></i><span>Trade</span></a>
+    <a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P buy USDT</span></a>
+    <a href="account.html"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// CONFIGURATION
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, update, get, remove, query, orderByChild, limitToLast, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let userData = null;
+let balanceVisible = false;
+let currentCurrency = 'USD';
+let exchangeRates = { USD: 1, TZS: 2800, MWK: 5600, ZMW: 30 };
+let userCountry = 'Tanzania';
+let localCurrencySymbol = 'TZS';
+let localCurrencyRate = 2800;
+let whatsappGroups = {};
+
+let chatUnsubscribe = null;
+let postsUnsubscribe = null;
+let transactionsUnsubscribe = null;
+let notificationsUnsubscribe = null;
+
+let replyingToMessage = null;
+
+// ============================================================
+// COUNTRY FLAG MAPPING
+// ============================================================
+const countryFlagImages = {
+    'Tanzania': 'https://flagcdn.com/tz.svg',
+    'Malawi': 'https://flagcdn.com/mw.svg',
+    'Zambia': 'https://flagcdn.com/zm.svg',
+    'Kenya': 'https://flagcdn.com/ke.svg',
+    'Uganda': 'https://flagcdn.com/ug.svg',
+    'Nigeria': 'https://flagcdn.com/ng.svg',
+    'Ghana': 'https://flagcdn.com/gh.svg',
+    'South Africa': 'https://flagcdn.com/za.svg',
+    'Congo DRC': 'https://flagcdn.com/cd.svg',
+    'Burundi': 'https://flagcdn.com/bi.svg',
+    'Botswana': 'https://flagcdn.com/bw.svg',
+    'Namibia': 'https://flagcdn.com/na.svg',
+    'Mozambique': 'https://flagcdn.com/mz.svg',
+    'Rwanda': 'https://flagcdn.com/rw.svg',
+    'Egypt': 'https://flagcdn.com/eg.svg',
+    'Morocco': 'https://flagcdn.com/ma.svg',
+    'default': 'https://flagcdn.com/tz.svg'
+};
+
+const countryCurrencies = {
+    'Tanzania': { symbol: 'TZS', rate: 2800 },
+    'Malawi': { symbol: 'MWK', rate: 5600 },
+    'Zambia': { symbol: 'ZMW', rate: 30 },
+    'Kenya': { symbol: 'KES', rate: 140 },
+    'Uganda': { symbol: 'UGX', rate: 3800 },
+    'Nigeria': { symbol: 'NGN', rate: 1500 },
+    'Ghana': { symbol: 'GHS', rate: 15 },
+    'South Africa': { symbol: 'ZAR', rate: 19 },
+    'Congo DRC': { symbol: 'CDF', rate: 2850 },
+    'Burundi': { symbol: 'BIF', rate: 3500 },
+    'Botswana': { symbol: 'BWP', rate: 13 },
+    'Namibia': { symbol: 'NAD', rate: 19 },
+    'Mozambique': { symbol: 'MZN', rate: 64 },
+    'Rwanda': { symbol: 'RWF', rate: 1300 },
+    'Egypt': { symbol: 'EGP', rate: 48 },
+    'Morocco': { symbol: 'MAD', rate: 10 }
+};
+
+// ============================================================
+// WHATSAPP GROUPS - FETCH FROM FIREBASE
+// ============================================================
+async function loadWhatsAppGroups() {
+    try {
+        const snapshot = await get(ref(db, 'whatsappGroups'));
+        if (snapshot.exists()) {
+            whatsappGroups = snapshot.val();
+            console.log('[ABOTRA] WhatsApp groups loaded from Firebase:', whatsappGroups);
+        } else {
+            // Default fallback if no groups in Firebase
+            whatsappGroups = {
+                'Tanzania': { link: 'https://chat.whatsapp.com/D2fegQD6rqdJPoM7ZIkZIG', name: 'ABOTRA Tanzania' },
+                'Malawi': { link: 'https://chat.whatsapp.com/GkfqtLPBcGm9Nd87txfwMP', name: 'ABOTRA Malawi' },
+                'Zambia': { link: 'https://chat.whatsapp.com/JuVaMTB3EogHIRNiV2zuUT', name: 'ABOTRA Zambia' },
+                'Kenya': { link: 'https://chat.whatsapp.com/KenyaGroupLink', name: 'ABOTRA Kenya' },
+                'Uganda': { link: 'https://chat.whatsapp.com/UgandaGroupLink', name: 'ABOTRA Uganda' },
+                'Nigeria': { link: 'https://chat.whatsapp.com/NigeriaGroupLink', name: 'ABOTRA Nigeria' },
+                'Ghana': { link: 'https://chat.whatsapp.com/GhanaGroupLink', name: 'ABOTRA Ghana' },
+                'South Africa': { link: 'https://chat.whatsapp.com/SouthAfricaGroupLink', name: 'ABOTRA South Africa' },
+                'Congo DRC': { link: 'https://chat.whatsapp.com/CongoGroupLink', name: 'ABOTRA Congo' },
+                'Burundi': { link: 'https://chat.whatsapp.com/BurundiGroupLink', name: 'ABOTRA Burundi' },
+                'Botswana': { link: 'https://chat.whatsapp.com/BotswanaGroupLink', name: 'ABOTRA Botswana' },
+                'Namibia': { link: 'https://chat.whatsapp.com/NamibiaGroupLink', name: 'ABOTRA Namibia' },
+                'Mozambique': { link: 'https://chat.whatsapp.com/MozambiqueGroupLink', name: 'ABOTRA Mozambique' },
+                'Rwanda': { link: 'https://chat.whatsapp.com/RwandaGroupLink', name: 'ABOTRA Rwanda' },
+                'default': { link: 'https://chat.whatsapp.com/YourDefaultGroupLink', name: 'ABOTRA Community' }
+            };
+            // Save defaults to Firebase
+            await set(ref(db, 'whatsappGroups'), whatsappGroups);
+        }
+        await updateWhatsAppButton();
+    } catch(error) {
+        console.error('Error loading WhatsApp groups:', error);
+        // Use fallback
+        whatsappGroups = {
+            'Tanzania': { link: 'https://chat.whatsapp.com/D2fegQD6rqdJPoM7ZIkZIG', name: 'ABOTRA Tanzania' },
+            'default': { link: 'https://chat.whatsapp.com/YourDefaultGroupLink', name: 'ABOTRA Community' }
+        };
+    }
+}
+
+function getWhatsAppLink(country) {
+    if (!country) return whatsappGroups['default']?.link || '#';
+    const group = whatsappGroups[country];
+    if (group && group.link) return group.link;
+    return whatsappGroups['default']?.link || '#';
+}
+
+function getWhatsAppName(country) {
+    if (!country) return whatsappGroups['default']?.name || 'WhatsApp Group';
+    const group = whatsappGroups[country];
+    if (group && group.name) return group.name;
+    return whatsappGroups['default']?.name || 'WhatsApp Group';
+}
+
+async function updateWhatsAppButton() {
+    if (!currentUser) return;
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const userSnap = await get(userRef);
+        if (userSnap.exists()) {
+            const userCountry = userSnap.val().country || 'default';
+            const whatsappLink = getWhatsAppLink(userCountry);
+            const whatsappName = getWhatsAppName(userCountry);
+            const whatsappBtn = document.getElementById('whatsappGroupBtn');
+            if (whatsappBtn) {
+                whatsappBtn.style.display = 'flex';
+                whatsappBtn.setAttribute('data-link', whatsappLink);
+                whatsappBtn.setAttribute('data-country', userCountry);
+                const span = whatsappBtn.querySelector('span');
+                if (span) {
+                    span.textContent = whatsappName.length > 15 ? whatsappName.substring(0, 12) + '...' : whatsappName;
+                }
+                whatsappBtn.title = `Join ${whatsappName}`;
+            }
+        }
+    } catch(error) {
+        console.error('Error updating WhatsApp button:', error);
+    }
+}
+
+function openWhatsAppGroup() {
+    const btn = document.getElementById('whatsappGroupBtn');
+    if (!btn) return;
+    const link = btn.getAttribute('data-link') || getWhatsAppLink('default');
+    if (link && link !== '#') {
+        window.open(link, '_blank');
+    } else {
+        showNotification('WhatsApp group link not configured for your country. Please contact admin.', 'info');
+    }
+}
+
+window.openWhatsAppGroup = openWhatsAppGroup;
+window.getWhatsAppLink = getWhatsAppLink;
+window.getWhatsAppName = getWhatsAppName;
+
+// ============================================================
+// NOTIFICATION FUNCTIONS (PUSH NOTIFICATIONS)
+// ============================================================
+
+async function sendPushNotification(userId, title, body, data = {}) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/notifications/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${await getAuthToken()}`
+            },
+            body: JSON.stringify({
+                userId: userId,
+                title: title,
+                body: body,
+                data: data
+            })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Send notification error:', error);
+        return { success: false };
+    }
+}
+
+async function getAuthToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) {
+                reject(new Error('No user logged in'));
+                return;
+            }
+            try {
+                const token = await user.getIdToken(true);
+                resolve(token);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// ============================================================
+// SAVE NOTIFICATION TO DATABASE
+// ============================================================
+
+async function saveNotification(userId, title, message, type = 'info', data = {}) {
+    try {
+        const notifRef = push(ref(db, `notifications/${userId}`));
+        await set(notifRef, {
+            id: notifRef.key,
+            title: title,
+            message: message,
+            type: type,
+            read: false,
+            data: data,
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+        return notifRef.key;
+    } catch (error) {
+        console.error('Save notification error:', error);
+        return null;
+    }
+}
+
+// ============================================================
+// NOTIFY ALL USERS (for global events)
+// ============================================================
+
+async function notifyAllUsers(title, message, type = 'info', data = {}) {
+    try {
+        const usersSnap = await get(ref(db, 'users'));
+        if (!usersSnap.exists()) return;
+        
+        const users = usersSnap.val();
+        const promises = [];
+        
+        for (const userId of Object.keys(users)) {
+            promises.push(saveNotification(userId, title, message, type, data));
+        }
+        
+        await Promise.all(promises);
+        console.log(`[NOTIFY] Sent notification to ${Object.keys(users).length} users`);
+    } catch (error) {
+        console.error('Notify all users error:', error);
+    }
+}
+
+// ============================================================
+// NOTIFICATION LISTENER FOR CURRENT USER
+// ============================================================
+
+function setupNotificationListener() {
+    if (!currentUser) return;
+    
+    if (notificationsUnsubscribe) {
+        try { off(notificationsUnsubscribe); } catch(e) {}
+        notificationsUnsubscribe = null;
+    }
+    
+    const notifRef = ref(db, `notifications/${currentUser.uid}`);
+    notificationsUnsubscribe = onValue(notifRef, (snapshot) => {
+        let unread = 0;
+        let latestNotification = null;
+        
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const notif = child.val();
+                if (!notif.read) {
+                    unread++;
+                }
+                if (!latestNotification || (notif.timestamp || 0) > (latestNotification.timestamp || 0)) {
+                    latestNotification = notif;
+                }
+            });
+        }
+        
+        const badge = document.getElementById('topNotificationBadge');
+        if (badge) {
+            if (unread > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = unread > 99 ? '99+' : unread;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Show desktop/push notification for new unread notifications
+        if (unread > 0 && latestNotification && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            try {
+                new Notification('🔔 ABOTRA-PROAI', {
+                    body: `${latestNotification.title}: ${latestNotification.message}`,
+                    icon: '../assets/images/logo.png'
+                });
+            } catch(e) {}
+        }
+    });
+}
+
+// ============================================================
+// CHAT FUNCTIONS WITH NOTIFICATIONS
+// ============================================================
+
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    if (!input) return;
+    const msg = input.value.trim();
+    if (!msg) {
+        showNotification('Please type a message', 'error');
+        return;
+    }
+    if (!checkAuth()) return;
+    
+    let displayUsername = userData?.username || "Trader";
+    
+    try {
+        const chatRef = ref(db, 'global_chat');
+        const newMessageRef = push(chatRef);
+        const messageData = {
+            username: displayUsername,
+            message: msg,
+            timestamp: Date.now(),
+            userId: currentUser.uid,
+            userEmail: currentUser.email || ''
+        };
+        if (replyingToMessage) {
+            messageData.replyTo = replyingToMessage.id;
+            messageData.replyToUsername = replyingToMessage.username;
+            cancelReply();
+        }
+        
+        await set(newMessageRef, messageData);
+        input.value = '';
+        
+        // Send notification to all users about new chat message
+        const chatMessage = replyingToMessage 
+            ? `${displayUsername} replied to ${replyingToMessage.username}: ${msg.substring(0, 50)}`
+            : `${displayUsername}: ${msg.substring(0, 50)}`;
+        
+        // Notify all users about new chat message
+        await notifyAllUsers(
+            '💬 New Chat Message',
+            chatMessage,
+            'info',
+            { chatId: newMessageRef.key, userId: currentUser.uid, username: displayUsername }
+        );
+        
+        const container = document.getElementById('chatMessages');
+        if (container) {
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+        showNotification('Message sent!', 'success');
+    } catch(error) { 
+        console.error('Send message error:', error); 
+        showNotification('Failed to send message. Please try again.', 'error'); 
+    }
+}
+
+// ============================================================
+// SOCIAL POSTS WITH NOTIFICATIONS
+// ============================================================
+
+async function createPost() {
+    const contentInput = document.getElementById('postContent');
+    const imageInput = document.getElementById('postImage');
+    const previewImg = document.getElementById('imagePreview');
+    const content = contentInput ? contentInput.value.trim() : '';
+    const file = imageInput ? imageInput.files[0] : null;
+    
+    if (!content && !file) { 
+        showNotification('✏️ Write something or add an image', 'error'); 
+        return; 
+    }
+    if (!checkAuth()) return;
+    
+    let authorName = userData?.username || "Trader";
+    if (!authorName || authorName === "Trader") {
+        try {
+            const userSnap = await get(ref(db, `users/${currentUser.uid}`));
+            if (userSnap.exists()) {
+                authorName = userSnap.val().username || userSnap.val().fullName || "Trader";
+                if (userData) userData.username = authorName;
+            }
+        } catch(e) {}
+    }
+    
+    const timestamp = Date.now();
+    const tempId = 'temp_' + timestamp + '_' + Math.random().toString(36).substr(2, 6);
+    
+    const tempPostData = {
+        id: tempId,
+        author: authorName,
+        userId: currentUser.uid,
+        content: content || "",
+        image: null,
+        likes: 0,
+        commentCount: 0,
+        timestamp: timestamp,
+        isTemp: true
+    };
+    
+    const tempElement = addPostToUI(tempPostData);
+    
+    if (contentInput) contentInput.value = '';
+    if (imageInput) imageInput.value = '';
+    if (previewImg) previewImg.style.display = 'none';
+    
+    let imageUrl = null;
+    if (file) {
+        showNotification('📤 Uploading image...', 'info');
+        try {
+            imageUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        } catch(e) {
+            showNotification('Failed to load image', 'error');
+        }
+    }
+    
+    const finalPostData = {
+        author: authorName,
+        userId: currentUser.uid,
+        content: content || "",
+        image: imageUrl || null,
+        likes: 0,
+        commentCount: 0,
+        timestamp: timestamp,
+        createdAt: timestamp
+    };
+    
+    try {
+        const newRef = push(ref(db, 'social_posts'));
+        await set(newRef, finalPostData);
+        
+        if (tempElement && tempElement.parentNode) {
+            tempElement.remove();
+        }
+        
+        // Send notification to all users about new post
+        await notifyAllUsers(
+            '📝 New Community Post',
+            `${authorName} shared a new post: ${content.substring(0, 60)}...`,
+            'info',
+            { postId: newRef.key, author: authorName }
+        );
+        
+        showNotification('✅ Post shared successfully!', 'success');
+    } catch(e) {
+        console.error("Failed to save post:", e);
+        showNotification('❌ Failed to save post. Please try again.', 'error');
+        if (tempElement && tempElement.parentNode) {
+            tempElement.remove();
+        }
+    }
+}
+
+// ============================================================
+// COMMENT WITH NOTIFICATIONS
+// ============================================================
+
+async function postComment(postId, postAuthor) {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) { showNotification('Please enter a comment', 'error'); return; }
+    if (!checkAuth()) return;
+    
+    const commentData = { 
+        postId, 
+        userId: currentUser?.uid, 
+        author: userData?.username || 'Trader', 
+        text, 
+        timestamp: Date.now() 
+    };
+    if (currentPostComments?.replyingTo) { 
+        commentData.parentCommentId = currentPostComments.replyingTo.id; 
+        commentData.replyTo = currentPostComments.replyingTo.author; 
+    }
+    
+    try {
+        const commentRef = push(ref(db, `comments/${postId}`));
+        await set(commentRef, commentData);
+        
+        const postRef = ref(db, `social_posts/${postId}`);
+        const postSnap = await get(postRef);
+        if (postSnap.exists()) {
+            const newCommentCount = (postSnap.val().commentCount || 0) + 1;
+            await update(postRef, { commentCount: newCommentCount });
+            
+            // Send notification to post author about new comment
+            const postData = postSnap.val();
+            if (postData.userId && postData.userId !== currentUser.uid) {
+                await saveNotification(
+                    postData.userId,
+                    '💬 New Comment',
+                    `${userData?.username || 'User'} commented on your post: "${text.substring(0, 50)}..."`,
+                    'info',
+                    { postId: postId, commenterId: currentUser.uid }
+                );
+            }
+        }
+        input.value = '';
+        currentPostComments.replyingTo = null;
+        await loadComments(postId, postAuthor);
+        showNotification('Comment posted!', 'success');
+    } catch(error) { 
+        console.error('Comment error:', error); 
+        showNotification('Failed to post comment', 'error'); 
+    }
+}
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+
+function checkAuth() {
+    if (!currentUser) {
+        showNotification('Please login first', 'error');
+        return false;
+    }
+    return true;
+}
+
+async function retryOperation(operation, maxRetries = 3, delay = 1000) {
+    let lastError;
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await operation();
+        } catch (e) {
+            lastError = e;
+            if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+            }
+        }
+    }
+    throw lastError;
+}
+
+function formatTimeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 5) return "Just now";
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return new Date(timestamp).toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
+    document.body.appendChild(toast);
+    toast.querySelector('.close-notif').addEventListener('click', () => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); });
+    setTimeout(() => { if(toast.parentNode) { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); } }, 4000);
+    
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && type !== 'error') {
+        try {
+            new Notification('ABOTRA-PROAI', { body: message, icon: '../assets/images/logo.png' });
+        } catch(e) {}
+    }
+}
+
+// ============================================================
+// COUNTRY & CURRENCY
+// ============================================================
+
+async function loadUserCountry() {
+    if (!currentUser) return 'Tanzania';
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const snap = await get(userRef);
+        if (snap.exists()) {
+            const country = snap.val().country || 'Tanzania';
+            userCountry = country;
+            return country;
+        }
+    } catch(e) {}
+    return 'Tanzania';
+}
+
+async function updateCountryFlagBadge() {
+    const badge = document.getElementById('flagBadge');
+    const flagImg = document.getElementById('countryFlagImg');
+    if (!badge || !flagImg) return;
+    
+    const country = await loadUserCountry();
+    const flagUrl = countryFlagImages[country] || countryFlagImages['default'];
+    flagImg.src = flagUrl;
+    flagImg.alt = `${country} flag`;
+    badge.style.display = 'flex';
+    
+    const currencyData = countryCurrencies[country] || { symbol: 'TZS', rate: 2800 };
+    localCurrencySymbol = currencyData.symbol;
+    localCurrencyRate = currencyData.rate;
+    
+    const exchangeBtnText = document.getElementById('exchangeBtnText');
+    if (exchangeBtnText) {
+        exchangeBtnText.textContent = `View in ${localCurrencySymbol}`;
+    }
+    
+    if (balanceVisible && userData) {
+        const balanceEl = document.getElementById('userBalance');
+        if (balanceEl) {
+            balanceEl.innerHTML = formatBalanceInCurrency(userData.balance || 0);
+        }
+    }
+}
+
+async function loadExchangeRates() {
+    try {
+        const ratesRef = ref(db, 'exchangeRates');
+        const snap = await get(ratesRef);
+        if (snap.exists()) {
+            const rates = snap.val();
+            exchangeRates = { USD: 1, ...rates };
+            const currencyData = countryCurrencies[userCountry] || { symbol: 'TZS', rate: 2800 };
+            localCurrencyRate = currencyData.rate;
+        }
+    } catch(e) {}
+}
+
+function formatBalanceInCurrency(usdAmount) {
+    if (currentCurrency === 'USD') return `$${usdAmount.toFixed(2)}`;
+    const converted = usdAmount * localCurrencyRate;
+    let symbol = localCurrencySymbol;
+    return `${symbol} ${converted.toFixed(localCurrencySymbol === 'TZS' || localCurrencySymbol === 'MWK' ? 0 : 2)}`;
+}
+
+function setupExchangeCurrency() {
+    const exchangeBtn = document.getElementById('exchangeCurrencyBtn');
+    const exchangeBtnText = document.getElementById('exchangeBtnText');
+    if (!exchangeBtn || !exchangeBtnText) return;
+    
+    exchangeBtn.addEventListener('click', async () => {
+        if (currentCurrency === 'USD') {
+            currentCurrency = localCurrencySymbol;
+        } else {
+            currentCurrency = 'USD';
+        }
+        
+        const balanceEl = document.getElementById('userBalance');
+        if (balanceEl && balanceVisible && userData) {
+            balanceEl.innerHTML = formatBalanceInCurrency(userData.balance || 0);
+        }
+        
+        exchangeBtnText.textContent = currentCurrency === 'USD' ? `View in ${localCurrencySymbol}` : 'View in USD';
+        showNotification(`Balance shown in ${currentCurrency}`, 'info');
+    });
+}
+
+// ============================================================
+// POST FUNCTIONS
+// ============================================================
+
+function addPostToUI(postData) {
+    const container = document.getElementById('postsContainer');
+    if (!container) return null;
+    
+    const postAuthorDisplay = postData.author || 'Trader';
+    const displayTime = postData.isTemp ? "Just now" : formatTimeAgo(postData.timestamp);
+    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
+    
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post-card post-card-own';
+    postDiv.setAttribute('data-temp-id', postData.id);
+    postDiv.setAttribute('data-post-id', postData.id);
+    postDiv.setAttribute('data-author', postAuthorDisplay);
+    
+    postDiv.innerHTML = `
+        <div class="post-header">
+            <i class="fas fa-user-circle" style="font-size:28px; color:#FFD700;"></i>
+            <div class="post-author-wrapper">
+                <span class="post-author">${escapeHtml(postAuthorDisplay)}</span>
+            </div>
+            <div class="post-time">${displayTime}</div>
+            <button class="delete-post-btn" disabled style="opacity:0.5; cursor:not-allowed;"><i class="fas fa-spinner fa-pulse"></i> Posting...</button>
+        </div>
+        <div class="post-content">${contentHtml}</div>
+        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" loading="lazy" onclick="event.stopPropagation(); window.open(this.src, '_blank')">` : ''}
+        <div class="post-actions">
+            <button class="like-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-heart"></i> <span class="like-count">0</span>
+            </button>
+            <button class="comment-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-comment"></i> <span class="comment-count">0</span>
+            </button>
+            <button class="share-btn" disabled style="opacity:0.5;">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+        <div style="font-size:8px; color:#FFD700; text-align:center; margin-top:4px;">
+            <i class="fas fa-spinner fa-pulse"></i> Posting...
+        </div>
+    `;
+    
+    postDiv.addEventListener('click', function(e) {
+        if (e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.closest('button')) return;
+        const postId = this.getAttribute('data-post-id');
+        if (postId && !postId.startsWith('temp_')) {
+            const postData = { 
+                id: postId, 
+                author: this.getAttribute('data-author') || 'User',
+                content: this.querySelector('.post-content')?.textContent || '',
+                image: this.querySelector('.post-image')?.src || null,
+                likes: parseInt(this.querySelector('.like-count')?.textContent || '0'),
+                commentCount: parseInt(this.querySelector('.comment-count')?.textContent || '0'),
+                userId: ''
+            };
+            const postRef = ref(db, `social_posts/${postId}`);
+            get(postRef).then((snap) => {
+                if (snap.exists()) {
+                    postData.userId = snap.val().userId || '';
+                    postData.author = snap.val().author || postData.author;
+                    openPostZoom(postData);
+                } else {
+                    openPostZoom(postData);
+                }
+            }).catch(() => {
+                openPostZoom(postData);
+            });
+        }
+    });
+    
+    container.insertBefore(postDiv, container.firstChild);
+    return postDiv;
+}
+
+function openPostZoom(postData) {
+    const modal = document.getElementById('postZoomModal');
+    const body = document.getElementById('postZoomBody');
+    if (!modal || !body) return;
+    
+    const isOwner = currentUser && postData.userId === currentUser.uid;
+    const postAuthorDisplay = postData.author || 'Trader';
+    const displayTime = postData.timestamp ? formatTimeAgo(postData.timestamp) : 'Just now';
+    const contentHtml = postData.content ? escapeHtml(postData.content).replace(/\n/g, '<br>') : '';
+    
+    let followBtnHtml = '';
+    if (currentUser && postData.userId && postData.userId !== currentUser.uid) {
+        followBtnHtml = `<button class="follow-btn" onclick="window.followUser('${postData.userId}', '${escapeHtml(postAuthorDisplay)}', this)">Follow</button>`;
+    }
+    
+    body.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+            <i class="fas fa-user-circle" style="font-size:40px; color:#FFD700;"></i>
+            <div>
+                <div class="post-author" style="font-size:16px;">${escapeHtml(postAuthorDisplay)}</div>
+                <div class="post-time">${displayTime}</div>
+            </div>
+            ${followBtnHtml}
+            ${isOwner ? `<button class="delete-post-btn" onclick="window.deletePost('${postData.id}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-trash-alt"></i> Delete</button>` : 
+                        `<button class="report-post-btn" onclick="window.showReportModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');"><i class="fas fa-flag"></i> Report</button>`}
+        </div>
+        <div class="post-content">${contentHtml}</div>
+        ${postData.image ? `<img src="${escapeHtml(postData.image)}" class="post-image" onclick="window.open(this.src, '_blank')" style="max-height:400px; width:100%; object-fit:contain; border-radius:12px; margin:12px 0; border:1px solid rgba(255,215,0,0.2);">` : ''}
+        <div class="post-actions" style="border-top:1px solid rgba(255,215,0,0.15); padding-top:12px; margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="like-btn" onclick="window.toggleLike('${postData.id}', this)" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-heart"></i> <span class="like-count">${postData.likes || 0}</span>
+            </button>
+            <button class="comment-btn" onclick="window.showCommentsModal('${postData.id}', '${escapeHtml(postAuthorDisplay)}'); document.getElementById('postZoomModal').classList.remove('active');" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-comment"></i> <span class="comment-count">${postData.commentCount || 0}</span>
+            </button>
+            <button class="share-btn" onclick="window.sharePost('${postData.id}', '${postData.userId}', '${escapeHtml(postData.content || '').substring(0, 100).replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+// ============================================================
+// CHAT FUNCTIONS
+// ============================================================
+
+function setReplyingTo(messageId, username) {
+    replyingToMessage = { id: messageId, username: username };
+    const replyIndicator = document.getElementById('replyIndicator');
+    const replyingToNameSpan = document.getElementById('replyingToName');
+    if (replyIndicator && replyingToNameSpan) {
+        replyingToNameSpan.textContent = username;
+        replyIndicator.style.display = 'flex';
+    }
+    document.getElementById('chatInput').focus();
+}
+
+function cancelReply() {
+    replyingToMessage = null;
+    const replyIndicator = document.getElementById('replyIndicator');
+    if (replyIndicator) replyIndicator.style.display = 'none';
+}
+
+async function deleteChatMessage(messageId) {
+    if (!checkAuth()) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'delete-modal';
+    modal.innerHTML = `<div class="delete-modal-card"><h3><i class="fas fa-exclamation-triangle"></i> Delete Message</h3><div class="modal-message" style="color:#ccc; margin-bottom:10px;">Are you sure you want to delete this message?</div><div class="modal-warning"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone.</div><div class="modal-buttons"><button class="modal-btn cancel" id="cancelBtn">Cancel</button><button class="modal-btn confirm" id="confirmBtn">Confirm</button></div></div>`;
+    document.body.appendChild(modal);
+    
+    document.getElementById('confirmBtn').addEventListener('click', async () => {
+        modal.remove();
+        try {
+            const msgRef = ref(db, `global_chat/${messageId}`);
+            const snapshot = await get(msgRef);
+            if (snapshot.exists() && snapshot.val().userId === currentUser.uid) { 
+                await retryOperation(() => remove(msgRef));
+                showNotification('Message deleted successfully!', 'success');
+            } else { 
+                showNotification('You can only delete your own messages!', 'error'); 
+            }
+        } catch(error) { 
+            console.error('Delete message error:', error); 
+            showNotification('Failed to delete message', 'error'); 
+        }
+    });
+    document.getElementById('cancelBtn').addEventListener('click', () => modal.remove());
+}
+
+window.deleteChatMessage = deleteChatMessage;
+window.replyToChatMessage = setReplyingTo;
+
+// ============================================================
+// SETUP CHAT
+// ============================================================
+
+function setupChat() {
+    if (chatUnsubscribe) {
+        try { off(chatUnsubscribe); } catch(e) {}
+        chatUnsubscribe = null;
+    }
+    
+    const chatRef = ref(db, 'global_chat');
+    const chatQuery = query(chatRef, orderByChild('timestamp'), limitToLast(100));
+    
+    chatUnsubscribe = onValue(chatQuery, async (snapshot) => {
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        
+        const skeletonElements = container.querySelectorAll('.skeleton-card');
+        skeletonElements.forEach(el => el.remove());
+        
+        if (!snapshot.exists()) {
+            if (!container.querySelector('.chat-message')) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No messages yet. Be the first to chat!</div>';
+            }
+            return;
+        }
+        
+        const existingMessages = container.querySelectorAll('.chat-message');
+        const existingIds = new Map();
+        existingMessages.forEach(el => {
+            const id = el.getAttribute('data-message-id');
+            if (id) {
+                existingIds.set(id, { element: el });
+            }
+        });
+        
+        const messages = [];
+        snapshot.forEach(child => {
+            messages.push({ id: child.key, ...child.val() });
+        });
+        messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        
+        const processedIds = new Set();
+        let newMessageAdded = false;
+        
+        for (const msg of messages) {
+            processedIds.add(msg.id);
+            
+            if (!existingIds.has(msg.id)) {
+                const msgElement = await createChatMessageElement(msg);
+                if (msgElement) {
+                    container.appendChild(msgElement);
+                    newMessageAdded = true;
+                }
+            }
+        }
+        
+        const toRemove = [];
+        existingMessages.forEach(el => {
+            const id = el.getAttribute('data-message-id');
+            if (id && !processedIds.has(id)) {
+                toRemove.push(el);
+            }
+        });
+        toRemove.forEach(el => el.remove());
+        
+        if (newMessageAdded) {
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+        
+    }, (error) => {
+        console.error("Chat listener error:", error);
+        const container = document.getElementById('chatMessages');
+        if (container) {
+            const skeletonElements = container.querySelectorAll('.skeleton-card');
+            skeletonElements.forEach(el => el.remove());
+            if (!container.querySelector('.chat-message')) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Error loading messages. Please refresh.</div>';
+            }
+        }
+    });
+}
+
+async function createChatMessageElement(msg) {
+    const isOwn = currentUser && msg.userId === currentUser.uid;
+    const msgClass = isOwn ? 'chat-message-own' : 'chat-message-other';
+    const usernameToShow = msg.username || 'Trader';
+    const isVerified = await getUserVerifiedStatus(msg.userId);
+    const blueTickHtml = renderBlueTick(isVerified);
+    const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    let replyHtml = '';
+    if (msg.replyTo) {
+        try {
+            const repliedMsgSnapshot = await get(ref(db, `global_chat/${msg.replyTo}`));
+            if (repliedMsgSnapshot.exists()) {
+                const repliedMsg = repliedMsgSnapshot.val();
+                replyHtml = `<div style="font-size:8px; opacity:0.7; margin-bottom:3px; padding-left:6px; border-left:2px solid #FFD700;"><i class="fas fa-reply"></i> Replying to ${escapeHtml(msg.replyToUsername || repliedMsg.username || 'User')}: "${escapeHtml(repliedMsg.message.substring(0, 50))}"</div>`;
+            }
+        } catch(e) {}
+    }
+    
+    const div = document.createElement('div');
+    div.className = `chat-message ${msgClass}`;
+    div.setAttribute('data-message-id', msg.id);
+    div.setAttribute('data-timestamp', msg.timestamp || Date.now());
+    
+    div.innerHTML = `
+        <div class="chat-username">
+            <i class="fas fa-user-circle" style="font-size:18px; color:#FFD700;"></i> 
+            ${escapeHtml(usernameToShow)}${blueTickHtml}
+        </div>
+        ${replyHtml}
+        <div class="chat-message-text">${escapeHtml(msg.message)}</div>
+        <div class="chat-message-time">
+            <span><i class="far fa-clock"></i> ${timeStr}</span>
+            ${!isOwn ? `<button class="reply-chat-btn" onclick="window.replyToChatMessage('${msg.id}', '${escapeHtml(usernameToShow)}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+            ${isOwn ? `<button class="delete-chat-btn" onclick="window.deleteChatMessage('${msg.id}')"><i class="fas fa-trash-alt"></i> Delete</button>` : ''}
+        </div>
+    `;
+    return div;
+}
+
+// ============================================================
+// SETUP SOCIAL POSTS
+// ============================================================
+
+function setupSocialPosts() {
+    if (postsUnsubscribe) {
+        try { off(postsUnsubscribe); } catch(e) {}
+        postsUnsubscribe = null;
+    }
+    
+    const postsQuery = query(ref(db, 'social_posts'), orderByChild('timestamp'));
+    
+    postsUnsubscribe = onValue(postsQuery, async (snapshot) => {
+        const container = document.getElementById('postsContainer');
+        if (!container) return;
+        
+        const skeletonElements = container.querySelectorAll('.skeleton-card');
+        skeletonElements.forEach(el => el.remove());
+        
+        const tempPosts = container.querySelectorAll('.post-card[data-temp-id]');
+        const tempElements = Array.from(tempPosts).map(el => el.cloneNode(true));
+        
+        if (!snapshot.exists()) {
+            if (tempElements.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">✨ Be the first to share your trading success!</div>';
+            } else {
+                container.innerHTML = '';
+                tempElements.forEach(el => container.appendChild(el));
+            }
+            return;
+        }
+        
+        const existingPosts = container.querySelectorAll('.post-card:not([data-temp-id])');
+        const existingIds = new Set();
+        existingPosts.forEach(el => {
+            const id = el.getAttribute('data-post-id');
+            if (id) existingIds.add(id);
+        });
+        
+        const posts = [];
+        snapshot.forEach(child => {
+            posts.push({ id: child.key, ...child.val() });
+        });
+        posts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        
+        const processedIds = new Set();
+        const postsToAdd = [];
+        
+        for (const post of posts) {
+            processedIds.add(post.id);
+            
+            const existingEl = container.querySelector(`[data-post-id="${post.id}"]`);
+            
+            if (!existingEl) {
+                let isTemp = false;
+                tempElements.forEach(el => {
+                    const tempId = el.getAttribute('data-temp-id');
+                    if (tempId && (tempId.includes(post.id) || post.id.includes(tempId))) {
+                        isTemp = true;
+                    }
+                });
+                
+                if (!isTemp) {
+                    postsToAdd.push(post);
+                }
+            } else {
+                const currentLikes = parseInt(existingEl.querySelector('.like-count')?.textContent || '0');
+                const currentComments = parseInt(existingEl.querySelector('.comment-count')?.textContent || '0');
+                
+                if (currentLikes !== (post.likes || 0)) {
+                    const likeSpan = existingEl.querySelector('.like-count');
+                    if (likeSpan) likeSpan.textContent = post.likes || 0;
+                }
+                if (currentComments !== (post.commentCount || 0)) {
+                    const commentSpan = existingEl.querySelector('.comment-count');
+                    if (commentSpan) commentSpan.textContent = post.commentCount || 0;
+                }
+                
+                const currentAuthor = existingEl.getAttribute('data-author');
+                if (currentAuthor !== post.author) {
+                    existingEl.setAttribute('data-author', post.author || 'User');
+                    const authorEl = existingEl.querySelector('.post-author');
+                    if (authorEl) authorEl.textContent = post.author || 'User';
+                }
+            }
+        }
+        
+        const toRemove = [];
+        existingPosts.forEach(el => {
+            const id = el.getAttribute('data-post-id');
+            if (id && !processedIds.has(id)) {
+                toRemove.push(el);
+            }
+        });
+        toRemove.forEach(el => el.remove());
+        
+        for (const post of postsToAdd) {
+            const postElement = await createPostElement(post);
+            if (postElement) {
+                container.insertBefore(postElement, container.firstChild);
+            }
+        }
+        
+        tempElements.forEach(el => {
+            const existing = container.querySelector(`[data-temp-id="${el.getAttribute('data-temp-id')}"]`);
+            if (!existing) {
+                container.insertBefore(el, container.firstChild);
+            }
+        });
+        
+    }, (error) => {
+        console.error("Posts listener error:", error);
+        const container = document.getElementById('postsContainer');
+        if (container) {
+            const skeletonElements = container.querySelectorAll('.skeleton-card');
+            skeletonElements.forEach(el => el.remove());
+            if (!container.querySelector('.post-card')) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Error loading posts. Please refresh.</div>';
+            }
+        }
+    });
+}
+
+async function createPostElement(post) {
+    const isOwner = currentUser && post.userId === currentUser.uid;
+    let followButtonHtml = '';
+    
+    if (currentUser && post.userId && post.userId !== currentUser.uid) {
+        try {
+            const followRef = ref(db, `follows/${currentUser.uid}/${post.userId}`);
+            const followSnap = await get(followRef);
+            const isFollowing = followSnap.exists();
+            followButtonHtml = `<button class="follow-btn ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); window.followUser('${post.userId}', '${escapeHtml(post.author || 'User')}', this)">${isFollowing ? 'Following' : 'Follow'}</button>`;
+        } catch(e) {}
+    }
+    
+    const userProfile = await getUserProfileData(post.userId);
+    const postAuthorDisplay = userProfile.username || post.author || 'Trader';
+    const displayTime = formatTimeAgo(post.timestamp);
+    const isVerified = await getUserVerifiedStatus(post.userId);
+    const blueTickHtml = renderBlueTick(isVerified);
+    
+    const postClass = isOwner ? 'post-card post-card-own' : 'post-card';
+    const contentHtml = post.content ? escapeHtml(post.content).replace(/\n/g, '<br>') : '';
+    
+    const postDiv = document.createElement('div');
+    postDiv.className = postClass;
+    postDiv.setAttribute('data-post-id', post.id);
+    postDiv.setAttribute('data-author', postAuthorDisplay);
+    
+    postDiv.addEventListener('click', function(e) {
+        if (e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.closest('button')) return;
+        const postId = this.getAttribute('data-post-id');
+        if (postId) {
+            const postData = { 
+                id: postId, 
+                author: this.getAttribute('data-author') || 'User',
+                content: this.querySelector('.post-content')?.textContent || '',
+                image: this.querySelector('.post-image')?.src || null,
+                likes: parseInt(this.querySelector('.like-count')?.textContent || '0'),
+                commentCount: parseInt(this.querySelector('.comment-count')?.textContent || '0'),
+                userId: post.userId || ''
+            };
+            openPostZoom(postData);
+        }
+    });
+    
+    postDiv.innerHTML = `
+        <div class="post-header">
+            <i class="fas fa-user-circle" style="font-size:28px; color:#FFD700;"></i>
+            <div class="post-author-wrapper">
+                <span class="post-author">${escapeHtml(postAuthorDisplay)}</span>
+                ${blueTickHtml}
+                ${followButtonHtml}
+            </div>
+            <div class="post-time">${escapeHtml(displayTime)}</div>
+            ${isOwner ? 
+                `<button class="delete-post-btn" onclick="event.stopPropagation(); window.deletePost('${post.id}')"><i class="fas fa-trash-alt"></i> Delete</button>` : 
+                `<button class="report-post-btn" onclick="event.stopPropagation(); window.showReportModal('${post.id}', '${escapeHtml(postAuthorDisplay)}')"><i class="fas fa-flag"></i> Report</button>`
+            }
+        </div>
+        <div class="post-content">${contentHtml}</div>
+        ${post.image ? `<img src="${escapeHtml(post.image)}" class="post-image" loading="lazy" onclick="event.stopPropagation(); window.open(this.src, '_blank')">` : ''}
+        <div class="post-actions" onclick="event.stopPropagation();">
+            <button class="like-btn" onclick="window.toggleLike('${post.id}', this)">
+                <i class="fas fa-heart"></i> <span class="like-count">${post.likes || 0}</span>
+            </button>
+            <button class="comment-btn" onclick="window.showCommentsModal('${post.id}', '${escapeHtml(postAuthorDisplay)}')">
+                <i class="fas fa-comment"></i> <span class="comment-count">${post.commentCount || 0}</span>
+            </button>
+            <button class="share-btn" onclick="window.sharePost('${post.id}', '${post.userId}', '${escapeHtml(post.content || '').substring(0, 100).replace(/'/g, "\\'")}')">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+    `;
+    return postDiv;
+}
+
+// ============================================================
+// USER PROFILE HELPERS
+// ============================================================
+
+async function getUserProfileData(userId) {
+    if (!userId) return { username: 'Trader', profilePic: null };
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snap = await get(userRef);
+        if (snap.exists()) {
+            const data = snap.val();
+            return {
+                username: data.username || data.fullName || data.name || 'Trader',
+                profilePic: data.profilePic || data.photoURL || null
+            };
+        }
+        return { username: 'Trader', profilePic: null };
+    } catch(e) { return { username: 'Trader', profilePic: null }; }
+}
+
+async function getUserVerifiedStatus(userId) {
+    if (!userId) return false;
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snap = await get(userRef);
+        return snap.exists() && snap.val().isVerified === true;
+    } catch(e) { return false; }
+}
+
+function renderBlueTick(isVerified) {
+    if (!isVerified) return '';
+    return '<span class="verified-badge"><i class="fas fa-check"></i></span>';
+}
+
+// ============================================================
+// LIVE TRANSACTIONS
+// ============================================================
+
+function setupLiveTransactions() {
+    if (transactionsUnsubscribe) {
+        try { off(transactionsUnsubscribe); } catch(e) {}
+        transactionsUnsubscribe = null;
+    }
+    
+    const transactionsQuery = query(ref(db, 'transactionsFeed'), orderByChild('timestamp'), limitToLast(20));
+    
+    transactionsUnsubscribe = onValue(transactionsQuery, (snapshot) => {
+        const container = document.getElementById('transactionsInner');
+        if (!container) return;
+        
+        if (container.innerHTML.includes('Loading transactions...')) {
+            container.innerHTML = '';
+        }
+        
+        const transactions = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const tx = child.val();
+                if (tx.timestamp) transactions.push({ id: child.key, ...tx });
+            });
+            transactions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        }
+        
+        if (transactions.length === 0) {
+            container.innerHTML = '<div class="transaction-item"><i class="fas fa-info-circle"></i> No recent transactions</div>';
+            return;
+        }
+        
+        let html = '';
+        transactions.forEach(tx => {
+            let icon = '', colorClass = '';
+            switch(tx.type) {
+                case 'deposit': icon = 'fa-money-bill-wave'; colorClass = 'positive'; break;
+                case 'withdraw': icon = 'fa-arrow-down'; colorClass = 'negative'; break;
+                case 'trade': icon = 'fa-chart-line'; colorClass = tx.amount > 0 ? 'positive' : 'negative'; break;
+                case 'transfer': icon = 'fa-exchange-alt'; colorClass = 'positive'; break;
+                default: icon = 'fa-robot'; colorClass = 'positive';
+            }
+            const amountText = tx.amount ? `$${Math.abs(tx.amount).toFixed(2)}` : '';
+            html += `<div class="transaction-item"><i class="fas ${icon}"></i><span class="transaction-details">${escapeHtml(tx.username || 'User')}</span><span class="transaction-amount ${colorClass}">${amountText}</span><span class="transaction-time">${formatTimeAgo(tx.timestamp)}</span></div>`;
+        });
+        html += html;
+        container.innerHTML = html;
+    }, (error) => {
+        console.error("Transactions listener error:", error);
+        const container = document.getElementById('transactionsInner');
+        if (container) {
+            container.innerHTML = '<div class="transaction-item"><i class="fas fa-exclamation-triangle"></i> Error loading transactions</div>';
+        }
+    });
+}
+
+// ============================================================
+// MARKET & CAROUSEL
+// ============================================================
+
+let carouselIndex = 0;
+let totalSlides = 6;
+
+function updateCarousel() {
+    const track = document.getElementById('carouselTrack');
+    if (!track) return;
+    track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+    document.querySelectorAll('.carousel-dot').forEach((dot, i) => { dot.classList.toggle('active', i === carouselIndex); });
+}
+
+function setupCarousel() {
+    const totalSlidesCount = document.querySelectorAll('.carousel-slide').length;
+    totalSlides = totalSlidesCount;
+    const dotsContainer = document.getElementById('carouselDots');
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < totalSlidesCount; i++) {
+        const dot = document.createElement('div');
+        dot.className = `carousel-dot ${i === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => { carouselIndex = i; updateCarousel(); });
+        dotsContainer.appendChild(dot);
+    }
+    const prevBtn = document.getElementById('carouselPrev');
+    const nextBtn = document.getElementById('carouselNext');
+    if (prevBtn) prevBtn.addEventListener('click', () => { carouselIndex = (carouselIndex - 1 + totalSlides) % totalSlides; updateCarousel(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { carouselIndex = (carouselIndex + 1) % totalSlides; updateCarousel(); });
+    updateCarousel();
+    setInterval(() => { carouselIndex = (carouselIndex + 1) % totalSlides; updateCarousel(); }, 5000);
+}
+
+async function fetchLiveMarket() {
+    const coinIds = ['bitcoin', 'ethereum', 'binancecoin', 'solana', 'ripple'];
+    const symbols = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP'];
+    
+    try {
+        const response = await fetch(
+            `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds.join(',')}&order=market_cap_desc&per_page=5&page=1&sparkline=false`
+        );
+        
+        if (!response.ok) throw new Error('CoinGecko API error');
+        
+        const data = await response.json();
+        const marketData = [];
+        
+        data.forEach((coin, index) => {
+            const symbol = symbols[index] || coin.symbol.toUpperCase();
+            const price = coin.current_price || 0;
+            const change = coin.price_change_percentage_24h || 0;
+            const logoUrl = coin.image || '';
+            const fallback = symbol.substring(0, 2);
+            
+            marketData.push({
+                symbol: symbol,
+                name: `${symbol}/USDT`,
+                price: price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                change: `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`,
+                type: change >= 0 ? 'positive' : 'negative',
+                changed: true,
+                logo: logoUrl,
+                fallback: fallback
+            });
+        });
+        
+        const marketGrid = document.getElementById('marketGrid');
+        if (!marketGrid) return;
+        marketGrid.innerHTML = '';
+        
+        marketData.forEach(m => {
+            let card = document.createElement('div');
+            card.className = 'market-card';
+            if(m.changed) card.classList.add('glowing');
+            card.innerHTML = `
+                <div class="market-left">
+                    <div class="market-icon">
+                        <img src="${m.logo}" alt="${m.symbol}" 
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'fallback\\'>${m.fallback}</span>'"
+                             loading="lazy">
+                    </div>
+                    <div>
+                        <div class="market-name">${m.symbol}</div>
+                        <div class="market-change ${m.type}">${m.change}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="market-price">$${m.price}</div>
+                </div>
+            `;
+            marketGrid.appendChild(card);
+            if(m.changed) setTimeout(() => card.classList.remove('glowing'), 1000);
+        });
+    } catch (error) {
+        console.error('Error fetching market data:', error);
+    }
+}
+
+// ============================================================
+// NOTIFICATIONS PERMISSION
+// ============================================================
+
+async function requestNotificationPermission() {
+    if (typeof Notification === 'undefined') {
+        showNotification('Notifications are not supported in this environment', 'info');
+        return;
+    }
+    
+    if (Notification.permission === 'granted') {
+        showNotification('Notifications enabled!', 'success');
+        document.getElementById('notifPermissionBtn').style.display = 'none';
+    } else if (Notification.permission !== 'denied') {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showNotification('Notifications enabled!', 'success');
+                document.getElementById('notifPermissionBtn').style.display = 'none';
+            }
+        } catch(e) {}
+    }
+}
+
+// ============================================================
+// REALTIME USER DATA
+// ============================================================
+
+function setupRealtimeUserData(uid) {
+    const userRTDBRef = ref(db, `users/${uid}`);
+    onValue(userRTDBRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const rtdbData = snapshot.val();
+            const balance = rtdbData.balance || 0;
+            const username = rtdbData.username || rtdbData.fullName || "Trader";
+            const profilePic = rtdbData.profilePic || rtdbData.photoURL || null;
+            const balanceEl = document.getElementById('userBalance');
+            if (balanceVisible && balanceEl) {
+                balanceEl.innerHTML = formatBalanceInCurrency(balance);
+                balanceEl.classList.add('balance-up');
+                setTimeout(() => balanceEl.classList.remove('balance-up'), 500);
+            } else if (!balanceVisible && balanceEl) {
+                balanceEl.innerHTML = '••••••';
+            }
+            if (userData) {
+                userData.balance = balance;
+                userData.username = username;
+                userData.profilePic = profilePic;
+            }
+        }
+    });
+}
+
+async function loadUserRealTimeStats(uid) {
+    if (!uid) return;
+    const tradesRef = ref(db, `trades/${uid}`);
+    onValue(tradesRef, (snapshot) => {
+        let totalTrades = 0, winningTrades = 0, dailyPnL = 0;
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const trade = child.val();
+                if (trade.status === 'closed') {
+                    totalTrades++;
+                    if (trade.closedProfit > 0) winningTrades++;
+                    if (trade.closedAt && new Date(trade.closedAt).toDateString() === new Date().toDateString()) {
+                        dailyPnL += trade.closedProfit || 0;
+                    }
+                }
+            });
+        }
+        const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : 0;
+        const aiScore = Math.min(Math.floor(winRate * 0.8 + 20), 100);
+        document.getElementById('winRate').innerHTML = `${winRate}%`;
+        document.getElementById('aiScore').innerHTML = `${aiScore}<span style="font-size:12px;">/100</span>`;
+        document.getElementById('dailyPnL').innerHTML = `${dailyPnL >= 0 ? '+' : ''}$${dailyPnL.toFixed(2)}`;
+        const dailyTrend = document.getElementById('dailyTrend');
+        if (dailyPnL >= 0) {
+            dailyTrend.className = 'trend-up';
+            dailyTrend.innerHTML = '<i class="fas fa-arrow-up"></i> Today';
+        } else {
+            dailyTrend.className = 'trend-down';
+            dailyTrend.innerHTML = '<i class="fas fa-arrow-down"></i> Today';
+        }
+    });
+}
+
+async function loadUserInitialData(user) {
+    const rtdbUserRef = ref(db, `users/${user.uid}`);
+    const rtdbSnap = await get(rtdbUserRef);
+    let balance = 0, totalDeposited = 0, username = "Trader", profilePic = null;
+    if (rtdbSnap.exists()) {
+        const rtdbData = rtdbSnap.val();
+        balance = rtdbData.balance || 0;
+        totalDeposited = rtdbData.totalDeposited || 0;
+        username = rtdbData.username || rtdbData.fullName || "Trader";
+        profilePic = rtdbData.profilePic || rtdbData.photoURL || null;
+        userCountry = rtdbData.country || 'Tanzania';
+    } else {
+        username = "Trader";
+        await set(ref(db, `users/${user.uid}`), {
+            uid: user.uid, email: user.email, username: username,
+            balance: 0, totalDeposited: 0, createdAt: Date.now(), country: 'Tanzania'
+        });
+    }
+    return { balance, totalDeposited, username, profilePic };
+}
+
+// ============================================================
+// THEME
+// ============================================================
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    } else {
+        document.body.classList.remove('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    }
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+
+function setupEventListeners() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            if (document.body.classList.contains('light-theme')) {
+                document.body.classList.remove('light-theme');
+                localStorage.setItem('abotra_theme', 'dark');
+                const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+                const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+                if (sunIcon) sunIcon.style.display = 'inline-block';
+                if (moonIcon) moonIcon.style.display = 'none';
+            } else {
+                document.body.classList.add('light-theme');
+                localStorage.setItem('abotra_theme', 'light');
+                const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+                const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+                if (sunIcon) sunIcon.style.display = 'none';
+                if (moonIcon) moonIcon.style.display = 'inline-block';
+            }
+        });
+    }
+    
+    const toggleBalance = document.getElementById('toggleBalance');
+    if (toggleBalance) {
+        toggleBalance.addEventListener('click', function() {
+            const el = document.getElementById('userBalance');
+            if (balanceVisible) {
+                if (el) el.innerHTML = '••••••';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                if (el && userData) el.innerHTML = formatBalanceInCurrency(userData.balance || 0);
+                this.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+            balanceVisible = !balanceVisible;
+        });
+    }
+    
+    setupExchangeCurrency();
+    
+    const notifBtn = document.getElementById('notifTopBtn');
+    if (notifBtn) notifBtn.addEventListener('click', () => window.location.href = 'notifications.html');
+    
+    const logoutBtn = document.getElementById('logoutBtnTop');
+    if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+        await signOut(auth);
+        showNotification('Logged out successfully', 'success');
+        setTimeout(() => window.location.href = 'login.html', 1000);
+    });
+    
+    const sendChatBtn = document.getElementById('sendChatBtn');
+    if (sendChatBtn) sendChatBtn.addEventListener('click', sendChatMessage);
+    
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChatMessage(); } });
+    
+    const createPostBtn = document.getElementById('createPostBtn');
+    if (createPostBtn) createPostBtn.addEventListener('click', createPost);
+    
+    const postImage = document.getElementById('postImage');
+    if (postImage) postImage.addEventListener('change', (e) => {
+        if(e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const preview = document.getElementById('imagePreview');
+                if (preview) { preview.src = ev.target.result; preview.style.display = 'block'; }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+    
+    const imageUploadLabel = document.getElementById('imageUploadLabel');
+    if(imageUploadLabel) imageUploadLabel.addEventListener('click', () => document.getElementById('postImage').click());
+    
+    const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+    if (cancelReplyBtn) cancelReplyBtn.addEventListener('click', cancelReply);
+    
+    const notifPermissionBtn = document.getElementById('notifPermissionBtn');
+    if (notifPermissionBtn) notifPermissionBtn.addEventListener('click', requestNotificationPermission);
+}
+
+// ============================================================
+// AUTH STATE
+// ============================================================
+
+onAuthStateChanged(auth, async (user) => {
+    if(!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    console.log("User logged in:", user.uid);
+    
+    await loadExchangeRates();
+    await updateCountryFlagBadge();
+    
+    const initialData = await loadUserInitialData(user);
+    userData = { ...initialData, email: user.email };
+    
+    setupRealtimeUserData(user.uid);
+    loadUserRealTimeStats(user.uid);
+    fetchLiveMarket();
+    setupCarousel();
+    setupNotificationListener();
+    setupEventListeners();
+    
+    setupChat();
+    setupSocialPosts();
+    setupLiveTransactions();
+    
+    // Load WhatsApp groups from Firebase
+    await loadWhatsAppGroups();
+    
+    setInterval(() => fetchLiveMarket(), 30000);
+    
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        const notifBtn = document.getElementById('notifPermissionBtn');
+        if (notifBtn) notifBtn.style.display = 'flex';
+    } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const notifBtn = document.getElementById('notifPermissionBtn');
+        if (notifBtn) notifBtn.style.display = 'none';
+    }
+});
+
+initTheme();
+</script>
+</body>
+</html>
