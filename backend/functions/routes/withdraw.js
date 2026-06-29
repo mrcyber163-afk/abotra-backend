@@ -1,368 +1,139 @@
-// functions/routes/withdraw.js
 const express = require('express');
 const router = express.Router();
-const { getDB } = require('../firebase');
+const { restGet, restPut, restPost, restPatch } = require('../firebase');
 
-// ============================================================
-// MIDDLEWARE: Verify Firebase Token
-// ============================================================
+const { authGetUser } = require('../firebase');
+
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-            success: false,
-            error: 'Missing or invalid Authorization header'
-        });
+        return res.status(401).json({ success: false, error: 'Missing authorization token' });
     }
-
     const token = authHeader.split('Bearer ')[1];
     try {
-        const { getAuth } = require('../firebase');
-        const auth = getAuth();
-        const decodedToken = await auth.verifyIdToken(token);
-        req.user = decodedToken;
+        const userInfo = await authGetUser(token);
+        if (!userInfo || !userInfo.users || userInfo.users.length === 0) {
+            return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+        }
+        req.user = { uid: userInfo.users[0].localId, email: userInfo.users[0].email };
         next();
     } catch (error) {
-        console.error('[AUTH] Token verification failed:', error.message);
-        return res.status(401).json({
-            success: false,
-            error: 'Invalid or expired token. Please login again.'
-        });
+        return res.status(401).json({ success: false, error: 'Invalid or expired token' });
     }
 }
 
-// ============================================================
-// MIDDLEWARE: Check Admin
-// ============================================================
 async function verifyAdmin(req, res, next) {
     try {
-        const db = getDB();
-        const adminSnap = await db.ref(`admins/${req.user.uid}`).once('value');
-        if (!adminSnap.exists()) {
-            return res.status(403).json({
-                success: false,
-                error: 'Admin access required'
-            });
-        }
+        const adminList = await restGet('admins');
+        const isAdmin = adminList && (adminList[req.user.uid] === true || adminList.includes && adminList.includes(req.user.uid));
+        if (!isAdmin) return res.status(403).json({ success: false, error: 'Admin access required' });
         req.isAdmin = true;
         next();
     } catch (error) {
-        console.error('[ADMIN] Check failed:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: 'Failed to verify admin status'
-        });
+        return res.status(500).json({ success: false, error: 'Failed to verify admin status' });
     }
 }
 
-// ============================================================
-// 1. GET USER WITHDRAWAL HISTORY
-// ============================================================
 router.get('/history', verifyToken, async (req, res) => {
     try {
         const userId = req.user.uid;
-        const db = getDB();
-        const snapshot = await db.ref(`withdrawals/${userId}`)
-            .orderByChild('createdAt')
-            .limitToLast(50)
-            .once('value');
-
         const withdrawals = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                const data = child.val();
-                withdrawals.push({
-                    id: child.key,
-                    ...data
-                });
+        const data = await restGet(`withdrawals/${userId}`);
+        if (data) {
+            Object.keys(data).forEach(key => {
+                withdrawals.push({ id: key, ...data[key] });
             });
         }
-
-        res.json({
-            success: true,
-            withdrawals: withdrawals.reverse()
-        });
+        withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        res.json({ success: true, withdrawals });
     } catch (error) {
         console.error('[WITHDRAW] History error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
-// ============================================================
-// 2. GET PENDING WITHDRAWALS (ADMIN ONLY)
-// ============================================================
 router.get('/pending', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const db = getDB();
-        const snapshot = await db.ref('adminWithdrawals')
-            .orderByChild('status')
-            .equalTo('pending')
-            .once('value');
-
         const withdrawals = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                const data = child.val();
-                withdrawals.push({
-                    id: child.key,
-                    ...data
-                });
+        const data = await restGet('adminWithdrawals');
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const w = data[key];
+                if (w.status === 'pending') withdrawals.push({ id: key, ...w });
             });
         }
-
-        res.json({
-            success: true,
-            withdrawals
-        });
+        res.json({ success: true, withdrawals });
     } catch (error) {
         console.error('[WITHDRAW] Pending error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
-// ============================================================
-// 3. GET ALL WITHDRAWALS (ADMIN ONLY)
-// ============================================================
-router.get('/all', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const db = getDB();
-        const snapshot = await db.ref('adminWithdrawals')
-            .orderByChild('createdAt')
-            .limitToLast(100)
-            .once('value');
-
-        const withdrawals = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                const data = child.val();
-                withdrawals.push({
-                    id: child.key,
-                    ...data
-                });
-            });
-        }
-
-        res.json({
-            success: true,
-            withdrawals: withdrawals.reverse()
-        });
-    } catch (error) {
-        console.error('[WITHDRAW] All error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// 4. APPROVE WITHDRAWAL (ADMIN ONLY)
-// ============================================================
 router.post('/approve', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const { withdrawalId } = req.body;
-        if (!withdrawalId) {
-            return res.status(400).json({
-                success: false,
-                error: 'withdrawalId is required'
-            });
-        }
+        if (!withdrawalId) return res.status(400).json({ success: false, error: 'withdrawalId required' });
 
-        const db = getDB();
-
-        // Get withdrawal from admin path
-        const withdrawalRef = db.ref(`adminWithdrawals/${withdrawalId}`);
-        const withdrawalSnap = await withdrawalRef.once('value');
-
-        if (!withdrawalSnap.exists()) {
-            return res.status(404).json({
-                success: false,
-                error: 'Withdrawal not found'
-            });
-        }
-
-        const withdrawalData = withdrawalSnap.val();
-
+        const withdrawalData = await restGet(`adminWithdrawals/${withdrawalId}`);
+        if (!withdrawalData) return res.status(404).json({ success: false, error: 'Withdrawal not found' });
         if (withdrawalData.status !== 'pending') {
-            return res.status(400).json({
-                success: false,
-                error: `Withdrawal already ${withdrawalData.status}`
-            });
+            return res.status(400).json({ success: false, error: `Withdrawal already ${withdrawalData.status}` });
         }
 
-        // Update admin withdrawal
-        await withdrawalRef.update({
-            status: 'approved',
-            approvedAt: Date.now(),
-            approvedBy: req.user.uid,
-            approvedByEmail: req.user.email
+        await restPatch(`adminWithdrawals/${withdrawalId}`, {
+            status: 'approved', approvedAt: Date.now(), approvedBy: req.user.uid, approvedByEmail: req.user.email
+        });
+        await restPatch(`withdrawals/${withdrawalData.uid}/${withdrawalId}`, {
+            status: 'approved', approvedAt: Date.now(), approvedBy: req.user.uid, approvedByEmail: req.user.email
         });
 
-        // Update user withdrawal
-        const userWithdrawalRef = db.ref(`withdrawals/${withdrawalData.uid}/${withdrawalId}`);
-        await userWithdrawalRef.update({
-            status: 'approved',
-            approvedAt: Date.now(),
-            approvedBy: req.user.uid,
-            approvedByEmail: req.user.email
-        });
-
-        // Send notification to user
-        const notifRef = db.ref(`notifications/${withdrawalData.uid}`).push();
-        await notifRef.set({
+        await restPost(`notifications/${withdrawalData.uid}`, {
             title: '✅ Withdrawal Approved!',
             message: `Your withdrawal of $${withdrawalData.amount.toFixed(2)} has been approved and processed.`,
-            type: 'success',
-            read: false,
-            timestamp: Date.now()
+            type: 'success', read: false, timestamp: Date.now()
         });
 
-        console.log(`[WITHDRAW] ✅ Approved: ${withdrawalId} for user ${withdrawalData.uid}`);
-
-        res.json({
-            success: true,
-            message: 'Withdrawal approved successfully',
-            withdrawalId: withdrawalId
-        });
-
+        res.json({ success: true, message: 'Withdrawal approved successfully', withdrawalId });
     } catch (error) {
         console.error('[WITHDRAW] Approve error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
-// ============================================================
-// 5. REJECT WITHDRAWAL (ADMIN ONLY)
-// ============================================================
 router.post('/reject', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const { withdrawalId, reason } = req.body;
-        if (!withdrawalId) {
-            return res.status(400).json({
-                success: false,
-                error: 'withdrawalId is required'
-            });
-        }
+        if (!withdrawalId) return res.status(400).json({ success: false, error: 'withdrawalId required' });
 
-        const db = getDB();
-
-        // Get withdrawal from admin path
-        const withdrawalRef = db.ref(`adminWithdrawals/${withdrawalId}`);
-        const withdrawalSnap = await withdrawalRef.once('value');
-
-        if (!withdrawalSnap.exists()) {
-            return res.status(404).json({
-                success: false,
-                error: 'Withdrawal not found'
-            });
-        }
-
-        const withdrawalData = withdrawalSnap.val();
-
+        const withdrawalData = await restGet(`adminWithdrawals/${withdrawalId}`);
+        if (!withdrawalData) return res.status(404).json({ success: false, error: 'Withdrawal not found' });
         if (withdrawalData.status !== 'pending') {
-            return res.status(400).json({
-                success: false,
-                error: `Withdrawal already ${withdrawalData.status}`
-            });
+            return res.status(400).json({ success: false, error: `Withdrawal already ${withdrawalData.status}` });
         }
 
-        // Return funds to user
-        const userRef = db.ref(`users/${withdrawalData.uid}`);
-        const userSnap = await userRef.once('value');
-        if (userSnap.exists()) {
-            const currentBalance = userSnap.val().balance || 0;
-            await userRef.update({
-                balance: currentBalance + withdrawalData.amount
-            });
-            console.log(`[WITHDRAW] 🔄 Returned $${withdrawalData.amount} to user ${withdrawalData.uid}`);
-        }
+        const userData = await restGet(`users/${withdrawalData.uid}`);
+        const currentBalance = userData?.balance || 0;
+        await restPatch(`users/${withdrawalData.uid}`, { balance: currentBalance + withdrawalData.amount });
 
-        // Update admin withdrawal
-        await withdrawalRef.update({
-            status: 'rejected',
-            rejectedAt: Date.now(),
-            rejectedBy: req.user.uid,
-            rejectedByEmail: req.user.email,
-            rejectionReason: reason || 'No reason provided'
+        await restPatch(`adminWithdrawals/${withdrawalId}`, {
+            status: 'rejected', rejectedAt: Date.now(), rejectedBy: req.user.uid,
+            rejectedByEmail: req.user.email, rejectionReason: reason || 'No reason provided'
+        });
+        await restPatch(`withdrawals/${withdrawalData.uid}/${withdrawalId}`, {
+            status: 'rejected', rejectedAt: Date.now(), rejectedBy: req.user.uid,
+            rejectedByEmail: req.user.email, rejectionReason: reason || 'No reason provided'
         });
 
-        // Update user withdrawal
-        const userWithdrawalRef = db.ref(`withdrawals/${withdrawalData.uid}/${withdrawalId}`);
-        await userWithdrawalRef.update({
-            status: 'rejected',
-            rejectedAt: Date.now(),
-            rejectedBy: req.user.uid,
-            rejectedByEmail: req.user.email,
-            rejectionReason: reason || 'No reason provided'
-        });
-
-        // Send notification to user
-        const notifRef = db.ref(`notifications/${withdrawalData.uid}`).push();
-        await notifRef.set({
+        await restPost(`notifications/${withdrawalData.uid}`, {
             title: '❌ Withdrawal Rejected',
             message: `Your withdrawal of $${withdrawalData.amount.toFixed(2)} was rejected. Reason: ${reason || 'No reason provided'}`,
-            type: 'error',
-            read: false,
-            timestamp: Date.now()
+            type: 'error', read: false, timestamp: Date.now()
         });
 
-        console.log(`[WITHDRAW] ❌ Rejected: ${withdrawalId} for user ${withdrawalData.uid}`);
-
-        res.json({
-            success: true,
-            message: 'Withdrawal rejected successfully',
-            withdrawalId: withdrawalId
-        });
-
+        res.json({ success: true, message: 'Withdrawal rejected successfully', withdrawalId });
     } catch (error) {
         console.error('[WITHDRAW] Reject error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// 6. GET WITHDRAWAL BY ID
-// ============================================================
-router.get('/:withdrawalId', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.uid;
-        const { withdrawalId } = req.params;
-        const db = getDB();
-
-        const snapshot = await db.ref(`withdrawals/${userId}/${withdrawalId}`).once('value');
-
-        if (!snapshot.exists()) {
-            return res.status(404).json({
-                success: false,
-                error: 'Withdrawal not found'
-            });
-        }
-
-        res.json({
-            success: true,
-            withdrawal: {
-                id: withdrawalId,
-                ...snapshot.val()
-            }
-        });
-    } catch (error) {
-        console.error('[WITHDRAW] Get error:', error);
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
