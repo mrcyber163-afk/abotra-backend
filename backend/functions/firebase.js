@@ -23,47 +23,113 @@ function initializeFirebase() {
 }
 
 async function restGet(path) {
-    try { const url = `${REST_URL}/${path}.json`; const response = await axios.get(url); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.get(url);
+        return response.data;
+    } catch (error) {
+        return null;
+    }
 }
 
 async function restPut(path, data) {
-    try { const url = `${REST_URL}/${path}.json`; const response = await axios.put(url, data); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.put(url, data);
+        return response.data;
+    } catch (error) {
+        return null;
+    }
 }
 
 async function restPost(path, data) {
-    try { const url = `${REST_URL}/${path}.json`; const response = await axios.post(url, data); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.post(url, data);
+        return response.data;
+    } catch (error) {
+        return null;
+    }
 }
 
 async function restPatch(path, data) {
-    try { const url = `${REST_URL}/${path}.json`; const response = await axios.patch(url, data); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.patch(url, data);
+        return response.data;
+    } catch (error) {
+        return null;
+    }
 }
 
 async function restDelete(path) {
-    try { const url = `${REST_URL}/${path}.json`; const response = await axios.delete(url); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `${REST_URL}/${path}.json`;
+        const response = await axios.delete(url);
+        return response.data;
+    } catch (error) {
+        return null;
+    }
 }
 
 async function authSignUp(email, password) {
-    try { const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`; const response = await axios.post(url, { email, password, returnSecureToken: true }); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`;
+        const response = await axios.post(url, { email, password, returnSecureToken: true });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] SignUp error:', error.response?.data || error.message);
+        return null;
+    }
 }
 
 async function authSignIn(email, password) {
-    try { const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`; const response = await axios.post(url, { email, password, returnSecureToken: true }); return response.data; } 
-    catch (error) { return null; }
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`;
+        const response = await axios.post(url, { email, password, returnSecureToken: true });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] SignIn error:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+async function authGetUser(idToken) {
+    try {
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`;
+        const response = await axios.post(url, { idToken });
+        return response.data;
+    } catch (error) {
+        console.error('[AUTH] GetUser error:', error.response?.data || error.message);
+        return null;
+    }
 }
 
 function getDB() { return { restGet, restPut, restPost, restPatch, restDelete }; }
-function getAuth() { return { authSignUp, authSignIn }; }
+function getAuth() { return { authSignUp, authSignIn, authGetUser }; }
 function isInitialized() { return initialized; }
 
 async function testConnection() {
-    try { await axios.get(`${REST_URL}/.json?shallow=true`); return { success: true }; } 
-    catch (error) { return { success: false, error: error.message }; }
+    try {
+        await axios.get(`${REST_URL}/.json?shallow=true`);
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
 }
 
-module.exports = { initializeFirebase, getDB, getAuth, isInitialized, testConnection, restGet, restPut, restPost, restPatch, restDelete, authSignUp, authSignIn };
+module.exports = {
+    initializeFirebase,
+    getDB,
+    getAuth,
+    isInitialized,
+    testConnection,
+    restGet,
+    restPut,
+    restPost,
+    restPatch,
+    restDelete,
+    authSignUp,
+    authSignIn,
+    authGetUser
+};
