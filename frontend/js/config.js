@@ -1,7 +1,12 @@
+// ============================================================
+// CONFIG.JS - Frontend Configuration
+// ============================================================
+
 const API_URL = process.env.API_URL || process.env.VITE_API_URL || 'https://abotra-backend-production.up.railway.app';
 
 const CONFIG = {
     API_URL: API_URL,
+    API_BASE_URL: API_URL, // ✅ Added for backward compatibility
     WS_URL: API_URL.replace('https://', 'wss://'),
     ENVIRONMENT: process.env.NODE_ENV || 'production',
     VERSION: '2.0.0',
@@ -17,5 +22,9 @@ const CONFIG = {
 };
 
 window.CONFIG = CONFIG;
-if (typeof module !== 'undefined' && module.exports) { module.exports = CONFIG; }
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}
+
 console.log('[CONFIG] ✅ API_URL:', CONFIG.API_URL);
