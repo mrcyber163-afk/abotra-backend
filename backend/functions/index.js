@@ -1,5 +1,5 @@
 // ============================================================
-// INDEX.JS - FIXED REGISTRATION
+// INDEX.JS - WITH BETTER ERROR HANDLING
 // ============================================================
 
 const express = require('express');
@@ -10,9 +10,6 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const axios = require('axios');
 
-// ============================================================
-// MIDDLEWARE
-// ============================================================
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -24,7 +21,6 @@ const FIREBASE_DB_URL = process.env.FIREBASE_DATABASE_URL || 'https://abotra-pro
 const API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM';
 
 console.log('[FIREBASE] 🔑 Using REST API mode');
-console.log('[FIREBASE] 📡 Database:', FIREBASE_DB_URL);
 
 // ============================================================
 // FIREBASE HELPERS
@@ -36,7 +32,6 @@ async function restGet(path) {
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
-        console.error('[REST GET] Error:', error.message);
         return null;
     }
 }
@@ -47,7 +42,6 @@ async function restPut(path, data) {
         const response = await axios.put(url, data);
         return response.data;
     } catch (error) {
-        console.error('[REST PUT] Error:', error.message);
         return null;
     }
 }
@@ -62,8 +56,17 @@ async function authSignUp(email, password) {
         });
         return response.data;
     } catch (error) {
-        console.error('[AUTH] SignUp error:', error.response?.data || error.message);
-        return null;
+        // ✅ Extract Firebase error message
+        const firebaseError = error.response?.data?.error?.message || error.message;
+        const errorData = error.response?.data?.error || {};
+        
+        // ✅ Return error with proper message
+        return { 
+            error: true, 
+            code: errorData.code || 400,
+            message: firebaseError,
+            details: errorData
+        };
     }
 }
 
@@ -71,13 +74,11 @@ async function authSignUp(email, password) {
 // HEALTH CHECK
 // ============================================================
 app.get('/api/health', (req, res) => {
-    console.log('[HEALTH] ✅ Health check called');
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         mode: 'REST API',
-        version: '2.0.0',
-        environment: process.env.NODE_ENV || 'production'
+        version: '2.0.0'
     });
 });
 
@@ -91,14 +92,12 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================
-// ✅ FIXED REGISTRATION
+// ✅ FIXED REGISTRATION - WITH PROPER ERROR HANDLING
 // ============================================================
 app.post('/api/auth/register', async (req, res) => {
     try {
-        console.log('[REGISTER] Request:', req.body);
         const { email, password, username, fullName, country } = req.body;
 
-        // Validation
         if (!email || !password) {
             return res.status(400).json({ 
                 success: false, 
@@ -115,15 +114,37 @@ app.post('/api/auth/register', async (req, res) => {
 
         console.log('[REGISTER] Creating user:', email);
 
-        // ✅ Step 1: Create user with Firebase Auth
+        // ✅ Create user with Firebase Auth
         const authResult = await authSignUp(email, password);
         
-        // ✅ CHECK: authResult should have idToken
-        if (!authResult || !authResult.idToken) {
-            console.error('[REGISTER] Auth result:', authResult);
+        // ✅ Check if there was an error from Firebase
+        if (authResult && authResult.error) {
+            console.error('[REGISTER] Firebase error:', authResult.message);
+            
+            // ✅ Return user-friendly error message
+            let errorMessage = 'Registration failed';
+            if (authResult.message === 'EMAIL_EXISTS') {
+                errorMessage = 'This email is already registered. Please login or use a different email.';
+            } else if (authResult.message === 'INVALID_EMAIL') {
+                errorMessage = 'Invalid email address. Please check and try again.';
+            } else if (authResult.message === 'WEAK_PASSWORD') {
+                errorMessage = 'Password is too weak. Please use a stronger password.';
+            } else {
+                errorMessage = authResult.message || 'Registration failed. Please try again.';
+            }
+            
             return res.status(400).json({ 
                 success: false, 
-                error: 'Failed to create user in Firebase Auth' 
+                error: errorMessage,
+                code: authResult.code
+            });
+        }
+
+        // ✅ Check if authResult is valid
+        if (!authResult || !authResult.idToken) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Failed to create user. Please try again.' 
             });
         }
 
@@ -132,7 +153,7 @@ app.post('/api/auth/register', async (req, res) => {
 
         console.log('[REGISTER] ✅ User created in Auth:', uid);
 
-        // ✅ Step 2: Save user data to database
+        // ✅ Save user data to database
         const userData = {
             uid: uid,
             email: email,
@@ -151,10 +172,9 @@ app.post('/api/auth/register', async (req, res) => {
             commissionEarned: 0
         };
 
-        const saveResult = await restPut(`users/${uid}`, userData);
+        await restPut(`users/${uid}`, userData);
         console.log('[REGISTER] ✅ User saved to database:', uid);
 
-        // ✅ Step 3: Return success with tokens
         return res.json({
             success: true,
             message: 'User registered successfully',
@@ -190,8 +210,6 @@ app.post('/api/auth/login', async (req, res) => {
                 error: 'Email and password are required' 
             });
         }
-
-        console.log('[LOGIN] User:', email);
 
         const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`;
         const response = await axios.post(url, { 
@@ -263,7 +281,6 @@ app.get('/api/user/profile', async (req, res) => {
 // 404 & ERROR HANDLING
 // ============================================================
 app.use((req, res) => {
-    console.log('[404] Not found:', req.method, req.path);
     res.status(404).json({
         success: false,
         error: 'Route not found',
@@ -284,5 +301,4 @@ app.use((err, req, res, next) => {
 // ============================================================
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`[SERVER] 🚀 Running on port ${PORT}`);
-    console.log(`[SERVER] 🔗 Health: http://0.0.0.0:${PORT}/api/health`);
 });
