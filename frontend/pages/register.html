@@ -7,17 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<script>
-const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
-    VERSION: '2.0.0'
-};
-window.CONFIG = CONFIG;
-console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
-
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body {
@@ -436,30 +425,26 @@ h1 {
 
 <script type="module">
 // ============================================================
-// CONFIG
-// ============================================================
-const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
-console.log('[REGISTER] API_BASE_URL:', API_BASE_URL);
-
-// ============================================================
-// FIREBASE CLIENT SDK
+// FIREBASE DIRECT - NO BACKEND
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
     getAuth,
+    createUserWithEmailAndPassword,
     signInWithPopup,
     GoogleAuthProvider,
     sendEmailVerification,
     updateProfile,
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
     onAuthStateChanged,
-    signInWithEmailAndPassword
+    RecaptchaVerifier,
+    signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
     getDatabase,
     ref,
-    get
+    set,
+    get,
+    push
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -486,202 +471,31 @@ if (refParam) {
 }
 
 // ============================================================
-// COUNTRIES DATA - ALL 160+ COUNTRIES
+// COUNTRIES DATA
 // ============================================================
 const countriesData = [
-    { code: "+93", name: "Afghanistan", flag: "🇦🇫", digits: 9 },
-    { code: "+355", name: "Albania", flag: "🇦🇱", digits: 9 },
-    { code: "+213", name: "Algeria", flag: "🇩🇿", digits: 9 },
-    { code: "+376", name: "Andorra", flag: "🇦🇩", digits: 6 },
-    { code: "+244", name: "Angola", flag: "🇦🇴", digits: 9 },
-    { code: "+1", name: "Antigua and Barbuda", flag: "🇦🇬", digits: 7 },
-    { code: "+54", name: "Argentina", flag: "🇦🇷", digits: 10 },
-    { code: "+374", name: "Armenia", flag: "🇦🇲", digits: 8 },
-    { code: "+61", name: "Australia", flag: "🇦🇺", digits: 9 },
-    { code: "+43", name: "Austria", flag: "🇦🇹", digits: 10 },
-    { code: "+994", name: "Azerbaijan", flag: "🇦🇿", digits: 9 },
-    { code: "+1", name: "Bahamas", flag: "🇧🇸", digits: 7 },
-    { code: "+973", name: "Bahrain", flag: "🇧🇭", digits: 8 },
-    { code: "+880", name: "Bangladesh", flag: "🇧🇩", digits: 10 },
-    { code: "+1", name: "Barbados", flag: "🇧🇧", digits: 7 },
-    { code: "+375", name: "Belarus", flag: "🇧🇾", digits: 9 },
-    { code: "+32", name: "Belgium", flag: "🇧🇪", digits: 9 },
-    { code: "+501", name: "Belize", flag: "🇧🇿", digits: 7 },
-    { code: "+229", name: "Benin", flag: "🇧🇯", digits: 8 },
-    { code: "+975", name: "Bhutan", flag: "🇧🇹", digits: 8 },
-    { code: "+591", name: "Bolivia", flag: "🇧🇴", digits: 8 },
-    { code: "+387", name: "Bosnia and Herzegovina", flag: "🇧🇦", digits: 8 },
-    { code: "+267", name: "Botswana", flag: "🇧🇼", digits: 7 },
-    { code: "+55", name: "Brazil", flag: "🇧🇷", digits: 11 },
-    { code: "+673", name: "Brunei", flag: "🇧🇳", digits: 7 },
-    { code: "+359", name: "Bulgaria", flag: "🇧🇬", digits: 9 },
-    { code: "+226", name: "Burkina Faso", flag: "🇧🇫", digits: 8 },
-    { code: "+257", name: "Burundi", flag: "🇧🇮", digits: 8 },
-    { code: "+855", name: "Cambodia", flag: "🇰🇭", digits: 9 },
-    { code: "+237", name: "Cameroon", flag: "🇨🇲", digits: 9 },
-    { code: "+1", name: "Canada", flag: "🇨🇦", digits: 10 },
-    { code: "+238", name: "Cape Verde", flag: "🇨🇻", digits: 7 },
-    { code: "+236", name: "Central African Republic", flag: "🇨🇫", digits: 8 },
-    { code: "+235", name: "Chad", flag: "🇹🇩", digits: 8 },
-    { code: "+56", name: "Chile", flag: "🇨🇱", digits: 9 },
-    { code: "+86", name: "China", flag: "🇨🇳", digits: 11 },
-    { code: "+57", name: "Colombia", flag: "🇨🇴", digits: 10 },
-    { code: "+269", name: "Comoros", flag: "🇰🇲", digits: 7 },
-    { code: "+242", name: "Congo", flag: "🇨🇬", digits: 9 },
-    { code: "+243", name: "Congo DRC", flag: "🇨🇩", digits: 9 },
-    { code: "+506", name: "Costa Rica", flag: "🇨🇷", digits: 8 },
-    { code: "+385", name: "Croatia", flag: "🇭🇷", digits: 9 },
-    { code: "+53", name: "Cuba", flag: "🇨🇺", digits: 8 },
-    { code: "+357", name: "Cyprus", flag: "🇨🇾", digits: 8 },
-    { code: "+420", name: "Czech Republic", flag: "🇨🇿", digits: 9 },
-    { code: "+45", name: "Denmark", flag: "🇩🇰", digits: 8 },
-    { code: "+253", name: "Djibouti", flag: "🇩🇯", digits: 8 },
-    { code: "+1", name: "Dominica", flag: "🇩🇲", digits: 7 },
-    { code: "+1", name: "Dominican Republic", flag: "🇩🇴", digits: 10 },
-    { code: "+593", name: "Ecuador", flag: "🇪🇨", digits: 9 },
-    { code: "+20", name: "Egypt", flag: "🇪🇬", digits: 10 },
-    { code: "+503", name: "El Salvador", flag: "🇸🇻", digits: 8 },
-    { code: "+240", name: "Equatorial Guinea", flag: "🇬🇶", digits: 9 },
-    { code: "+291", name: "Eritrea", flag: "🇪🇷", digits: 7 },
-    { code: "+372", name: "Estonia", flag: "🇪🇪", digits: 8 },
-    { code: "+251", name: "Ethiopia", flag: "🇪🇹", digits: 9 },
-    { code: "+679", name: "Fiji", flag: "🇫🇯", digits: 7 },
-    { code: "+358", name: "Finland", flag: "🇫🇮", digits: 9 },
-    { code: "+33", name: "France", flag: "🇫🇷", digits: 9 },
-    { code: "+241", name: "Gabon", flag: "🇬🇦", digits: 7 },
-    { code: "+220", name: "Gambia", flag: "🇬🇲", digits: 7 },
-    { code: "+995", name: "Georgia", flag: "🇬🇪", digits: 9 },
-    { code: "+49", name: "Germany", flag: "🇩🇪", digits: 10 },
-    { code: "+233", name: "Ghana", flag: "🇬🇭", digits: 9 },
-    { code: "+30", name: "Greece", flag: "🇬🇷", digits: 10 },
-    { code: "+1", name: "Grenada", flag: "🇬🇩", digits: 7 },
-    { code: "+502", name: "Guatemala", flag: "🇬🇹", digits: 8 },
-    { code: "+224", name: "Guinea", flag: "🇬🇳", digits: 9 },
-    { code: "+245", name: "Guinea-Bissau", flag: "🇬🇼", digits: 7 },
-    { code: "+592", name: "Guyana", flag: "🇬🇾", digits: 7 },
-    { code: "+509", name: "Haiti", flag: "🇭🇹", digits: 8 },
-    { code: "+504", name: "Honduras", flag: "🇭🇳", digits: 8 },
-    { code: "+36", name: "Hungary", flag: "🇭🇺", digits: 9 },
-    { code: "+354", name: "Iceland", flag: "🇮🇸", digits: 7 },
-    { code: "+91", name: "India", flag: "🇮🇳", digits: 10 },
-    { code: "+62", name: "Indonesia", flag: "🇮🇩", digits: 10 },
-    { code: "+98", name: "Iran", flag: "🇮🇷", digits: 10 },
-    { code: "+964", name: "Iraq", flag: "🇮🇶", digits: 10 },
-    { code: "+353", name: "Ireland", flag: "🇮🇪", digits: 9 },
-    { code: "+972", name: "Israel", flag: "🇮🇱", digits: 9 },
-    { code: "+39", name: "Italy", flag: "🇮🇹", digits: 10 },
-    { code: "+1", name: "Jamaica", flag: "🇯🇲", digits: 7 },
-    { code: "+81", name: "Japan", flag: "🇯🇵", digits: 10 },
-    { code: "+962", name: "Jordan", flag: "🇯🇴", digits: 9 },
-    { code: "+7", name: "Kazakhstan", flag: "🇰🇿", digits: 10 },
-    { code: "+254", name: "Kenya", flag: "🇰🇪", digits: 9 },
-    { code: "+686", name: "Kiribati", flag: "🇰🇮", digits: 5 },
-    { code: "+965", name: "Kuwait", flag: "🇰🇼", digits: 8 },
-    { code: "+996", name: "Kyrgyzstan", flag: "🇰🇬", digits: 9 },
-    { code: "+856", name: "Laos", flag: "🇱🇦", digits: 9 },
-    { code: "+371", name: "Latvia", flag: "🇱🇻", digits: 8 },
-    { code: "+961", name: "Lebanon", flag: "🇱🇧", digits: 8 },
-    { code: "+266", name: "Lesotho", flag: "🇱🇸", digits: 8 },
-    { code: "+231", name: "Liberia", flag: "🇱🇷", digits: 7 },
-    { code: "+218", name: "Libya", flag: "🇱🇾", digits: 9 },
-    { code: "+423", name: "Liechtenstein", flag: "🇱🇮", digits: 7 },
-    { code: "+370", name: "Lithuania", flag: "🇱🇹", digits: 8 },
-    { code: "+352", name: "Luxembourg", flag: "🇱🇺", digits: 9 },
-    { code: "+261", name: "Madagascar", flag: "🇲🇬", digits: 9 },
-    { code: "+265", name: "Malawi", flag: "🇲🇼", digits: 9 },
-    { code: "+60", name: "Malaysia", flag: "🇲🇾", digits: 9 },
-    { code: "+960", name: "Maldives", flag: "🇲🇻", digits: 7 },
-    { code: "+223", name: "Mali", flag: "🇲🇱", digits: 8 },
-    { code: "+356", name: "Malta", flag: "🇲🇹", digits: 8 },
-    { code: "+692", name: "Marshall Islands", flag: "🇲🇭", digits: 7 },
-    { code: "+222", name: "Mauritania", flag: "🇲🇷", digits: 8 },
-    { code: "+230", name: "Mauritius", flag: "🇲🇺", digits: 7 },
-    { code: "+52", name: "Mexico", flag: "🇲🇽", digits: 10 },
-    { code: "+691", name: "Micronesia", flag: "🇫🇲", digits: 7 },
-    { code: "+373", name: "Moldova", flag: "🇲🇩", digits: 8 },
-    { code: "+377", name: "Monaco", flag: "🇲🇨", digits: 8 },
-    { code: "+976", name: "Mongolia", flag: "🇲🇳", digits: 8 },
-    { code: "+382", name: "Montenegro", flag: "🇲🇪", digits: 8 },
-    { code: "+212", name: "Morocco", flag: "🇲🇦", digits: 9 },
-    { code: "+258", name: "Mozambique", flag: "🇲🇿", digits: 9 },
-    { code: "+95", name: "Myanmar", flag: "🇲🇲", digits: 9 },
-    { code: "+264", name: "Namibia", flag: "🇳🇦", digits: 9 },
-    { code: "+674", name: "Nauru", flag: "🇳🇷", digits: 7 },
-    { code: "+977", name: "Nepal", flag: "🇳🇵", digits: 10 },
-    { code: "+31", name: "Netherlands", flag: "🇳🇱", digits: 9 },
-    { code: "+64", name: "New Zealand", flag: "🇳🇿", digits: 9 },
-    { code: "+505", name: "Nicaragua", flag: "🇳🇮", digits: 8 },
-    { code: "+227", name: "Niger", flag: "🇳🇪", digits: 8 },
-    { code: "+234", name: "Nigeria", flag: "🇳🇬", digits: 10 },
-    { code: "+850", name: "North Korea", flag: "🇰🇵", digits: 8 },
-    { code: "+389", name: "North Macedonia", flag: "🇲🇰", digits: 8 },
-    { code: "+47", name: "Norway", flag: "🇳🇴", digits: 8 },
-    { code: "+968", name: "Oman", flag: "🇴🇲", digits: 8 },
-    { code: "+92", name: "Pakistan", flag: "🇵🇰", digits: 10 },
-    { code: "+680", name: "Palau", flag: "🇵🇼", digits: 7 },
-    { code: "+507", name: "Panama", flag: "🇵🇦", digits: 8 },
-    { code: "+675", name: "Papua New Guinea", flag: "🇵🇬", digits: 7 },
-    { code: "+595", name: "Paraguay", flag: "🇵🇾", digits: 9 },
-    { code: "+51", name: "Peru", flag: "🇵🇪", digits: 9 },
-    { code: "+63", name: "Philippines", flag: "🇵🇭", digits: 10 },
-    { code: "+48", name: "Poland", flag: "🇵🇱", digits: 9 },
-    { code: "+351", name: "Portugal", flag: "🇵🇹", digits: 9 },
-    { code: "+974", name: "Qatar", flag: "🇶🇦", digits: 8 },
-    { code: "+40", name: "Romania", flag: "🇷🇴", digits: 9 },
-    { code: "+7", name: "Russia", flag: "🇷🇺", digits: 10 },
-    { code: "+250", name: "Rwanda", flag: "🇷🇼", digits: 9 },
-    { code: "+1", name: "Saint Kitts and Nevis", flag: "🇰🇳", digits: 7 },
-    { code: "+1", name: "Saint Lucia", flag: "🇱🇨", digits: 7 },
-    { code: "+1", name: "Saint Vincent", flag: "🇻🇨", digits: 7 },
-    { code: "+685", name: "Samoa", flag: "🇼🇸", digits: 7 },
-    { code: "+378", name: "San Marino", flag: "🇸🇲", digits: 7 },
-    { code: "+239", name: "Sao Tome", flag: "🇸🇹", digits: 7 },
-    { code: "+966", name: "Saudi Arabia", flag: "🇸🇦", digits: 9 },
-    { code: "+221", name: "Senegal", flag: "🇸🇳", digits: 9 },
-    { code: "+381", name: "Serbia", flag: "🇷🇸", digits: 9 },
-    { code: "+248", name: "Seychelles", flag: "🇸🇨", digits: 7 },
-    { code: "+232", name: "Sierra Leone", flag: "🇸🇱", digits: 8 },
-    { code: "+65", name: "Singapore", flag: "🇸🇬", digits: 8 },
-    { code: "+421", name: "Slovakia", flag: "🇸🇰", digits: 9 },
-    { code: "+386", name: "Slovenia", flag: "🇸🇮", digits: 8 },
-    { code: "+677", name: "Solomon Islands", flag: "🇸🇧", digits: 7 },
-    { code: "+252", name: "Somalia", flag: "🇸🇴", digits: 8 },
-    { code: "+27", name: "South Africa", flag: "🇿🇦", digits: 9 },
-    { code: "+82", name: "South Korea", flag: "🇰🇷", digits: 10 },
-    { code: "+211", name: "South Sudan", flag: "🇸🇸", digits: 9 },
-    { code: "+34", name: "Spain", flag: "🇪🇸", digits: 9 },
-    { code: "+94", name: "Sri Lanka", flag: "🇱🇰", digits: 9 },
-    { code: "+249", name: "Sudan", flag: "🇸🇩", digits: 9 },
-    { code: "+597", name: "Suriname", flag: "🇸🇷", digits: 7 },
-    { code: "+46", name: "Sweden", flag: "🇸🇪", digits: 9 },
-    { code: "+41", name: "Switzerland", flag: "🇨🇭", digits: 9 },
-    { code: "+963", name: "Syria", flag: "🇸🇾", digits: 9 },
-    { code: "+886", name: "Taiwan", flag: "🇹🇼", digits: 9 },
-    { code: "+992", name: "Tajikistan", flag: "🇹🇯", digits: 9 },
     { code: "+255", name: "Tanzania", flag: "🇹🇿", digits: 9 },
-    { code: "+66", name: "Thailand", flag: "🇹🇭", digits: 9 },
-    { code: "+670", name: "Timor-Leste", flag: "🇹🇱", digits: 7 },
-    { code: "+228", name: "Togo", flag: "🇹🇬", digits: 8 },
-    { code: "+676", name: "Tonga", flag: "🇹🇴", digits: 5 },
-    { code: "+1", name: "Trinidad and Tobago", flag: "🇹🇹", digits: 7 },
-    { code: "+216", name: "Tunisia", flag: "🇹🇳", digits: 8 },
-    { code: "+90", name: "Turkey", flag: "🇹🇷", digits: 10 },
-    { code: "+993", name: "Turkmenistan", flag: "🇹🇲", digits: 8 },
-    { code: "+688", name: "Tuvalu", flag: "🇹🇻", digits: 5 },
-    { code: "+256", name: "Uganda", flag: "🇺🇬", digits: 9 },
-    { code: "+380", name: "Ukraine", flag: "🇺🇦", digits: 9 },
-    { code: "+971", name: "United Arab Emirates", flag: "🇦🇪", digits: 9 },
-    { code: "+44", name: "United Kingdom", flag: "🇬🇧", digits: 10 },
-    { code: "+1", name: "United States", flag: "🇺🇸", digits: 10 },
-    { code: "+598", name: "Uruguay", flag: "🇺🇾", digits: 8 },
-    { code: "+998", name: "Uzbekistan", flag: "🇺🇿", digits: 9 },
-    { code: "+678", name: "Vanuatu", flag: "🇻🇺", digits: 5 },
-    { code: "+379", name: "Vatican City", flag: "🇻🇦", digits: 6 },
-    { code: "+58", name: "Venezuela", flag: "🇻🇪", digits: 10 },
-    { code: "+84", name: "Vietnam", flag: "🇻🇳", digits: 9 },
-    { code: "+967", name: "Yemen", flag: "🇾🇪", digits: 9 },
+    { code: "+265", name: "Malawi", flag: "🇲🇼", digits: 9 },
     { code: "+260", name: "Zambia", flag: "🇿🇲", digits: 9 },
-    { code: "+263", name: "Zimbabwe", flag: "🇿🇼", digits: 9 }
+    { code: "+254", name: "Kenya", flag: "🇰🇪", digits: 9 },
+    { code: "+256", name: "Uganda", flag: "🇺🇬", digits: 9 },
+    { code: "+234", name: "Nigeria", flag: "🇳🇬", digits: 10 },
+    { code: "+233", name: "Ghana", flag: "🇬🇭", digits: 9 },
+    { code: "+27", name: "South Africa", flag: "🇿🇦", digits: 9 },
+    { code: "+243", name: "Congo DRC", flag: "🇨🇩", digits: 9 },
+    { code: "+257", name: "Burundi", flag: "🇧🇮", digits: 8 },
+    { code: "+267", name: "Botswana", flag: "🇧🇼", digits: 7 },
+    { code: "+264", name: "Namibia", flag: "🇳🇦", digits: 9 },
+    { code: "+258", name: "Mozambique", flag: "🇲🇿", digits: 9 },
+    { code: "+250", name: "Rwanda", flag: "🇷🇼", digits: 9 },
+    { code: "+20", name: "Egypt", flag: "🇪🇬", digits: 10 },
+    { code: "+212", name: "Morocco", flag: "🇲🇦", digits: 9 },
+    { code: "+1", name: "United States", flag: "🇺🇸", digits: 10 },
+    { code: "+44", name: "United Kingdom", flag: "🇬🇧", digits: 10 },
+    { code: "+91", name: "India", flag: "🇮🇳", digits: 10 },
+    { code: "+92", name: "Pakistan", flag: "🇵🇰", digits: 10 },
+    { code: "+880", name: "Bangladesh", flag: "🇧🇩", digits: 10 },
+    { code: "+86", name: "China", flag: "🇨🇳", digits: 11 }
 ];
 
 function populateCountryDropdowns() {
@@ -735,7 +549,65 @@ function showNotification(msg, type) {
 }
 
 // ============================================================
-// EMAIL REGISTRATION - VIA BACKEND API (/api/auth/register)
+// SAVE USER TO FIREBASE DATABASE
+// ============================================================
+async function saveUserToFirebase(user, userData) {
+    const userRef = ref(rtdb, `users/${user.uid}`);
+    await set(userRef, {
+        uid: user.uid,
+        email: user.email,
+        username: userData.username,
+        fullName: userData.fullName,
+        country: userData.country,
+        phone: userData.phone || null,
+        referralCode: userData.referralCode || null,
+        balance: 0,
+        totalDeposited: 0,
+        totalWithdrawn: 0,
+        isVerified: false,
+        isActive: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    });
+    
+    // Save username lookup
+    await set(ref(rtdb, `usernames/${userData.username.toLowerCase()}`), { uid: user.uid });
+    
+    // Save email lookup
+    await set(ref(rtdb, `emails/${user.email}`), { uid: user.uid });
+}
+
+// ============================================================
+// HANDLE REFERRAL
+// ============================================================
+async function handleReferral(newUserId) {
+    if (!referredByCode) return;
+    try {
+        const referralRef = ref(rtdb, `referrals/${referredByCode}`);
+        const snap = await get(referralRef);
+        if (snap.exists()) {
+            const referrerUid = snap.val().uid;
+            const newRef = push(ref(rtdb, `users/${referrerUid}/referrals`));
+            await set(newRef, {
+                userId: newUserId,
+                joinedAt: Date.now()
+            });
+            // Add to global referrals
+            const refListRef = push(ref(rtdb, `referralList`));
+            await set(refListRef, {
+                referrer: referrerUid,
+                referred: newUserId,
+                date: Date.now()
+            });
+            console.log('[REFERRAL] Recorded successfully');
+        }
+    } catch (e) {
+        console.error('[REFERRAL] Error:', e);
+    }
+}
+
+// ============================================================
+// EMAIL REGISTRATION - FIREBASE DIRECT
 // ============================================================
 async function registerWithEmail() {
     if (!document.getElementById('termsCheckbox').checked) {
@@ -763,67 +635,171 @@ async function registerWithEmail() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
 
     try {
-        console.log('[REGISTER] Sending request to:', `${API_BASE_URL}/api/auth/register`);
+        // Check if username already exists
+        const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
+        const usernameSnap = await get(usernameRef);
+        if (usernameSnap.exists()) {
+            throw new Error('Username already taken');
+        }
         
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-                fullName: fullName,
-                username: username,
-                country: country,
-                referralCode: referredByCode
-            })
+        // Check if email already exists
+        const emailRef = ref(rtdb, `emails/${email}`);
+        const emailSnap = await get(emailRef);
+        if (emailSnap.exists()) {
+            throw new Error('Email already registered');
+        }
+
+        // Create user with Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Update profile with full name
+        await updateProfile(user, {
+            displayName: fullName
         });
-
-        const data = await response.json();
-        console.log('[REGISTER] Response:', data);
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || 'Registration failed');
-        }
-
-        if (data.data && data.data.idToken) {
-            localStorage.setItem('abotra_token', data.data.idToken);
-            localStorage.setItem('abotra_user', JSON.stringify(data.data));
-        }
-
-        showNotification('✅ Account created successfully!', 'success');
-        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        
+        // Save user to Firebase Database
+        await saveUserToFirebase(user, {
+            fullName,
+            username,
+            country,
+            referralCode: referredByCode,
+            phone: null
+        });
+        
+        // Handle referral
+        await handleReferral(user.uid);
+        
+        // Send email verification
+        await sendEmailVerification(user);
+        
+        showNotification('✅ Account created! Please verify your email.', 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 3000);
 
     } catch (error) {
         console.error('[REGISTER] Error:', error);
-        showNotification(error.message || 'Registration failed', 'error');
+        let message = error.message;
+        if (error.code === 'auth/email-already-in-use') {
+            message = 'Email already registered';
+        } else if (error.code === 'auth/weak-password') {
+            message = 'Password too weak';
+        } else if (error.code === 'auth/operation-not-allowed') {
+            message = 'Email/password accounts are not enabled';
+        }
+        showNotification(message, 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Register with Email';
     }
 }
 
 // ============================================================
-// OTHER FUNCTIONS
+// PHONE REGISTRATION
 // ============================================================
 let recaptchaVerifier = null;
-let phoneConfirmation = null;
-
-async function initRecaptcha() {
-    if (!recaptchaVerifier) {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'registerBtn', {
-            size: 'invisible',
-            callback: () => console.log("[RECAPTCHA] Resolved")
-        });
-    }
-    try { await recaptchaVerifier.render(); } catch (e) { console.warn("[RECAPTCHA] Render warning:", e); }
-}
 
 async function registerWithPhone() {
-    showNotification('Phone registration coming soon!', 'info');
+    if (!document.getElementById('termsCheckbox').checked) {
+        showNotification('Please accept Terms & Conditions', 'error');
+        return;
+    }
+
+    const fullName = document.getElementById('phoneFullName').value.trim();
+    const username = document.getElementById('phoneUsername').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const password = document.getElementById('phonePassword').value;
+    const countrySelect = document.getElementById('phoneCountryCode');
+    const country = countrySelect.options[countrySelect.selectedIndex]?.value || '';
+    
+    const selectedText = countrySelect.options[countrySelect.selectedIndex]?.text || '';
+    const matched = countriesData.find(c => selectedText.includes(c.name));
+    const countryCode = matched ? matched.code : '';
+
+    if (!fullName || !username || !phoneNumber || !password || !country) {
+        showNotification('All fields are required', 'error');
+        return;
+    }
+    if (password.length < 6) {
+        showNotification('Password must be at least 6 characters', 'error');
+        return;
+    }
+    if (!countryCode) {
+        showNotification('Please select a valid country', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+
+    try {
+        // Check if username already exists
+        const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
+        const usernameSnap = await get(usernameRef);
+        if (usernameSnap.exists()) {
+            throw new Error('Username already taken');
+        }
+
+        // Initialize reCAPTCHA
+        if (!recaptchaVerifier) {
+            recaptchaVerifier = new RecaptchaVerifier(auth, 'registerBtn', {
+                size: 'invisible',
+                callback: () => console.log("[RECAPTCHA] Resolved")
+            });
+            await recaptchaVerifier.render();
+        }
+
+        const fullPhoneNumber = countryCode + phoneNumber;
+        const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, recaptchaVerifier);
+        console.log("[PHONE] OTP sent to:", fullPhoneNumber);
+        
+        showNotification('📱 OTP sent to your phone!', 'info');
+        
+        // Prompt for OTP
+        const otp = prompt('Enter the 6-digit verification code sent to your phone:');
+        if (!otp) {
+            throw new Error('OTP is required');
+        }
+        
+        const userCredential = await confirmation.confirm(otp);
+        const user = userCredential.user;
+        
+        // Update profile
+        await updateProfile(user, {
+            displayName: fullName
+        });
+        
+        // Save user to Firebase Database
+        await saveUserToFirebase(user, {
+            fullName,
+            username,
+            country,
+            phone: fullPhoneNumber,
+            referralCode: referredByCode
+        });
+        
+        // Handle referral
+        await handleReferral(user.uid);
+        
+        showNotification('✅ Account created successfully!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+
+    } catch (error) {
+        console.error('[PHONE] Error:', error);
+        let message = error.message;
+        if (error.code === 'auth/invalid-verification-code') {
+            message = 'Invalid OTP code';
+        } else if (error.code === 'auth/too-many-requests') {
+            message = 'Too many attempts. Try again later';
+        }
+        showNotification(message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-phone"></i> Register with Phone';
+    }
 }
 
-// Google registration
+// ============================================================
+// GOOGLE REGISTRATION
+// ============================================================
 document.getElementById('googleSignUpBtn')?.addEventListener('click', async () => {
     if (!document.getElementById('termsCheckbox').checked) {
         showNotification('Please accept Terms & Conditions', 'error');
@@ -840,21 +816,29 @@ document.getElementById('googleSignUpBtn')?.addEventListener('click', async () =
         const user = result.user;
         console.log("[GOOGLE] User:", user.uid);
 
-        const response = await fetch(`${API_BASE_URL}/api/auth/register/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                uid: user.uid,
-                email: user.email,
+        // Check if user already exists
+        const userRef = ref(rtdb, `users/${user.uid}`);
+        const userSnap = await get(userRef);
+        
+        if (!userSnap.exists()) {
+            // Create username from email
+            let username = user.email.split('@')[0];
+            // Check if username exists
+            const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
+            const usernameSnap = await get(usernameRef);
+            if (usernameSnap.exists()) {
+                username = username + Math.floor(Math.random() * 1000);
+            }
+            
+            await saveUserToFirebase(user, {
                 fullName: user.displayName || user.email.split('@')[0],
-                username: user.email.split('@')[0] + Math.floor(Math.random() * 1000),
-                referralCode: referredByCode
-            })
-        });
-
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || 'Failed to save user');
+                username: username,
+                country: 'Tanzania',
+                referralCode: referredByCode,
+                phone: null
+            });
+            
+            await handleReferral(user.uid);
         }
 
         showNotification(`✅ Welcome ${user.displayName || 'User'}!`, 'success');
@@ -871,24 +855,22 @@ document.getElementById('googleSignUpBtn')?.addEventListener('click', async () =
 // ============================================================
 // METHOD SWITCHING
 // ============================================================
-let currentMethod = 'email';
-
 document.querySelectorAll('.register-option').forEach(opt => {
     opt.addEventListener('click', function() {
         document.querySelectorAll('.register-option').forEach(o => o.classList.remove('active'));
         this.classList.add('active');
-        currentMethod = this.dataset.method;
+        const method = this.dataset.method;
         document.getElementById('emailSection').style.display = 'none';
         document.getElementById('phoneSection').style.display = 'none';
         document.getElementById('googleSection').style.display = 'none';
 
         const btn = document.getElementById('registerBtn');
-        if (currentMethod === 'email') {
+        if (method === 'email') {
             document.getElementById('emailSection').style.display = 'block';
             btn.style.display = 'flex';
             btn.innerHTML = '<i class="fas fa-user-plus"></i> Register with Email';
             btn.onclick = registerWithEmail;
-        } else if (currentMethod === 'phone') {
+        } else if (method === 'phone') {
             document.getElementById('phoneSection').style.display = 'block';
             btn.style.display = 'flex';
             btn.innerHTML = '<i class="fas fa-phone"></i> Register with Phone';
