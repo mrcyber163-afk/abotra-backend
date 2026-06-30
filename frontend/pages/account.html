@@ -6,7 +6,6 @@
 <title>Account | ABOTRA-PROAI - Manage Your Profile</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
 
 <!-- ============================================================ -->
 <!-- CONFIG - Backend Connection                                     -->
@@ -317,9 +316,6 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 <!-- EMAIL MODAL -->
 <div class="modal-overlay" id="emailModal"><div class="modal-container"><i class="fas fa-envelope" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Change Email Address</h3><p>Enter your new email address</p><input type="email" id="modalEmail" placeholder="email@example.com"><div class="modal-buttons"><button class="modal-btn cancel" id="closeEmailModal">Cancel</button><button class="modal-btn confirm" id="saveEmailModal">Save</button></div></div></div>
 
-<!-- BIOMETRIC MODAL -->
-<div class="modal-overlay" id="biometricModal"><div class="modal-container"><i class="fas fa-fingerprint" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Enable Biometric Login</h3><p id="biometricModalMessage">Enter your password to securely enable fingerprint</p><input type="password" id="biometricPassword" placeholder="Enter your password"><div class="error-message" id="biometricError">Incorrect password.</div><div id="biometricStatusDiv" style="display:none; margin-bottom:10px; padding:8px; border-radius:8px;"></div><div class="modal-buttons"><button class="modal-btn cancel" id="closeBiometricModal">Cancel</button><button class="modal-btn confirm" id="confirmBiometricModal">Enable</button></div></div></div>
-
 <!-- USERNAME MODAL -->
 <div class="modal-overlay" id="usernameModal"><div class="modal-container"><i class="fas fa-user-edit" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Change Username</h3><p>Choose a unique username</p><input type="text" id="newUsername" placeholder="Enter new username" maxlength="20"><div class="modal-buttons"><button class="modal-btn cancel" id="closeUsernameModal">Cancel</button><button class="modal-btn confirm" id="saveUsernameModal">Save</button></div></div></div>
 
@@ -347,7 +343,6 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 
 <div class="settings-card"><div class="section-title"><i class="fas fa-sliders-h"></i> Account Settings</div>
 <div class="setting-item" id="changePasswordBtn"><span><i class="fas fa-lock"></i> Change Password</span><i class="fas fa-chevron-right arrow"></i></div>
-<div class="setting-item" id="biometricSetting"><span><i class="fas fa-fingerprint"></i> Biometric Login</span><div class="biometric-toggle"><div class="toggle-switch" id="biometricToggle"></div></div></div>
 <div class="setting-item" id="twoFactorBtn"><span><i class="fas fa-shield-alt"></i> Two-Factor Authentication</span><i class="fas fa-chevron-right arrow"></i></div>
 <div class="setting-item" id="kycBtn"><span><i class="fas fa-id-card"></i> Submit KYC Documents</span><i class="fas fa-chevron-right arrow"></i></div>
 </div>
@@ -371,11 +366,11 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 
 <script type="module">
 // ============================================================
-// FIREBASE IMPORTS
+// FIREBASE IMPORTS - Pure RTDB Only
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signOut, signInWithEmailAndPassword, updateEmail, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signOut, updateEmail, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ============================================================
@@ -391,65 +386,13 @@ const firebaseConfig = {
     appId: "1:510401455603:web:8efa0a186a90dea7c0de86" 
 };
 
-// ============================================================
-// API BASE URL
-// ============================================================
-const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
-    ? 'http://localhost:5001' 
-    : 'https://abotra-backend.up.railway.app';
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const rtdb = getDatabase(app);
 const storage = getStorage(app);
 
 let currentUser = null, userData = null, recaptchaVerifier = null, pendingPhoneNumber = null, phoneConfirmationResult = null;
-let rpId = window.location.hostname || "abotra-proai.com";
-
-// ============================================================
-// GET FIREBASE TOKEN
-// ============================================================
-async function getFirebaseToken() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            unsubscribe();
-            if (!user) {
-                reject(new Error('No user logged in'));
-                return;
-            }
-            try {
-                const token = await user.getIdToken(true);
-                resolve(token);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
-}
-
-// ============================================================
-// API CALLS TO BACKEND
-// ============================================================
-async function apiRequest(endpoint, method, body = null) {
-    try {
-        const token = await getFirebaseToken();
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        };
-        if (body) options.body = JSON.stringify(body);
-        
-        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API request error:', error);
-        return { success: false, error: error.message };
-    }
-}
+let rtdbListeners = [];
 
 // ============================================================
 // COUNTRY FLAGS
@@ -498,91 +441,107 @@ function compressImage(file, maxWidth, maxHeight, quality) {
 // ============================================================
 // RECAPTCHA
 // ============================================================
-async function initRecaptcha() { if(!recaptchaVerifier) recaptchaVerifier = new RecaptchaVerifier(auth, 'savePhoneModal', { size: 'invisible' }); await recaptchaVerifier.render(); }
-
-// ============================================================
-// BIOMETRIC FUNCTIONS
-// ============================================================
-async function enableBiometricWithWebAuthn(password) {
-    try {
-        const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
-        const attResp = await SimpleWebAuthnBrowser.startRegistration({
-            rp: { name: "ABOTRA-PROAI", id: rpId },
-            user: { id: currentUser.uid, name: currentUser.email, displayName: currentUser.email.split('@')[0] },
-            challenge, pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
-            timeout: 60000, attestation: "none"
-        });
-        localStorage.setItem('abotra_biometric_credential', JSON.stringify(attResp));
-        localStorage.setItem('abotra_biometric_email', currentUser.email);
-        localStorage.setItem('abotra_biometric_password', password);
-        localStorage.setItem('abotra_biometric_enabled', 'true');
-        await set(ref(rtdb, `biometric/${currentUser.uid}`), { enabled: true, credentialId: attResp.id, timestamp: Date.now() });
-        return true;
-    } catch(e) { console.error(e); return false; }
-}
-
-async function disableBiometric() {
-    localStorage.removeItem('abotra_biometric_credential');
-    localStorage.removeItem('abotra_biometric_email');
-    localStorage.removeItem('abotra_biometric_password');
-    localStorage.removeItem('abotra_biometric_enabled');
-    if(currentUser) await remove(ref(rtdb, `biometric/${currentUser.uid}`));
-    document.getElementById('biometricToggle')?.classList.remove('active');
-    showNotification('Biometric disabled', 'info');
-}
-
-async function checkBiometricEnabled() {
-    const saved = localStorage.getItem('abotra_biometric_credential');
-    if(saved && currentUser) { document.getElementById('biometricToggle')?.classList.add('active'); return true; }
-    document.getElementById('biometricToggle')?.classList.remove('active');
-    return false;
+async function initRecaptcha() { 
+    if(!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'savePhoneModal', { 
+            size: 'invisible',
+            callback: () => {}
+        }); 
+    }
+    await recaptchaVerifier.render(); 
 }
 
 // ============================================================
-// LOAD USER DATA
+// 🔥 DIRECT RTDB LOAD FUNCTIONS - No API
 // ============================================================
 async function loadAllUserData(user) {
-    const userRef = ref(rtdb, `users/${user.uid}`);
-    const robotsRef = ref(rtdb, `userRobots/${user.uid}`);
-    const kycRef = ref(rtdb, `kyc/${user.uid}`);
-    
-    const [userSnap, robotsSnap, kycSnap] = await Promise.all([
-        get(userRef), get(robotsRef), get(kycRef)
-    ]);
-    
-    if(userSnap.exists()) userData = userSnap.val();
-    else { 
-        userData = { username: user.email.split('@')[0], email: user.email, createdAt: Date.now(), country: 'Tanzania', commissionEarned: 0, referralCount: 0 }; 
-        await set(userRef, userData); 
+    try {
+        const userRef = ref(rtdb, `users/${user.uid}`);
+        const robotsRef = ref(rtdb, `userRobots/${user.uid}`);
+        const kycRef = ref(rtdb, `kyc/${user.uid}`);
+        
+        const [userSnap, robotsSnap, kycSnap] = await Promise.all([
+            get(userRef), get(robotsRef), get(kycRef)
+        ]);
+        
+        if(userSnap.exists()) {
+            userData = userSnap.val();
+        } else {
+            userData = { 
+                username: user.email ? user.email.split('@')[0] : 'user_' + user.uid.substring(0, 6),
+                email: user.email || '',
+                createdAt: Date.now(),
+                country: 'Tanzania',
+                commissionEarned: 0,
+                referralCount: 0 
+            };
+            await set(userRef, userData);
+        }
+        
+        let activeRobots = 0;
+        if(robotsSnap.exists()) {
+            robotsSnap.forEach(c => { 
+                const val = c.val();
+                if(val.status === 'active') activeRobots++; 
+            });
+        }
+        
+        let kycStatus = userData.kycStatus || 'none';
+        if(kycStatus === 'none' && kycSnap.exists()) {
+            const kycData = kycSnap.val();
+            if(kycData.status === 'approved' || kycData.status === 'verified') kycStatus = 'approved';
+            else if(kycData.status === 'pending') kycStatus = 'pending';
+            else if(kycData.status === 'rejected') kycStatus = 'rejected';
+        }
+        
+        const referralCount = userData.referralCount || 0;
+        const commissionEarned = userData.commissionEarned || 0;
+        
+        return { userData, activeRobots, kycStatus, referralCount, commissionEarned };
+    } catch (error) {
+        console.error('[RTDB] Load user error:', error);
+        return { 
+            userData: { username: 'User', email: user.email || '', createdAt: Date.now(), country: 'Tanzania' },
+            activeRobots: 0,
+            kycStatus: 'none',
+            referralCount: 0,
+            commissionEarned: 0
+        };
     }
-    
-    let activeRobots = 0;
-    if(robotsSnap.exists()) {
-        robotsSnap.forEach(c => { if(c.val().status === 'active') activeRobots++; });
-    }
-    
-    let kycStatus = userData.kycStatus || 'none';
-    if(kycStatus === 'none' && kycSnap.exists()) {
-        const kycData = kycSnap.val();
-        if(kycData.status === 'approved' || kycData.status === 'verified') kycStatus = 'approved';
-        else if(kycData.status === 'pending') kycStatus = 'pending';
-        else if(kycData.status === 'rejected') kycStatus = 'rejected';
-        else if(kycData.kycStatus === 'approved') kycStatus = 'approved';
-        else if(kycData.kycStatus === 'pending') kycStatus = 'pending';
-        else if(kycData.kycStatus === 'rejected') kycStatus = 'rejected';
-    }
-    
-    const referralCount = userData.referralCount || 0;
-    const commissionEarned = userData.commissionEarned || 0;
-    
-    return { userData, activeRobots, kycStatus, referralCount, commissionEarned };
 }
 
+// ============================================================
+// SETUP RTDB LISTENERS - Realtime Updates
+// ============================================================
+function setupRTDBListeners(user) {
+    rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
+    rtdbListeners = [];
+    
+    const userRef = ref(rtdb, `users/${user.uid}`);
+    const userUnsub = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            userData = snapshot.val();
+            loadUserData(user);
+        }
+    });
+    rtdbListeners.push(userUnsub);
+    
+    const kycRef = ref(rtdb, `kyc/${user.uid}`);
+    const kycUnsub = onValue(kycRef, (snapshot) => {
+        if (snapshot.exists()) {
+            loadUserData(user);
+        }
+    });
+    rtdbListeners.push(kycUnsub);
+}
+
+// ============================================================
+// LOAD USER DATA - Render UI
+// ============================================================
 async function loadUserData(user) {
     const data = await loadAllUserData(user);
     
-    const username = data.userData.username || user.email.split('@')[0];
+    const username = data.userData.username || user.email?.split('@')[0] || 'User';
     const isVerified = data.userData.isVerified === true;
     const blueTick = isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
     const createdAt = data.userData.createdAt ? new Date(data.userData.createdAt) : new Date();
@@ -608,11 +567,9 @@ async function loadUserData(user) {
     if(isPhoneUser) {
         emailHtml = `<button class="inline-btn edit-btn" id="editEmailBtn"><i class="fas fa-edit"></i> Edit</button>`;
     }
-    if(!user.emailVerified) {
+    if(!user.emailVerified && user.email && !isPhoneUser) {
         emailHtml += ` <button class="inline-btn" id="verifyEmailBtn"><i class="fas fa-envelope"></i> Verify</button>`;
     } else if(user.emailVerified && !isPhoneUser) {
-        emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
-    } else if(user.emailVerified && isPhoneUser) {
         emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
     }
     
@@ -625,8 +582,9 @@ async function loadUserData(user) {
         phoneHtml = `<button class="inline-btn add-btn" id="addPhoneBtn"><i class="fas fa-plus"></i> Add Phone</button>`;
     }
     
-    const referralCount = data.referralCount;
-    const totalCommission = data.commissionEarned;
+    const referralCount = data.referralCount || 0;
+    const totalCommission = data.commissionEarned || 0;
+    const activeRobots = data.activeRobots || 0;
     
     document.getElementById('accountCard').innerHTML = `
         <div class="profile-picture-box">
@@ -634,11 +592,11 @@ async function loadUserData(user) {
             <div class="profile-info-text"><h3>${escapeHtml(username)}${blueTick}</h3><p>Member since: ${formattedDate}</p></div>
         </div>
         <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="username-container"><span class="username-text" id="usernameDisplay">${escapeHtml(username)}</span><i class="fas fa-edit username-edit-icon" id="editUsernameBtn"></i></div></div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><span id="accountEmail">${escapeHtml(user.email)}</span> ${emailHtml}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><span id="accountEmail">${escapeHtml(user.email || 'Not set')}</span> ${emailHtml}</div></div>
         <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><span id="accountPhone">${data.userData.phone || 'Not added'}</span> ${phoneHtml}</div></div>
         <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><span class="country-flag">${countryFlag}</span> ${escapeHtml(userCountry)}</div></div>
         <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value" id="accountKyc">${kycHtml}</div></div>
-        <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><span class="inline-stats-number">${data.activeRobots}</span></div></div>
+        <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><span class="inline-stats-number">${activeRobots}</span></div></div>
         <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value">${formattedDate}</div></div>
     `;
     
@@ -648,7 +606,7 @@ async function loadUserData(user) {
     let refCode = data.userData.referralCode;
     if(!refCode){ 
         refCode = 'ABOTRA' + Math.random().toString(36).substring(2,8).toUpperCase(); 
-        await update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode }); 
+        update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode }).catch(() => {}); 
     }
     const refLinkDiv = document.querySelector('.referral-link');
     if(refLinkDiv){ 
@@ -694,20 +652,17 @@ async function loadUserData(user) {
         openOtpModal(); for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
         showNotification('OTP sent', 'info');
     });
-    
-    await checkBiometricEnabled();
 }
 
 // ============================================================
 // MODAL FUNCTIONS
 // ============================================================
-const phoneModal = document.getElementById('phoneModal'), emailModal = document.getElementById('emailModal'), biometricModal = document.getElementById('biometricModal'), usernameModal = document.getElementById('usernameModal'), otpModal = document.getElementById('otpModal');
+const phoneModal = document.getElementById('phoneModal'), emailModal = document.getElementById('emailModal'), usernameModal = document.getElementById('usernameModal'), otpModal = document.getElementById('otpModal');
+
 function openPhoneModal() { phoneModal?.classList.add('active'); }
 function closePhoneModal() { phoneModal?.classList.remove('active'); }
 function openEmailModal() { emailModal?.classList.add('active'); }
 function closeEmailModal() { emailModal?.classList.remove('active'); }
-function openBiometricModal() { biometricModal?.classList.add('active'); document.getElementById('biometricPassword').value = ''; document.getElementById('biometricError').classList.remove('show'); }
-function closeBiometricModal() { biometricModal?.classList.remove('active'); }
 function openUsernameModal() { usernameModal?.classList.add('active'); }
 function closeUsernameModal() { usernameModal?.classList.remove('active'); }
 function openOtpModal() { otpModal?.classList.add('active'); }
@@ -715,7 +670,6 @@ function closeOtpModal() { otpModal?.classList.remove('active'); }
 
 document.getElementById('closePhoneModal')?.addEventListener('click', closePhoneModal);
 document.getElementById('closeEmailModal')?.addEventListener('click', closeEmailModal);
-document.getElementById('closeBiometricModal')?.addEventListener('click', closeBiometricModal);
 document.getElementById('closeUsernameModal')?.addEventListener('click', closeUsernameModal);
 document.getElementById('closeOtpModal')?.addEventListener('click', closeOtpModal);
 
@@ -762,18 +716,6 @@ document.getElementById('saveUsernameModal')?.addEventListener('click', async ()
     closeUsernameModal();
 });
 
-document.getElementById('confirmBiometricModal')?.addEventListener('click', async () => {
-    const pwd = document.getElementById('biometricPassword').value;
-    if(!pwd) return showNotification('Enter password', 'error');
-    try {
-        await signInWithEmailAndPassword(auth, currentUser.email, pwd);
-        const success = await enableBiometricWithWebAuthn(pwd);
-        if(success) { showNotification('Biometric enabled!', 'success'); closeBiometricModal(); document.getElementById('biometricToggle').classList.add('active'); }
-        else showNotification('Biometric failed', 'error');
-    } catch(e) { document.getElementById('biometricError')?.classList.add('show'); }
-});
-
-document.getElementById('biometricToggle')?.addEventListener('click', async (e) => { e.stopPropagation(); (await checkBiometricEnabled()) ? await disableBiometric() : openBiometricModal(); });
 document.getElementById('logoutTopBtn')?.addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
 document.getElementById('changePasswordBtn')?.addEventListener('click', () => { sendPasswordResetEmail(auth, currentUser.email); showNotification('Reset link sent!', 'success'); });
 document.getElementById('twoFactorBtn')?.addEventListener('click', () => showNotification('2FA coming soon', 'info'));
@@ -785,10 +727,15 @@ function initTheme() {
 }
 document.getElementById('themeToggle')?.addEventListener('click', () => { document.body.classList.toggle('light-theme'); localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); });
 
+// ============================================================
+// INIT
+// ============================================================
 onAuthStateChanged(auth, async(user) => { 
     if(!user){ window.location.href='login.html'; return; } 
     currentUser = user; 
-    await loadUserData(user); 
+    console.log('[Account] User logged in:', user.uid);
+    await loadUserData(user);
+    setupRTDBListeners(user);
 });
 initTheme();
 </script>

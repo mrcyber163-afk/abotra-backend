@@ -6,7 +6,6 @@
 <title>AI Robots | ABOTRA-PROAI - Choose Your Trading Robot</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <!-- ============================================================ -->
 <!-- CONFIG - Backend Connection                                     -->
@@ -184,7 +183,6 @@ align-items: center;
 .logo-area p { color: #AAAAAA; font-size: 8px; }
 .top-bar-right { display: flex; align-items: center; gap: 8px; }
 
-/* ===== CURRENCY TOGGLE BUTTON ===== */
 .currency-toggle-btn {
 background: rgba(255,215,0,0.15);
 border: 1px solid rgba(255,215,0,0.4);
@@ -499,7 +497,6 @@ border-left: 3px solid;
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
 
-/* Instructions Box */
 .instructions-box {
 background: rgba(255,255,255,0.05);
 border: 1px solid rgba(255,215,0,0.2);
@@ -563,7 +560,6 @@ font-weight: 600;
 .currency-toggle-btn i { font-size: 10px; }
 }
 
-/* ===== MODAL ===== */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -710,7 +706,6 @@ font-weight: 600;
 <div><h2>ABOTRA-PROAI</h2><p>AI Trading Robots</p></div>
 </div>
 <div class="top-bar-right">
-<!-- ===== CURRENCY TOGGLE BUTTON + BACK ===== -->
 <button class="currency-toggle-btn" id="currencyToggleBtn">
     <i class="fas fa-exchange-alt"></i> 
     <span id="currencyDisplay">USD</span>
@@ -728,7 +723,6 @@ font-weight: 600;
 <div class="main-content">
 <div class="page-title"><i class="fas fa-robot"></i> AI Trading Robots</div>
 <div class="robots-grid" id="robotsContainer">
-    <!-- Skeleton Loaders -->
     <div class="skeleton-card">
         <div class="skeleton-image"></div>
         <div class="skeleton-content">
@@ -776,7 +770,6 @@ font-weight: 600;
     </div>
 </div>
 
-<!-- Instructions Box -->
 <div class="instructions-box">
     <h3><i class="fas fa-info-circle"></i> How AI Robots Work</h3>
     <ul>
@@ -800,10 +793,10 @@ font-weight: 600;
 
 <script type="module">
 // ============================================================
-// FIREBASE IMPORTS
+// FIREBASE IMPORTS - Direct RTDB
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, push, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, get, push, update, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ============================================================
@@ -824,13 +817,6 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================
-// API BASE URL
-// ============================================================
-const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
-    ? 'http://localhost:5001' 
-    : 'https://abotra-backend.up.railway.app';
-
-// ============================================================
 // STATE
 // ============================================================
 let currentUser = null;
@@ -842,6 +828,7 @@ let userCountry = 'Tanzania';
 let currentCurrency = 'USD';
 let localRate = 2800;
 let localSymbol = 'TZS';
+let rtdbListeners = [];
 
 // ============================================================
 // COUNTRY & CURRENCY
@@ -866,7 +853,7 @@ const countryCurrencies = {
 };
 
 // ============================================================
-// ROBOTS DATA
+// ROBOTS DATA - Default
 // ============================================================
 const defaultRobots = [
     { id: 0, name: "Starter Bot", level: 0, dailyProfit: 3, price: 20, description: "✨ Start your AI trading journey! Perfect for beginners. Low-cost entry with steady 3% daily returns.", hot: false, image: "../assets/images/robot0.png", winRate: 80, isStarter: true, minTrade: 3 },
@@ -886,133 +873,6 @@ const INVESTED_AMOUNT = {
     0: 10, 1: 30, 2: 72, 3: 120, 4: 180,
     5: 240, 6: 300, 7: 450, 8: 560, 9: 720, 10: 1000
 };
-
-// ============================================================
-// ONESIGNAL
-// ============================================================
-const ONESIGNAL_APP_ID = "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc";
-let oneSignalInitialized = false;
-
-async function initOneSignal() {
-    if (oneSignalInitialized) return;
-    try {
-        if (typeof window.OneSignal === 'undefined') { setTimeout(initOneSignal, 1000); return; }
-        await window.OneSignal.Deferred;
-        await window.OneSignal.init({ appId: ONESIGNAL_APP_ID, safari_web_id: "web.onesignal.auto.123456789", notifyButton: { enable: false }, allowLocalhostAsSecureOrigin: true });
-        oneSignalInitialized = true;
-        if (currentUser) {
-            await window.OneSignal.sendTag("user_id", currentUser.uid);
-            await window.OneSignal.sendTag("user_email", currentUser.email);
-            await window.OneSignal.setExternalUserId(currentUser.uid);
-        }
-    } catch(e) { console.error("OneSignal init error:", e); }
-}
-
-// ============================================================
-// GET FIREBASE TOKEN
-// ============================================================
-async function getFirebaseToken() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            unsubscribe();
-            if (!user) {
-                reject(new Error('No user logged in'));
-                return;
-            }
-            try {
-                const token = await user.getIdToken(true);
-                resolve(token);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
-}
-
-// ============================================================
-// API CALLS TO BACKEND
-// ============================================================
-async function apiRequest(endpoint, method, body = null) {
-    try {
-        const token = await getFirebaseToken();
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        };
-        if (body) options.body = JSON.stringify(body);
-        
-        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API request error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ============================================================
-// LOAD FUNCTIONS
-// ============================================================
-async function loadRobots() {
-    try {
-        const data = await apiRequest('robots', 'GET');
-        if (data.success && data.robots) {
-            robotsData = data.robots;
-        } else {
-            robotsData = [...defaultRobots];
-        }
-    } catch (error) {
-        console.error('Load robots error:', error);
-        robotsData = [...defaultRobots];
-    }
-    renderRobots();
-    return robotsData;
-}
-
-async function loadUserBalance() {
-    if (!currentUser) return 0;
-    try {
-        const data = await apiRequest('user/profile', 'GET');
-        if (data.success && data.user) {
-            userBalance = data.user.balance || 0;
-            return userBalance;
-        }
-    } catch (error) {
-        console.error('Load balance error:', error);
-    }
-    return userBalance;
-}
-
-async function loadPurchasedRobots() {
-    if (!currentUser) return [];
-    try {
-        const data = await apiRequest('robots/my-robots', 'GET');
-        if (data.success && data.robots) {
-            purchasedRobots = data.robots.map(r => r.robotId);
-            return purchasedRobots;
-        }
-    } catch (error) {
-        console.error('Load purchased robots error:', error);
-    }
-    return [];
-}
-
-async function loadUserCountry() {
-    if (!currentUser) return 'Tanzania';
-    try {
-        const data = await apiRequest('user/profile', 'GET');
-        if (data.success && data.user) {
-            userCountry = data.user.country || 'Tanzania';
-            return userCountry;
-        }
-    } catch (error) {
-        console.error('Load country error:', error);
-    }
-    return 'Tanzania';
-}
 
 // ============================================================
 // CURRENCY FUNCTIONS
@@ -1089,51 +949,30 @@ function showNotification(message, type) {
 }
 
 // ============================================================
-// PURCHASE ROBOT - VIA BACKEND API
+// CONFIRM MODAL
 // ============================================================
-async function purchaseRobot(robot) {
-    if (!currentUser) {
-        showNotification("Please login first", "error");
-        window.location.href = 'login.html';
-        return;
-    }
-    if (purchasedRobots.includes(robot.id)) {
-        showNotification(`You already own ${robot.name}!`, "error");
-        return;
-    }
-    if (userBalance < robot.price) {
-        showNotification(`Insufficient balance! Need $${robot.price}. Please deposit funds.`, "error");
-        return;
-    }
-    
-    const btn = document.querySelector(`.buy-btn[data-robot-id="${robot.id}"]`);
-    if (btn) { 
-        btn.disabled = true; 
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
-    }
-    
-    try {
-        const data = await apiRequest('robots/purchase', 'POST', { robotId: robot.id });
-        
-        if (data.success) {
-            const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
-            purchasedRobots.push(robot.id);
-            userBalance -= robot.price;
-            
-            showSuccessPopup(robot.name, investedAmount, () => {
-                renderRobots();
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Already Owned'; }
-            });
-            renderRobots();
-        } else {
-            showNotification(`❌ ${data.error || 'Purchase failed'}`, 'error');
-            if (btn) btn.disabled = false;
-        }
-    } catch (error) {
-        console.error('Purchase error:', error);
-        showNotification('Error purchasing robot. Please try again.', 'error');
-        if (btn) btn.disabled = false;
-    }
+function showConfirmModal(title, message, onConfirm) {
+    const existing = document.querySelector('.modal-overlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal-card">
+            <h3>${title}</h3>
+            <div class="modal-message">${message}</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('active'), 10);
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+        overlay.remove();
+        if (onConfirm) onConfirm();
+    });
+    document.getElementById('modalCancelBtn').addEventListener('click', () => overlay.remove());
 }
 
 // ============================================================
@@ -1166,33 +1005,194 @@ function showSuccessPopup(robotName, investedAmount, callback) {
 }
 
 // ============================================================
-// CONFIRM MODAL
+// DIRECT RTDB FUNCTIONS
 // ============================================================
-function showConfirmModal(title, message, onConfirm, onCancel) {
-    const existing = document.querySelector('.modal-overlay');
-    if (existing) existing.remove();
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-        <div class="modal-card">
-            <h3>${title}</h3>
-            <div class="modal-message">${message}</div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-    setTimeout(() => overlay.classList.add('active'), 10);
-    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
-        overlay.remove();
-        if (onConfirm) onConfirm();
+
+// 1. LOAD USER DATA
+async function loadUserData(uid) {
+    try {
+        const snapshot = await get(ref(db, `users/${uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            userCountry = data.country || 'Tanzania';
+            return data;
+        }
+        return null;
+    } catch (error) {
+        console.error('[RTDB] Load user error:', error);
+        return null;
+    }
+}
+
+// 2. LOAD PURCHASED ROBOTS
+async function loadPurchasedRobots(uid) {
+    try {
+        const snapshot = await get(ref(db, `userRobots/${uid}`));
+        purchasedRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                if (robot.robotId !== undefined) {
+                    purchasedRobots.push(robot.robotId);
+                }
+            });
+        }
+        return purchasedRobots;
+    } catch (error) {
+        console.error('[RTDB] Load purchased robots error:', error);
+        return [];
+    }
+}
+
+// 3. LOAD ROBOTS FROM RTDB
+async function loadRobotsFromRTDB() {
+    try {
+        const snapshot = await get(ref(db, 'robots'));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            robotsData = Object.values(data);
+            return robotsData;
+        }
+    } catch (error) {
+        console.error('[RTDB] Load robots error:', error);
+    }
+    // Fallback to default
+    robotsData = [...defaultRobots];
+    return robotsData;
+}
+
+// 4. PURCHASE ROBOT - Direct RTDB Transaction
+async function purchaseRobotDirect(robot) {
+    if (!currentUser) {
+        showNotification("Please login first", "error");
+        window.location.href = 'login.html';
+        return;
+    }
+    if (purchasedRobots.includes(robot.id)) {
+        showNotification(`You already own ${robot.name}!`, "error");
+        return;
+    }
+    if (userBalance < robot.price) {
+        showNotification(`Insufficient balance! Need ${formatPriceInCurrency(robot.price)}. Please deposit funds.`, "error");
+        return;
+    }
+    
+    const btn = document.querySelector(`.buy-btn[data-robot-id="${robot.id}"]`);
+    if (btn) { 
+        btn.disabled = true; 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
+    }
+    
+    try {
+        const uid = currentUser.uid;
+        const userRef = ref(db, `users/${uid}`);
+        const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+        
+        // Run transaction to deduct balance and add robot
+        const result = await runTransaction(userRef, (currentData) => {
+            if (currentData === null) return currentData;
+            const balance = currentData.balance || 0;
+            if (balance < robot.price) return currentData;
+            currentData.balance = balance - robot.price;
+            return currentData;
+        });
+        
+        if (!result.committed) {
+            showNotification('Transaction failed. Please try again.', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Purchase Robot'; }
+            return;
+        }
+        
+        // Save purchased robot
+        const robotData = {
+            robotId: robot.id,
+            name: robot.name,
+            level: robot.level,
+            dailyProfit: robot.dailyProfit,
+            price: robot.price,
+            purchasedAt: Date.now(),
+            status: 'inactive',
+            minTrade: robot.minTrade || 3,
+            investedAmount: INVESTED_AMOUNT[robot.id] || (robot.price / 2)
+        };
+        
+        await set(robotRef, robotData);
+        
+        // Update local state
+        purchasedRobots.push(robot.id);
+        userBalance -= robot.price;
+        
+        const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
+        
+        showSuccessPopup(robot.name, investedAmount, () => {
+            renderRobots();
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Already Owned'; }
+        });
+        renderRobots();
+        
+        // Add notification
+        const notifRef = push(ref(db, `notifications/${uid}`));
+        await set(notifRef, {
+            title: '🤖 Robot Purchased',
+            message: `You purchased ${robot.name} for ${formatPriceInCurrency(robot.price)}! ${formatPriceInCurrency(investedAmount)} auto-invested.`,
+            type: 'success',
+            read: false,
+            timestamp: Date.now()
+        });
+        
+    } catch (error) {
+        console.error('[RTDB] Purchase error:', error);
+        showNotification('Error purchasing robot. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Purchase Robot'; }
+    }
+}
+
+// ============================================================
+// SETUP RTDB LISTENERS - Realtime Updates
+// ============================================================
+function setupRTDBListeners(uid) {
+    // Clean up existing listeners
+    rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
+    rtdbListeners = [];
+    
+    // Listen to user balance changes
+    const userRef = ref(db, `users/${uid}`);
+    const userUnsub = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            updateBalanceUI();
+        }
     });
-    document.getElementById('modalCancelBtn').addEventListener('click', () => {
-        overlay.remove();
-        if (onCancel) onCancel();
+    rtdbListeners.push(userUnsub);
+    
+    // Listen to purchased robots changes
+    const robotsRef = ref(db, `userRobots/${uid}`);
+    const robotsUnsub = onValue(robotsRef, (snapshot) => {
+        purchasedRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                if (robot.robotId !== undefined) {
+                    purchasedRobots.push(robot.robotId);
+                }
+            });
+        }
+        renderRobots();
     });
+    rtdbListeners.push(robotsUnsub);
+}
+
+function updateBalanceUI() {
+    const summaryDiv = document.querySelector('.robots-grid .summary-div');
+    if (summaryDiv) {
+        const formattedBalance = formatPriceInCurrency(userBalance);
+        const balanceSpan = summaryDiv.querySelector('.balance-value');
+        if (balanceSpan) {
+            balanceSpan.textContent = formattedBalance;
+        }
+    }
 }
 
 // ============================================================
@@ -1252,7 +1252,7 @@ function renderRobots() {
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px;">
                     <span style="color:#888; font-size:9px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
-                    <span style="color:#FFD700; font-weight:700; font-size:14px;">$${minTrade}</span>
+                    <span style="color:#FFD700; font-weight:700; font-size:14px;">${formatPriceInCurrency(minTrade)}</span>
                 </div>
                 ${isStarter && !isOwned ? `<div style="background:rgba(14,203,129,0.1); border-radius:10px; padding:6px 10px; margin-bottom:12px; text-align:center; color:#0ECB81; font-size:10px;"><i class="fas fa-gift"></i> Only ${formattedPrice} - Start Trading Today!</div>` : ''}
                 <button class="buy-btn" data-robot-id="${robot.id}" ${isOwned ? 'disabled' : ''}>${isOwned ? '<i class="fas fa-check"></i> Already Owned' : '<i class="fas fa-shopping-cart"></i> Purchase Robot'}</button>
@@ -1264,8 +1264,8 @@ function renderRobots() {
                 e.stopPropagation(); 
                 showConfirmModal(
                     'Confirm Purchase',
-                    `Are you sure you want to purchase ${robot.name} for ${formattedPrice}?<br><br>💰 <strong>$${investedAmount.toFixed(2)}</strong> will be auto-invested for trading.`,
-                    () => purchaseRobot(robot)
+                    `Are you sure you want to purchase ${robot.name} for ${formattedPrice}?<br><br>💰 <strong>${formatPriceInCurrency(investedAmount)}</strong> will be auto-invested for trading.`,
+                    () => purchaseRobotDirect(robot)
                 );
             }); 
         }
@@ -1273,11 +1273,12 @@ function renderRobots() {
     });
     
     const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'summary-div';
     summaryDiv.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 15px; background: rgba(255,215,0,0.08); border-radius: 18px; margin-top: 10px;';
     const formattedBalance = formatPriceInCurrency(userBalance);
     summaryDiv.innerHTML = `<div style="display: flex; justify-content: center; gap: 25px; flex-wrap: wrap;">
         <div><i class="fas fa-robot" style="color: #FFD700;"></i> <span style="color: #FFD700;">${robotsData.length}</span> <span style="color: #888;">AI Robots</span></div>
-        <div><i class="fas fa-wallet" style="color: #0ECB81;"></i> <span style="color: #0ECB81;">${formattedBalance}</span> <span style="color: #888;">Balance</span></div>
+        <div><i class="fas fa-wallet" style="color: #0ECB81;"></i> <span class="balance-value" style="color: #0ECB81;">${formattedBalance}</span> <span style="color: #888;">Balance</span></div>
         <div><i class="fas fa-shopping-cart" style="color: #FFD700;"></i> <span style="color: #FFD700;">${purchasedRobots.length}</span> <span style="color: #888;">/${robotsData.length} Owned</span></div>
     </div>`;
     container.appendChild(summaryDiv);
@@ -1314,23 +1315,23 @@ document.getElementById('themeToggle').addEventListener('click', function() {
 });
 
 // ============================================================
+// CURRENCY TOGGLE
+// ============================================================
+document.getElementById('currencyToggleBtn').addEventListener('click', toggleCurrency);
+
+// ============================================================
 // INIT
 // ============================================================
 async function init() {
     initTheme();
+    
     onAuthStateChanged(auth, async (user) => {
         if (!user) { 
             window.location.href = 'login.html'; 
             return; 
         }
         currentUser = user;
-        
-        // Load country for currency
-        const country = await loadUserCountry();
-        const currencyInfo = getLocalCurrencyInfo(country);
-        localRate = currencyInfo.rate;
-        localSymbol = currencyInfo.symbol;
-        updateCurrencyDisplay();
+        console.log('[Robots] User logged in:', user.uid);
         
         // Show skeletons
         const container = document.getElementById('robotsContainer');
@@ -1340,17 +1341,27 @@ async function init() {
             <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-stats"><div class="skeleton-stat"></div><div class="skeleton-stat"></div><div class="skeleton-stat"></div></div><div class="skeleton-button"></div></div></div>
         `;
         
-        // Load data
-        await loadRobots();
-        await loadUserBalance();
-        await loadPurchasedRobots();
-        renderRobots();
-        await initOneSignal();
+        // Load data from RTDB
+        await loadUserData(user.uid);
+        await loadPurchasedRobots(user.uid);
+        await loadRobotsFromRTDB();
         
-        // Setup currency toggle
-        document.getElementById('currencyToggleBtn').addEventListener('click', toggleCurrency);
+        // Setup currency
+        const currencyInfo = getLocalCurrencyInfo(userCountry);
+        localRate = currencyInfo.rate;
+        localSymbol = currencyInfo.symbol;
+        updateCurrencyDisplay();
+        
+        // Render robots
+        renderRobots();
+        
+        // Setup RTDB listeners for realtime updates
+        setupRTDBListeners(user.uid);
+        
+        console.log('[Robots] ✅ Page initialized with RTDB');
     });
 }
+
 init();
 </script>
 </body>

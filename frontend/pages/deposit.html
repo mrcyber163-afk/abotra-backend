@@ -7,20 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
-<script>
-const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
-    VERSION: '2.0.0'
-};
-window.CONFIG = CONFIG;
-console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
-
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; min-height: 100vh; padding-bottom: 75px; position: relative; font-size: 11px; }
@@ -423,59 +409,6 @@ color: #888;
 font-size: 10px;
 }
 
-.instructions-box {
-background: rgba(255,215,0,0.06);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 14px;
-padding: 14px 16px;
-margin-top: 12px;
-backdrop-filter: blur(10px);
-}
-.instructions-box h4 {
-color: #FFD700;
-font-size: 12px;
-font-weight: 700;
-margin-bottom: 8px;
-display: flex;
-align-items: center;
-gap: 6px;
-}
-.instructions-box .step {
-color: #CCCCCC;
-font-size: 10px;
-padding: 3px 0;
-display: flex;
-align-items: flex-start;
-gap: 8px;
-line-height: 1.5;
-}
-.instructions-box .step i {
-color: #0ECB81;
-font-size: 12px;
-margin-top: 2px;
-min-width: 16px;
-}
-.instructions-box .step .highlight {
-color: #FFD700;
-font-weight: 600;
-}
-.instructions-box .step .warning {
-color: #F6465D;
-font-weight: 600;
-}
-.instructions-box .step .number {
-color: #0ECB81;
-font-weight: 700;
-}
-
-body.light-theme .instructions-box {
-background: rgba(255,215,0,0.06);
-border-color: rgba(128,0,0,0.2);
-}
-body.light-theme .instructions-box .step {
-color: #444;
-}
-
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
 .bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
 .bottom-nav a i { font-size: 16px; }
@@ -532,7 +465,6 @@ color: #444;
 <div class="skeleton-input"></div>
 <div class="skeleton-input"></div>
 <div class="skeleton-submit-btn"></div>
-<div class="skeleton-note"></div>
 </div>
 </div>
 
@@ -558,27 +490,33 @@ color: #444;
 <option value="Nigeria">🇳🇬 Nigeria</option>
 </select>
 </div>
-<div class="auto-payment-note"><i class="fas fa-info-circle"></i> Your country is auto-detected from your profile. Select a payment network below to see deposit details.</div>
+<div class="auto-payment-note"><i class="fas fa-info-circle"></i> Select your country and payment network below.</div>
 </div>
 
 <div class="wallet-card">
 <div class="wallet-title"><i class="fas fa-globe-africa"></i> Mobile Money Deposit</div>
 <div id="mobileNetworksContainer" class="networks-grid"><div style="text-align:center; padding:20px; color:#888;">Select your country first</div></div>
 
-<!-- Instructions Box -->
-<div id="instructionsContainer" style="display:none;">
-<div class="instructions-box" id="instructionsBox">
-<h4><i class="fas fa-info-circle"></i> <span id="instructionsTitle">Payment Instructions</span></h4>
-<div id="instructionsContent"></div>
-</div>
-</div>
-
 <div class="input-box"><input type="tel" id="senderPhone" placeholder="Your Phone Number (that sent payment)"></div>
 <div class="input-box"><input type="text" id="senderName" placeholder="Your Full Name (as registered)"></div>
 <div class="input-box"><input type="number" id="mobileAmount" placeholder="Amount (USDT) - Minimum $10" step="1" min="10"></div>
-<div class="input-box"><input type="text" id="mobileLocalAmount" placeholder="Local Currency Amount" readonly></div>
+
+<!-- ✅ RATE DISPLAY - Shows instantly when user selects network and enters amount -->
+<div id="rateDisplay" style="display:none; background:rgba(14,203,129,0.08); border:1px solid rgba(14,203,129,0.2); border-radius:10px; padding:10px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+        <span style="color:#888; font-size:10px;"><i class="fas fa-exchange-alt" style="color:#0ECB81;"></i> Exchange Rate</span>
+        <span style="color:#FFD700; font-weight:700; font-size:13px;" id="rateDisplayValue">1 USDT = 0 TZS</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#888; font-size:10px;"><i class="fas fa-coins" style="color:#FFD700;"></i> You will send</span>
+        <span style="color:#0ECB81; font-weight:700; font-size:14px;" id="localAmountDisplay">0 TZS</span>
+    </div>
+</div>
+
 <div class="input-box"><input type="text" id="transactionId" placeholder="Transaction ID / Reference Number (Optional)"></div>
+
 <button class="submit-btn" id="submitMobileBtn"><i class="fas fa-paper-plane"></i> Submit Mobile Deposit</button>
+
 <div class="auto-payment-note"><i class="fas fa-clock"></i> Send payment to the number shown above, then submit your details. Admin will verify and approve within 24 hours.</div>
 </div>
 </div>
@@ -610,7 +548,7 @@ USDT TRC20 Auto Deposit
 </div>
 
 <div class="auto-payment-note" style="margin-bottom:12px;">
-<i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified automatically and balance is credited after admin approval.
+<i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified and balance credited after admin approval.
 </div>
 
 <!-- Step Progress -->
@@ -703,9 +641,6 @@ QR Code<br><span style="font-size:8px;">(Coming Soon)</span>
 <div class="auto-payment-note" style="background: rgba(14,203,129,0.1);">
 <i class="fas fa-shield-alt"></i> All P2P transactions are secured and verified by ABOTRA-PROAI escrow system
 </div>
-<div class="auto-payment-note" style="margin-top:12px;">
-<i class="fas fa-exchange-alt"></i> After buying USDT from P2P market, you can make a mobile money deposit using the numbers above
-</div>
 </div>
 </div>
 </div>
@@ -721,12 +656,7 @@ QR Code<br><span style="font-size:8px;">(Coming Soon)</span>
 
 <script type="module">
 // ============================================================
-// CONFIGURATION
-// ============================================================
-const API_BASE_URL = 'https://abotra-backend.up.railway.app';
-
-// ============================================================
-// FIREBASE CLIENT SDK
+// FIREBASE IMPORTS - Pure RTDB
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -774,253 +704,6 @@ const DEFAULT_EXCHANGE_RATES = {
 };
 
 // ============================================================
-// PAYMENT INSTRUCTIONS - UPDATED WITH Mixx By Yas
-// ============================================================
-const PAYMENT_INSTRUCTIONS = {
-    'Tanzania': {
-        'M-Pesa Tanzania': {
-            title: '📱 M-Pesa Tanzania - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150*00#</span> or open M-Pesa app',
-                'Select <span class="highlight">"Lipa kwa M-Pesa"</span> (Pay with M-Pesa)',
-                'Enter Business Number: <span class="highlight">61105668</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference Number: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN',
-                'Wait for confirmation SMS'
-            ]
-        },
-        'Mixx By Yas': {
-            title: '📱 Mixx By Yas - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150*01#</span> or open Mixx By Yas app',
-                'Select <span class="highlight">"Malipo"</span> (Payments)',
-                'Enter Business Number: <span class="highlight">61105668</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Description: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Airtel Money Tanzania': {
-            title: '📱 Airtel Money Tanzania - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150*60#</span>',
-                'Select <span class="highlight">"Lipa kwa Airtel Money"</span>',
-                'Enter Business Number: <span class="highlight">61105668</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Description: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Malawi': {
-        'TNM Mpamba': {
-            title: '📱 TNM Mpamba - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Send Money"</span>',
-                'Enter Account Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Airtel Money Malawi': {
-            title: '📱 Airtel Money Malawi - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Make Payment"</span>',
-                'Enter Account Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Zambia': {
-        'MTN Mobile Money': {
-            title: '📱 MTN Mobile Money - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*222#</span>',
-                'Select <span class="highlight">"Pay Bill"</span>',
-                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Airtel Money Zambia': {
-            title: '📱 Airtel Money Zambia - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*115#</span>',
-                'Select <span class="highlight">"Pay Bill"</span>',
-                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Kenya': {
-        'M-Pesa Kenya': {
-            title: '📱 M-Pesa Kenya - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*334#</span>',
-                'Select <span class="highlight">"Lipa na M-Pesa"</span>',
-                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference Number: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Airtel Money Kenya': {
-            title: '📱 Airtel Money Kenya - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150*100#</span>',
-                'Select <span class="highlight">"Pay Bill"</span>',
-                'Enter Business Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Nigeria': {
-        'M-Pesa Nigeria': {
-            title: '📱 M-Pesa Nigeria - Payment Instructions',
-            steps: [
-                'Open M-Pesa app',
-                'Select <span class="highlight">"Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Airtel Money Nigeria': {
-            title: '📱 Airtel Money Nigeria - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*223#</span>',
-                'Select <span class="highlight">"Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'MTN Mobile Money': {
-            title: '📱 MTN Mobile Money - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*223#</span>',
-                'Select <span class="highlight">"MoMo Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Botswana': {
-        'Orange Money': {
-            title: '📱 Orange Money - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*112#</span>',
-                'Select <span class="highlight">"Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'BTC Mobile Money': {
-            title: '📱 BTC Mobile Money - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*112#</span>',
-                'Select <span class="highlight">"Make Payment"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Namibia': {
-        'MTC Mobile Money': {
-            title: '📱 MTC Mobile Money - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*160#</span>',
-                'Select <span class="highlight">"Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Mozambique': {
-        'M-Pesa Mozambique': {
-            title: '📱 M-Pesa Mozambique - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Send Money"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Vodacom M-Pesa': {
-            title: '📱 Vodacom M-Pesa - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Send Money"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Congo DRC': {
-        'M-Pesa Congo': {
-            title: '📱 M-Pesa Congo - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Send Money"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    },
-    'Burundi': {
-        'Lumicash': {
-            title: '📱 Lumicash - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*142#</span>',
-                'Select <span class="highlight">"Pay"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        },
-        'Ecocash Burundi': {
-            title: '📱Ecocash Burundi - Payment Instructions',
-            steps: [
-                'Dial <span class="highlight">*150#</span>',
-                'Select <span class="highlight">"Send Money"</span>',
-                'Enter Number: <span class="highlight">[ACCOUNT_NUMBER]</span>',
-                'Enter Amount: <span class="highlight">[AMOUNT]</span>',
-                'Enter Reference: <span class="highlight">[ORDER_ID]</span>',
-                'Confirm by entering your PIN'
-            ]
-        }
-    }
-};
-
-// ============================================================
 // NOTIFICATION FUNCTIONS
 // ============================================================
 function showNotification(message, type) {
@@ -1028,30 +711,37 @@ function showNotification(message, type) {
     if (existing) existing.remove();
     const toast = document.createElement('div');
     toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 5000);
 }
 
 async function addNotification(userId, title, message, type = 'info') {
     if (!userId) return;
-    const notifRef = push(ref(db, `notifications/${userId}`));
-    await set(notifRef, { title, message, type, read: false, timestamp: Date.now() });
+    try {
+        const notifRef = push(ref(db, `notifications/${userId}`));
+        await set(notifRef, { title, message, type, read: false, timestamp: Date.now() });
+    } catch(e) { console.error('Add notification error:', e); }
 }
 
 async function addAdminNotification(title, message, type = 'info') {
-    const adminNotifRef = push(ref(db, 'adminNotifications'));
-    await set(adminNotifRef, { title, message, type, read: false, timestamp: Date.now() });
+    try {
+        const adminNotifRef = push(ref(db, 'adminNotifications'));
+        await set(adminNotifRef, { title, message, type, read: false, timestamp: Date.now() });
+    } catch(e) { console.error('Admin notification error:', e); }
 }
 
 async function addDepositLog(userId, action, details) {
-    const logRef = push(ref(db, `deposit_logs`));
-    await set(logRef, {
-        userId,
-        action,
-        details: typeof details === 'string' ? details : JSON.stringify(details),
-        timestamp: Date.now()
-    });
+    try {
+        const logRef = push(ref(db, 'deposit_logs'));
+        await set(logRef, {
+            userId,
+            action,
+            details: typeof details === 'string' ? details : JSON.stringify(details),
+            timestamp: Date.now()
+        });
+    } catch(e) { console.error('Deposit log error:', e); }
 }
 
 // ============================================================
@@ -1059,11 +749,12 @@ async function addDepositLog(userId, action, details) {
 // ============================================================
 async function loadKYCData(userId) {
     try {
-        const kycRef = ref(db, `kyc/${userId}/status`);
+        const kycRef = ref(db, `kyc/${userId}`);
         const snapshot = await get(kycRef);
         if (snapshot.exists()) {
-            const status = snapshot.val();
-            const fullName = currentUserData?.fullName || currentUserData?.displayName || 'User';
+            const data = snapshot.val();
+            const status = data.status || 'not-submitted';
+            const fullName = data.fullName || currentUserData?.fullName || currentUserData?.displayName || 'User';
             currentKycData = { status, fullName };
             return currentKycData;
         }
@@ -1179,18 +870,6 @@ function loadMobileNetworksFromSettings() {
     });
 }
 
-function updateMobileLocalAmount() {
-    const usd = parseFloat(document.getElementById('mobileAmount').value) || 0;
-    if (selectedNetwork && selectedCountry) {
-        const rate = exchangeRates[selectedCountry] || 2800;
-        const currency = getCurrency(selectedCountry);
-        const localAmount = usd * rate;
-        document.getElementById('mobileLocalAmount').value = `${localAmount.toFixed(0)} ${currency}`;
-    } else {
-        document.getElementById('mobileLocalAmount').value = '';
-    }
-}
-
 function getCurrency(country) {
     const currencies = {
         'Tanzania': 'TZS',
@@ -1214,24 +893,32 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function getPaymentInstructions(country, networkName, amount, accountNumber, orderId) {
-    const countryInstructions = PAYMENT_INSTRUCTIONS[country];
-    if (!countryInstructions) return null;
-    const networkInstructions = countryInstructions[networkName];
-    if (!networkInstructions) return null;
-    const currency = getCurrency(country);
-    const localAmount = amount * (exchangeRates[country] || 2800);
+// ============================================================
+// ✅ RATE DISPLAY - Real-time update when user types amount
+// ============================================================
+function updateRateDisplay() {
+    const rateDisplay = document.getElementById('rateDisplay');
+    const rateDisplayValue = document.getElementById('rateDisplayValue');
+    const localAmountDisplay = document.getElementById('localAmountDisplay');
     
-    let stepsHtml = '';
-    networkInstructions.steps.forEach((step) => {
-        let formattedStep = step
-            .replace(/\[AMOUNT\]/g, `${localAmount.toFixed(0)} ${currency}`)
-            .replace(/\[ACCOUNT_NUMBER\]/g, accountNumber || 'N/A')
-            .replace(/\[ORDER_ID\]/g, orderId || 'N/A');
-        stepsHtml += `<div class="step"><i class="fas fa-circle"></i> <span>${formattedStep}</span></div>`;
-    });
+    if (!selectedNetwork || !selectedCountry) {
+        rateDisplay.style.display = 'none';
+        return;
+    }
     
-    return { title: networkInstructions.title, stepsHtml };
+    const usdAmount = parseFloat(document.getElementById('mobileAmount').value) || 0;
+    if (usdAmount < 10) {
+        rateDisplay.style.display = 'none';
+        return;
+    }
+    
+    const rate = exchangeRates[selectedCountry] || 2800;
+    const currency = getCurrency(selectedCountry);
+    const localAmount = usdAmount * rate;
+    
+    rateDisplayValue.textContent = `1 USDT = ${rate.toFixed(0)} ${currency}`;
+    localAmountDisplay.textContent = `${localAmount.toFixed(0)} ${currency}`;
+    rateDisplay.style.display = 'block';
 }
 
 function renderMobileNetworks() {
@@ -1239,14 +926,14 @@ function renderMobileNetworks() {
     if (!container) return;
     if (!selectedCountry) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Select your country first</div>';
-        document.getElementById('instructionsContainer').style.display = 'none';
+        document.getElementById('rateDisplay').style.display = 'none';
         return;
     }
     
     const networks = mobileNetworksData[selectedCountry] || [];
     if (networks.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No payment methods configured for this country. Please contact support.</div>';
-        document.getElementById('instructionsContainer').style.display = 'none';
+        document.getElementById('rateDisplay').style.display = 'none';
         return;
     }
     
@@ -1287,8 +974,7 @@ function renderMobileNetworks() {
                 document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
                 selectedNetwork = network;
-                updateMobileLocalAmount();
-                updateInstructions();
+                updateRateDisplay();
             };
         } else {
             card.style.opacity = '0.5';
@@ -1298,80 +984,8 @@ function renderMobileNetworks() {
     });
 }
 
-function updateInstructions() {
-    const container = document.getElementById('instructionsContainer');
-    const content = document.getElementById('instructionsContent');
-    const title = document.getElementById('instructionsTitle');
-    
-    if (!selectedNetwork || !selectedCountry) {
-        container.style.display = 'none';
-        return;
-    }
-    
-    const amount = parseFloat(document.getElementById('mobileAmount').value) || 0;
-    if (amount < 10) {
-        container.style.display = 'none';
-        return;
-    }
-    
-    const instructions = getPaymentInstructions(
-        selectedCountry,
-        selectedNetwork.name,
-        amount,
-        selectedNetwork.number,
-        'DEP-' + Date.now().toString().substring(0, 8)
-    );
-    
-    if (instructions) {
-        title.textContent = instructions.title.replace('📱 ', '');
-        content.innerHTML = instructions.stepsHtml;
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-    }
-}
-
-document.getElementById('mobileAmount').addEventListener('input', updateInstructions);
-
-async function loadUserCountry() {
-    if (!currentUser) return;
-    try {
-        const userRef = ref(db, `users/${currentUser.uid}`);
-        const userSnapshot = await get(userRef);
-        if (userSnapshot.exists()) {
-            const userData = userSnapshot.val();
-            if (userData.country && userData.country !== 'Not selected' && userData.country !== '') {
-                selectedCountry = userData.country;
-                document.getElementById('countrySelect').value = selectedCountry;
-                renderMobileNetworks();
-            }
-        }
-    } catch (error) {
-        console.error('Error loading user country:', error);
-    }
-}
-
-async function saveUserCountry(country) {
-    if (!currentUser || !country) return;
-    try {
-        const userRef = ref(db, `users/${currentUser.uid}`);
-        await update(userRef, { country });
-    } catch (error) {
-        console.error('Error saving country:', error);
-    }
-}
-
-document.getElementById('countrySelect').addEventListener('change', async (e) => {
-    selectedCountry = e.target.value;
-    selectedNetwork = null;
-    if (selectedCountry && currentUser) await saveUserCountry(selectedCountry);
-    renderMobileNetworks();
-    updateMobileLocalAmount();
-    document.getElementById('instructionsContainer').style.display = 'none';
-});
-
 // ============================================================
-// PROCESS MOBILE DEPOSIT - VIA BACKEND API
+// PROCESS MOBILE DEPOSIT - Pure Firebase
 // ============================================================
 async function processMobileDeposit() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
@@ -1419,14 +1033,13 @@ async function processMobileDeposit() {
             senderName: name,
             transactionId: transactionId || 'N/A',
             status: 'pending',
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            date: new Date().toISOString()
         };
 
-        // ✅ User writes to /deposits/{userId}/{depositId}
         const depositRef = ref(db, `deposits/${currentUser.uid}/${depositId}`);
         await set(depositRef, depositData);
 
-        // ✅ User writes to /user_deposits/{userId}/{depositId}
         const userDepositRef = ref(db, `user_deposits/${currentUser.uid}/${depositId}`);
         await set(userDepositRef, depositData);
 
@@ -1447,10 +1060,9 @@ async function processMobileDeposit() {
         document.getElementById('senderPhone').value = '';
         document.getElementById('senderName').value = '';
         document.getElementById('transactionId').value = '';
-        document.getElementById('mobileLocalAmount').value = '';
         selectedNetwork = null;
         document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
-        document.getElementById('instructionsContainer').style.display = 'none';
+        document.getElementById('rateDisplay').style.display = 'none';
         
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
         
@@ -1464,6 +1076,17 @@ async function processMobileDeposit() {
 }
 
 document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
+
+// ============================================================
+// EVENT LISTENERS FOR RATE DISPLAY
+// ============================================================
+document.getElementById('mobileAmount').addEventListener('input', updateRateDisplay);
+document.getElementById('countrySelect').addEventListener('change', () => {
+    selectedCountry = document.getElementById('countrySelect').value;
+    selectedNetwork = null;
+    renderMobileNetworks();
+    document.getElementById('rateDisplay').style.display = 'none';
+});
 
 // ============================================================
 // BINANCE USDT FUNCTIONS
@@ -1500,9 +1123,6 @@ async function checkExistingTxHash(txHash) {
     }
 }
 
-// ============================================================
-// CREATE BINANCE ORDER - FIXED
-// ============================================================
 async function createBinanceOrder() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
     
@@ -1541,11 +1161,9 @@ async function createBinanceOrder() {
             expiryAt: expiryTime
         };
 
-        // ✅ User writes to /binance_deposits/{userId}/{orderId}
         const orderRef = ref(db, `binance_deposits/${currentUser.uid}/${orderId}`);
         await set(orderRef, orderData);
 
-        // ✅ Also write to /deposits for admin visibility
         const depositRef = ref(db, `deposits/${currentUser.uid}/${orderId}`);
         await set(depositRef, {
             id: orderId,
@@ -1602,9 +1220,6 @@ document.getElementById('copyWalletAddress')?.addEventListener('click', () => {
     showNotification('Wallet address copied!', 'success');
 });
 
-// ============================================================
-// VERIFY BINANCE DEPOSIT - FIXED
-// ============================================================
 async function verifyBinanceDeposit() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
     if (!currentOrderId) { showNotification('Please create an order first', 'error'); return; }
@@ -1642,14 +1257,12 @@ async function verifyBinanceDeposit() {
             return;
         }
         
-        // ✅ Update /binance_deposits
         await update(orderRef, {
             txHash: txHash,
             status: 'pending_verification',
             submittedAt: Date.now()
         });
 
-        // ✅ Update /deposits
         const depositRef = ref(db, `deposits/${currentUser.uid}/${currentOrderId}`);
         const depositSnap = await get(depositRef);
         if (depositSnap.exists()) {
@@ -1735,6 +1348,27 @@ document.getElementById('themeToggle').addEventListener('click', () => {
         if (moonIcon) moonIcon.style.display = 'none';
     }
 });
+
+// ============================================================
+// LOAD USER COUNTRY
+// ============================================================
+async function loadUserCountry() {
+    if (!currentUser) return;
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            if (userData.country && userData.country !== 'Not selected' && userData.country !== '') {
+                selectedCountry = userData.country;
+                document.getElementById('countrySelect').value = selectedCountry;
+                renderMobileNetworks();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user country:', error);
+    }
+}
 
 // ============================================================
 // INIT

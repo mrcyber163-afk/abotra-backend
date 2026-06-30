@@ -7,28 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
-<script>
-const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
-    VERSION: '2.0.0'
-};
-window.CONFIG = CONFIG;
-console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
-
 <style>
-
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Inter', sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 body {
 background: #050505;
@@ -49,10 +29,7 @@ background-image: url("../assets/images/background-light.png");
 color: #333;
 }
 
-body.light-theme .overlay {
-background: rgba(255,255,255,0.85);
-}
-
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 body.light-theme .top-bar,
 body.light-theme .leaderboard-container,
 body.light-theme .leader-card,
@@ -61,54 +38,27 @@ body.light-theme .podium-card {
 background: rgba(255,255,255,0.95);
 border: 1px solid rgba(0,0,0,0.08);
 }
-
 body.light-theme .leaderboard-list {
 background: rgba(255,255,255,0.95);
 border: 1px solid rgba(0,0,0,0.08);
 }
-
 body.light-theme .leader-header {
 background: rgba(128,0,0,0.08);
 border-bottom: 1px solid rgba(128,0,0,0.15);
 }
-
 body.light-theme .leader-card {
 border-bottom: 1px solid rgba(0,0,0,0.08);
 }
-
 body.light-theme .leader-card:hover {
 background: rgba(128,0,0,0.05);
 }
-
-body.light-theme .theme-toggle {
-background: rgba(0,0,0,0.08);
-border-color: rgba(128,0,0,0.3);
-}
-
-body.light-theme .theme-toggle svg {
-stroke: #800000;
-}
-
-body.light-theme .bottom-nav {
-background: rgba(255,255,255,0.95);
-border-top: 1px solid rgba(128,0,0,0.2);
-}
-
-body.light-theme .bottom-nav a {
-color: #888;
-}
-
-body.light-theme .bottom-nav a.active {
-color: #800000;
-}
-
-body.light-theme .bottom-nav a svg {
-stroke: #888;
-}
-
-body.light-theme .bottom-nav a.active svg {
-stroke: #800000;
-}
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle svg { stroke: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .bottom-nav a svg { stroke: #888; }
+body.light-theme .bottom-nav a.active svg { stroke: #800000; }
 
 .skeleton-stats-bar {
 display: grid;
@@ -236,14 +186,6 @@ background-size: 200% 100%;
 border-radius: 4px;
 animation: shimmer 1.5s infinite;
 }
-.skeleton-leader-avatar {
-width: 32px;
-height: 32px;
-background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 50%;
-animation: shimmer 1.5s infinite;
-}
 @keyframes shimmer {
 0% { background-position: -200% 0; }
 100% { background-position: 200% 0; }
@@ -265,38 +207,14 @@ align-items: center;
 justify-content: center;
 transition: 0.3s;
 }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle svg { width: 16px; height: 16px; stroke: #FFD700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
-.theme-toggle:hover {
-background: rgba(255,215,0,0.2);
-transform: scale(1.05);
-}
-
-.theme-toggle svg {
-width: 16px;
-height: 16px;
-stroke: #FFD700;
-stroke-width: 2;
-fill: none;
-stroke-linecap: round;
-stroke-linejoin: round;
-}
-
-.overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.82);
-backdrop-filter: blur(4px);
-z-index: 1;
-}
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
 
 .top-bar {
 position: fixed;
-top: 0;
-left: 0;
-right: 0;
+top: 0; left: 0; right: 0;
 z-index: 100;
 background: rgba(10,10,10,0.95);
 backdrop-filter: blur(12px);
@@ -306,38 +224,11 @@ display: flex;
 justify-content: space-between;
 align-items: center;
 }
-
-.logo-area {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.logo-area img {
-width: 32px;
-height: 32px;
-border-radius: 8px;
-object-fit: cover;
-background: transparent;
-}
-
-.logo-area h2 {
-color: #FFD700;
-font-size: 14px;
-margin-bottom: 2px;
-}
-
-.logo-area p {
-color: #AAAAAA;
-font-size: 7px;
-}
-
-.top-bar-right {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
 .back-btn-top {
 background: rgba(255,215,0,0.15);
 border: none;
@@ -352,10 +243,7 @@ gap: 5px;
 font-size: 9px;
 font-weight: 500;
 }
-
-.back-btn-top:hover {
-background: rgba(255,215,0,0.3);
-}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
 
 .leaderboard-container {
 position: relative;
@@ -364,7 +252,6 @@ max-width: 1200px;
 margin: 70px auto 20px;
 padding: 0 12px;
 }
-
 .top-title {
 text-align: center;
 font-size: 20px;
@@ -384,7 +271,6 @@ justify-content: center;
 gap: 8px;
 margin-bottom: 20px;
 }
-
 .period-btn {
 background: rgba(255,255,255,0.1);
 border: 1px solid rgba(255,215,0,0.3);
@@ -395,17 +281,12 @@ cursor: pointer;
 transition: 0.3s;
 color: #AAAAAA;
 }
-
 .period-btn.active {
 background: linear-gradient(135deg, #800000, #FFD700);
 color: white;
 border-color: #FFD700;
 }
-
-.period-btn:hover {
-background: rgba(255,215,0,0.2);
-color: #FFD700;
-}
+.period-btn:hover { background: rgba(255,215,0,0.2); color: #FFD700; }
 
 .stats-bar {
 display: grid;
@@ -413,7 +294,6 @@ grid-template-columns: repeat(4, 1fr);
 gap: 12px;
 margin-bottom: 25px;
 }
-
 .stats-card {
 background: rgba(255,255,255,0.05);
 border: 1px solid rgba(255,215,0,0.2);
@@ -422,12 +302,7 @@ padding: 16px;
 text-align: center;
 transition: 0.3s;
 }
-
-.stats-card:hover {
-transform: translateY(-2px);
-border-color: #FFD700;
-}
-
+.stats-card:hover { transform: translateY(-2px); border-color: #FFD700; }
 .stats-label {
 font-size: 9px;
 margin-bottom: 6px;
@@ -437,23 +312,10 @@ justify-content: center;
 gap: 4px;
 color: #AAAAAA;
 }
+.stats-value { font-size: 20px; font-weight: 800; color: #FFD700; }
+.stats-sub { font-size: 9px; margin-top: 4px; color: #888; }
 
-.stats-value {
-font-size: 20px;
-font-weight: 800;
-color: #FFD700;
-}
-
-.stats-sub {
-font-size: 9px;
-margin-top: 4px;
-color: #888;
-}
-
-.podium-section {
-margin-bottom: 30px;
-}
-
+.podium-section { margin-bottom: 30px; }
 .podium {
 display: flex;
 justify-content: center;
@@ -461,7 +323,6 @@ align-items: flex-end;
 gap: 15px;
 flex-wrap: wrap;
 }
-
 .podium-card {
 text-align: center;
 width: 110px;
@@ -472,12 +333,7 @@ border: 1px solid rgba(255,215,0,0.2);
 border-radius: 18px;
 padding: 12px;
 }
-
-.podium-card:hover {
-transform: translateY(-5px);
-border-color: #FFD700;
-}
-
+.podium-card:hover { transform: translateY(-5px); border-color: #FFD700; }
 .podium-rank {
 width: 65px;
 height: 65px;
@@ -491,42 +347,12 @@ font-weight: 800;
 color: white;
 position: relative;
 }
-
-.podium-rank.first {
-background: linear-gradient(135deg, #FFD700, #DAA520);
-box-shadow: 0 0 20px rgba(255,215,0,0.4);
-}
-
-.podium-rank.second {
-background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
-box-shadow: 0 0 15px rgba(192,192,192,0.3);
-}
-
-.podium-rank.third {
-background: linear-gradient(135deg, #CD7F32, #B87333);
-box-shadow: 0 0 15px rgba(205,127,50,0.3);
-}
-
-.podium-crown {
-position: absolute;
-top: -22px;
-left: 50%;
-transform: translateX(-50%);
-font-size: 20px;
-filter: drop-shadow(0 0 3px #FFD700);
-}
-
-.podium-name {
-font-weight: 700;
-font-size: 11px;
-color: #FFD700;
-}
-
-.podium-profit {
-font-size: 10px;
-font-weight: 600;
-color: #0ECB81;
-}
+.podium-rank.first { background: linear-gradient(135deg, #FFD700, #DAA520); box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+.podium-rank.second { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); box-shadow: 0 0 15px rgba(192,192,192,0.3); }
+.podium-rank.third { background: linear-gradient(135deg, #CD7F32, #B87333); box-shadow: 0 0 15px rgba(205,127,50,0.3); }
+.podium-crown { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 20px; filter: drop-shadow(0 0 3px #FFD700); }
+.podium-name { font-weight: 700; font-size: 11px; color: #FFD700; }
+.podium-profit { font-size: 10px; font-weight: 600; color: #0ECB81; }
 
 .leaderboard-list {
 background: rgba(255,255,255,0.05);
@@ -534,7 +360,6 @@ border: 1px solid rgba(255,215,0,0.2);
 border-radius: 20px;
 overflow: hidden;
 }
-
 .leader-header {
 display: grid;
 grid-template-columns: 70px 1fr 110px 80px 90px;
@@ -544,10 +369,7 @@ border-bottom: 1px solid rgba(255,215,0,0.2);
 font-size: 10px;
 font-weight: 600;
 }
-
-.leader-header div {
-color: #FFD700;
-}
+.leader-header div { color: #FFD700; }
 
 .leader-card {
 display: grid;
@@ -558,17 +380,8 @@ border-bottom: 1px solid rgba(255,255,255,0.08);
 transition: 0.3s;
 cursor: pointer;
 }
-
-.leader-card:hover {
-background: rgba(255,215,0,0.08);
-transform: translateX(3px);
-}
-
-.leader-rank {
-font-weight: 700;
-font-size: 12px;
-}
-
+.leader-card:hover { background: rgba(255,215,0,0.08); transform: translateX(3px); }
+.leader-rank { font-weight: 700; font-size: 12px; }
 .rank-badge {
 display: inline-flex;
 width: 32px;
@@ -579,34 +392,12 @@ justify-content: center;
 font-weight: 800;
 font-size: 11px;
 }
+.rank-badge.gold { background: linear-gradient(135deg, #FFD700, #DAA520); color: #800000; box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+.rank-badge.silver { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); color: #333; }
+.rank-badge.bronze { background: linear-gradient(135deg, #CD7F32, #B87333); color: white; }
+.rank-badge.normal { background: rgba(255,255,255,0.15); color: #AAAAAA; }
 
-.rank-badge.gold {
-background: linear-gradient(135deg, #FFD700, #DAA520);
-color: #800000;
-box-shadow: 0 0 8px rgba(255,215,0,0.3);
-}
-
-.rank-badge.silver {
-background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
-color: #333;
-}
-
-.rank-badge.bronze {
-background: linear-gradient(135deg, #CD7F32, #B87333);
-color: white;
-}
-
-.rank-badge.normal {
-background: rgba(255,255,255,0.15);
-color: #AAAAAA;
-}
-
-.leader-info {
-display: flex;
-align-items: center;
-gap: 10px;
-}
-
+.leader-info { display: flex; align-items: center; gap: 10px; }
 .leader-avatar {
 width: 36px;
 height: 36px;
@@ -620,7 +411,6 @@ font-size: 14px;
 color: white;
 position: relative;
 }
-
 .verified-icon {
 position: absolute;
 bottom: -2px;
@@ -635,7 +425,6 @@ justify-content: center;
 font-size: 7px;
 color: white;
 }
-
 .online-dot {
 position: absolute;
 top: -2px;
@@ -646,13 +435,7 @@ border-radius: 50%;
 background: #0ECB81;
 border: 2px solid #1a1a1a;
 }
-
-.leader-name {
-font-weight: 600;
-font-size: 11px;
-color: #FFD700;
-}
-
+.leader-name { font-weight: 600; font-size: 11px; color: #FFD700; }
 .level-badge {
 display: inline-block;
 padding: 2px 6px;
@@ -661,47 +444,15 @@ font-size: 8px;
 font-weight: 600;
 margin-left: 6px;
 }
+.level-legendary { background: linear-gradient(135deg, #FF4500, #FF6347); color: white; }
+.level-diamond { background: linear-gradient(135deg, #00BFFF, #1E90FF); color: white; }
+.level-gold { background: linear-gradient(135deg, #FFD700, #DAA520); color: #800000; }
+.level-silver { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); color: #333; }
+.level-bronze { background: linear-gradient(135deg, #CD7F32, #B87333); color: white; }
 
-.level-legendary {
-background: linear-gradient(135deg, #FF4500, #FF6347);
-color: white;
-}
-
-.level-diamond {
-background: linear-gradient(135deg, #00BFFF, #1E90FF);
-color: white;
-}
-
-.level-gold {
-background: linear-gradient(135deg, #FFD700, #DAA520);
-color: #800000;
-}
-
-.level-silver {
-background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
-color: #333;
-}
-
-.level-bronze {
-background: linear-gradient(135deg, #CD7F32, #B87333);
-color: white;
-}
-
-.leader-profit {
-font-weight: 700;
-font-size: 12px;
-color: #0ECB81;
-}
-
-.leader-profit.negative {
-color: #F6465D;
-}
-
-.leader-actions {
-display: flex;
-gap: 6px;
-}
-
+.leader-profit { font-weight: 700; font-size: 12px; color: #0ECB81; }
+.leader-profit.negative { color: #F6465D; }
+.leader-actions { display: flex; gap: 6px; }
 .action-btn {
 background: rgba(255,215,0,0.15);
 border: 1px solid rgba(255,215,0,0.3);
@@ -715,55 +466,19 @@ align-items: center;
 gap: 4px;
 color: #FFD700;
 }
+.action-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
 
-.action-btn:hover {
-background: rgba(255,215,0,0.3);
-transform: scale(1.02);
-}
-
-.loading-state {
-text-align: center;
-padding: 50px;
-}
-
-.loading-state i {
-font-size: 40px;
-color: #FFD700;
-margin-bottom: 12px;
-animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-0% { transform: rotate(0deg); }
-100% { transform: rotate(360deg); }
-}
-
-.loading-state p {
-color: #AAAAAA;
-font-size: 10px;
-}
-
-.empty-state {
-text-align: center;
-padding: 50px;
-}
-
-.empty-state i {
-font-size: 40px;
-color: rgba(255,215,0,0.3);
-margin-bottom: 12px;
-}
-
-.empty-state p {
-color: #888;
-font-size: 10px;
-}
+.loading-state { text-align: center; padding: 50px; }
+.loading-state i { font-size: 40px; color: #FFD700; margin-bottom: 12px; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.loading-state p { color: #AAAAAA; font-size: 10px; }
+.empty-state { text-align: center; padding: 50px; }
+.empty-state i { font-size: 40px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
+.empty-state p { color: #888; font-size: 10px; }
 
 .bottom-nav {
 position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
+bottom: 0; left: 0; right: 0;
 background: rgba(10,10,10,0.95);
 backdrop-filter: blur(12px);
 border-top: 1px solid rgba(255,215,0,0.2);
@@ -773,7 +488,6 @@ justify-content: space-around;
 padding: 6px 10px;
 z-index: 100;
 }
-
 .bottom-nav a {
 display: flex;
 flex-direction: column;
@@ -784,33 +498,11 @@ transition: 0.3s;
 gap: 3px;
 color: #888;
 }
-
-.bottom-nav a svg {
-width: 18px;
-height: 18px;
-stroke: #888;
-stroke-width: 2;
-fill: none;
-stroke-linecap: round;
-stroke-linejoin: round;
-transition: 0.3s;
-}
-
-.bottom-nav a.active {
-color: #FFD700;
-}
-
-.bottom-nav a.active svg {
-stroke: #FFD700;
-}
-
-.bottom-nav a:hover {
-color: #FFD700;
-}
-
-.bottom-nav a:hover svg {
-stroke: #FFD700;
-}
+.bottom-nav a svg { width: 18px; height: 18px; stroke: #888; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; transition: 0.3s; }
+.bottom-nav a.active { color: #FFD700; }
+.bottom-nav a.active svg { stroke: #FFD700; }
+.bottom-nav a:hover { color: #FFD700; }
+.bottom-nav a:hover svg { stroke: #FFD700; }
 
 .notification-popup {
 position: fixed;
@@ -829,127 +521,38 @@ box-shadow: 0 12px 28px rgba(0,0,0,0.3);
 animation: slideInRight 0.3s ease;
 border-left: 3px solid;
 }
-
-.notification-popup.success {
-background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08));
-border-left-color: #00FF88;
-}
-
-.notification-popup.error {
-background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08));
-border-left-color: #FF4D4D;
-}
-
-.notification-popup.info {
-background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08));
-border-left-color: #FFD700;
-}
-
-.notification-popup i {
-font-size: 18px;
-}
-
-.notification-popup .popup-message {
-flex: 1;
-font-size: 10px;
-font-weight: 500;
-color: white;
-}
-
-@keyframes slideInRight {
-from { opacity: 0; transform: translateX(100%); }
-to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeOut {
-from { opacity: 1; transform: translateX(0); }
-to { opacity: 0; transform: translateX(100%); }
-}
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup i { font-size: 18px; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; font-weight: 500; color: white; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 
 @media(max-width: 768px) {
-.leaderboard-container {
-padding: 0 12px;
-margin-top: 65px;
-}
-.top-title {
-font-size: 18px;
-}
-.stats-bar {
-grid-template-columns: repeat(2, 1fr);
-gap: 8px;
-}
-.stats-value {
-font-size: 16px;
-}
-.leader-header {
-display: none;
-}
-.leader-card {
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-gap: 10px;
-padding: 12px;
-}
-.leader-rank {
-margin-bottom: 4px;
-}
-.leader-info {
-width: 100%;
-}
-.leader-profit {
-align-self: flex-end;
-margin-top: -35px;
-}
-.leader-actions {
-width: 100%;
-justify-content: flex-end;
-margin-top: 4px;
-}
-.podium-card {
-width: 90px;
-}
-.podium-rank {
-width: 55px;
-height: 55px;
-font-size: 24px;
-}
-.podium-name {
-font-size: 10px;
-}
-.theme-toggle {
-padding: 8px;
-}
-.logo-area h2 {
-font-size: 13px;
-}
-.logo-area p {
-display: none;
-}
-.bottom-nav a span {
-font-size: 6px;
-}
-.bottom-nav a svg {
-width: 16px;
-height: 16px;
-}
-.period-btn {
-padding: 4px 12px;
-font-size: 9px;
-}
-.skeleton-stats-bar {
-grid-template-columns: repeat(2, 1fr);
-}
-.skeleton-podium {
-gap: 8px;
-}
-.skeleton-podium-card {
-width: 80px;
-}
-.skeleton-podium-rank {
-width: 50px;
-height: 50px;
-}
+.leaderboard-container { padding: 0 12px; margin-top: 65px; }
+.top-title { font-size: 18px; }
+.stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.stats-value { font-size: 16px; }
+.leader-header { display: none; }
+.leader-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px; }
+.leader-rank { margin-bottom: 4px; }
+.leader-info { width: 100%; }
+.leader-profit { align-self: flex-end; margin-top: -35px; }
+.leader-actions { width: 100%; justify-content: flex-end; margin-top: 4px; }
+.podium-card { width: 90px; }
+.podium-rank { width: 55px; height: 55px; font-size: 24px; }
+.podium-name { font-size: 10px; }
+.theme-toggle { padding: 8px; }
+.logo-area h2 { font-size: 13px; }
+.logo-area p { display: none; }
+.bottom-nav a span { font-size: 6px; }
+.bottom-nav a svg { width: 16px; height: 16px; }
+.period-btn { padding: 4px 12px; font-size: 9px; }
+.skeleton-stats-bar { grid-template-columns: repeat(2, 1fr); }
+.skeleton-podium { gap: 8px; }
+.skeleton-podium-card { width: 80px; }
+.skeleton-podium-rank { width: 50px; height: 50px; }
 }
 </style>
 </head>
@@ -958,10 +561,7 @@ height: 50px;
 <div class="top-bar">
 <div class="logo-area">
 <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
-<div>
-<h2>ABOTRA-PROAI</h2>
-<p>Top Traders</p>
-</div>
+<div><h2>ABOTRA-PROAI</h2><p>Top Traders</p></div>
 </div>
 <div class="top-bar-right">
 <button class="back-btn-top" onclick="window.location.href='dashboard.html'">
@@ -1043,10 +643,7 @@ Top Traders Leaderboard
 
     <div class="podium-section">
         <div class="podium" id="podiumContainer">
-            <div class="loading-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading podium...</p>
-            </div>
+            <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading podium...</p></div>
         </div>
     </div>
 
@@ -1059,10 +656,7 @@ Top Traders Leaderboard
             <div>Action</div>
         </div>
         <div id="leaderboardList">
-            <div class="loading-state">
-                <i class="fas fa-chart-line"></i>
-                <p>Loading leaderboard data...</p>
-            </div>
+            <div class="loading-state"><i class="fas fa-chart-line"></i><p>Loading leaderboard data...</p></div>
         </div>
     </div>
 </div>
@@ -1096,7 +690,11 @@ Top Traders Leaderboard
 </div>
 
 <script type="module">
+// ============================================================
+// FIREBASE IMPORTS - Pure RTDB
+// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1109,64 +707,16 @@ const firebaseConfig = {
     appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
 };
 
-// ============================================================
-// API BASE URL
-// ============================================================
-const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
-    ? 'http://localhost:5001' 
-    : 'https://abotra-backend.up.railway.app';
-
 const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 const auth = getAuth(app);
 
 let currentUser = null;
 let currentPeriod = 'daily';
 let leaderboardData = [];
-
-// ============================================================
-// GET FIREBASE TOKEN
-// ============================================================
-async function getFirebaseToken() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            unsubscribe();
-            if (!user) {
-                reject(new Error('No user logged in'));
-                return;
-            }
-            try {
-                const token = await user.getIdToken(true);
-                resolve(token);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
-}
-
-// ============================================================
-// API CALLS TO BACKEND
-// ============================================================
-async function apiRequest(endpoint, method, body = null) {
-    try {
-        const token = await getFirebaseToken();
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        };
-        if (body) options.body = JSON.stringify(body);
-        
-        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API request error:', error);
-        return { success: false, error: error.message };
-    }
-}
+let allUsers = {};
+let allTrades = {};
+let rtdbListeners = [];
 
 // ============================================================
 // THEME TOGGLE
@@ -1201,16 +751,12 @@ document.getElementById('themeToggle').addEventListener('click', function() {
 function showNotification(message, type) {
     const existing = document.querySelector('.notification-popup');
     if (existing) existing.remove();
-    
     const toast = document.createElement('div');
     toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
     document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 function escapeHtml(text) {
@@ -1226,9 +772,111 @@ function getLevelBadge(level) {
 }
 
 // ============================================================
-// LOAD LEADERBOARD FROM BACKEND
+// 🔥 DIRECT RTDB FUNCTIONS - No API
 // ============================================================
-async function loadLeaderboard() {
+
+// Get all users from RTDB
+async function loadUsers() {
+    try {
+        const snapshot = await get(ref(db, 'users'));
+        if (snapshot.exists()) {
+            allUsers = snapshot.val();
+            return allUsers;
+        }
+        return {};
+    } catch (error) {
+        console.error('[RTDB] Load users error:', error);
+        return {};
+    }
+}
+
+// Get all trades from RTDB
+async function loadAllTrades() {
+    try {
+        const snapshot = await get(ref(db, 'trades'));
+        if (snapshot.exists()) {
+            allTrades = snapshot.val();
+            return allTrades;
+        }
+        return {};
+    } catch (error) {
+        console.error('[RTDB] Load trades error:', error);
+        return {};
+    }
+}
+
+// Get a user's trades
+async function getUserTrades(uid) {
+    try {
+        const snapshot = await get(ref(db, `trades/${uid}`));
+        if (snapshot.exists()) {
+            const trades = [];
+            snapshot.forEach(child => {
+                const trade = child.val();
+                if (trade.status === 'closed' || trade.status === 'completed') {
+                    trades.push(trade);
+                }
+            });
+            return trades;
+        }
+        return [];
+    } catch (error) {
+        console.error(`[RTDB] Load trades for ${uid} error:`, error);
+        return [];
+    }
+}
+
+// Calculate trader stats from trades
+function calculateTraderStats(trades) {
+    let totalProfit = 0;
+    let totalTrades = 0;
+    let winningTrades = 0;
+    let losingTrades = 0;
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let lastWasWin = null;
+
+    trades.forEach(trade => {
+        const pnl = trade.netProfit || trade.closedProfit || trade.profit || 0;
+        totalProfit += pnl;
+        totalTrades++;
+        
+        if (pnl > 0) {
+            winningTrades++;
+            if (lastWasWin !== false) {
+                currentStreak++;
+            } else {
+                currentStreak = 1;
+            }
+            lastWasWin = true;
+        } else if (pnl < 0) {
+            losingTrades++;
+            currentStreak = 0;
+            lastWasWin = false;
+        }
+        
+        if (currentStreak > bestStreak) {
+            bestStreak = currentStreak;
+        }
+    });
+
+    const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+    
+    return {
+        profit: totalProfit,
+        totalTrades,
+        winningTrades,
+        losingTrades,
+        winRate,
+        bestStreak,
+        winLoss: totalTrades > 0 ? (winningTrades - losingTrades) : 0
+    };
+}
+
+// ============================================================
+// BUILD LEADERBOARD FROM RTDB DATA
+// ============================================================
+async function buildLeaderboard(period) {
     const container = document.getElementById('leaderboardList');
     const podiumContainer = document.getElementById('podiumContainer');
     
@@ -1236,35 +884,91 @@ async function loadLeaderboard() {
     podiumContainer.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading podium...</p></div>';
     
     try {
-        const data = await apiRequest(`leaderboard?period=${currentPeriod}&limit=100`, 'GET');
+        // Load all users and trades
+        await loadUsers();
+        await loadAllTrades();
         
-        if (data.success) {
-            leaderboardData = data.traders || [];
-            
-            // Update stats
-            if (data.stats) {
-                document.getElementById('totalTraders').textContent = data.stats.total || 0;
-                document.getElementById('totalProfit').innerHTML = `$${(data.stats.totalProfit || 0).toFixed(2)}`;
-                document.getElementById('avgProfit').innerHTML = `$${(data.stats.avgProfit || 0).toFixed(2)}`;
-                document.getElementById('bestStreak').textContent = data.stats.bestStreak || 0;
-            }
-            
-            // Render podium
-            renderPodium(data.podium || []);
-            
-            // Render leaderboard
-            renderLeaderboard(leaderboardData);
-            
-            setTimeout(() => {
-                document.getElementById('skeletonContainer').style.display = 'none';
-                document.getElementById('realContent').style.display = 'block';
-            }, 500);
-        } else {
-            throw new Error(data.error || 'Failed to load leaderboard');
+        const now = Date.now();
+        let periodStart = 0;
+        
+        switch(period) {
+            case 'daily': periodStart = now - (24 * 60 * 60 * 1000); break;
+            case 'weekly': periodStart = now - (7 * 24 * 60 * 60 * 1000); break;
+            case 'monthly': periodStart = now - (30 * 24 * 60 * 60 * 1000); break;
+            default: periodStart = 0;
         }
         
+        const traderStats = [];
+        const userEntries = Object.entries(allUsers);
+        
+        for (const [uid, userData] of userEntries) {
+            // Skip users without trades
+            if (!allTrades[uid]) continue;
+            
+            // Filter trades by period
+            const trades = [];
+            const tradeEntries = Object.entries(allTrades[uid]);
+            
+            for (const [tradeId, trade] of tradeEntries) {
+                if (trade.status !== 'closed' && trade.status !== 'completed') continue;
+                const tradeTime = trade.closedAt || trade.timestamp || trade.createdAt || 0;
+                if (periodStart > 0 && tradeTime < periodStart) continue;
+                trades.push(trade);
+            }
+            
+            if (trades.length === 0) continue;
+            
+            const stats = calculateTraderStats(trades);
+            
+            // Skip if no profit and no trades
+            if (stats.totalTrades === 0) continue;
+            
+            traderStats.push({
+                uid: uid,
+                username: userData.username || userData.fullName || userData.displayName || 'Trader',
+                email: userData.email || '',
+                profit: stats.profit,
+                totalTrades: stats.totalTrades,
+                winningTrades: stats.winningTrades,
+                losingTrades: stats.losingTrades,
+                winRate: stats.winRate,
+                bestStreak: stats.bestStreak,
+                isVerified: userData.isVerified || false,
+                isOnline: userData.isOnline || false,
+                level: userData.level || 'Bronze',
+                isCurrentUser: uid === currentUser?.uid
+            });
+        }
+        
+        // Sort by profit (highest first)
+        traderStats.sort((a, b) => b.profit - a.profit);
+        
+        leaderboardData = traderStats;
+        
+        // Update stats
+        const totalTraders = traderStats.length;
+        const totalProfit = traderStats.reduce((sum, t) => sum + t.profit, 0);
+        const avgProfit = totalTraders > 0 ? totalProfit / totalTraders : 0;
+        const bestStreak = traderStats.reduce((max, t) => Math.max(max, t.bestStreak), 0);
+        
+        document.getElementById('totalTraders').textContent = totalTraders;
+        document.getElementById('totalProfit').innerHTML = `$${totalProfit.toFixed(2)}`;
+        document.getElementById('avgProfit').innerHTML = `$${avgProfit.toFixed(2)}`;
+        document.getElementById('bestStreak').textContent = bestStreak;
+        
+        // Render podium (top 3)
+        renderPodium(traderStats.slice(0, 3));
+        
+        // Render leaderboard
+        renderLeaderboard(traderStats);
+        
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 500);
+        
     } catch (error) {
-        console.error('Load leaderboard error:', error);
+        console.error('Build leaderboard error:', error);
         container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading leaderboard: ${error.message}</p></div>`;
         podiumContainer.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading podium.</p></div>';
         
@@ -1400,33 +1104,42 @@ function renderLeaderboard(traders) {
 }
 
 // ============================================================
-// FOLLOW TRADER
+// FOLLOW TRADER - Save to RTDB
 // ============================================================
 window.followTrader = async function(traderId, traderName) {
     if (!currentUser) {
         showNotification('Please login first', 'error');
         return;
     }
-    
     if (traderId === currentUser.uid) {
         showNotification('You cannot follow yourself', 'error');
         return;
     }
     
     try {
-        const data = await apiRequest('leaderboard/follow', 'POST', { traderId });
-        if (data.success) {
-            showNotification(`You are now following ${traderName}`, 'success');
+        const followsRef = ref(db, `follows/${currentUser.uid}/${traderId}`);
+        const snapshot = await get(followsRef);
+        const isFollowing = snapshot.exists();
+        
+        if (isFollowing) {
+            await set(followsRef, null);
+            showNotification(`Unfollowed ${traderName}`, 'info');
         } else {
-            showNotification(data.error || 'Failed to follow', 'error');
+            await set(followsRef, {
+                followedAt: Date.now(),
+                traderId: traderId,
+                traderName: traderName
+            });
+            showNotification(`You are now following ${traderName}`, 'success');
         }
     } catch (error) {
+        console.error('Follow error:', error);
         showNotification('Error following trader', 'error');
     }
 };
 
 // ============================================================
-// TOGGLE NOTIFICATIONS
+// TOGGLE NOTIFICATIONS - Save to RTDB
 // ============================================================
 window.toggleNotification = async function(traderId) {
     if (!currentUser) {
@@ -1435,19 +1148,22 @@ window.toggleNotification = async function(traderId) {
     }
     
     try {
-        // Check current state
-        const data = await apiRequest(`leaderboard/notifications?traderId=${traderId}`, 'GET');
-        const isEnabled = data.enabled || false;
+        const notifRef = ref(db, `notifications_settings/${currentUser.uid}/${traderId}`);
+        const snapshot = await get(notifRef);
+        const isEnabled = snapshot.exists() && snapshot.val().enabled === true;
         
-        const result = await apiRequest('leaderboard/notifications/toggle', 'POST', {
-            traderId: traderId,
-            enabled: !isEnabled
-        });
-        
-        if (result.success) {
-            showNotification(result.message, 'success');
+        if (isEnabled) {
+            await set(notifRef, { enabled: false });
+            showNotification('Notifications disabled for this trader', 'info');
+        } else {
+            await set(notifRef, {
+                enabled: true,
+                setAt: Date.now()
+            });
+            showNotification('Notifications enabled for this trader', 'success');
         }
     } catch (error) {
+        console.error('Toggle notification error:', error);
         showNotification('Error toggling notifications', 'error');
     }
 };
@@ -1458,7 +1174,7 @@ window.toggleNotification = async function(traderId) {
 window.viewTraderProfile = function(traderId) {
     const trader = leaderboardData.find(t => t.uid === traderId);
     if (trader) {
-        showNotification(`${trader.username}: Profit: $${trader.profit.toFixed(2)} | Win Rate: ${(trader.winRate || 0).toFixed(1)}%`, 'info');
+        showNotification(`📊 ${trader.username}\n💰 Profit: $${trader.profit.toFixed(2)}\n📈 Win Rate: ${(trader.winRate || 0).toFixed(1)}%\n📊 Trades: ${trader.totalTrades}`, 'info');
     }
 };
 
@@ -1476,12 +1192,38 @@ function changePeriod(period) {
     document.getElementById('skeletonContainer').style.display = 'block';
     document.getElementById('realContent').style.display = 'none';
     
-    loadLeaderboard();
+    buildLeaderboard(period);
 }
 
 document.querySelectorAll('.period-btn').forEach(btn => {
     btn.addEventListener('click', () => changePeriod(btn.getAttribute('data-period')));
 });
+
+// ============================================================
+// SETUP RTDB LISTENERS - Realtime Updates
+// ============================================================
+function setupRTDBListeners() {
+    if (!currentUser) return;
+    
+    // Clean up existing listeners
+    rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
+    rtdbListeners = [];
+    
+    // Listen to trades changes
+    const tradesRef = ref(db, 'trades');
+    const tradesUnsub = onValue(tradesRef, () => {
+        // Refresh leaderboard when trades change
+        buildLeaderboard(currentPeriod);
+    });
+    rtdbListeners.push(tradesUnsub);
+    
+    // Listen to users changes
+    const usersRef = ref(db, 'users');
+    const usersUnsub = onValue(usersRef, () => {
+        buildLeaderboard(currentPeriod);
+    });
+    rtdbListeners.push(usersUnsub);
+}
 
 // ============================================================
 // INIT
@@ -1496,10 +1238,12 @@ async function init() {
         }
         
         currentUser = user;
-        await loadLeaderboard();
+        await buildLeaderboard('daily');
+        setupRTDBListeners();
         
+        // Refresh every 60 seconds
         setInterval(() => {
-            loadLeaderboard();
+            buildLeaderboard(currentPeriod);
         }, 60000);
     });
 }

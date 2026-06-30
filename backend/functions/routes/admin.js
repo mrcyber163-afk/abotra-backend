@@ -500,7 +500,110 @@ router.get('/system-stats', verifyToken, checkAdmin, async (req, res) => {
         res.status(400).json({ success: false, error: error.message });
     }
 });
-
+// ============================================================
+// CHANGE USER PASSWORD - Via Firebase REST API
+// ============================================================
+router.post('/change-password', verifyToken, async (req, res) => {
+    try {
+        const db = getDB();
+        const { targetUid, newPassword } = req.body;
+        
+        if (!targetUid || !newPassword || newPassword.length < 8) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Invalid request. Password must be at least 8 characters.' 
+            });
+        }
+        
+        // ✅ 1. Get user email from Firebase RTDB
+        const userSnap = await db.ref(`users/${targetUid}`).once('value');
+        if (!userSnap.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        const userData = userSnap.val();
+        const email = userData.email;
+        
+        if (!email) {
+            return res.status(404).json({ success: false, error: 'User email not found' });
+        }
+        
+        // ✅ 2. Use Firebase REST API to change password
+        // We need to generate a password reset link
+        // The user will reset their own password
+        
+        const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM';
+        
+        // ✅ Generate password reset link
+        const resetResponse = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${FIREBASE_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestType: 'PASSWORD_RESET',
+                    email: email
+                })
+            }
+        );
+        
+        const resetData = await resetResponse.json();
+        
+        if (!resetResponse.ok) {
+            console.error('[PASSWORD] Reset error:', resetData);
+            return res.status(400).json({ 
+                success: false, 
+                error: resetData.error?.message || 'Failed to send password reset' 
+            });
+        }
+        
+        // ✅ 3. Save password change request to Firebase
+        const requestRef = db.ref(`passwordChangeRequests/${targetUid}`).push();
+        await requestRef.set({
+            uid: targetUid,
+            email: email,
+            requestedBy: req.user.uid,
+            requestedByEmail: req.user.email,
+            requestedAt: Date.now(),
+            status: 'pending',
+            resetLink: resetData.oobCode ? `https://abotra-proai.com/reset-password.html?oobCode=${resetData.oobCode}` : null
+        });
+        
+        // ✅ 4. Add notification to user
+        const notifRef = db.ref(`notifications/${targetUid}`).push();
+        await notifRef.set({
+            title: '🔐 Password Reset Requested',
+            message: `An admin has requested a password reset for your account. Please check your email (${email}) for the reset link.`,
+            type: 'security',
+            read: false,
+            timestamp: Date.now(),
+            link: 'account.html'
+        });
+        
+        // ✅ 5. Log the action
+        const logRef = db.ref('adminLogs').push();
+        await logRef.set({
+            action: 'password_reset_requested',
+            adminId: req.user.uid,
+            adminEmail: req.user.email,
+            targetUid: targetUid,
+            targetEmail: email,
+            timestamp: Date.now()
+        });
+        
+        console.log(`[ADMIN] Password reset requested for ${email} by ${req.user.email}`);
+        
+        res.json({
+            success: true,
+            message: `Password reset email sent to ${email}. User will receive instructions to reset their password.`,
+            email: email
+        });
+        
+    } catch (error) {
+        console.error('[ADMIN] Change password error:', error);
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
 // ============================================================
 // EXPORT
 // ============================================================

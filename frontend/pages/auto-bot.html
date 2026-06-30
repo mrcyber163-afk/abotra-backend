@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Auto Trading Bot | ABOTRA-PROAI - AI Trading Bot Control</title>
+<title>Auto Trading Bot | ABOTRA-PROAI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
 <script>
 const CONFIG = {
     API_URL: 'https://abotra-backend-production.up.railway.app',
@@ -37,13 +34,16 @@ body {
 }
 body.light-theme {
     background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
 }
 body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 body.light-theme .top-bar,
 body.light-theme .bot-container,
 body.light-theme .robot-card,
 body.light-theme .stats-card,
-body.light-theme .logs-card {
+body.light-theme .logs-card,
+body.light-theme .global-balance,
+body.light-theme .instructions-box {
     background: rgba(255,255,255,0.95);
     border: 1px solid rgba(0,0,0,0.08);
 }
@@ -57,6 +57,12 @@ body.light-theme .theme-toggle i { color: #800000; }
 body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
 body.light-theme .bottom-nav a { color: #888; }
 body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .log-message { color: #333; }
+body.light-theme .log-robot { color: #800000; }
+body.light-theme .instructions-box li { color: #444; }
+body.light-theme .modal-container { background: #f5f5f5; border-color: rgba(128,0,0,0.3); }
+body.light-theme .modal-title { color: #800000; }
+body.light-theme .modal-message { color: #333; }
 
 .theme-toggle {
     background: rgba(0,0,0,0.7);
@@ -74,24 +80,24 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .theme-toggle i { font-size: 15px; color: #FFFFFF; }
 
 .currency-toggle-btn {
-background: rgba(255,215,0,0.15);
-border: 1px solid rgba(255,215,0,0.4);
-border-radius: 10px;
-padding: 4px 12px;
-color: #FFD700;
-cursor: pointer;
-transition: 0.3s;
-display: flex;
-align-items: center;
-gap: 5px;
-font-size: 10px;
-font-weight: 600;
-white-space: nowrap;
-height: 32px;
+    background: rgba(255,215,0,0.15);
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 10px;
+    padding: 4px 12px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    height: 32px;
 }
 .currency-toggle-btn:hover {
-background: rgba(255,215,0,0.3);
-transform: scale(1.02);
+    background: rgba(255,215,0,0.3);
+    transform: scale(1.02);
 }
 .currency-toggle-btn i { font-size: 11px; }
 
@@ -115,7 +121,7 @@ transform: scale(1.02);
     align-items: center;
 }
 .logo-area { display: flex; align-items: center; gap: 8px; }
-.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background:#800000; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background:transparent; }
 .logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
 .logo-area p { color: #AAAAAA; font-size: 7px; }
 .top-bar-right { display: flex; align-items: center; gap: 6px; }
@@ -242,9 +248,6 @@ transform: scale(1.02);
 }
 .invested-amount .invested-label { color: #aaa; }
 .invested-amount .invested-value { color: #0ECB81; font-weight: 700; }
-.invested-amount .invested-value.currency-updated {
-    animation: priceUpdate 0.3s ease;
-}
 .robot-status {
     display: flex;
     align-items: center;
@@ -351,41 +354,88 @@ transform: scale(1.02);
     font-size: 8px;
     cursor: pointer;
 }
+.clear-logs:hover { background: rgba(255,215,0,0.2); }
 .logs-container { 
-    max-height: 380px;
+    max-height: 350px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 6px;
-    background: rgba(0,0,0,0.15);
-    border-radius: 8px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    scroll-behavior: smooth;
+}
+.logs-container::-webkit-scrollbar {
+    width: 4px;
+}
+.logs-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+.logs-container::-webkit-scrollbar-thumb {
+    background: rgba(255,215,0,0.4);
+    border-radius: 10px;
+}
+.logs-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,215,0,0.6);
 }
 .log-item {
     display: flex;
     align-items: center;
-    padding: 6px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 6px 12px;
+    border-radius: 8px;
     font-size: 9px;
     flex-wrap: wrap;
     gap: 6px;
     transition: background 0.2s;
-    border-radius: 5px;
     background: rgba(255,255,255,0.03);
+    border-left: 3px solid transparent;
     margin-bottom: 2px;
-    width: 100%;
+    min-height: 28px;
 }
 .log-item:hover { background: rgba(255,215,0,0.05); }
-.log-robot { color: #FFD700; font-weight: 600; min-width: 80px; font-size: 9px; }
-.log-message { color: #FFFFFF; flex: 1; font-size: 9px; line-height: 1.4; word-break: break-word; }
-.log-time { color: #888; font-size: 7px; min-width: 60px; text-align: right; font-family: monospace; }
-.log-message.win { color: #0ECB81; }
-.log-message.loss { color: #F6465D; }
-.log-message.info { color: #FFD700; }
+.log-item .log-time {
+    font-size: 7px;
+    color: #666;
+    font-family: monospace;
+    min-width: 50px;
+    flex-shrink: 0;
+}
+.log-item .log-icon {
+    font-size: 10px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.log-item .log-robot {
+    color: #FFD700;
+    font-weight: 600;
+    font-size: 9px;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+.log-item .log-message {
+    flex: 1;
+    font-size: 9px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.log-item.win { border-left-color: #0ECB81; background: rgba(14,203,129,0.06); }
+.log-item.win .log-message { color: #0ECB81; }
+.log-item.loss { border-left-color: #F6465D; background: rgba(246,70,93,0.06); }
+.log-item.loss .log-message { color: #F6465D; }
+.log-item.info { border-left-color: #FFD700; background: rgba(255,215,0,0.04); }
+.log-item.info .log-message { color: #FFD700; }
+.log-item.profit { border-left-color: #00FF88; background: rgba(0,255,136,0.06); }
+.log-item.profit .log-message { color: #00FF88; }
+.log-item.warning { border-left-color: #FF9800; background: rgba(255,152,0,0.06); }
+.log-item.warning .log-message { color: #FF9800; }
+
 .log-count-badge {
     background: rgba(255,215,0,0.2);
     border-radius: 20px;
-    padding: 2px 5px;
+    padding: 2px 8px;
     font-size: 8px;
     color: #FFD700;
     margin-left: 5px;
@@ -438,50 +488,8 @@ transform: scale(1.02);
 }
 .bottom-nav a i { font-size: 15px; }
 .bottom-nav a.active { color: #FFD700; }
-.notification-popup {
-    position: fixed;
-    top: 70px;
-    right: 15px;
-    min-width: 240px;
-    max-width: 300px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 99999;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.3);
-    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border-left: 3px solid;
-}
-.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
-.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
-.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
-.notification-popup i { font-size: 15px; }
-.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
-@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
-@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-@media(max-width: 700px) {
-    .bot-container { padding: 0 12px; margin-top: 65px; }
-    .page-title { font-size: 18px; }
-    .global-balance { flex-direction: column; text-align: center; }
-    .global-balance .value { font-size: 18px; }
-    .robots-grid { grid-template-columns: 1fr; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .theme-toggle { padding: 8px; }
-    .logo-area h2 { font-size: 13px; }
-    .logo-area p { display: none; }
-    .bottom-nav a span { font-size: 6px; }
-    .bottom-nav a i { font-size: 14px; }
-    .log-robot { min-width: 65px; font-size: 8px; }
-    .log-message { font-size: 8px; }
-    .log-time { font-size: 6px; min-width: 55px; }
-    .logs-container { gap: 3px; padding: 5px; }
-    .currency-toggle-btn { padding: 3px 8px; font-size: 9px; height: 28px; }
-    .currency-toggle-btn i { font-size: 10px; }
-}
+.notification-popup { display: none !important; }
+
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -509,6 +517,9 @@ transform: scale(1.02);
 }
 .modal-btn-confirm { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
 .modal-btn-cancel { background: rgba(255,255,255,0.08); color: #aaa; }
+.modal-btn-confirm:hover { transform: scale(1.02); }
+.modal-btn-cancel:hover { background: rgba(255,255,255,0.15); }
+
 .progress-bar {
     width: 100%;
     height: 4px;
@@ -568,13 +579,7 @@ transform: scale(1.02);
     color: #F6465D;
     font-weight: 600;
 }
-body.light-theme .instructions-box {
-    background: rgba(255,215,0,0.08);
-    border-color: rgba(128,0,0,0.3);
-}
-body.light-theme .instructions-box li {
-    color: #444;
-}
+
 .skeleton-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -600,91 +605,119 @@ body.light-theme .instructions-box li {
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
 }
+
 @media(max-width: 700px) {
+    .bot-container { padding: 0 12px; margin-top: 65px; }
+    .page-title { font-size: 18px; }
+    .global-balance { flex-direction: column; text-align: center; }
+    .global-balance .value { font-size: 18px; }
+    .robots-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .theme-toggle { padding: 8px; }
+    .logo-area h2 { font-size: 13px; }
+    .logo-area p { display: none; }
+    .bottom-nav a span { font-size: 6px; }
+    .bottom-nav a i { font-size: 14px; }
+    .log-robot { min-width: 55px; font-size: 8px; }
+    .log-message { font-size: 8px; }
+    .log-time { font-size: 6px; min-width: 45px; }
+    .logs-container { gap: 3px; padding: 5px 8px; }
+    .currency-toggle-btn { padding: 3px 8px; font-size: 9px; height: 28px; }
+    .currency-toggle-btn i { font-size: 10px; }
     .skeleton-grid { grid-template-columns: 1fr; }
+    .log-item .log-icon { width: 16px; font-size: 9px; }
 }
 </style>
 </head>
 <body>
+
 <div class="top-bar">
-<div class="logo-area">
-<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
-<div><h2>ABOTRA-PROAI</h2><p>Auto Trading Bot</p></div>
-</div>
-<div class="top-bar-right">
-<button class="currency-toggle-btn" id="currencyToggleBtn">
-    <i class="fas fa-exchange-alt"></i> 
-    <span id="currencyDisplay">USD</span>
-</button>
-<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
-<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
-</div>
-</div>
-<div class="overlay"></div>
-<div class="bot-container">
-<div class="page-title"><i class="fas fa-robot"></i> AI Auto Trading Bot <span class="live-badge"></span></div>
-<div class="global-balance">
-<span class="label"><i class="fas fa-wallet"></i> Available Balance</span>
-<span class="value" id="globalBalance">$0.00</span>
-<div class="global-actions">
-<button onclick="window.location.href='deposit.html'"><i class="fas fa-plus"></i> Deposit</button>
-<button onclick="window.location.href='withdraw.html'"><i class="fas fa-minus"></i> Withdraw</button>
-</div>
-</div>
-
-<div id="statsGrid" class="stats-grid">
-    <div class="stats-card"><div class="stats-title">Active Robots</div><div class="stat-value" id="statActiveRobots">0</div></div>
-    <div class="stats-card"><div class="stats-title">Total Trades</div><div class="stat-value" id="statTotalTrades">0</div></div>
-    <div class="stats-card"><div class="stats-title">Total Profit</div><div class="stat-value" id="statTotalProfit">$0.00</div></div>
-    <div class="stats-card"><div class="stats-title">Win Rate</div><div class="stat-value" id="statWinRate">0%</div></div>
-</div>
-
-<div class="section-title"><i class="fas fa-microchip"></i> My AI Robots</div>
-<div id="robotsList">
-    <div class="skeleton-grid">
-        <div class="skeleton-robot-card">
-            <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
-            <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
-            <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
-            <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
-        </div>
-        <div class="skeleton-robot-card">
-            <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
-            <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
-            <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
-            <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
-        </div>
+    <div class="logo-area">
+        <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+        <div><h2>ABOTRA-PROAI</h2><p>Auto Trading Bot</p></div>
+    </div>
+    <div class="top-bar-right">
+        <button class="currency-toggle-btn" id="currencyToggleBtn">
+            <i class="fas fa-exchange-alt"></i> 
+            <span id="currencyDisplay">USD</span>
+        </button>
+        <button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+        <div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></div>
     </div>
 </div>
 
-<div class="logs-card">
-<div class="logs-header"><div class="logs-title"><i class="fas fa-list"></i> Trading Logs <span class="live-badge"></span><span class="log-count-badge" id="logCount">0</span></div><button class="clear-logs" id="clearLogsBtn"><i class="fas fa-trash-alt"></i> Clear Logs</button></div>
-<div class="logs-container" id="logsContainer"><div style="padding: 15px; text-align: center; color: #888;">Loading logs...</div></div>
-</div>
+<div class="overlay"></div>
 
-<div class="instructions-box">
-    <h3><i class="fas fa-info-circle"></i> How AI Auto Trading Works</h3>
-    <ul>
-        <li><i class="fas fa-lock"></i> <span>When you start a robot, <strong class="highlight">100% of your balance is locked</strong> for <strong class="highlight">30 days</strong>.</span></li>
-        <li><i class="fas fa-chart-line"></i> <span>Daily profits are calculated based on your robot's daily percentage and <strong class="highlight">credited to your balance every 24 hours</strong>.</span></li>
-        <li><i class="fas fa-coins"></i> <span>Your locked capital (principal) is <strong class="highlight">released after 30 days</strong> along with the final day's profit.</span></li>
-        <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Important:</strong> Daily returns are <strong class="warning">approximations and NOT guaranteed</strong>. Actual returns depend on market conditions, AI performance, and trading strategies.</span></li>
-        <li><i class="fas fa-robot"></i> <span>Higher level robots have <strong class="highlight">higher daily profit percentages</strong> but also higher investment requirements.</span></li>
-        <li><i class="fas fa-play-circle"></i> <span>Once started, the robot runs automatically for <strong class="highlight">30 days</strong>. You cannot withdraw the locked capital until the 30 days are complete.</span></li>
-        <li><i class="fas fa-plus-circle"></i> <span>You can <strong class="highlight">add more capital</strong> to an active robot to increase potential earnings.</span></li>
-        <li><i class="fas fa-shield-alt"></i> <span>All trading is automated by AI - <strong class="highlight">no manual intervention needed</strong> after starting.</span></li>
-        <li><i class="fas fa-undo"></i> <span>After 30 days, you can <strong class="highlight">manually restart</strong> the robot using the <strong class="highlight">"Restart Robot"</strong> button.</span></li>
-    </ul>
-</div>
+<div class="bot-container">
+    <div class="page-title"><i class="fas fa-robot"></i> AI Auto Trading Bot <span class="live-badge"></span></div>
+    
+    <div class="global-balance">
+        <span class="label"><i class="fas fa-wallet"></i> Available Balance</span>
+        <span class="value" id="globalBalance">$0.00</span>
+        <div class="global-actions">
+            <button onclick="window.location.href='deposit.html'"><i class="fas fa-plus"></i> Deposit</button>
+            <button onclick="window.location.href='withdraw.html'"><i class="fas fa-minus"></i> Withdraw</button>
+        </div>
+    </div>
+
+    <div id="statsGrid" class="stats-grid">
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-microchip"></i> Active Robots</div><div class="stat-value" id="statActiveRobots">0</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-exchange-alt"></i> Total Trades</div><div class="stat-value" id="statTotalTrades">0</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-coins"></i> Total Profit</div><div class="stat-value" id="statTotalProfit">$0.00</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-percent"></i> Win Rate</div><div class="stat-value" id="statWinRate">0%</div></div>
+    </div>
+
+    <div class="section-title"><i class="fas fa-microchip"></i> My AI Robots</div>
+    <div id="robotsList">
+        <div class="skeleton-grid">
+            <div class="skeleton-robot-card">
+                <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+            </div>
+            <div class="skeleton-robot-card">
+                <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="logs-card">
+        <div class="logs-header">
+            <div class="logs-title"><i class="fas fa-list"></i> Trading Logs <span class="live-badge"></span><span class="log-count-badge" id="logCount">0</span></div>
+            <button class="clear-logs" id="clearLogsBtn"><i class="fas fa-trash-alt"></i> Clear Logs</button>
+        </div>
+        <div class="logs-container" id="logsContainer">
+            <div style="padding: 15px; text-align: center; color: #888; font-size: 10px;">Loading logs...</div>
+        </div>
+    </div>
+
+    <div class="instructions-box">
+        <h3><i class="fas fa-info-circle"></i> How AI Auto Trading Works</h3>
+        <ul>
+            <li><i class="fas fa-lock"></i> <span>When you start a robot, <strong class="highlight">100% of your balance is locked</strong> for <strong class="highlight">30 days</strong>.</span></li>
+            <li><i class="fas fa-chart-line"></i> <span>Daily profits are calculated based on your robot's daily percentage and <strong class="highlight">credited to your balance every 24 hours</strong>.</span></li>
+            <li><i class="fas fa-coins"></i> <span>Your locked capital (principal) is <strong class="highlight">released after 30 days</strong> along with the final day's profit.</span></li>
+            <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Important:</strong> Daily returns are <strong class="warning">approximations and NOT guaranteed</strong>. Actual returns depend on market conditions, AI performance, and trading strategies.</span></li>
+            <li><i class="fas fa-robot"></i> <span>Higher level robots have <strong class="highlight">higher daily profit percentages</strong> but also higher investment requirements.</span></li>
+            <li><i class="fas fa-play-circle"></i> <span>Once started, the robot runs automatically for <strong class="highlight">30 days</strong>. You cannot withdraw the locked capital until the 30 days are complete.</span></li>
+            <li><i class="fas fa-plus-circle"></i> <span>You can <strong class="highlight">add more capital</strong> to an active robot to increase potential earnings.</span></li>
+            <li><i class="fas fa-shield-alt"></i> <span>All trading is automated by AI - <strong class="highlight">no manual intervention needed</strong> after starting.</span></li>
+            <li><i class="fas fa-undo"></i> <span>After 30 days, you can <strong class="highlight">manually restart</strong> the robot using the <strong class="highlight">"Restart Robot"</strong> button.</span></li>
+        </ul>
+    </div>
 </div>
 
 <div class="bottom-nav">
-<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
-<a href="auto-bot.html" class="active"><i class="fas fa-robot"></i><span>Auto Bot</span></a>
-<a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
-<a href="subscriptions.html"><i class="fas fa-crown"></i><span>Subscribe</span></a>
-<a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
-<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="auto-bot.html" class="active"><i class="fas fa-robot"></i><span>Auto Bot</span></a>
+    <a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+    <a href="subscriptions.html"><i class="fas fa-crown"></i><span>Subscribe</span></a>
+    <a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
+    <a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
 </div>
 
 <script type="module">
@@ -692,7 +725,7 @@ body.light-theme .instructions-box li {
 // FIREBASE IMPORTS
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, set, update, get, push, query, orderByChild, limitToLast, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, set, update, get, push, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ============================================================
@@ -713,14 +746,51 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================
-// API BASE URL
+// API BASE URL - For backend processing
 // ============================================================
-const API_BASE_URL = window.location.origin === 'http://localhost:5001' 
-    ? 'http://localhost:5001' 
-    : 'https://abotra-backend.up.railway.app';
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
 
 // ============================================================
-// COUNTRY & CURRENCY
+// ROBOT CONFIG
+// ============================================================
+const robotProfits = {
+    0: { name: "Starter Bot", dailyProfit: 3 },
+    1: { name: "Bronze Bot", dailyProfit: 4 },
+    2: { name: "Silver Bot", dailyProfit: 5 },
+    3: { name: "Gold Bot", dailyProfit: 7 },
+    4: { name: "Platinum Bot", dailyProfit: 9 },
+    5: { name: "Diamond Bot", dailyProfit: 11 },
+    6: { name: "Emerald Bot", dailyProfit: 15 },
+    7: { name: "Ruby Bot", dailyProfit: 19 },
+    8: { name: "Sapphire Bot", dailyProfit: 23 },
+    9: { name: "Onyx Bot", dailyProfit: 28 },
+    10: { name: "Legendary Bot", dailyProfit: 38 }
+};
+
+const robotMinTrade = {
+    0: 3, 1: 10, 2: 30, 3: 50, 4: 90,
+    5: 120, 6: 150, 7: 200, 8: 250, 9: 300, 10: 500
+};
+
+const DEFAULT_DURATION_DAYS = 30;
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let userBalance = 0;
+let subscriptionMultiplier = 1;
+let activeRobots = [];
+let robotStats = {};
+let tradeLogs = [];
+let currentCurrency = 'USD';
+let localRate = 2800;
+let localSymbol = 'TZS';
+let userCountry = 'Tanzania';
+let rtdbListeners = [];
+
+// ============================================================
+// CURRENCY FUNCTIONS
 // ============================================================
 const countryCurrencies = {
     'Tanzania': { symbol: 'TZS', rate: 2800 },
@@ -741,116 +811,11 @@ const countryCurrencies = {
     'Morocco': { symbol: 'MAD', rate: 10 }
 };
 
-// ===== ROBOT PROFITS =====
-const robotProfits = {
-    0: { name: "Starter Bot", dailyProfit: 3 },
-    1: { name: "Bronze Bot", dailyProfit: 4 },
-    2: { name: "Silver Bot", dailyProfit: 5 },
-    3: { name: "Gold Bot", dailyProfit: 7 },
-    4: { name: "Platinum Bot", dailyProfit: 9 },
-    5: { name: "Diamond Bot", dailyProfit: 11 },
-    6: { name: "Emerald Bot", dailyProfit: 15 },
-    7: { name: "Ruby Bot", dailyProfit: 19 },
-    8: { name: "Sapphire Bot", dailyProfit: 23 },
-    9: { name: "Onyx Bot", dailyProfit: 28 },
-    10: { name: "Legendary Bot", dailyProfit: 38 }
-};
-
-// ===== MINIMUM TRADE AMOUNTS =====
-const robotMinTrade = {
-    0: 3, 1: 10, 2: 30, 3: 50, 4: 90,
-    5: 120, 6: 150, 7: 200, 8: 250, 9: 300, 10: 500
-};
-
-// ===== INVESTED AMOUNTS =====
-const INVESTED_AMOUNTS = {
-    0: 10, 1: 30, 2: 72, 3: 120, 4: 180,
-    5: 240, 6: 300, 7: 450, 8: 560, 9: 720, 10: 1000
-};
-
-const DEFAULT_DURATION_DAYS = 30;
-
-// ============================================================
-// STATE
-// ============================================================
-let currentUser = null;
-let userBalance = 0;
-let userSubscription = { plan: 'Free Plan', multiplier: 1, expiry: 0 };
-let activeRobots = [];
-let robotStats = {};
-let tradeLogs = [];
-let dailyProcessingIntervals = {};
-
-let currentCurrency = 'USD';
-let localRate = 2800;
-let localSymbol = 'TZS';
-let userCountry = 'Tanzania';
-
-// ============================================================
-// GET FIREBASE TOKEN
-// ============================================================
-async function getFirebaseToken() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            unsubscribe();
-            if (!user) {
-                reject(new Error('No user logged in'));
-                return;
-            }
-            try {
-                const token = await user.getIdToken(true);
-                resolve(token);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
-}
-
-// ============================================================
-// API CALLS TO BACKEND
-// ============================================================
-async function apiRequest(endpoint, method, body = null) {
-    try {
-        const token = await getFirebaseToken();
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        };
-        if (body) options.body = JSON.stringify(body);
-        
-        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API request error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ============================================================
-// CURRENCY FUNCTIONS
-// ============================================================
-async function loadUserCountry() {
-    if (!currentUser) return 'Tanzania';
-    try {
-        const data = await apiRequest('user/profile', 'GET');
-        if (data.success && data.user) {
-            userCountry = data.user.country || 'Tanzania';
-            return userCountry;
-        }
-    } catch(e) {}
-    return 'Tanzania';
-}
-
 function getLocalCurrencyInfo(country) {
     return countryCurrencies[country] || { symbol: 'TZS', rate: 2800 };
 }
 
-function formatPriceInCurrency(usdAmount) {
+function formatPrice(usdAmount) {
     if (currentCurrency === 'USD') {
         return `$${usdAmount.toFixed(2)}`;
     }
@@ -879,7 +844,7 @@ function toggleCurrency() {
 function updateAllPrices() {
     const balanceEl = document.getElementById('globalBalance');
     if (balanceEl && userBalance !== undefined) {
-        const formatted = formatPriceInCurrency(userBalance);
+        const formatted = formatPrice(userBalance);
         if (balanceEl.textContent !== formatted) {
             balanceEl.textContent = formatted;
             balanceEl.classList.remove('currency-updated');
@@ -887,237 +852,638 @@ function updateAllPrices() {
             balanceEl.classList.add('currency-updated');
         }
     }
-    
-    const statTotalProfit = document.getElementById('statTotalProfit');
-    if (statTotalProfit) {
-        const match = statTotalProfit.textContent.match(/[\d.]+/);
-        if (match) {
-            const usdValue = parseFloat(match[0]);
-            if (!isNaN(usdValue)) {
-                const formatted = formatPriceInCurrency(usdValue);
-                if (statTotalProfit.textContent !== formatted) {
-                    statTotalProfit.textContent = formatted;
-                    statTotalProfit.classList.remove('currency-updated');
-                    void statTotalProfit.offsetWidth;
-                    statTotalProfit.classList.add('currency-updated');
-                }
+}
+
+// ============================================================
+// GET FIREBASE TOKEN
+// ============================================================
+async function getFirebaseToken() {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (!user) { reject(new Error('No user logged in')); return; }
+            try { const token = await user.getIdToken(true); resolve(token); } catch (error) { reject(error); }
+        });
+    });
+}
+
+// ============================================================
+// API CALLS TO BACKEND
+// ============================================================
+async function apiRequest(endpoint, method, body = null) {
+    try {
+        const token = await getFirebaseToken();
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
-        }
+        };
+        if (body) options.body = JSON.stringify(body);
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+        return await response.json();
+    } catch (error) {
+        console.error('API request error:', error);
+        return { success: false, error: error.message };
     }
 }
 
 // ============================================================
-// NOTIFICATION FUNCTIONS
+// 🔥 PROCESS DAILY PROFITS VIA BACKEND
 // ============================================================
-function showNotification(message, type) {
-    const existing = document.querySelector('.notification-popup');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
-}
-
-function showModal(title, message, onConfirm) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-container"><div class="modal-title">${title}</div><div class="modal-message">${message}</div><div class="modal-buttons"><button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button><button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modalConfirmBtn').addEventListener('click', () => { modal.remove(); onConfirm(); });
-    document.getElementById('modalCancelBtn').addEventListener('click', () => modal.remove());
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ============================================================
-// LOG FUNCTIONS
-// ============================================================
-async function addLog(robotName, message, type) {
+async function processDailyProfitsBackend() {
     if (!currentUser) return;
     try {
-        const logData = {
-            robot: robotName,
-            message: message,
-            type: type,
+        console.log('[BOT] Processing daily profits via backend...');
+        const response = await apiRequest('bot/process-daily', 'POST');
+        if (response.success && response.processed > 0) {
+            console.log(`[BOT] ✅ Processed ${response.processed} daily profits`);
+            await Promise.all([
+                loadUserDataDirect(),
+                loadActiveRobotsDirect(),
+                loadRobotStatsDirect(),
+                loadTradingLogsDirect()
+            ]);
+        }
+    } catch (error) {
+        console.error('[BOT] Daily profit error:', error);
+        // Fallback: Process locally if backend fails
+        await processDailyProfitsDirect();
+    }
+}
+
+// ============================================================
+// FALLBACK: DIRECT FIREBASE DAILY PROFIT
+// ============================================================
+async function processDailyProfitsDirect() {
+    if (!currentUser) return;
+    try {
+        console.log('[BOT] Checking daily profits (fallback)...');
+        const uid = currentUser.uid;
+        const now = Date.now();
+        let processed = 0;
+        
+        const snapshot = await get(ref(db, `userRobots/${uid}`));
+        if (!snapshot.exists()) return;
+        
+        const userRef = ref(db, `users/${uid}`);
+        
+        const promises = [];
+        snapshot.forEach(child => {
+            const robot = child.val();
+            const robotId = child.key;
+            if (robot.status !== 'active') return;
+            
+            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
+            const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
+            if (now < nextProfitTime) return;
+            
+            promises.push(processSingleRobotProfitDirect(robot, robotId, uid));
+        });
+        
+        const results = await Promise.all(promises);
+        processed = results.filter(r => r === true).length;
+        
+        if (processed > 0) {
+            console.log(`[BOT] ✅ Processed ${processed} daily profits (fallback)`);
+            await Promise.all([
+                loadUserDataDirect(),
+                loadActiveRobotsDirect(),
+                loadRobotStatsDirect(),
+                loadTradingLogsDirect()
+            ]);
+        }
+    } catch (error) {
+        console.error('[BOT] Daily profit error (fallback):', error);
+    }
+}
+
+async function processSingleRobotProfitDirect(robot, robotId, uid) {
+    try {
+        const now = Date.now();
+        const investedAmount = robot.investedAmount || robot.amount || 0;
+        if (investedAmount <= 0) return false;
+        
+        const dailyPercent = robot.dailyProfit || 3;
+        const grossProfit = (investedAmount * dailyPercent) / 100;
+        const hiddenFee = grossProfit * 0.10;
+        const netProfit = grossProfit - hiddenFee;
+        
+        const profitDays = robot.profitDays || 0;
+        const totalDays = robot.durationDays || 30;
+        const isLastDay = (profitDays + 1) >= totalDays;
+        
+        let finalNetReturn = netProfit;
+        let isCompleted = false;
+        
+        if (isLastDay) {
+            const totalReturn = investedAmount + netProfit;
+            const finalFee = totalReturn * 0.10;
+            finalNetReturn = totalReturn - finalFee;
+            isCompleted = true;
+        }
+        
+        const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
+        
+        if (isCompleted) {
+            await update(robotRef, {
+                status: 'completed',
+                completedAt: now,
+                investedAmount: 0,
+                amount: 0
+            });
+        } else {
+            await update(robotRef, {
+                lastProfitTime: now,
+                lastProfitAmount: netProfit,
+                profitDays: profitDays + 1
+            });
+        }
+        
+        await runTransaction(ref(db, `users/${uid}`), (current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + finalNetReturn;
+            }
+            return current;
+        });
+        
+        await runTransaction(ref(db, `robotStats/${uid}/${robotId}`), (current) => {
+            if (!current) current = { profit: 0, trades: 0, wins: 0 };
+            current.profit += finalNetReturn;
+            current.trades += 1;
+            current.wins += 1;
+            return current;
+        });
+        
+        const logRef = push(ref(db, `tradingLogs/${uid}`));
+        await set(logRef, {
+            id: logRef.key,
+            robot: robot.name || 'Robot',
+            message: `💰 Daily profit: +${formatPrice(finalNetReturn)} (${dailyPercent}%)`,
+            type: 'profit',
             time: new Date().toLocaleTimeString(),
             timestamp: Date.now()
-        };
-        await apiRequest('bot/logs', 'POST', logData);
-        tradeLogs.unshift(logData);
-        if (tradeLogs.length > 50) tradeLogs.pop();
-        renderLogs();
-    } catch(e) {
-        console.error('Add log error:', e);
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('[BOT] Process robot profit error:', error);
+        return false;
     }
+}
+
+// ============================================================
+// 🔥 DIRECT FIREBASE LOAD FUNCTIONS
+// ============================================================
+async function loadUserDataDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            userCountry = data.country || 'Tanzania';
+            updateAllPrices();
+            return data;
+        }
+    } catch (error) {
+        console.error('[RTDB] Load user error:', error);
+    }
+    return null;
+}
+
+async function loadSubscriptionDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.subscription && data.subscription.expiry > Date.now()) {
+                subscriptionMultiplier = data.subscription.multiplier || 1;
+                return;
+            }
+        }
+        subscriptionMultiplier = 1;
+    } catch (error) {
+        console.error('[RTDB] Load subscription error:', error);
+        subscriptionMultiplier = 1;
+    }
+}
+
+async function loadActiveRobotsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `userRobots/${currentUser.uid}`));
+        activeRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                activeRobots.push({ id: child.key, ...robot });
+            });
+        }
+        renderRobots();
+        updateStatsUI();
+    } catch (error) {
+        console.error('[RTDB] Load robots error:', error);
+        renderRobots();
+    }
+}
+
+async function loadRobotStatsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `robotStats/${currentUser.uid}`));
+        robotStats = {};
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                robotStats[child.key] = child.val();
+            });
+        }
+        updateStatsUI();
+    } catch (error) {
+        console.error('[RTDB] Load stats error:', error);
+    }
+}
+
+async function loadTradingLogsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `tradingLogs/${currentUser.uid}`));
+        tradeLogs = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                tradeLogs.push(child.val());
+            });
+        }
+        tradeLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderLogs();
+    } catch (error) {
+        console.error('[RTDB] Load logs error:', error);
+    }
+}
+
+// ============================================================
+// SETUP RTDB LISTENERS
+// ============================================================
+function setupRTDBListeners() {
+    if (!currentUser) return;
+    rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
+    rtdbListeners = [];
+    
+    const uid = currentUser.uid;
+    
+    const userRef = ref(db, `users/${uid}`);
+    const userUnsub = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            userCountry = data.country || 'Tanzania';
+            updateAllPrices();
+        }
+    });
+    rtdbListeners.push(userUnsub);
+    
+    const robotsRef = ref(db, `userRobots/${uid}`);
+    const robotsUnsub = onValue(robotsRef, (snapshot) => {
+        activeRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                activeRobots.push({ id: child.key, ...robot });
+            });
+        }
+        renderRobots();
+        updateStatsUI();
+    });
+    rtdbListeners.push(robotsUnsub);
+    
+    const statsRef = ref(db, `robotStats/${uid}`);
+    const statsUnsub = onValue(statsRef, (snapshot) => {
+        robotStats = {};
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                robotStats[child.key] = child.val();
+            });
+        }
+        updateStatsUI();
+    });
+    rtdbListeners.push(statsUnsub);
+    
+    const logsRef = ref(db, `tradingLogs/${uid}`);
+    const logsUnsub = onValue(logsRef, (snapshot) => {
+        tradeLogs = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                tradeLogs.push(child.val());
+            });
+        }
+        tradeLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderLogs();
+    });
+    rtdbListeners.push(logsUnsub);
+}
+
+// ============================================================
+// UI RENDER FUNCTIONS
+// ============================================================
+function updateStatsUI() {
+    let activeCount = activeRobots.filter(r => r.status === 'active').length;
+    let totalTrades = 0, totalProfit = 0, totalWins = 0;
+    Object.values(robotStats).forEach(s => {
+        totalTrades += s.trades || 0;
+        totalProfit += s.profit || 0;
+        totalWins += s.wins || 0;
+    });
+    const winRate = totalTrades > 0 ? (totalWins / totalTrades * 100).toFixed(1) : 0;
+    
+    document.getElementById('statActiveRobots').textContent = activeCount;
+    document.getElementById('statTotalTrades').textContent = totalTrades;
+    document.getElementById('statTotalProfit').textContent = formatPrice(totalProfit);
+    document.getElementById('statWinRate').textContent = `${winRate}%`;
+}
+
+function renderRobots() {
+    const container = document.getElementById('robotsList');
+    if (!container) return;
+    
+    if (activeRobots.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-robot"></i>
+                <p>You don't have any AI robots yet.</p>
+                <button onclick="window.location.href='robots.html'">Purchase a Robot</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="robots-grid">';
+    activeRobots.forEach(robot => {
+        const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+        const isActive = robot.status === 'active';
+        const isCompleted = robot.status === 'completed';
+        const stats = robotStats[robot.id] || { profit: 0, trades: 0, wins: 0 };
+        const invested = robot.investedAmount || robot.amount || 0;
+        const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+        const estimatedDaily = (invested * dailyPercent) / 100;
+        const totalProfit = stats.profit || 0;
+        const winRate = stats.trades > 0 ? (stats.wins / stats.trades * 100).toFixed(1) : 0;
+        const minTrade = robotMinTrade[robot.robotId] || 3;
+        
+        let progressPercent = 0;
+        let daysCompleted = robot.profitDays || 0;
+        if (isActive && robot.endTime) {
+            const now = Date.now();
+            const totalDuration = robot.endTime - (robot.startTime || now);
+            const elapsed = now - (robot.startTime || now);
+            progressPercent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+        } else if (isCompleted) {
+            progressPercent = 100;
+        }
+        
+        html += `
+            <div class="robot-card">
+                <div class="robot-header">
+                    <span class="robot-name">${info.name}</span>
+                    <span class="robot-level">Level ${robot.robotId}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px; margin-bottom:6px;">
+                    <span style="color:#888; font-size:8px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
+                    <span style="color:#0ECB81; font-weight:700; font-size:12px;">${formatPrice(minTrade)}</span>
+                </div>
+                <div class="invested-amount">
+                    <span class="invested-label"><i class="fas fa-lock"></i> Invested:</span>
+                    <span class="invested-value">${formatPrice(invested)}</span>
+                </div>
+                <div class="robot-stats">
+                    <div class="robot-stat"><div class="robot-stat-label">Daily</div><div class="robot-stat-value">${dailyPercent}%</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Est. Daily</div><div class="robot-stat-value" style="color:#0ECB81">≈${formatPrice(estimatedDaily)}</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Multiplier</div><div class="robot-stat-value">${subscriptionMultiplier}x</div></div>
+                </div>
+                <div class="robot-stats">
+                    <div class="robot-stat"><div class="robot-stat-label">Total Profit</div><div class="robot-stat-value" style="color:${totalProfit>=0?'#0ECB81':'#F6465D'}">${formatPrice(totalProfit)}</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Win Rate</div><div class="robot-stat-value">${winRate}%</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Days</div><div class="robot-stat-value">${daysCompleted}/${DEFAULT_DURATION_DAYS}</div></div>
+                </div>
+                <div class="robot-status">
+                    <div>
+                        <span class="status-indicator ${isActive?'active':'inactive'}"></span>
+                        <span class="status-text">${isActive?'🤖 Active':(isCompleted?'✅ Completed':'⏸ Inactive')}</span>
+                    </div>
+                    <div class="robot-profit">💰 ${formatPrice(totalProfit)}</div>
+                </div>
+                ${isActive ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
+                <div class="robot-buttons">
+                    ${isCompleted ? 
+                        `<button class="btn-restart-robot" data-id="${robot.id}"><i class="fas fa-undo"></i> Restart</button>` : 
+                        isActive ? 
+                        `<button class="btn-add-capital" data-id="${robot.id}"><i class="fas fa-plus-circle"></i> Add Capital</button>` :
+                        `<button class="btn-start-robot" data-id="${robot.id}"><i class="fas fa-play"></i> Start Robot</button>`
+                    }
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+    
+    container.querySelectorAll('.btn-start-robot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) startRobot(robot);
+        });
+    });
+    container.querySelectorAll('.btn-restart-robot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) restartRobot(robot);
+        });
+    });
+    container.querySelectorAll('.btn-add-capital').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) addCapital(robot);
+        });
+    });
 }
 
 function renderLogs() {
     const container = document.getElementById('logsContainer');
     if (!container) return;
-    if (tradeLogs.length === 0) { 
-        container.innerHTML = '<div class="log-item"><span class="log-message">📋 No trading activity yet. Start a robot to begin trading 24/7.</span></div>'; 
-        return; 
+    if (tradeLogs.length === 0) {
+        container.innerHTML = '<div style="padding:15px; text-align:center; color:#888; font-size:10px;">📋 No trading activity yet. Start a robot to begin trading 24/7.</div>';
+        return;
     }
-    const logsToShow = tradeLogs.slice(0, 15);
-    container.innerHTML = '';
-    logsToShow.forEach(log => {
-        const cls = log.type === 'win' ? 'win' : (log.type === 'loss' ? 'loss' : 'info');
-        const icon = log.type === 'win' ? '✅' : (log.type === 'loss' ? '❌' : '📋');
-        const logDiv = document.createElement('div');
-        logDiv.className = 'log-item';
-        logDiv.innerHTML = `<span class="log-robot">🤖 ${escapeHtml(log.robot)}</span><span class="log-message ${cls}">${icon} ${escapeHtml(log.message)}</span><span class="log-time">${log.time || '--:--:--'}</span>`;
-        container.appendChild(logDiv);
+    let html = '';
+    tradeLogs.slice(0, 30).forEach(log => {
+        const type = log.type || 'info';
+        const iconMap = {
+            'win': '✅',
+            'loss': '❌',
+            'profit': '💰',
+            'warning': '⚠️',
+            'info': '📋'
+        };
+        const icon = iconMap[type] || '📋';
+        const time = log.time || new Date(log.timestamp).toLocaleTimeString() || '--:--:--';
+        const robotName = log.robot || 'Robot';
+        
+        html += `
+            <div class="log-item ${type}">
+                <span class="log-time">${time}</span>
+                <span class="log-icon">${icon}</span>
+                <span class="log-robot">${robotName}</span>
+                <span class="log-message">${log.message}</span>
+            </div>
+        `;
     });
-    const logCountBadge = document.getElementById('logCount');
-    if (logCountBadge) logCountBadge.textContent = tradeLogs.length;
+    container.innerHTML = html;
+    document.getElementById('logCount').textContent = tradeLogs.length;
     container.scrollTop = container.scrollHeight;
 }
 
 // ============================================================
-// UPDATE UI FUNCTIONS
-// ============================================================
-function updateStatsUI() {
-    let activeCount = activeRobots.filter(r => r.status === 'active').length;
-    let totalTrades = 0, totalProfit = 0, totalWins = 0;
-    Object.values(robotStats).forEach(s => { totalTrades += s.trades||0; totalProfit += s.profit||0; totalWins += s.wins||0; });
-    const winRate = totalTrades > 0 ? (totalWins/totalTrades*100).toFixed(1) : 0;
-    document.getElementById('statActiveRobots').textContent = activeCount;
-    document.getElementById('statTotalTrades').textContent = totalTrades;
-    
-    const profitEl = document.getElementById('statTotalProfit');
-    const formattedProfit = formatPriceInCurrency(totalProfit);
-    if (profitEl) profitEl.textContent = formattedProfit;
-    
-    document.getElementById('statWinRate').textContent = `${winRate}%`;
-}
-
-// ============================================================
-// START ROBOT VIA BACKEND
+// TRADE FUNCTIONS
 // ============================================================
 async function startRobot(robot) {
-    if (!currentUser) return;
-    
-    const result = await apiRequest('user/profile', 'GET');
-    const userData = result.success ? result.user : null;
-    const currentBalance = userData ? userData.balance || 0 : 0;
-    
-    const minTrade = robotMinTrade[robot.robotId] || 3;
-    if (currentBalance < minTrade) { 
-        showNotification(`Insufficient balance! Minimum ${formatPriceInCurrency(minTrade)} required.`, 'error'); 
-        return; 
-    }
-    
-    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-    const finalDailyPercent = info.dailyProfit * userSubscription.multiplier;
-    const lockAmount = currentBalance;
-    const estimatedDailyProfit = (lockAmount * finalDailyPercent) / 100;
-    const totalEstimatedProfit = estimatedDailyProfit * DEFAULT_DURATION_DAYS;
-    
-    showModal('Start Robot - 30 Days Lock', 
-        `Start ${info.name}?\n\n` +
-        `🔒 LOCK AMOUNT: ${formatPriceInCurrency(lockAmount)} (100% of balance)\n` +
-        `⏰ Duration: ${DEFAULT_DURATION_DAYS} days\n` +
-        `📈 Daily profit: ${finalDailyPercent}% (approx ${formatPriceInCurrency(estimatedDailyProfit)}/day)\n` +
-        `💰 Estimated total profit: ${formatPriceInCurrency(totalEstimatedProfit)}\n\n` +
-        `⚠️ Daily returns are approximations and NOT guaranteed.`, 
-        async () => {
-            try {
-                const startData = {
-                    robotId: robot.robotId,
-                    robotName: info.name,
-                    lockAmount: lockAmount,
-                    dailyProfit: finalDailyPercent,
-                    durationDays: DEFAULT_DURATION_DAYS,
-                    minTrade: minTrade
-                };
-                const response = await apiRequest('bot/start', 'POST', startData);
-                if (response.success) {
-                    await addLog(info.name, `🚀 Bot STARTED - ${formatPriceInCurrency(lockAmount)} locked for ${DEFAULT_DURATION_DAYS} days. Daily profit: ${finalDailyPercent}%!`, 'info');
-                    showNotification(`${info.name} started! ${formatPriceInCurrency(lockAmount)} locked.`, 'success');
-                    await loadActiveRobots();
-                    await loadUserData();
-                } else {
-                    showNotification(response.error || 'Failed to start robot', 'error');
-                }
-            } catch(e) {
-                console.error('Start robot error:', e);
-                showNotification('Error starting robot', 'error');
-            }
-        });
-}
-
-// ============================================================
-// RESTART COMPLETED ROBOT
-// ============================================================
-async function restartCompletedRobot(robot) {
     const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
     const minTrade = robotMinTrade[robot.robotId] || 3;
     
-    const result = await apiRequest('user/profile', 'GET');
-    const userData = result.success ? result.user : null;
-    const currentBalance = userData ? userData.balance || 0 : 0;
-    
-    if (currentBalance < minTrade) {
-        showNotification(`Insufficient balance! Minimum ${formatPriceInCurrency(minTrade)} required.`, 'error');
+    if (userBalance < minTrade) {
+        showNotification(`Insufficient balance! Need ${formatPrice(minTrade)}`, 'error');
         return;
     }
     
-    const finalDailyPercent = info.dailyProfit * userSubscription.multiplier;
-    const lockAmount = currentBalance;
+    const lockAmount = userBalance;
+    const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+    const estimatedDaily = (lockAmount * dailyPercent) / 100;
+    const totalEstimated = estimatedDaily * DEFAULT_DURATION_DAYS;
     
-    showModal('Restart Robot', 
-        `Restart ${info.name} for another ${DEFAULT_DURATION_DAYS} days?\n\n` +
-        `🔒 LOCK AMOUNT: ${formatPriceInCurrency(lockAmount)} (100% of balance)\n` +
-        `📈 Daily profit: ${finalDailyPercent}% (approx ${formatPriceInCurrency((lockAmount * finalDailyPercent / 100))}/day)`, 
+    showModal(
+        `Start ${info.name}`,
+        `Lock ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n` +
+        `📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)\n` +
+        `💰 Est. Total: ${formatPrice(totalEstimated)}`,
         async () => {
             try {
-                const restartData = {
-                    robotId: robot.robotId,
-                    robotName: info.name,
-                    lockAmount: lockAmount,
-                    dailyProfit: finalDailyPercent,
+                const uid = currentUser.uid;
+                const userRef = ref(db, `users/${uid}`);
+                const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                
+                await runTransaction(userRef, (current) => {
+                    if (current) {
+                        const balance = current.balance || 0;
+                        if (balance < lockAmount) return current;
+                        current.balance = balance - lockAmount;
+                    }
+                    return current;
+                });
+                
+                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                await update(robotRef, {
+                    status: 'active',
+                    startTime: Date.now(),
+                    endTime: endTime,
+                    lastProfitTime: Date.now(),
+                    profitDays: 0,
+                    investedAmount: lockAmount,
+                    originalAmount: lockAmount,
+                    minTrade: minTrade,
                     durationDays: DEFAULT_DURATION_DAYS,
-                    minTrade: minTrade
-                };
-                const response = await apiRequest('bot/restart', 'POST', restartData);
-                if (response.success) {
-                    await addLog(info.name, `🔄 Bot RESTARTED for another ${DEFAULT_DURATION_DAYS} days! ${formatPriceInCurrency(lockAmount)} locked.`, 'info');
-                    showNotification(`${info.name} restarted successfully!`, 'success');
-                    await loadActiveRobots();
-                    await loadUserData();
-                } else {
-                    showNotification(response.error || 'Failed to restart robot', 'error');
-                }
-            } catch(e) {
-                console.error('Restart robot error:', e);
-                showNotification('Error restarting robot', 'error');
+                    dailyProfit: dailyPercent
+                });
+                
+                await Promise.all([
+                    loadActiveRobotsDirect(),
+                    loadUserDataDirect(),
+                    loadRobotStatsDirect(),
+                    loadTradingLogsDirect()
+                ]);
+                
+            } catch (error) {
+                console.error('[BOT] Start error:', error);
+                showNotification('Failed to start robot', 'error');
             }
-        });
+        }
+    );
 }
 
-// ============================================================
-// ADD CAPITAL TO ROBOT
-// ============================================================
-async function addCapitalToRobot(robot) {
-    if (!currentUser) return;
-    
-    const result = await apiRequest('user/profile', 'GET');
-    const userData = result.success ? result.user : null;
-    const currentBalance = userData ? userData.balance || 0 : 0;
+async function restartRobot(robot) {
+    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
     const minTrade = robotMinTrade[robot.robotId] || 3;
     
-    if (currentBalance < minTrade) { 
-        showNotification(`Insufficient balance! Minimum ${formatPriceInCurrency(minTrade)} required.`, 'error'); 
-        return; 
+    if (userBalance < minTrade) {
+        showNotification(`Insufficient balance! Need ${formatPrice(minTrade)}`, 'error');
+        return;
     }
     
+    const lockAmount = userBalance;
+    const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+    const estimatedDaily = (lockAmount * dailyPercent) / 100;
+    
+    showModal(
+        `Restart ${info.name}`,
+        `Restart with ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n` +
+        `📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)`,
+        async () => {
+            try {
+                const uid = currentUser.uid;
+                const userRef = ref(db, `users/${uid}`);
+                const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                
+                await runTransaction(userRef, (current) => {
+                    if (current) {
+                        const balance = current.balance || 0;
+                        if (balance < lockAmount) return current;
+                        current.balance = balance - lockAmount;
+                    }
+                    return current;
+                });
+                
+                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                await update(robotRef, {
+                    status: 'active',
+                    startTime: Date.now(),
+                    endTime: endTime,
+                    lastProfitTime: Date.now(),
+                    profitDays: 0,
+                    investedAmount: lockAmount,
+                    originalAmount: lockAmount,
+                    minTrade: minTrade,
+                    durationDays: DEFAULT_DURATION_DAYS,
+                    dailyProfit: dailyPercent,
+                    completedAt: null
+                });
+                
+                await Promise.all([
+                    loadActiveRobotsDirect(),
+                    loadUserDataDirect(),
+                    loadRobotStatsDirect(),
+                    loadTradingLogsDirect()
+                ]);
+                
+            } catch (error) {
+                console.error('[BOT] Restart error:', error);
+                showNotification('Failed to restart robot', 'error');
+            }
+        }
+    );
+}
+
+async function addCapital(robot) {
     const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+    const minTrade = robotMinTrade[robot.robotId] || 3;
+    
+    if (userBalance < minTrade) {
+        showNotification(`Insufficient balance! Need ${formatPrice(minTrade)}`, 'error');
+        return;
+    }
+    
+    const maxAdd = Math.min(userBalance, 10000);
     const currentInvested = robot.investedAmount || robot.amount || 0;
     
     const modalDiv = document.createElement('div');
@@ -1126,11 +1492,11 @@ async function addCapitalToRobot(robot) {
         <div class="modal-container">
             <div class="modal-title">Add Capital to ${info.name}</div>
             <div class="modal-message" style="text-align:left;">
-                <p style="margin-bottom:10px;">Current invested: <strong style="color:#0ECB81;">${formatPriceInCurrency(currentInvested)}</strong></p>
-                <p style="margin-bottom:10px;">Min trade: <strong style="color:#FFD700;">${formatPriceInCurrency(minTrade)}</strong></p>
-                <p style="margin-bottom:10px;">Available: <strong style="color:#FFD700;">${formatPriceInCurrency(currentBalance)}</strong></p>
+                <p style="margin-bottom:8px;">Current: <strong style="color:#0ECB81;">${formatPrice(currentInvested)}</strong></p>
+                <p style="margin-bottom:8px;">Available: <strong style="color:#FFD700;">${formatPrice(userBalance)}</strong></p>
+                <p style="margin-bottom:8px;">Min Trade: <strong style="color:#FFD700;">${formatPrice(minTrade)}</strong></p>
                 <label style="color:#FFD700;">Amount to add:</label>
-                <input type="number" id="addCapitalAmount" min="${minTrade}" max="${currentBalance}" step="1" style="width:100%; padding:8px; margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:white;">
+                <input type="number" id="addCapitalAmount" min="${minTrade}" max="${maxAdd}" step="1" value="${Math.min(maxAdd, 100)}" style="width:100%; padding:8px; margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:white; font-size:14px;">
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
@@ -1141,195 +1507,64 @@ async function addCapitalToRobot(robot) {
     document.body.appendChild(modalDiv);
     
     document.getElementById('modalConfirmBtn').addEventListener('click', async () => {
-        const addAmount = parseFloat(document.getElementById('addCapitalAmount').value);
-        if (!addAmount || addAmount < minTrade) { showNotification(`Minimum add is ${formatPriceInCurrency(minTrade)}`, 'error'); modalDiv.remove(); return; }
-        if (addAmount > currentBalance) { showNotification('Insufficient balance', 'error'); modalDiv.remove(); return; }
-        
+        const amount = parseFloat(document.getElementById('addCapitalAmount').value);
+        if (!amount || amount < minTrade) {
+            showNotification(`Minimum add is ${formatPrice(minTrade)}`, 'error');
+            return;
+        }
+        if (amount > userBalance) {
+            showNotification('Insufficient balance', 'error');
+            return;
+        }
         modalDiv.remove();
+        
         try {
-            const response = await apiRequest(`bot/add-capital/${robot.id}`, 'POST', { amount: addAmount });
-            if (response.success) {
-                await addLog(info.name, `💰 CAPITAL ADDED +${formatPriceInCurrency(addAmount)}`, 'info');
-                showNotification(`${formatPriceInCurrency(addAmount)} added to ${info.name}!`, 'success');
-                await loadActiveRobots();
-                await loadUserData();
-            } else {
-                showNotification(response.error || 'Failed to add capital', 'error');
+            const uid = currentUser.uid;
+            const userRef = ref(db, `users/${uid}`);
+            const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+            
+            await runTransaction(userRef, (current) => {
+                if (current) {
+                    const balance = current.balance || 0;
+                    if (balance < amount) return current;
+                    current.balance = balance - amount;
+                }
+                return current;
+            });
+            
+            const snap = await get(robotRef);
+            if (snap.exists()) {
+                const data = snap.val();
+                const newInvested = (data.investedAmount || data.amount || 0) + amount;
+                await update(robotRef, { investedAmount: newInvested, amount: newInvested });
             }
-        } catch(e) {
-            console.error('Add capital error:', e);
-            showNotification('Error adding capital', 'error');
+            
+            await Promise.all([
+                loadActiveRobotsDirect(),
+                loadUserDataDirect(),
+                loadRobotStatsDirect()
+            ]);
+            
+        } catch (error) {
+            console.error('[BOT] Add capital error:', error);
+            showNotification('Failed to add capital', 'error');
         }
     });
-    
     document.getElementById('modalCancelBtn').addEventListener('click', () => modalDiv.remove());
 }
 
 // ============================================================
-// LOAD FUNCTIONS
+// CLEAR LOGS
 // ============================================================
-async function loadUserData() {
-    if (!currentUser) return;
-    try {
-        const data = await apiRequest('user/profile', 'GET');
-        if (data.success && data.user) {
-            userBalance = data.user.balance || 0;
-            const balanceEl = document.getElementById('globalBalance');
-            if (balanceEl) {
-                const formatted = formatPriceInCurrency(userBalance);
-                if (balanceEl.textContent !== formatted) {
-                    balanceEl.textContent = formatted;
-                    balanceEl.classList.remove('currency-updated');
-                    void balanceEl.offsetWidth;
-                    balanceEl.classList.add('currency-updated');
-                }
-            }
-        }
-    } catch(e) {
-        console.error('Load user data error:', e);
-    }
-}
-
-async function loadUserSubscription() {
-    if (!currentUser) return;
-    try {
-        const data = await apiRequest('user/subscription', 'GET');
-        if (data.success && data.subscription) {
-            const sub = data.subscription;
-            if (sub.expiry > Date.now()) {
-                userSubscription = { plan: sub.plan, multiplier: sub.multiplier, expiry: sub.expiry };
-            } else {
-                userSubscription = { plan: 'Free Plan', multiplier: 1, expiry: 0 };
-            }
-        }
-    } catch(e) {
-        console.error('Load subscription error:', e);
-    }
-}
-
-async function loadActiveRobots() {
-    if (!currentUser) return;
-    try {
-        const data = await apiRequest('bot/robots', 'GET');
-        if (data.success && data.robots) {
-            activeRobots = data.robots;
-            renderRobotsList();
-            updateStatsUI();
-        }
-    } catch(e) {
-        console.error('Load robots error:', e);
-    }
-}
-
-async function loadRobotStats() {
-    if (!currentUser) return;
-    try {
-        const data = await apiRequest('bot/stats', 'GET');
-        if (data.success && data.stats) {
-            robotStats = data.stats;
-            updateStatsUI();
-            renderRobotsList();
-        }
-    } catch(e) {
-        console.error('Load stats error:', e);
-    }
-}
-
-async function loadTradingLogs() {
-    if (!currentUser) return;
-    try {
-        const data = await apiRequest('bot/logs', 'GET');
-        if (data.success && data.logs) {
-            tradeLogs = data.logs.slice(0, 15);
+document.getElementById('clearLogsBtn')?.addEventListener('click', () => {
+    showModal('Clear Logs', 'Clear all trading logs? This cannot be undone.', async () => {
+        if (currentUser) {
+            await set(ref(db, `tradingLogs/${currentUser.uid}`), null);
+            tradeLogs = [];
             renderLogs();
         }
-    } catch(e) {
-        console.error('Load logs error:', e);
-    }
-}
-
-// ============================================================
-// RENDER ROBOTS LIST
-// ============================================================
-function renderRobotsList() {
-    const container = document.getElementById('robotsList');
-    if (activeRobots.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-robot"></i><p>You don't have any AI robots yet.</p><button onclick="window.location.href='robots.html'">Purchase a Robot</button></div>`;
-        return;
-    }
-    container.innerHTML = '<div class="robots-grid"></div>';
-    const grid = container.querySelector('.robots-grid');
-    activeRobots.forEach(robot => {
-        const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-        const isActive = robot.status === 'active';
-        const isCompleted = robot.status === 'completed';
-        const stats = robotStats[robot.id] || { profit: 0, trades: 0, wins: 0 };
-        const winRate = stats.trades > 0 ? (stats.wins/stats.trades*100).toFixed(1) : 0;
-        const finalDaily = info.dailyProfit * userSubscription.multiplier;
-        let investedAmount = robot.investedAmount || robot.amount || 0;
-        
-        if (investedAmount === 0 && robot.robotId !== undefined && INVESTED_AMOUNTS[robot.robotId] !== undefined) {
-            investedAmount = INVESTED_AMOUNTS[robot.robotId];
-        }
-        
-        const minTrade = robotMinTrade[robot.robotId] || 3;
-        const totalDays = DEFAULT_DURATION_DAYS;
-        const estimatedDailyProfit = (investedAmount * finalDaily) / 100;
-        const formattedInvested = formatPriceInCurrency(investedAmount);
-        const formattedMinTrade = formatPriceInCurrency(minTrade);
-        const formattedDailyProfit = formatPriceInCurrency(estimatedDailyProfit);
-        const formattedTotalProfit = formatPriceInCurrency(stats.profit);
-        
-        let progressPercent = 0;
-        let daysRemaining = 0;
-        let daysCompleted = robot.profitDays || 0;
-        if (isActive && robot.endTime) {
-            const now = Date.now();
-            const totalDuration = robot.endTime - (robot.startTime || now);
-            const elapsed = now - (robot.startTime || now);
-            progressPercent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-            daysRemaining = Math.max(0, Math.ceil((robot.endTime - now) / (24 * 60 * 60 * 1000)));
-        } else if (isCompleted) {
-            progressPercent = 100;
-            daysRemaining = 0;
-        }
-        
-        const card = document.createElement('div');
-        card.className = 'robot-card';
-        card.innerHTML = `
-            <div class="robot-header"><span class="robot-name">${info.name}</span><span class="robot-level">Level ${robot.robotId}</span></div>
-            <div style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px; margin-bottom:6px;">
-                <span style="color:#888; font-size:8px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
-                <span class="min-trade-value" data-usd-value="${minTrade}" style="color:#0ECB81; font-weight:700; font-size:12px;">${formattedMinTrade}</span>
-            </div>
-            <div class="invested-amount"><span class="invested-label"><i class="fas fa-lock"></i> Invested Amount:</span><span class="invested-value" data-usd-value="${investedAmount}">${formattedInvested}</span></div>
-            <div class="robot-stats"><div class="robot-stat"><div class="robot-stat-label">Daily Profit</div><div class="robot-stat-value">+${finalDaily}%</div></div><div class="robot-stat"><div class="robot-stat-label">Duration</div><div class="robot-stat-value">${totalDays} Days</div></div><div class="robot-stat"><div class="robot-stat-label">Multiplier</div><div class="robot-stat-value">${userSubscription.multiplier}x</div></div></div>
-            <div class="robot-stats"><div class="robot-stat"><div class="robot-stat-label">Est. Daily</div><div class="robot-stat-value" style="color:#0ECB81" data-usd-value="${estimatedDailyProfit}">≈${formattedDailyProfit}</div></div><div class="robot-stat"><div class="robot-stat-label">Total Profit</div><div class="robot-stat-value" style="color:${stats.profit>=0?'#0ECB81':'#F6465D'}">${formattedTotalProfit}</div></div><div class="robot-stat"><div class="robot-stat-label">Win Rate</div><div class="robot-stat-value">${winRate}%</div></div></div>
-            <div class="robot-status">
-                <div><span class="status-indicator ${isActive?'active':'inactive'}"></span><span class="status-text">${isActive?'🤖 Active - 30 Days Locked':(isCompleted?'✅ Task Complete! Ready to Restart':'⏸ Inactive')}</span></div>
-                <div class="robot-profit">💰 Total Earned: ${formattedTotalProfit}</div>
-            </div>
-            ${isActive ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%;"></div></div><div class="robot-progress">📅 Day ${daysCompleted}/${totalDays} | ${daysRemaining} days remaining</div>` : ''}
-            <div class="robot-buttons">
-                ${isCompleted ? 
-                    `<button class="btn-restart-robot" data-id="${robot.id}"><i class="fas fa-undo"></i> Restart Robot</button>` : 
-                    isActive ? 
-                    `<button class="btn-add-capital" data-id="${robot.id}"><i class="fas fa-plus-circle"></i> Add Capital</button>` :
-                    `<button class="btn-start-robot" data-id="${robot.id}"><i class="fas fa-play"></i> Start (Lock 100% Balance)</button>`
-                }
-            </div>
-        `;
-        grid.appendChild(card);
-        
-        const restartBtn = card.querySelector(`.btn-restart-robot[data-id="${robot.id}"]`);
-        const startBtn = card.querySelector(`.btn-start-robot[data-id="${robot.id}"]`);
-        const addCapitalBtn = card.querySelector(`.btn-add-capital[data-id="${robot.id}"]`);
-        
-        if (restartBtn) restartBtn.addEventListener('click', () => restartCompletedRobot(robot));
-        if (startBtn) startBtn.addEventListener('click', () => startRobot(robot));
-        if (addCapitalBtn) addCapitalBtn.addEventListener('click', () => addCapitalToRobot(robot));
     });
-}
+});
 
 // ============================================================
 // THEME TOGGLE
@@ -1339,61 +1574,86 @@ function initTheme() {
     if (saved === 'light') {
         document.body.classList.add('light-theme');
         const sunIcon = document.querySelector('#themeToggle i.fa-sun');
-        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
         if (sunIcon) sunIcon.style.display = 'none';
-        if (moonIcon) moonIcon.style.display = 'inline-block';
-    } else {
-        document.body.classList.remove('light-theme');
-        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
-        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
-        if (sunIcon) sunIcon.style.display = 'inline-block';
-        if (moonIcon) moonIcon.style.display = 'none';
     }
 }
-
 document.getElementById('themeToggle').addEventListener('click', () => {
     document.body.classList.toggle('light-theme');
     localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-    initTheme();
+    const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+    if (sunIcon) {
+        sunIcon.style.display = document.body.classList.contains('light-theme') ? 'none' : 'inline-block';
+    }
 });
 
-document.getElementById('clearLogsBtn')?.addEventListener('click', () => {
-    showModal('Clear Logs', 'Clear all trading logs? This cannot be undone.', async () => { 
-        if(currentUser) {
-            await apiRequest('bot/logs/clear', 'DELETE');
-            tradeLogs = []; 
-            renderLogs(); 
-            showNotification('✅ Trading logs cleared!', 'success'); 
-        }
-    });
-});
+function showNotification(message, type = 'info') {
+    // Just log to console, no popup
+    console.log(`[BOT] ${type}: ${message}`);
+}
 
 // ============================================================
 // INIT
 // ============================================================
 async function init() {
     initTheme();
+    
     onAuthStateChanged(auth, async (user) => {
-        if (!user) { window.location.href = 'login.html'; return; }
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
         currentUser = user;
+        console.log('[BOT] User logged in:', user.uid);
         
-        const country = await loadUserCountry();
-        const currencyInfo = getLocalCurrencyInfo(country);
+        const userData = await loadUserDataDirect();
+        if (userData && userData.country) {
+            userCountry = userData.country;
+        }
+        const currencyInfo = getLocalCurrencyInfo(userCountry);
         localRate = currencyInfo.rate;
         localSymbol = currencyInfo.symbol;
         updateCurrencyDisplay();
         
         document.getElementById('currencyToggleBtn').addEventListener('click', toggleCurrency);
         
-        await loadUserData();
-        await loadUserSubscription();
-        await loadActiveRobots();
-        await loadRobotStats();
-        await loadTradingLogs();
+        // Show skeletons
+        const container = document.getElementById('robotsList');
+        container.innerHTML = `
+            <div class="skeleton-grid">
+                <div class="skeleton-robot-card">
+                    <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                    <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                    <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                    <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+                </div>
+                <div class="skeleton-robot-card">
+                    <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                    <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                    <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                    <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+                </div>
+            </div>
+        `;
         
-        setInterval(() => { if(currentUser) loadUserData(); }, 30000);
+        await loadSubscriptionDirect();
+        await loadActiveRobotsDirect();
+        await loadRobotStatsDirect();
+        await loadTradingLogsDirect();
+        
+        // ✅ Process daily profits via backend (runs even if user offline)
+        await processDailyProfitsBackend();
+        
+        setupRTDBListeners();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => { if (currentUser) loadUserDataDirect(); }, 30000);
+        // Check daily profits every 5 minutes via backend
+        setInterval(() => { if (currentUser) processDailyProfitsBackend(); }, 5 * 60 * 1000);
+        
+        console.log('[BOT] ✅ Auto Bot initialized with backend daily profit');
     });
 }
+
 init();
 </script>
 </body>

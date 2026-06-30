@@ -1,69 +1,57 @@
 // functions/calculations/fees.js
-const { getDB } = require('../firebase');
-const { runTransaction } = require('../helpers');
 const config = require('../config');
 
 function calculateOpenFee(margin) {
-    return margin * config.OPEN_FEE_PERCENT;
+    return margin * config.OPEN_FEE_RATE;
 }
 
-function calculateCloseFee(amount) {
-    return amount * config.CLOSE_FEE_PERCENT;
+function calculateCloseFee(grossPnl) {
+    return Math.abs(grossPnl) * config.CLOSE_FEE_RATE;
 }
 
-function calculateLeverageFee(amount, leverage) {
-    const feePercent = getLeverageFee(leverage);
-    return amount * feePercent;
+function calculateTotalFees(margin, grossPnl) {
+    const openFee = calculateOpenFee(margin);
+    const closeFee = calculateCloseFee(grossPnl);
+    return openFee + closeFee;
 }
 
-function calculatePerformanceFee(profit) {
-    if (profit <= 0) return 0;
-    return profit * config.PERFORMANCE_FEE_PERCENT;
+function calculateNetProfit(margin, grossPnl) {
+    const totalFees = calculateTotalFees(margin, grossPnl);
+    return grossPnl - totalFees;
 }
 
-function getLeverageFee(leverage) {
-    const fees = config.LEVERAGE_FEES;
-    const keys = Object.keys(fees).map(Number).sort((a, b) => a - b);
-    for (const key of keys) {
-        if (leverage <= key) return fees[key];
+function calculateTradeResult(margin, leverage, entryPrice, closePrice, type) {
+    const positionSize = (margin * leverage) / entryPrice;
+    let grossPnl = 0;
+    if (type === 'BUY') {
+        grossPnl = (closePrice - entryPrice) * positionSize;
+    } else {
+        grossPnl = (entryPrice - closePrice) * positionSize;
     }
-    return fees[100] || 0.10;
+    const openFee = calculateOpenFee(margin);
+    const closeFee = calculateCloseFee(grossPnl);
+    const totalFees = openFee + closeFee;
+    const netProfit = grossPnl - totalFees;
+    
+    return {
+        grossPnl,
+        openFee,
+        closeFee,
+        totalFees,
+        netProfit,
+        positionSize
+    };
 }
 
 async function updatePlatformStats(type, amount) {
-    try {
-        const db = getDB();
-        const statsRef = db.ref('platformStats');
-        const snapshot = await statsRef.once('value');
-        const current = snapshot.exists() ? snapshot.val() : {};
-        const updates = {};
-        
-        const typeMap = {
-            'open': 'totalOpenFees',
-            'close': 'totalCloseFees',
-            'performance': 'totalPerformanceFees',
-            'leverage': 'totalLeverageFees'
-        };
-        
-        const key = typeMap[type];
-        if (key) {
-            updates[key] = (current[key] || 0) + amount;
-        }
-        updates.totalFeesCollected = (current.totalFeesCollected || 0) + amount;
-        updates.lastUpdated = Date.now();
-        
-        await statsRef.update(updates);
-        console.log(`[FEES] ✅ ${type} fee $${amount.toFixed(2)} added`);
-    } catch (error) {
-        console.error('[FEES] Error updating platform stats:', error);
-    }
+    console.log(`[PLATFORM] ${type}: $${amount.toFixed(2)}`);
 }
 
 module.exports = {
     calculateOpenFee,
     calculateCloseFee,
-    calculateLeverageFee,
-    calculatePerformanceFee,
-    getLeverageFee,
+    calculateTotalFees,
+    calculateNetProfit,
+    calculateTradeResult,
     updatePlatformStats
 };

@@ -1,151 +1,131 @@
-// functions/trade/trade-close.js
+// backend/functions/trade/trade-close.js
 const { getDB } = require('../firebase');
-const { runTransaction } = require('../helpers');
-const { calculatePnL } = require('../calculations/pnl');
-const { calculateCloseFee, calculatePerformanceFee, updatePlatformStats } = require('../calculations/fees');
-const { getPriceStream } = require('../streaming/price-stream');
-const { sendNotification } = require('../notifications/notifications');
 const config = require('../config');
+const { calculatePnL } = require('../calculations/pnl');
+const { calculateTradeResult } = require('../calculations/fees');
 
+// ✅ Close trade
 async function closeTrade(userId, tradeId, reason = 'Manual') {
     const db = getDB();
-    const priceStream = getPriceStream();
     
-    // Get trade - REST API returns data directly
+    // Get trade
     const tradeSnap = await db.ref(`trades/${userId}/${tradeId}`).once('value');
-    const trade = tradeSnap.val();
-    
-    if (!trade) throw new Error('Trade not found');
-    if (trade.status !== 'open') throw new Error('Trade already closed');
-    
-    // Get current price
-    const symbol = trade.symbol || 'BTC/USDT';
-    const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
-    const currentPrice = priceStream.getPrice(symbolClean) || trade.entryPrice;
-    
-    // Calculate PnL
-    const pnl = calculatePnL(trade, currentPrice);
-    const grossReturn = trade.margin + pnl;
-    
-    let performanceFeeAmount = 0;
-    let leverageFeeAmount = 0;
-    let closeFee = 0;
-    let netReturn = 0;
-    
-    // Performance fee for copied trades
-    if (trade.isCopiedTrade && trade.performanceFeePending !== false) {
-        if (pnl > 0) {
-            performanceFeeAmount = pnl * config.PERFORMANCE_FEE_PERCENT;
-            const perfFeeRef = db.ref(`performanceFees/${userId}/${tradeId}`);
-            const perfSnap = await perfFeeRef.once('value');
-            const perfData = perfSnap.val();
-            if (perfData) {
-                await perfFeeRef.update({
-                    status: 'collected',
-                    feeAmount: performanceFeeAmount,
-                    profitAmount: pnl,
-                    collectedAt: Date.now()
-                });
-            }
-            await updatePlatformStats('performance', performanceFeeAmount);
-        } else {
-            const perfFeeRef = db.ref(`performanceFees/${userId}/${tradeId}`);
-            const perfSnap = await perfFeeRef.once('value');
-            const perfData = perfSnap.val();
-            if (perfData) {
-                await perfFeeRef.update({
-                    status: 'no_profit',
-                    profitAmount: pnl,
-                    closedAt: Date.now()
-                });
-            }
-        }
+    if (!tradeSnap.exists()) {
+        console.warn(`[CLOSE] Trade ${tradeId} not found for ${userId}`);
+        return { success: false, error: 'Trade not found' };
     }
     
-    // Leverage fee
-    const leverage = trade.leverage || 1;
-    const leverageFeePercent = require('../calculations/fees').getLeverageFee(leverage);
-    const amountBeforePerfFee = grossReturn - performanceFeeAmount;
-    leverageFeeAmount = amountBeforePerfFee * leverageFeePercent;
+    const trade = tradeSnap.val();
+    if (trade.status !== 'open') {
+        return { success: false, error: 'Trade already closed' };
+    }
     
-    // Close fee
-    const amountAfterLeverageFee = amountBeforePerfFee - leverageFeeAmount;
-    closeFee = calculateCloseFee(amountAfterLeverageFee);
-    netReturn = amountAfterLeverageFee - closeFee;
+    // Get current price from Binance
+    const symbol = trade.symbol || 'BTC/USDT';
+    const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
+    const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolClean}`);
+    const priceData = await priceRes.json();
+    const currentPrice = parseFloat(priceData.price) || trade.entryPrice;
     
-    // Update user balance
-    const result = await runTransaction(`users/${userId}`, (data) => {
-        if (data) {
-            data.tradingBalance = (data.tradingBalance || 0) + netReturn;
-            if (pnl < 0) {
-                data.dailyLoss = (data.dailyLoss || 0) + Math.abs(pnl);
-            }
-            return data;
-        }
+    // Calculate PnL and fees
+    const result = calculateTradeResult(
+        trade.margin,
+        trade.leverage,
+        trade.entryPrice,
+        currentPrice,
+        trade.type
+    );
+    
+    if (!result) {
+        return { success: false, error: 'Fee calculation failed' };
+    }
+    
+    const { grossPnl, openFee, closeFee, totalFees, netProfit } = result;
+    
+    // ✅ Update user balance directly
+    const userSnap = await db.ref(`users/${userId}`).once('value');
+    const userData = userSnap.val() || {};
+    const currentBalance = userData.tradingBalance || 0;
+    
+    // Add margin back + net profit
+    const newBalance = currentBalance + trade.margin + netProfit;
+    
+    await db.ref(`users/${userId}`).update({
+        tradingBalance: newBalance,
+        dailyLoss: (userData.dailyLoss || 0) + (netProfit < 0 ? Math.abs(netProfit) : 0)
     });
     
-    if (!result.committed) throw new Error('Failed to update user balance');
+    // ✅ Save to trade history
+    const historyRef = db.ref(`tradeHistory/${userId}/${tradeId}`);
+    await historyRef.set({
+        ...trade,
+        closePrice: currentPrice,
+        grossPnl: grossPnl,
+        openFee: openFee,
+        closeFee: closeFee,
+        totalFees: totalFees,
+        netProfit: netProfit,
+        closedAt: Date.now(),
+        closeReason: reason
+    });
     
-    // Update trade
+    // ✅ Update trade status
     await db.ref(`trades/${userId}/${tradeId}`).update({
         status: 'closed',
-        closedProfit: pnl,
         closePrice: currentPrice,
-        closedAt: Date.now(),
-        closedAtMillis: Date.now(),
-        closeReason: reason,
+        grossPnl: grossPnl,
+        openFee: openFee,
         closeFee: closeFee,
-        performanceFee: performanceFeeAmount,
-        leverageFee: leverageFeeAmount,
-        netReturn: netReturn,
-        grossReturn: grossReturn,
-        totalFees: (trade.totalFees || 0) + closeFee + performanceFeeAmount + leverageFeeAmount
+        totalFees: totalFees,
+        netProfit: netProfit,
+        closedAt: Date.now(),
+        closeReason: reason
     });
     
-    // Update user trades list
     await db.ref(`user_trades/${userId}/${tradeId}`).update({
         status: 'closed',
         closedAt: Date.now(),
-        pnl: pnl,
-        netReturn: netReturn
+        grossPnl: grossPnl,
+        netProfit: netProfit,
+        totalFees: totalFees
     });
     
-    // Update platform stats
-    if (closeFee > 0) await updatePlatformStats('close', closeFee);
-    if (leverageFeeAmount > 0) await updatePlatformStats('leverage', leverageFeeAmount);
-    
-    // Update price stream
-    await priceStream.updateActiveSymbols();
-    
-    // Send notification
-    const pnlText = pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`;
-    await sendNotification(userId, {
-        title: `🔒 ${trade.type} Position Closed`,
-        message: `${trade.symbol || 'BTC/USDT'} | ${reason} | ${pnlText}`,
-        type: pnl >= 0 ? 'success' : 'error'
+    // ✅ Add log
+    const logRef = db.ref(`tradingLogs/${userId}`).push();
+    await logRef.set({
+        id: logRef.key,
+        robot: 'Manual Trade',
+        message: `🔒 ${trade.type} ${trade.symbol} closed - ${reason}, PnL: ${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`,
+        type: netProfit >= 0 ? 'win' : 'loss',
+        time: new Date().toLocaleTimeString(),
+        timestamp: Date.now()
     });
     
-    console.log(`[CLOSE] ✅ ${reason} trade closed for ${userId}: ${pnlText}`);
+    console.log(`[CLOSE] ✅ ${reason} trade closed for ${userId}: $${netProfit.toFixed(2)}`);
     
     return {
         success: true,
         tradeId: tradeId,
-        pnl: pnl,
+        netProfit: netProfit,
+        grossPnl: grossPnl,
         closePrice: currentPrice,
-        reason: reason,
-        netReturn: netReturn
+        reason: reason
     };
 }
 
+// ✅ Close all trades
 async function closeAllTrades(userId, reason = 'Close All') {
-    const { getOpenTrades } = require('./trade-open');
-    const trades = await getOpenTrades(userId);
-    const results = [];
+    const trades = await require('./trade-open').getOpenTrades(userId);
     
+    if (trades.length === 0) {
+        return { success: true, closed: 0, total: 0 };
+    }
+    
+    let closed = 0;
     for (const trade of trades) {
         try {
             const result = await closeTrade(userId, trade.id, reason);
-            results.push(result);
+            if (result.success) closed++;
         } catch (error) {
             console.error(`[CLOSE] Error closing trade ${trade.id}:`, error);
         }
@@ -153,7 +133,7 @@ async function closeAllTrades(userId, reason = 'Close All') {
     
     return {
         success: true,
-        closed: results.length,
+        closed: closed,
         total: trades.length
     };
 }

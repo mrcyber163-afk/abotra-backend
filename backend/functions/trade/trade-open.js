@@ -1,34 +1,52 @@
-// functions/trade/trade-open.js
+// backend/functions/trade/trade-open.js
 const { getDB } = require('../firebase');
-const { runTransaction, generateId } = require('../helpers');
-const { calculatePnL, calculateEquity, calculateUsedMargin, calculateLiquidation } = require('../calculations/pnl');
-const { calculateOpenFee, calculateLeverageFee, updatePlatformStats } = require('../calculations/fees');
-const { validateTrade } = require('../calculations/risk-manager');
-const { getPriceStream } = require('../streaming/price-stream');
-const { sendNotification } = require('../notifications/notifications');
 const config = require('../config');
+const { calculateLiquidationPrice, calculatePnL } = require('../calculations/pnl');
+const { calculateTradeResult } = require('../calculations/fees');
+const { loadRiskSettings, validateTrade } = require('../calculations/risk-manager');
 
+// ✅ Get open trades
 async function getOpenTrades(userId) {
     const db = getDB();
     const snapshot = await db.ref(`trades/${userId}`).once('value');
     const trades = [];
     
-    // REST API returns data directly
-    const data = snapshot.val();
-    if (data && typeof data === 'object') {
-        for (const tradeId of Object.keys(data)) {
-            const trade = data[tradeId];
+    if (snapshot.exists()) {
+        snapshot.forEach(child => {
+            const trade = child.val();
             if (trade && trade.status === 'open') {
-                trades.push({ id: tradeId, ...trade });
+                trades.push({ id: child.key, ...trade });
             }
-        }
+        });
     }
     return trades;
 }
 
+// ✅ Get all open trades (for monitoring)
+async function getAllOpenTrades() {
+    const db = getDB();
+    const trades = [];
+    
+    // Get all users with trades
+    const snapshot = await db.ref('trades').once('value');
+    if (snapshot.exists()) {
+        snapshot.forEach(child => {
+            const trade = child.val();
+            if (trade && trade.status === 'open') {
+                trades.push({
+                    id: child.key,
+                    userId: trade.userId || trade.uid,
+                    ...trade
+                });
+            }
+        });
+    }
+    return trades;
+}
+
+// ✅ Open trade
 async function openTrade(userId, tradeData) {
     const db = getDB();
-    const priceStream = getPriceStream();
     
     const {
         type,
@@ -51,9 +69,12 @@ async function openTrade(userId, tradeData) {
         throw new Error('Margin and leverage must be greater than 0');
     }
     
-    // Get current price
+    // Get current price from Binance
     const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
-    const currentPrice = priceStream.getPrice(symbolClean);
+    const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolClean}`);
+    const priceData = await priceRes.json();
+    const currentPrice = parseFloat(priceData.price);
+    
     if (!currentPrice || currentPrice <= 0) {
         throw new Error('Price not available for ' + symbol);
     }
@@ -67,7 +88,7 @@ async function openTrade(userId, tradeData) {
     const dailyLoss = userData.dailyLoss || 0;
     
     // Load risk settings
-    const risk = await require('../calculations/risk-manager').loadRiskSettings(userId);
+    const risk = await loadRiskSettings(userId);
     const positions = await getOpenTrades(userId);
     
     // Validate trade
@@ -77,9 +98,7 @@ async function openTrade(userId, tradeData) {
     }
     
     // Calculate fees
-    const openFee = calculateOpenFee(margin);
-    const leverageFeePercent = require('../calculations/fees').getLeverageFee(leverage);
-    const leverageFee = margin * leverageFeePercent;
+    const openFee = margin * config.OPEN_FEE_RATE;
     const totalCost = margin + openFee;
     
     // Check balance
@@ -87,21 +106,16 @@ async function openTrade(userId, tradeData) {
         throw new Error(`Insufficient balance. Need $${totalCost.toFixed(2)}, have $${tradingBalance.toFixed(2)}`);
     }
     
-    // Deduct balance
-    const result = await runTransaction(`users/${userId}`, (data) => {
-        if (data && (data.tradingBalance || 0) >= totalCost) {
-            data.tradingBalance -= totalCost;
-            return data;
-        }
+    // ✅ Deduct balance directly (no transaction needed for simple update)
+    await db.ref(`users/${userId}`).update({
+        tradingBalance: tradingBalance - totalCost
     });
     
-    if (!result.committed) throw new Error('Balance changed during transaction');
-    
     // Calculate liquidation price
-    const liqPrice = calculateLiquidation(margin, leverage, currentPrice, type);
+    const liquidationPrice = calculateLiquidationPrice(margin, leverage, currentPrice, type);
     
     // Create trade
-    const tradeId = generateId();
+    const tradeId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 6);
     const newTrade = {
         id: tradeId,
         userId: userId,
@@ -116,17 +130,14 @@ async function openTrade(userId, tradeData) {
         createdAt: Date.now(),
         createdAtMillis: Date.now(),
         symbol: symbol,
-        liquidationPrice: liqPrice,
+        liquidationPrice: liquidationPrice,
         openFee: openFee,
-        leverageFee: leverageFee,
         totalCost: totalCost,
         closeFee: 0,
         netReturn: 0,
         grossReturn: 0,
-        totalFees: openFee + leverageFee,
+        totalFees: openFee,
         isCopiedTrade: isCopiedTrade,
-        performanceFeePending: isCopiedTrade,
-        performanceFeeCollected: false,
         takeProfit: takeProfit || null,
         stopLoss: stopLoss || null
     };
@@ -141,16 +152,15 @@ async function openTrade(userId, tradeData) {
         createdAt: Date.now()
     });
     
-    // Update platform stats
-    await updatePlatformStats('open', openFee);
-    if (leverageFee > 0) await updatePlatformStats('leverage', leverageFee);
-    await priceStream.updateActiveSymbols();
-    
-    // Send notification
-    await sendNotification(userId, {
-        title: `🔓 ${type} Position Opened`,
-        message: `${symbol} | $${margin} | ${leverage}x | Entry: $${currentPrice.toFixed(2)}`,
-        type: 'success'
+    // ✅ Add log
+    const logRef = db.ref(`tradingLogs/${userId}`).push();
+    await logRef.set({
+        id: logRef.key,
+        robot: 'Manual Trade',
+        message: `🔓 ${type} ${symbol} opened - $${margin} @ ${leverage}x, Entry: $${currentPrice.toFixed(2)}`,
+        type: 'info',
+        time: new Date().toLocaleTimeString(),
+        timestamp: Date.now()
     });
     
     console.log(`[TRADE] ✅ ${type} trade opened for ${userId}: $${margin} @ ${leverage}x`);
@@ -158,14 +168,12 @@ async function openTrade(userId, tradeData) {
     return {
         success: true,
         tradeId: tradeId,
-        trade: {
-            id: tradeId,
-            ...newTrade
-        }
+        trade: newTrade
     };
 }
 
 module.exports = {
     openTrade,
-    getOpenTrades
+    getOpenTrades,
+    getAllOpenTrades
 };

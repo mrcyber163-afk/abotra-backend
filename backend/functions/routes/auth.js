@@ -1,652 +1,648 @@
-// ============================================================
-// AUTH ROUTES - REST API Version (No Admin SDK)
-// ============================================================
-
+// functions/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const { 
-    restGet, 
-    restPut, 
-    restPost, 
-    restPatch,
-    authSignUp,
-    authSignIn,
-    authGetUser
-} = require('../firebase');
+const { getDB, admin, getAuth } = require('../firebase');
 
 // ============================================================
-// 📧 REGISTER WITH EMAIL - MAIN ENDPOINT
+// HELPER: Create user object
+// ============================================================
+function createUserObject(data) {
+    const {
+        uid,
+        email,
+        fullName,
+        username,
+        country,
+        phone,
+        method = 'email',
+        referralCode = null,
+        isPhoneUser = false
+    } = data;
+
+    const userId = uid || 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+    const refCode = referralCode || 'ABOTRA' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    return {
+        uid: userId,
+        email: email || '',
+        fullName: fullName || email?.split('@')[0] || 'User',
+        username: username || email?.split('@')[0] + Math.floor(Math.random() * 1000),
+        country: country || 'Tanzania',
+        phone: phone || '',
+        method: method,
+        emailVerified: false,
+        phoneVerified: false,
+        isPhoneUser: isPhoneUser,
+        referredBy: referralCode || null,
+        referralCode: refCode,
+        referralCount: 0,
+        commissionEarned: 0,
+        depositCommissionEarned: 0,
+        botProfitCommissionEarned: 0,
+        affiliateWithdrawn: 0,
+        balance: 0,
+        tradingBalance: 0,
+        totalDeposited: 0,
+        totalWithdrawn: 0,
+        totalProfit: 0,
+        dailyPnL: 0,
+        dailyLoss: 0,
+        winRate: 0,
+        activeTrades: 0,
+        aiScore: 0,
+        status: 'active',
+        isVerified: false,
+        isMerchant: false,
+        isOnline: true,
+        profilePic: null,
+        createdAt: Date.now(),
+        lastLogin: Date.now(),
+        lastActive: Date.now(),
+        kycStatus: 'none',
+        subscriptionMultiplier: 1,
+        subscriptionExpiry: 0
+    };
+}
+
+// ============================================================
+// 1. REGISTER - Email
 // ============================================================
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, username, fullName, phone, country, referralCode } = req.body;
-
-        // Validation
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'Email and password are required'
-            });
-        }
-
-        if (password.length < 6) {
-            return res.status(400).json({
-                success: false,
-                error: 'Password must be at least 6 characters'
-            });
-        }
-
-        console.log('[REGISTER] Creating user:', email);
-
-        // 1. Create user using Firebase REST Auth
-        const authResult = await authSignUp(email, password);
-        
-        if (!authResult || !authResult.idToken) {
-            return res.status(400).json({
-                success: false,
-                error: 'Failed to create user. Email may already be in use.'
-            });
-        }
-
-        const uid = authResult.localId;
-        const displayName = username || fullName || email.split('@')[0];
-
-        console.log('[REGISTER] User created:', uid);
-
-        // 2. Generate referral code
-        const referralCodeGen = await generateReferralCode();
-
-        // 3. Save user data
-        const userData = {
-            uid: uid,
-            email: email,
-            username: displayName,
-            fullName: fullName || displayName,
-            phone: phone || '',
-            country: country || 'Tanzania',
-            balance: 0,
-            totalDeposited: 0,
-            createdAt: Date.now(),
-            isVerified: false,
-            isActive: true,
-            method: 'email',
-            referralCode: referralCodeGen,
-            referredBy: referralCode || null,
-            referralCount: 0
-        };
-
-        await restPut(`users/${uid}`, userData);
-        console.log('[REGISTER] User data saved');
-
-        // 4. Process referral if exists
-        if (referralCode) {
-            await processReferral(referralCode, displayName);
-        }
-
-        return res.json({
-            success: true,
-            message: 'User registered successfully',
-            data: {
-                uid: uid,
-                email: email,
-                username: displayName,
-                referralCode: referralCodeGen,
-                idToken: authResult.idToken,
-                refreshToken: authResult.refreshToken,
-                expiresIn: authResult.expiresIn
-            }
-        });
-
-    } catch (error) {
-        console.error('[REGISTER] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message || 'Registration failed'
-        });
-    }
-});
-
-// ============================================================
-// 📧 REGISTER WITH EMAIL - ALTERNATIVE ENDPOINT (Backward Compatible)
-// ============================================================
-router.post('/register/email', async (req, res) => {
-    try {
-        const { email, password, username, fullName, phone, country, referralCode } = req.body;
+        const { email, password, fullName, username, country, referralCode } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'Email and password are required'
+            return res.status(400).json({ success: false, error: 'Email and password required' });
+        }
+
+        const db = getDB();
+
+        // Check if email exists
+        const usersSnap = await db.ref('users').once('value');
+        let emailExists = false;
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                if (child.val().email && child.val().email.toLowerCase() === email.toLowerCase()) {
+                    emailExists = true;
+                }
             });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({
-                success: false,
-                error: 'Password must be at least 6 characters'
-            });
+        if (emailExists) {
+            return res.status(400).json({ success: false, error: 'Email already registered' });
         }
 
-        console.log('[REGISTER-EMAIL] Creating user:', email);
-
-        const authResult = await authSignUp(email, password);
-        
-        if (!authResult || !authResult.idToken) {
-            return res.status(400).json({
-                success: false,
-                error: 'Failed to create user. Email may already be in use.'
-            });
-        }
-
-        const uid = authResult.localId;
-        const displayName = username || fullName || email.split('@')[0];
-
-        const referralCodeGen = await generateReferralCode();
-
-        const userData = {
-            uid: uid,
-            email: email,
-            username: displayName,
-            fullName: fullName || displayName,
-            phone: phone || '',
-            country: country || 'Tanzania',
-            balance: 0,
-            totalDeposited: 0,
-            createdAt: Date.now(),
-            isVerified: false,
-            isActive: true,
-            method: 'email',
-            referralCode: referralCodeGen,
-            referredBy: referralCode || null,
-            referralCount: 0
-        };
-
-        await restPut(`users/${uid}`, userData);
-        console.log('[REGISTER-EMAIL] User data saved');
-
+        // Check referral code
         if (referralCode) {
-            await processReferral(referralCode, displayName);
+            const refSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+            if (!refSnap.exists()) {
+                return res.status(400).json({ success: false, error: 'Invalid referral code' });
+            }
         }
 
-        return res.json({
-            success: true,
-            message: 'User registered successfully',
-            data: {
-                uid: uid,
-                email: email,
-                username: displayName,
-                referralCode: referralCodeGen,
-                idToken: authResult.idToken,
-                refreshToken: authResult.refreshToken,
-                expiresIn: authResult.expiresIn
-            }
-        });
-
-    } catch (error) {
-        console.error('[REGISTER-EMAIL] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message || 'Registration failed'
-        });
-    }
-});
-
-// ============================================================
-// 📱 REGISTER WITH PHONE
-// ============================================================
-router.post('/register/phone', async (req, res) => {
-    try {
-        const { 
-            uid, 
-            fullName, 
-            username, 
-            phone, 
-            phoneRaw, 
-            phoneCountryCode, 
-            country, 
+        const userData = createUserObject({
+            email,
+            fullName,
+            username,
+            country,
             referralCode,
-            password 
-        } = req.body;
+            method: 'email'
+        });
 
-        if (!uid || !phone) {
-            return res.status(400).json({
-                success: false,
-                error: 'uid and phone are required'
-            });
-        }
+        const userId = userData.uid;
 
-        console.log('[REGISTER-PHONE] Saving user:', phone);
+        // Save user
+        await db.ref(`users/${userId}`).set(userData);
 
-        const existingUser = await restGet(`users/${uid}`);
-        if (existingUser) {
-            return res.json({
-                success: true,
-                message: 'User already exists',
-                data: { uid, phone }
-            });
-        }
-
-        const referralCodeGen = await generateReferralCode();
-
-        const userData = {
-            uid: uid,
-            fullName: fullName || 'User',
-            username: username || phone,
-            phone: phone,
-            phoneRaw: phoneRaw || phone.replace(/\D/g, ''),
-            phoneCountryCode: phoneCountryCode || '+255',
-            country: country || 'Tanzania',
-            balance: 0,
-            totalDeposited: 0,
-            createdAt: Date.now(),
-            isVerified: false,
-            isActive: true,
-            method: 'phone',
-            isPhoneUser: true,
-            referralCode: referralCodeGen,
-            referredBy: referralCode || null,
-            referralCount: 0
-        };
-
-        await restPut(`users/${uid}`, userData);
-        console.log('[REGISTER-PHONE] User data saved');
-
+        // Process referral
         if (referralCode) {
-            await processReferral(referralCode, fullName || 'User');
+            try {
+                const referrerSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+                if (referrerSnap.exists()) {
+                    referrerSnap.forEach(async (child) => {
+                        const referrerId = child.key;
+                        const referrerData = child.val();
+                        await db.ref(`users/${referrerId}`).update({
+                            referralCount: (referrerData.referralCount || 0) + 1
+                        });
+                        const notifRef = db.ref(`notifications/${referrerId}`).push();
+                        await notifRef.set({
+                            title: 'New Referral! 🎉',
+                            message: `${fullName || email} joined using your referral link!`,
+                            type: 'success',
+                            read: false,
+                            timestamp: Date.now()
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('[REFERRAL] Error:', e);
+            }
         }
 
-        return res.json({
+        res.json({
             success: true,
-            message: 'Phone user registered successfully',
             data: {
-                uid: uid,
-                phone: phone,
-                username: username || phone,
-                referralCode: referralCodeGen
+                uid: userId,
+                email: email,
+                referralCode: userData.referralCode,
+                message: 'Account created successfully'
             }
         });
 
     } catch (error) {
-        console.error('[REGISTER-PHONE] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        console.error('[AUTH] Register error:', error);
+        res.status(400).json({ success: false, error: error.message || 'Registration failed' });
     }
 });
 
 // ============================================================
-// 🔵 REGISTER WITH GOOGLE
+// 2. REGISTER - Google ✅
 // ============================================================
 router.post('/register/google', async (req, res) => {
     try {
         const { uid, email, fullName, username, referralCode } = req.body;
 
         if (!uid || !email) {
-            return res.status(400).json({
-                success: false,
-                error: 'uid and email are required'
-            });
+            return res.status(400).json({ success: false, error: 'UID and email required' });
         }
 
-        console.log('[REGISTER-GOOGLE] Saving user:', email);
+        const db = getDB();
 
-        const existingUser = await restGet(`users/${uid}`);
-        if (existingUser) {
+        // Check if user already exists
+        const userSnap = await db.ref(`users/${uid}`).once('value');
+        if (userSnap.exists()) {
+            await db.ref(`users/${uid}`).update({
+                lastLogin: Date.now(),
+                isOnline: true
+            });
             return res.json({
                 success: true,
-                message: 'User already exists',
-                data: { uid, email }
+                data: {
+                    uid: uid,
+                    email: email,
+                    message: 'User already exists, logged in'
+                }
             });
         }
 
-        const referralCodeGen = await generateReferralCode();
-
-        const userData = {
-            uid: uid,
-            email: email,
-            username: username || email.split('@')[0],
-            fullName: fullName || email.split('@')[0],
-            balance: 0,
-            totalDeposited: 0,
-            createdAt: Date.now(),
-            isVerified: false,
-            isActive: true,
-            method: 'google',
-            referralCode: referralCodeGen,
-            referredBy: referralCode || null,
-            referralCount: 0,
-            authProvider: 'google'
-        };
-
-        await restPut(`users/${uid}`, userData);
-        console.log('[REGISTER-GOOGLE] User data saved');
-
-        if (referralCode) {
-            await processReferral(referralCode, fullName || email.split('@')[0]);
+        // Check if email exists
+        const usersSnap = await db.ref('users').once('value');
+        let emailExists = false;
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                if (child.val().email && child.val().email.toLowerCase() === email.toLowerCase()) {
+                    emailExists = true;
+                }
+            });
         }
 
-        return res.json({
+        if (emailExists) {
+            return res.status(400).json({ success: false, error: 'Email already registered' });
+        }
+
+        // Check referral code
+        if (referralCode) {
+            const refSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+            if (!refSnap.exists()) {
+                return res.status(400).json({ success: false, error: 'Invalid referral code' });
+            }
+        }
+
+        const userData = createUserObject({
+            uid: uid,
+            email: email,
+            fullName: fullName || email.split('@')[0],
+            username: username || email.split('@')[0] + Math.floor(Math.random() * 1000),
+            referralCode: referralCode,
+            method: 'google'
+        });
+
+        await db.ref(`users/${uid}`).set(userData);
+
+        // Process referral
+        if (referralCode) {
+            try {
+                const referrerSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+                if (referrerSnap.exists()) {
+                    referrerSnap.forEach(async (child) => {
+                        const referrerId = child.key;
+                        const referrerData = child.val();
+                        await db.ref(`users/${referrerId}`).update({
+                            referralCount: (referrerData.referralCount || 0) + 1
+                        });
+                        const notifRef = db.ref(`notifications/${referrerId}`).push();
+                        await notifRef.set({
+                            title: 'New Referral! 🎉',
+                            message: `${fullName || email} joined using your referral link!`,
+                            type: 'success',
+                            read: false,
+                            timestamp: Date.now()
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('[REFERRAL] Error:', e);
+            }
+        }
+
+        res.json({
             success: true,
-            message: 'Google user registered successfully',
             data: {
                 uid: uid,
                 email: email,
-                username: username || email.split('@')[0],
-                referralCode: referralCodeGen
+                referralCode: userData.referralCode,
+                message: 'Google account created successfully'
             }
         });
 
     } catch (error) {
-        console.error('[REGISTER-GOOGLE] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        console.error('[AUTH] Google register error:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// 🔐 LOGIN
+// 3. REGISTER - Phone ✅
+// ============================================================
+router.post('/register/phone', async (req, res) => {
+    try {
+        const { uid, phone, fullName, username, country, referralCode } = req.body;
+
+        if (!uid || !phone) {
+            return res.status(400).json({ success: false, error: 'UID and phone required' });
+        }
+
+        const db = getDB();
+
+        // Check if user already exists
+        const userSnap = await db.ref(`users/${uid}`).once('value');
+        if (userSnap.exists()) {
+            await db.ref(`users/${uid}`).update({
+                lastLogin: Date.now(),
+                isOnline: true
+            });
+            return res.json({
+                success: true,
+                data: {
+                    uid: uid,
+                    phone: phone,
+                    message: 'User already exists'
+                }
+            });
+        }
+
+        // Check if phone exists
+        const usersSnap = await db.ref('users').once('value');
+        let phoneExists = false;
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                if (child.val().phone && child.val().phone === phone) {
+                    phoneExists = true;
+                }
+            });
+        }
+
+        if (phoneExists) {
+            return res.status(400).json({ success: false, error: 'Phone number already registered' });
+        }
+
+        // Check referral code
+        if (referralCode) {
+            const refSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+            if (!refSnap.exists()) {
+                return res.status(400).json({ success: false, error: 'Invalid referral code' });
+            }
+        }
+
+        const userData = createUserObject({
+            uid: uid,
+            email: phone + '@phone.user',
+            fullName: fullName || 'Phone User',
+            username: username || 'user_' + Math.floor(Math.random() * 10000),
+            country: country || 'Tanzania',
+            phone: phone,
+            referralCode: referralCode,
+            method: 'phone',
+            isPhoneUser: true
+        });
+
+        await db.ref(`users/${uid}`).set(userData);
+
+        // Process referral
+        if (referralCode) {
+            try {
+                const referrerSnap = await db.ref('users').orderByChild('referralCode').equalTo(referralCode.toUpperCase()).once('value');
+                if (referrerSnap.exists()) {
+                    referrerSnap.forEach(async (child) => {
+                        const referrerId = child.key;
+                        const referrerData = child.val();
+                        await db.ref(`users/${referrerId}`).update({
+                            referralCount: (referrerData.referralCount || 0) + 1
+                        });
+                        const notifRef = db.ref(`notifications/${referrerId}`).push();
+                        await notifRef.set({
+                            title: 'New Referral! 🎉',
+                            message: `${fullName || phone} joined using your referral link!`,
+                            type: 'success',
+                            read: false,
+                            timestamp: Date.now()
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('[REFERRAL] Error:', e);
+            }
+        }
+
+        res.json({
+            success: true,
+            data: {
+                uid: uid,
+                phone: phone,
+                referralCode: userData.referralCode,
+                message: 'Phone account created successfully'
+            }
+        });
+
+    } catch (error) {
+        console.error('[AUTH] Phone register error:', error);
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// 4. LOGIN
 // ============================================================
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'Email and password are required'
+            return res.status(400).json({ success: false, error: 'Email and password required' });
+        }
+
+        const db = getDB();
+
+        // Find user by email
+        const usersSnap = await db.ref('users').once('value');
+        let foundUser = null;
+        let userId = null;
+
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                const user = child.val();
+                if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                    foundUser = user;
+                    userId = child.key;
+                }
             });
         }
 
-        console.log('[LOGIN] User:', email);
-
-        const authResult = await authSignIn(email, password);
-
-        if (!authResult || !authResult.idToken) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid email or password'
-            });
+        if (!foundUser || !userId) {
+            return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
-        const uid = authResult.localId;
-        const userData = await restGet(`users/${uid}`);
+        // Update last login
+        await db.ref(`users/${userId}`).update({
+            lastLogin: Date.now(),
+            lastActive: Date.now(),
+            isOnline: true
+        });
 
-        return res.json({
+        res.json({
             success: true,
-            message: 'Login successful',
             data: {
-                uid: uid,
-                email: email,
-                user: userData || { uid: uid, email: email },
-                idToken: authResult.idToken,
-                refreshToken: authResult.refreshToken,
-                expiresIn: authResult.expiresIn
+                uid: userId,
+                email: foundUser.email,
+                username: foundUser.username,
+                fullName: foundUser.fullName,
+                referralCode: foundUser.referralCode,
+                balance: foundUser.balance || 0,
+                tradingBalance: foundUser.tradingBalance || 0,
+                isVerified: foundUser.isVerified || false,
+                isMerchant: foundUser.isMerchant || false,
+                kycStatus: foundUser.kycStatus || 'none'
             }
         });
 
     } catch (error) {
-        console.error('[LOGIN] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message || 'Login failed'
-        });
+        console.error('[AUTH] Login error:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// ✅ VERIFY TOKEN
+// 5. GET PROFILE
 // ============================================================
-router.post('/verify-token', async (req, res) => {
+router.get('/profile', async (req, res) => {
     try {
-        const { idToken } = req.body;
-
-        if (!idToken) {
-            return res.status(400).json({
-                success: false,
-                error: 'ID token is required'
-            });
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, error: 'Missing authorization token' });
         }
 
-        const userInfo = await authGetUser(idToken);
+        const token = authHeader.split('Bearer ')[1];
 
-        if (!userInfo || !userInfo.users || userInfo.users.length === 0) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid token'
-            });
+        // Verify token
+        let decodedToken;
+        try {
+            const auth = getAuth();
+            decodedToken = await auth.verifyIdToken(token);
+        } catch (error) {
+            try {
+                const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.FIREBASE_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: token })
+                });
+                const data = await response.json();
+                if (data.users && data.users.length > 0) {
+                    decodedToken = { uid: data.users[0].localId, email: data.users[0].email };
+                } else {
+                    throw new Error('Invalid token');
+                }
+            } catch (e) {
+                return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+            }
         }
 
-        const user = userInfo.users[0];
-        const uid = user.localId;
-        const userData = await restGet(`users/${uid}`);
+        const userId = decodedToken.uid;
+        const db = getDB();
 
-        return res.json({
+        const userSnap = await db.ref(`users/${userId}`).once('value');
+        if (!userSnap.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const user = userSnap.val();
+
+        res.json({
             success: true,
             user: {
-                uid: uid,
+                id: userId,
                 email: user.email,
-                emailVerified: user.emailVerified,
-                displayName: user.displayName,
-                userData: userData || { uid: uid, email: user.email }
+                fullName: user.fullName || user.name || '',
+                username: user.username || '',
+                phone: user.phone || '',
+                country: user.country || 'Tanzania',
+                balance: user.balance || 0,
+                tradingBalance: user.tradingBalance || 0,
+                totalDeposited: user.totalDeposited || 0,
+                totalWithdrawn: user.totalWithdrawn || 0,
+                totalProfit: user.totalProfit || 0,
+                dailyPnL: user.dailyPnL || 0,
+                dailyLoss: user.dailyLoss || 0,
+                winRate: user.winRate || 0,
+                activeTrades: user.activeTrades || 0,
+                aiScore: user.aiScore || 0,
+                isMerchant: user.isMerchant || false,
+                isVerified: user.isVerified || false,
+                isOnline: user.isOnline || false,
+                isPhoneUser: user.isPhoneUser || false,
+                referralCode: user.referralCode || '',
+                referralCount: user.referralCount || 0,
+                commissionEarned: user.commissionEarned || 0,
+                affiliateWithdrawn: user.affiliateWithdrawn || 0,
+                kycStatus: user.kycStatus || 'none',
+                subscriptionMultiplier: user.subscriptionMultiplier || 1,
+                subscriptionExpiry: user.subscriptionExpiry || 0,
+                createdAt: user.createdAt || Date.now(),
+                lastActive: user.lastActive || null,
+                profilePic: user.profilePic || null
             }
         });
 
     } catch (error) {
-        console.error('[VERIFY TOKEN] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message || 'Token verification failed'
-        });
+        console.error('[AUTH] Profile error:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// 🔍 VERIFY REFERRAL CODE
+// 6. UPDATE PROFILE
+// ============================================================
+router.put('/profile', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, error: 'Missing authorization token' });
+        }
+
+        const token = authHeader.split('Bearer ')[1];
+        let userId;
+
+        try {
+            const auth = getAuth();
+            const decoded = await auth.verifyIdToken(token);
+            userId = decoded.uid;
+        } catch (e) {
+            return res.status(401).json({ success: false, error: 'Invalid token' });
+        }
+
+        const db = getDB();
+        const { fullName, username, phone, country, profilePic } = req.body;
+
+        const updates = {};
+        if (fullName !== undefined) updates.fullName = fullName;
+        if (username !== undefined) updates.username = username;
+        if (phone !== undefined) updates.phone = phone;
+        if (country !== undefined) updates.country = country;
+        if (profilePic !== undefined) updates.profilePic = profilePic;
+        updates.updatedAt = Date.now();
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ success: false, error: 'No fields to update' });
+        }
+
+        await db.ref(`users/${userId}`).update(updates);
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully'
+        });
+
+    } catch (error) {
+        console.error('[AUTH] Update error:', error);
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// 7. VERIFY REFERRAL CODE
 // ============================================================
 router.get('/verify-referral/:code', async (req, res) => {
     try {
         const { code } = req.params;
-        
         if (!code) {
-            return res.status(400).json({
-                success: false,
-                error: 'Referral code is required'
-            });
+            return res.status(400).json({ success: false, error: 'Referral code required' });
         }
 
-        const users = await restGet('users');
-        if (!users) {
+        const db = getDB();
+        const upperCode = code.toUpperCase();
+        const snapshot = await db.ref('users').orderByChild('referralCode').equalTo(upperCode).once('value');
+
+        if (snapshot.exists()) {
+            let userId = null;
+            snapshot.forEach(child => {
+                userId = child.key;
+            });
             return res.json({
                 success: true,
-                valid: false,
-                referrer: null
+                valid: true,
+                userId: userId
             });
         }
 
-        const upperCode = code.toUpperCase();
-        let referrer = null;
-
-        for (const [uid, userData] of Object.entries(users)) {
-            if (userData.referralCode && userData.referralCode.toUpperCase() === upperCode) {
-                referrer = {
-                    uid: uid,
-                    username: userData.username,
-                    fullName: userData.fullName
-                };
-                break;
-            }
-        }
-
-        return res.json({
+        res.json({
             success: true,
-            valid: !!referrer,
-            referrer: referrer
+            valid: false
         });
 
     } catch (error) {
-        console.error('[VERIFY REFERRAL] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        console.error('[AUTH] Verify referral error:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// 🚪 LOGOUT
+// 8. UPDATE ONLINE STATUS
 // ============================================================
-router.post('/logout', (req, res) => {
-    return res.json({
-        success: true,
-        message: 'Logout successful'
-    });
-});
-
-// ============================================================
-// 📊 GET USER PROFILE
-// ============================================================
-router.get('/profile/:uid', async (req, res) => {
+router.put('/status', async (req, res) => {
     try {
-        const { uid } = req.params;
-
-        if (!uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'User ID is required'
-            });
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, error: 'Missing token' });
         }
 
-        const userData = await restGet(`users/${uid}`);
+        const token = authHeader.split('Bearer ')[1];
+        let userId;
 
-        if (!userData) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            });
+        try {
+            const auth = getAuth();
+            const decoded = await auth.verifyIdToken(token);
+            userId = decoded.uid;
+        } catch (e) {
+            return res.status(401).json({ success: false, error: 'Invalid token' });
         }
 
-        return res.json({
+        const { isOnline } = req.body;
+        const db = getDB();
+
+        await db.ref(`users/${userId}`).update({
+            isOnline: isOnline || false,
+            lastSeen: Date.now()
+        });
+
+        res.json({
             success: true,
-            user: userData
+            isOnline: isOnline
         });
 
     } catch (error) {
-        console.error('[GET PROFILE] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        console.error('[AUTH] Status error:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
-
-// ============================================================
-// 📝 UPDATE USER PROFILE
-// ============================================================
-router.patch('/profile/:uid', async (req, res) => {
-    try {
-        const { uid } = req.params;
-        const updates = req.body;
-
-        if (!uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'User ID is required'
-            });
-        }
-
-        delete updates.uid;
-        delete updates.idToken;
-        delete updates.password;
-
-        updates.updatedAt = Date.now();
-
-        await restPatch(`users/${uid}`, updates);
-
-        const userData = await restGet(`users/${uid}`);
-
-        return res.json({
-            success: true,
-            message: 'Profile updated successfully',
-            user: userData
-        });
-
-    } catch (error) {
-        console.error('[UPDATE PROFILE] Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-async function generateReferralCode() {
-    function generateCode() {
-        const timestamp = Date.now().toString(36).toUpperCase();
-        const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-        return `ABOTRA${timestamp.slice(-4)}${random}`;
-    }
-
-    let code = generateCode();
-    let attempts = 0;
-    
-    while (attempts < 50) {
-        const users = await restGet('users');
-        let found = false;
-        if (users) {
-            for (const [uid, userData] of Object.entries(users)) {
-                if (userData.referralCode === code) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        if (!found) return code;
-        code = generateCode();
-        attempts++;
-    }
-    return `ABOTRA${Date.now().toString(36).toUpperCase().slice(-6)}`;
-}
-
-async function processReferral(referralCode, referrerName) {
-    try {
-        const users = await restGet('users');
-        if (!users) return;
-
-        let referrerUid = null;
-        for (const [uid, userData] of Object.entries(users)) {
-            if (userData.referralCode === referralCode) {
-                referrerUid = uid;
-                break;
-            }
-        }
-
-        if (!referrerUid) return;
-
-        const referrerData = users[referrerUid];
-        const referralCount = (referrerData.referralCount || 0) + 1;
-        await restPatch(`users/${referrerUid}`, { referralCount });
-
-        const notification = {
-            title: 'New Referral! 🎉',
-            message: `${referrerName || 'Someone'} joined using your referral link!`,
-            type: 'success',
-            read: false,
-            timestamp: Date.now()
-        };
-
-        await restPost(`notifications/${referrerUid}`, notification);
-        console.log('[REFERRAL] Processed for:', referrerUid);
-
-    } catch (error) {
-        console.error('[REFERRAL] Error:', error.message);
-    }
-}
 
 module.exports = router;

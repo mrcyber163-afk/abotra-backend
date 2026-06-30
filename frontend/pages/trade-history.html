@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
 <script>
 const CONFIG = {
     API_URL: 'https://abotra-backend-production.up.railway.app',
@@ -46,6 +43,7 @@ body.light-theme .theme-toggle i { color: #800000; }
 body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
 body.light-theme .bottom-nav a { color: #888; }
 body.light-theme .bottom-nav a.active { color: #800000; }
+
 .skeleton-stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .skeleton-stats-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; text-align: center; animation: skeletonPulse 1.5s ease-in-out infinite; }
 .skeleton-stats-label { height: 10px; width: 70px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 5px; margin: 0 auto 6px auto; animation: shimmer 1.5s infinite; }
@@ -68,11 +66,12 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .skeleton-pnl-percent { height: 14px; width: 45px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; border-radius: 4px; animation: shimmer 1.5s infinite; }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes skeletonPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
 .theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
 .theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
 .theme-toggle i { font-size: 15px; color: #FFFFFF; }
-.theme-toggle span { display: none; }
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+
 .top-bar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
@@ -86,8 +85,10 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .top-bar-right { display: flex; align-items: center; gap: 8px; }
 .back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 10px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; }
 .back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
 .history-container { position: relative; z-index: 2; max-width: 1200px; margin: 70px auto 20px; padding: 0 12px; }
 .page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
 .stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .stats-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; text-align: center; }
 .stats-label { color: #AAAAAA; font-size: 9px; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
@@ -95,6 +96,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .stats-sub { font-size: 9px; margin-top: 4px; }
 .stats-sub.positive { color: #0ECB81; }
 .stats-sub.negative { color: #F6465D; }
+
 .filter-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
 .filter-title { color: #FFD700; font-size: 12px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 .filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -104,6 +106,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .filter-select option { background: #1a1a1a; }
 .reset-filter { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 0 16px; color: #FFD700; cursor: pointer; transition: 0.3s; font-size: 11px; height: 38px; }
 .reset-filter:hover { background: rgba(255,215,0,0.4); }
+
 .history-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 16px; margin-bottom: 12px; transition: 0.3s; }
 .history-card:hover { transform: translateX(3px); border-color: #FFD700; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
@@ -115,6 +118,9 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .detail-item { display: flex; flex-direction: column; gap: 3px; }
 .detail-label { color: #888; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .detail-value { color: #FFFFFF; font-size: 11px; font-weight: 600; }
+.detail-value.positive { color: #0ECB81; }
+.detail-value.negative { color: #F6465D; }
+
 .pnl-section { display: flex; justify-content: flex-end; align-items: center; gap: 16px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
 .pnl-amount { font-size: 14px; font-weight: 800; }
 .pnl-amount.positive { color: #0ECB81; }
@@ -122,13 +128,16 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .pnl-percent { font-size: 10px; }
 .pnl-percent.positive { color: #0ECB81; }
 .pnl-percent.negative { color: #F6465D; }
+
 .loading-container { text-align: center; padding: 50px 20px; }
 .loading-spinner { width: 35px; height: 35px; border: 2px solid rgba(255,215,0,0.2); border-top: 2px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .loading-text { color: #FFD700; font-size: 12px; font-weight: 500; }
+
 .empty-state { text-align: center; padding: 50px 20px; background: rgba(255,255,255,0.03); border-radius: 16px; }
 .empty-state i { font-size: 38px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
 .empty-state p { color: #AAAAAA; font-size: 11px; }
+
 .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
@@ -139,6 +148,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
 .bottom-nav a i { font-size: 16px; }
 .bottom-nav a.active { color: #FFD700; }
+
 .notification-popup {
     position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px;
     padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px;
@@ -152,6 +162,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 .notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+
 @media(max-width: 700px) {
     .history-container { padding: 0 12px; margin-top: 65px; }
     .page-title { font-size: 18px; }
@@ -179,7 +190,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 </div>
 <div class="top-bar-right">
 <button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
-<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></div>
 </div>
 </div>
 
@@ -278,7 +289,7 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 
 <script type="module">
 // ============================================================
-// CONFIG - From global
+// CONFIG
 // ============================================================
 const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
 
@@ -286,7 +297,7 @@ const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-bac
 // FIREBASE
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -306,6 +317,32 @@ const auth = getAuth(app);
 let currentUser = null;
 let allTrades = [];
 let filteredTrades = [];
+let isLoading = false;
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', function() {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+});
+
+function showNotification(message, type = 'info') {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
+}
 
 // ============================================================
 // API HELPER
@@ -320,171 +357,200 @@ async function getFirebaseToken() {
     });
 }
 
-async function apiRequest(endpoint, method, body = null) {
+async function apiRequest(endpoint, method = 'GET', body = null) {
     try {
         const token = await getFirebaseToken();
-        const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+        const options = { 
+            method, 
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` 
+            } 
+        };
         if (body) options.body = JSON.stringify(body);
         const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
-        return await response.json();
-    } catch (error) { console.error('API error:', error); return { success: false, error: error.message }; }
-}
-
-// ============================================================
-// THEME
-// ============================================================
-function initTheme() {
-    const savedTheme = localStorage.getItem('abotra_theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('[API] Error:', error);
+        return { success: false, error: error.message };
     }
 }
-document.getElementById('themeToggle').addEventListener('click', function() {
-    if (document.body.classList.contains('light-theme')) {
-        document.body.classList.remove('light-theme');
-        localStorage.setItem('abotra_theme', 'dark');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
-    } else {
-        document.body.classList.add('light-theme');
-        localStorage.setItem('abotra_theme', 'light');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
-    }
-});
-
-function showNotification(message, type) {
-    const existing = document.querySelector('.notification-popup');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
-}
 
 // ============================================================
-// LOAD TRADES
+// LOAD TRADES - FIXED ✅
 // ============================================================
 async function loadTrades() {
-    if (!currentUser) return;
+    if (!currentUser || isLoading) return;
+    isLoading = true;
+    
     const container = document.getElementById('historyContainer');
     container.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Loading trades...</div></div>';
     
     try {
-        // Try backend API first
+        // 🔥 TRY BACKEND API FIRST
         const data = await apiRequest('trades/history', 'GET');
-        if (data.success && data.trades) {
-            allTrades = data.trades || [];
+        
+        if (data && data.success && data.trades && data.trades.length > 0) {
+            console.log('[History] ✅ Loaded from API:', data.trades.length, 'trades');
+            allTrades = data.trades;
         } else {
-            // Fallback to Firebase
+            console.log('[History] ⚠️ API returned no trades, trying Firebase fallback...');
+            
+            // 🔥 FALLBACK TO FIREBASE RTDB
             const tradesRef = ref(db, `trades/${currentUser.uid}`);
             const snapshot = await get(tradesRef);
             allTrades = [];
+            
             if (snapshot.exists()) {
                 snapshot.forEach(child => {
                     const trade = child.val();
+                    // ✅ Check both 'closed' and 'completed' status
                     if (trade.status === 'closed' || trade.status === 'completed') {
                         allTrades.push({ id: child.key, ...trade });
                     }
                 });
+                console.log('[History] ✅ Loaded from Firebase:', allTrades.length, 'trades');
+            } else {
+                console.log('[History] ℹ️ No trades found in Firebase');
             }
         }
+        
+        // Sort by date (newest first)
         allTrades.sort((a, b) => {
-            const dateA = a.closedAt || a.timestamp || 0;
-            const dateB = b.closedAt || b.timestamp || 0;
+            const dateA = a.closedAt || a.timestamp || a.createdAt || 0;
+            const dateB = b.closedAt || b.timestamp || b.createdAt || 0;
             return dateB - dateA;
         });
+        
+        // Apply filters and render
         applyFilters();
+        
+        // Show real content
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 300);
+        
         if (allTrades.length === 0) {
             showNotification('No completed trades found.', 'info');
         }
+        
+    } catch (error) {
+        console.error('[History] Error loading trades:', error);
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading trades: ${error.message}</p></div>`;
         setTimeout(() => {
             document.getElementById('skeletonContainer').style.display = 'none';
             document.getElementById('realContent').style.display = 'block';
         }, 500);
-    } catch (error) {
-        console.error("Error loading trades:", error);
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading trades. Please try again.</p></div>';
-        setTimeout(() => {
-            document.getElementById('skeletonContainer').style.display = 'none';
-            document.getElementById('realContent').style.display = 'block';
-        }, 1000);
+    } finally {
+        isLoading = false;
     }
 }
 
+// ============================================================
+// FILTERS - FIXED ✅
+// ============================================================
 function applyFilters() {
     const typeFilter = document.getElementById('filterType').value;
     const dateFilter = document.getElementById('filterDate').value;
     const resultFilter = document.getElementById('filterResult').value;
+    
     filteredTrades = [...allTrades];
     
+    // Filter by type
     if (typeFilter !== 'all') {
-        filteredTrades = filteredTrades.filter(t => t.type === typeFilter);
+        filteredTrades = filteredTrades.filter(t => (t.type || '').toUpperCase() === typeFilter);
     }
+    
+    // Filter by date
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
     if (dateFilter === 'today') {
-        filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= today);
+        filteredTrades = filteredTrades.filter(t => {
+            const date = new Date(t.closedAt || t.timestamp || t.createdAt || 0);
+            return date >= today;
+        });
     } else if (dateFilter === 'week') {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= weekAgo);
+        filteredTrades = filteredTrades.filter(t => {
+            const date = new Date(t.closedAt || t.timestamp || t.createdAt || 0);
+            return date >= weekAgo;
+        });
     } else if (dateFilter === 'month') {
         const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= monthAgo);
+        filteredTrades = filteredTrades.filter(t => {
+            const date = new Date(t.closedAt || t.timestamp || t.createdAt || 0);
+            return date >= monthAgo;
+        });
     } else if (dateFilter === 'year') {
         const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-        filteredTrades = filteredTrades.filter(t => new Date(t.closedAt || t.timestamp) >= yearAgo);
+        filteredTrades = filteredTrades.filter(t => {
+            const date = new Date(t.closedAt || t.timestamp || t.createdAt || 0);
+            return date >= yearAgo;
+        });
     }
+    
+    // Filter by result
     if (resultFilter === 'profit') {
-        filteredTrades = filteredTrades.filter(t => (t.closedProfit || t.profit || 0) > 0);
+        filteredTrades = filteredTrades.filter(t => (t.netProfit || t.closedProfit || t.profit || 0) > 0);
     } else if (resultFilter === 'loss') {
-        filteredTrades = filteredTrades.filter(t => (t.closedProfit || t.profit || 0) < 0);
+        filteredTrades = filteredTrades.filter(t => (t.netProfit || t.closedProfit || t.profit || 0) < 0);
     }
+    
     updateStats();
     renderHistory();
 }
 
+// ============================================================
+// STATS - FIXED ✅
+// ============================================================
 function updateStats() {
     const totalTrades = filteredTrades.length;
-    const winningTrades = filteredTrades.filter(t => (t.closedProfit || t.profit || 0) > 0).length;
+    const winningTrades = filteredTrades.filter(t => (t.netProfit || t.closedProfit || t.profit || 0) > 0).length;
     const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : 0;
-    const totalPnl = filteredTrades.reduce((sum, t) => sum + (t.closedProfit || t.profit || 0), 0);
-    const bestTrade = filteredTrades.length > 0 ? Math.max(...filteredTrades.map(t => t.closedProfit || t.profit || 0)) : 0;
+    const totalPnl = filteredTrades.reduce((sum, t) => sum + (t.netProfit || t.closedProfit || t.profit || 0), 0);
+    const bestTrade = totalTrades > 0 ? Math.max(...filteredTrades.map(t => t.netProfit || t.closedProfit || t.profit || 0)) : 0;
     const avgProfit = totalTrades > 0 ? totalPnl / totalTrades : 0;
     
     document.getElementById('totalTrades').textContent = totalTrades;
     document.getElementById('winRate').textContent = `${winRate}%`;
-    document.getElementById('totalPnl').innerHTML = `$${totalPnl.toFixed(2)}`;
-    document.getElementById('bestTrade').innerHTML = `$${bestTrade.toFixed(2)}`;
+    document.getElementById('totalPnl').textContent = `$${totalPnl.toFixed(2)}`;
+    document.getElementById('bestTrade').textContent = `$${bestTrade.toFixed(2)}`;
+    
     const pnlPercent = document.getElementById('pnlPercent');
     if (avgProfit > 0) {
-        pnlPercent.innerHTML = `Avg: +$${avgProfit.toFixed(2)}`;
+        pnlPercent.textContent = `Avg: +$${avgProfit.toFixed(2)}`;
         pnlPercent.className = 'stats-sub positive';
     } else if (avgProfit < 0) {
-        pnlPercent.innerHTML = `Avg: -$${Math.abs(avgProfit).toFixed(2)}`;
+        pnlPercent.textContent = `Avg: -$${Math.abs(avgProfit).toFixed(2)}`;
         pnlPercent.className = 'stats-sub negative';
     } else {
-        pnlPercent.innerHTML = 'Avg: $0';
+        pnlPercent.textContent = 'Avg: $0.00';
         pnlPercent.className = 'stats-sub';
     }
 }
 
+// ============================================================
+// RENDER - FIXED ✅
+// ============================================================
 function renderHistory() {
     const container = document.getElementById('historyContainer');
+    
     if (filteredTrades.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i><p>No trades found matching your filters</p></div>`;
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i><p>No trades match your filters</p></div>`;
         return;
     }
+    
     container.innerHTML = '';
+    
     filteredTrades.forEach(trade => {
-        const pnl = trade.closedProfit || trade.profit || 0;
-        const entryPrice = trade.entryPrice || trade.price || 0;
+        const pnl = trade.netProfit || trade.closedProfit || trade.profit || 0;
+        const entryPrice = trade.entryPrice || 0;
         const closePrice = trade.closePrice || trade.exitPrice || entryPrice;
         const priceChange = entryPrice > 0 ? ((closePrice - entryPrice) / entryPrice * 100).toFixed(2) : 0;
-        const closeDate = new Date(trade.closedAt || trade.timestamp || Date.now()).toLocaleString();
+        const closeDate = new Date(trade.closedAt || trade.timestamp || trade.createdAt || Date.now()).toLocaleString();
         const leverage = trade.leverage || 1;
         const stakedAmount = trade.margin || trade.investedAmount || trade.amount || 0;
         
@@ -492,7 +558,7 @@ function renderHistory() {
         card.className = 'history-card';
         card.innerHTML = `
             <div class="card-header">
-                <div class="trade-type ${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type || 'TRADE'}</div>
+                <div class="trade-type ${(trade.type || '').toLowerCase() === 'buy' ? 'buy' : 'sell'}">${trade.type || 'TRADE'}</div>
                 <div class="trade-date"><i class="far fa-calendar-alt"></i> ${closeDate}</div>
             </div>
             <div class="card-details">
@@ -502,6 +568,9 @@ function renderHistory() {
                 <div class="detail-item"><div class="detail-label">Close Price</div><div class="detail-value">$${closePrice.toFixed(2)}</div></div>
                 <div class="detail-item"><div class="detail-label">Price Change</div><div class="detail-value ${priceChange >= 0 ? 'positive' : 'negative'}">${priceChange >= 0 ? '+' : ''}${priceChange}%</div></div>
                 <div class="detail-item"><div class="detail-label">Symbol</div><div class="detail-value">${trade.symbol || 'BTC/USDT'}</div></div>
+                ${trade.openFee ? `<div class="detail-item"><div class="detail-label">Open Fee</div><div class="detail-value" style="color:#F6465D;">$${trade.openFee.toFixed(2)}</div></div>` : ''}
+                ${trade.closeFee ? `<div class="detail-item"><div class="detail-label">Close Fee</div><div class="detail-value" style="color:#F6465D;">$${trade.closeFee.toFixed(2)}</div></div>` : ''}
+                ${trade.totalFees ? `<div class="detail-item"><div class="detail-label">Total Fees</div><div class="detail-value" style="color:#F6465D;">$${trade.totalFees.toFixed(2)}</div></div>` : ''}
             </div>
             <div class="pnl-section">
                 <div class="pnl-amount ${pnl >= 0 ? 'positive' : 'negative'}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</div>
@@ -512,6 +581,9 @@ function renderHistory() {
     });
 }
 
+// ============================================================
+// RESET FILTERS
+// ============================================================
 function resetFilters() {
     document.getElementById('filterType').value = 'all';
     document.getElementById('filterDate').value = 'all';
@@ -519,6 +591,9 @@ function resetFilters() {
     applyFilters();
 }
 
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
 document.getElementById('filterType').addEventListener('change', applyFilters);
 document.getElementById('filterDate').addEventListener('change', applyFilters);
 document.getElementById('filterResult').addEventListener('change', applyFilters);
@@ -529,13 +604,21 @@ document.getElementById('resetFilterBtn').addEventListener('click', resetFilters
 // ============================================================
 function init() {
     initTheme();
+    
     onAuthStateChanged(auth, async (user) => {
-        if (!user) { window.location.href = 'login.html'; return; }
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
         currentUser = user;
         await loadTrades();
     });
 }
+
 init();
+
+console.log('[ABOTRA] ✅ Trade History loaded');
+console.log('[ABOTRA] 🔧 Debug: window.allTrades =', allTrades);
 </script>
 </body>
 </html>

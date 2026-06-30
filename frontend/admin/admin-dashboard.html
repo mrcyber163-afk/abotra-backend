@@ -10,572 +10,85 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
-<script>
-const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
-    VERSION: '2.0.0',
-    VAPID_PUBLIC_KEY: 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z'
-};
-window.CONFIG = CONFIG;
-console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
-
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
+/* ===== SAME STYLES AS BEFORE ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); }
+body.light-theme .admin-header, body.light-theme .sidebar, body.light-theme .section-card, body.light-theme .stat-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); }
+body.light-theme .admin-header h2, body.light-theme .page-title, body.light-theme .section-title, body.light-theme .stat-value { color: #800000; }
+body.light-theme .nav-item { color: #555; }
+body.light-theme .nav-item:hover, body.light-theme .nav-item.active { background: rgba(128,0,0,0.08); color: #800000; border-left-color: #800000; }
+body.light-theme .modal-content { background: linear-gradient(145deg, #ffffff, #f5f5f5); border-color: rgba(128,0,0,0.15); }
+body.light-theme .push-modal-input, body.light-theme .modal-edit-input { background: #f5f5f5; color: #333; border-color: #ddd; }
+body.light-theme .confirm-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); border: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .confirm-modal-title { color: #1a1a1a; }
 
-body {
-    background: #050505;
-    background-image: url("../assets/images/background.png");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    min-height: 100vh;
-    position: relative;
-    font-size: 11px;
-}
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 0; pointer-events: none; }
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 
-body.light-theme {
-    background: #f5f5f5;
-    background-image: url("../assets/images/background-light.png");
-}
+.admin-header { position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.menu-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 8px 12px; color: #FFD700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.3s; font-size: 11px; }
+.menu-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-area img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.logo-area p { color: rgba(255,255,255,0.7); font-size: 8px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.notif-icon { position: relative; cursor: pointer; color: #FFD700; font-size: 18px; transition: 0.3s; background: rgba(255,215,0,0.15); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.notif-icon:hover { background: rgba(255,215,0,0.3); transform: scale(1.05); }
+.notif-badge { position: absolute; top: -5px; right: -5px; background: #F6465D; color: white; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 20px; display: none; animation: pulse 1s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.theme-toggle { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer; color: #FFD700; display: flex; align-items: center; gap: 6px; transition: 0.3s; font-weight: 500; font-size: 11px; }
+.theme-toggle:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
+.logout-btn { background: rgba(246,70,93,0.15); border: none; border-radius: 10px; padding: 8px 14px; color: #F6465D; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; font-weight: 500; font-size: 11px; }
+.logout-btn:hover { background: rgba(246,70,93,0.3); transform: scale(1.02); }
 
-body.light-theme .admin-header,
-body.light-theme .sidebar,
-body.light-theme .section-card,
-body.light-theme .stat-card,
-body.light-theme .notification-panel {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid rgba(0,0,0,0.08);
-}
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 199; display: none; }
+.sidebar-overlay.active { display: block; }
+.sidebar { position: fixed; top: -100%; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); z-index: 200; transition: top 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-radius: 0 0 20px 20px; max-height: 80vh; overflow-y: auto; border-bottom: 1px solid rgba(255,215,0,0.2); }
+.sidebar.open { top: 65px; }
+.nav-menu { padding: 12px 0; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #ccc; text-decoration: none; transition: 0.3s; font-size: 12px; font-weight: 500; border-left: 3px solid transparent; }
+.nav-item i { width: 20px; font-size: 14px; }
+.nav-item:hover { background: rgba(255,215,0,0.08); color: #FFD700; border-left-color: #FFD700; }
+.nav-item.active { background: rgba(255,215,0,0.12); color: #FFD700; border-left-color: #FFD700; }
+.nav-badge { background: #F6465D; color: white; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: auto; display: none; }
 
-body.light-theme .admin-header h2,
-body.light-theme .page-title,
-body.light-theme .section-title,
-body.light-theme .stat-value {
-    color: #800000;
-}
+.main-content { position: relative; z-index: 2; margin-top: 75px; padding: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+.page-title { font-size: 22px; font-weight: 800; color: #FFD700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-body.light-theme .nav-item {
-    color: #555;
-}
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 10px 8px; text-align: center; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
+.stat-card:hover { transform: translateY(-3px); border-color: #FFD700; background: rgba(255,215,0,0.08); }
+.stat-icon { width: 36px; height: 36px; background: rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-size: 16px; color: #FFD700; }
+.stat-value { font-size: 18px; font-weight: 800; color: #FFD700; margin-bottom: 2px; }
+.stat-label { color: #aaa; font-size: 9px; font-weight: 500; }
 
-body.light-theme .nav-item:hover,
-body.light-theme .nav-item.active {
-    background: rgba(128,0,0,0.08);
-    color: #800000;
-    border-left-color: #800000;
-}
+.section-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.1); border-radius: 16px; padding: 16px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+.section-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,215,0,0.2); }
+.view-all-btn { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 4px 10px; color: #FFD700; font-size: 9px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; }
+.view-all-btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); }
 
-body.light-theme td {
-    color: #444;
-}
-
-body.light-theme th {
-    color: #800000;
-}
-
-body.light-theme .view-btn {
-    background: rgba(128,0,0,0.1);
-    color: #800000;
-}
-
-body.light-theme .push-modal-input {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
-}
-
-body.light-theme .modal-content {
-    background: linear-gradient(145deg, #ffffff, #f5f5f5);
-    border-color: rgba(128,0,0,0.15);
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.82);
-    backdrop-filter: blur(4px);
-    z-index: 0;
-    pointer-events: none;
-}
-body.light-theme .overlay {
-    background: rgba(255,255,255,0.85);
-}
-
-.admin-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(10,10,10,0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.menu-btn {
-    background: rgba(255,215,0,0.15);
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    color: #FFD700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    transition: 0.3s;
-    font-size: 11px;
-}
-
-.menu-btn:hover {
-    background: rgba(255,215,0,0.3);
-    transform: scale(1.02);
-}
-
-.logo-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.logo-area img {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    object-fit: cover;
-}
-
-.logo-area h2 {
-    color: #FFD700;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.logo-area p {
-    color: rgba(255,255,255,0.7);
-    font-size: 8px;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.notif-icon {
-    position: relative;
-    cursor: pointer;
-    color: #FFD700;
-    font-size: 18px;
-    transition: 0.3s;
-    background: rgba(255,215,0,0.15);
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.notif-icon:hover {
-    background: rgba(255,215,0,0.3);
-    transform: scale(1.05);
-}
-
-.notif-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #F6465D;
-    color: white;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 5px;
-    border-radius: 20px;
-    display: none;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.theme-toggle {
-    background: rgba(255,215,0,0.15);
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    cursor: pointer;
-    color: #FFD700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: 0.3s;
-    font-weight: 500;
-    font-size: 11px;
-}
-
-.theme-toggle:hover {
-    background: rgba(255,215,0,0.3);
-    transform: scale(1.02);
-}
-
-.logout-btn {
-    background: rgba(246,70,93,0.15);
-    border: none;
-    border-radius: 10px;
-    padding: 8px 14px;
-    color: #F6465D;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: 0.3s;
-    font-weight: 500;
-    font-size: 11px;
-}
-
-.logout-btn:hover {
-    background: rgba(246,70,93,0.3);
-    transform: scale(1.02);
-}
-
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(5px);
-    z-index: 199;
-    display: none;
-}
-
-.sidebar-overlay.active {
-    display: block;
-}
-
-.sidebar {
-    position: fixed;
-    top: -100%;
-    left: 0;
-    right: 0;
-    background: rgba(10,10,10,0.95);
-    backdrop-filter: blur(12px);
-    z-index: 200;
-    transition: top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border-radius: 0 0 20px 20px;
-    max-height: 80vh;
-    overflow-y: auto;
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-}
-
-.sidebar.open {
-    top: 65px;
-}
-
-.sidebar-header {
-    padding: 15px 18px;
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sidebar-header img {
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-}
-
-.sidebar-header h3 {
-    color: #FFD700;
-    font-size: 16px;
-}
-
-.sidebar-header p {
-    color: #888;
-    font-size: 10px;
-}
-
-.nav-menu {
-    padding: 12px 0;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    color: #ccc;
-    text-decoration: none;
-    transition: 0.3s;
-    font-size: 12px;
-    font-weight: 500;
-    border-left: 3px solid transparent;
-}
-
-.nav-item i {
-    width: 20px;
-    font-size: 14px;
-}
-
-.nav-item:hover {
-    background: rgba(255,215,0,0.08);
-    color: #FFD700;
-    border-left-color: #FFD700;
-}
-
-.nav-item.active {
-    background: rgba(255,215,0,0.12);
-    color: #FFD700;
-    border-left-color: #FFD700;
-}
-
-.nav-badge {
-    background: #F6465D;
-    color: white;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
-    margin-left: auto;
-    display: none;
-}
-
-.main-content {
-    position: relative;
-    z-index: 2;
-    margin-top: 75px;
-    padding: 20px;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.page-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: #FFD700;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.loading-spinner {
-    width: 30px;
-    height: 30px;
-    border: 2px solid rgba(255,215,0,0.2);
-    border-top: 2px solid #FFD700;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px auto;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.stat-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,215,0,0.2);
-    border-radius: 14px;
-    padding: 10px 8px;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    border-color: #FFD700;
-    background: rgba(255,215,0,0.08);
-}
-
-.stat-icon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255,215,0,0.15);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 6px auto;
-    font-size: 16px;
-    color: #FFD700;
-}
-
-.stat-value {
-    font-size: 18px;
-    font-weight: 800;
-    color: #FFD700;
-    margin-bottom: 2px;
-}
-
-.stat-label {
-    color: #aaa;
-    font-size: 9px;
-    font-weight: 500;
-}
-
-.section-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,215,0,0.1);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-    backdrop-filter: blur(10px);
-}
-
-.section-title {
-    color: #FFD700;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-}
-
-.view-all-btn {
-    background: rgba(255,215,0,0.15);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 16px;
-    padding: 4px 10px;
-    color: #FFD700;
-    font-size: 9px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.view-all-btn:hover {
-    background: rgba(255,215,0,0.3);
-    transform: translateY(-2px);
-}
-
-.table-responsive {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 8px 8px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-th {
-    color: #FFD700;
-    font-weight: 600;
-    font-size: 9px;
-    text-transform: uppercase;
-}
-
-td {
-    color: #ddd;
-    font-size: 10px;
-}
-
-tr:hover td {
-    background: rgba(255,215,0,0.04);
-}
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+th { color: #FFD700; font-weight: 600; font-size: 9px; text-transform: uppercase; }
+td { color: #ddd; font-size: 10px; }
+tr:hover td { background: rgba(255,215,0,0.04); }
 
 .status-pending, .status-approved, .status-rejected {
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 8px;
-    font-weight: 700;
-    display: inline-block;
-    white-space: nowrap;
+    padding: 2px 8px; border-radius: 20px; font-size: 8px; font-weight: 700; display: inline-block;
 }
+.status-pending { background: rgba(255,215,0,0.2); color: #FFD700; border: 1px solid rgba(255,215,0,0.3); }
+.status-approved { background: rgba(14,203,129,0.2); color: #0ECB81; border: 1px solid rgba(14,203,129,0.3); }
+.status-rejected { background: rgba(246,70,93,0.2); color: #F6465D; border: 1px solid rgba(246,70,93,0.3); }
 
-.status-pending {
-    background: rgba(255,215,0,0.2);
-    color: #FFD700;
-    border: 1px solid rgba(255,215,0,0.3);
-}
+.view-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 3px 8px; color: #FFD700; cursor: pointer; font-size: 9px; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 3px; }
+.view-btn:hover { background: rgba(255,215,0,0.4); transform: translateY(-2px); }
 
-.status-approved {
-    background: rgba(14,203,129,0.2);
-    color: #0ECB81;
-    border: 1px solid rgba(14,203,129,0.3);
-}
-
-.status-rejected {
-    background: rgba(246,70,93,0.2);
-    color: #F6465D;
-    border: 1px solid rgba(246,70,93,0.3);
-}
-
-.view-btn {
-    background: rgba(255,215,0,0.2);
-    border: none;
-    border-radius: 5px;
-    padding: 3px 8px;
-    color: #FFD700;
-    cursor: pointer;
-    font-size: 9px;
-    font-weight: 600;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.view-btn:hover {
-    background: rgba(255,215,0,0.4);
-    transform: translateY(-2px);
-}
-
-/* ========== PUSH NOTIFICATION MODAL ========== */
+/* ===== PUSH NOTIFICATION BUTTON ===== */
 .btn-push-all {
     background: rgba(33, 150, 243, 0.15);
     border: none;
@@ -590,704 +103,111 @@ tr:hover td {
     font-weight: 600;
     transition: 0.3s;
 }
-
-.btn-push-all:hover {
-    background: rgba(33, 150, 243, 0.3);
-    transform: translateY(-2px);
-}
-
-.push-modal-input {
-    width: 100%;
-    min-height: 80px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: white;
-    font-size: 12px;
-    outline: none;
-    resize: vertical;
-    transition: 0.3s;
-    margin-top: 8px;
-}
-
-.push-modal-input:focus {
-    border-color: #FFD700;
-    box-shadow: 0 0 0 2px rgba(255,215,0,0.1);
-}
-
-body.light-theme .push-modal-input {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
-}
-
-.input-group {
-    margin-bottom: 12px;
-}
-
-.input-group label {
-    color: #FFD700;
-    font-size: 11px;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.input-group label i {
-    margin-right: 4px;
-}
-
-.modal-edit-input {
-    width: 100%;
-    height: 40px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 10px;
-    padding: 8px 12px;
-    color: white;
-    font-size: 12px;
-    outline: none;
-    transition: 0.3s;
-}
-
-.modal-edit-input:focus {
-    border-color: #FFD700;
-    box-shadow: 0 0 0 2px rgba(255,215,0,0.1);
-}
-
-body.light-theme .modal-edit-input {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
-}
-
-/* ========== BEAUTIFUL MODALS ========== */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: linear-gradient(145deg, #1e1e2e, #161626);
-    border-radius: 24px;
-    padding: 28px;
-    max-width: 500px;
-    width: 100%;
-    border: 1px solid rgba(255,215,0,0.3);
-    position: relative;
-    animation: slideUp 0.3s ease;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-body.light-theme .modal-content {
-    background: linear-gradient(145deg, #ffffff, #f5f5f5);
-    border-color: rgba(128,0,0,0.15);
-}
-
-.modal-close {
-    position: absolute;
-    top: 14px;
-    right: 18px;
-    font-size: 22px;
-    cursor: pointer;
-    color: #FFD700;
-    transition: 0.3s;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.btn-push-all:hover { background: rgba(33, 150, 243, 0.3); transform: translateY(-2px); }
+.btn-push-all .push-dot {
+    width: 6px;
+    height: 6px;
+    background: #0ECB81;
     border-radius: 50%;
-}
-
-.modal-close:hover {
-    background: rgba(255,215,0,0.1);
-    transform: rotate(90deg);
-}
-
-.modal-content h3 {
-    color: #FFD700;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-    padding-bottom: 12px;
-}
-
-.modal-detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.modal-detail-label {
-    color: #aaa;
-    font-weight: 500;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.modal-detail-value {
-    color: #FFD700;
-    font-weight: 600;
-    font-size: 11px;
-    word-break: break-word;
-    text-align: right;
-    max-width: 60%;
-}
-
-.edit-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 18px;
-    justify-content: flex-end;
-}
-
-.btn-save-edit {
-    background: linear-gradient(135deg, #0ECB81, #0A9E65);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    color: white;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-save-edit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(14,203,129,0.4);
-}
-
-.btn-cancel-edit {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 10px 20px;
-    color: #aaa;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-cancel-edit:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateY(-2px);
-}
-
-.btn-send-push {
-    background: linear-gradient(135deg, #2196F3, #1976D2);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    color: white;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-send-push:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33,150,243,0.4);
-}
-
-.btn-send-push:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ========== CONFIRM MODAL ========== */
-.confirm-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(16px);
-    z-index: 20000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.confirm-modal.active {
-    display: flex;
-}
-
-.confirm-modal-card {
-    background: linear-gradient(145deg, #1e1e2e, #14141f);
-    border-radius: 24px;
-    padding: 28px 24px;
-    max-width: 400px;
-    width: 90%;
-    border: 1px solid rgba(255,215,0,0.25);
-    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-    animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    text-align: center;
-}
-
-@keyframes modalSlideUp {
-    from { transform: translateY(40px) scale(0.95); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-body.light-theme .confirm-modal-card {
-    background: linear-gradient(145deg, #ffffff, #f0f0f5);
-    border: 1px solid rgba(128,0,0,0.2);
-}
-
-.confirm-modal-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 14px;
-    font-size: 28px;
-}
-
-.confirm-modal-icon.warning {
-    background: rgba(255,215,0,0.15);
-    color: #FFD700;
-}
-
-.confirm-modal-icon.danger {
-    background: rgba(246,70,93,0.15);
-    color: #F6465D;
-}
-
-.confirm-modal-icon.success {
-    background: rgba(14,203,129,0.15);
-    color: #0ECB81;
-}
-
-.confirm-modal-icon.info {
-    background: rgba(33,150,243,0.15);
-    color: #2196F3;
-}
-
-.confirm-modal-title {
-    color: #FFFFFF;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-body.light-theme .confirm-modal-title {
-    color: #1a1a1a;
-}
-
-.confirm-modal-subtitle {
-    color: #aaa;
-    font-size: 13px;
-    margin-bottom: 16px;
-    line-height: 1.5;
-}
-
-.confirm-modal-details {
-    background: rgba(255,255,255,0.04);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin: 12px 0;
-    text-align: left;
-    border: 1px solid rgba(255,255,255,0.06);
-}
-
-.confirm-modal-details .detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-
-.confirm-modal-details .detail-label {
-    color: #888;
-}
-
-.confirm-modal-details .detail-value {
-    color: #FFD700;
-    font-weight: 600;
-}
-
-body.light-theme .confirm-modal-details .detail-value {
-    color: #800000;
-}
-
-.confirm-modal-warning {
-    background: rgba(246,70,93,0.1);
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin: 10px 0;
-    color: #F6465D;
-    font-size: 12px;
-    border: 1px solid rgba(246,70,93,0.2);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.confirm-modal-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-}
-
-.confirm-modal-btn {
-    flex: 1;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 30px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.confirm-modal-btn.cancel {
-    background: rgba(255,255,255,0.08);
-    color: #ccc;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-.confirm-modal-btn.cancel:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateY(-2px);
-}
-
-.confirm-modal-btn.confirm {
-    background: linear-gradient(135deg, #F6465D, #D43F52);
-    color: white;
-}
-
-.confirm-modal-btn.confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(246,70,93,0.4);
-}
-
-.confirm-modal-btn.confirm-success {
-    background: linear-gradient(135deg, #0ECB81, #0A9E65);
-    color: white;
-}
-
-.confirm-modal-btn.confirm-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(14,203,129,0.4);
-}
-
-.confirm-modal-btn.confirm-info {
-    background: linear-gradient(135deg, #2196F3, #1976D2);
-    color: white;
-}
-
-.confirm-modal-btn.confirm-info:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(33,150,243,0.4);
-}
-
-/* ========== NOTIFICATION PANEL ========== */
-.notification-panel {
-    position: fixed;
-    top: 65px;
-    right: -380px;
-    width: 380px;
-    height: calc(100vh - 65px);
-    background: rgba(10,10,10,0.98);
-    backdrop-filter: blur(12px);
-    z-index: 150;
-    transition: right 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border-left: 1px solid rgba(255,215,0,0.2);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.notification-panel.open {
-    right: 0;
-}
-
-body.light-theme .notification-panel {
-    background: white;
-    border-left: 1px solid rgba(128,0,0,0.1);
-}
-
-.notification-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,215,0,0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background: inherit;
-    z-index: 1;
-}
-
-.notification-header h3 {
-    color: #FFD700;
-    font-size: 15px;
-}
-
-.notification-actions {
-    display: flex;
-    gap: 6px;
-}
-
-.notif-action-btn {
-    background: rgba(255,215,0,0.15);
-    border: none;
-    border-radius: 16px;
-    padding: 3px 8px;
-    color: #FFD700;
-    font-size: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.notif-action-btn:hover {
-    background: rgba(255,215,0,0.3);
-}
-
-.notif-action-btn.clear-all {
-    background: rgba(246,70,93,0.15);
-    color: #F6465D;
-}
-
-.notif-action-btn.clear-all:hover {
-    background: rgba(246,70,93,0.3);
-}
-
-.close-notif {
-    background: none;
-    border: none;
-    color: #FFD700;
-    font-size: 20px;
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.close-notif:hover {
-    background: rgba(255,215,0,0.15);
-}
-
-.notification-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px 0;
-}
-
-.notification-item {
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    cursor: default;
-    transition: 0.2s;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.notification-item:hover {
-    background: rgba(255,215,0,0.05);
-}
-
-.notification-item.unread {
-    background: rgba(255,215,0,0.08);
-    border-left: 3px solid #FFD700;
-}
-
-.notification-icon-small {
-    width: 32px;
-    height: 32px;
-    background: rgba(255,215,0,0.15);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.notification-icon-small i {
-    font-size: 14px;
-    color: #FFD700;
-}
-
-.notification-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.notification-title {
-    color: #FFD700;
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.notification-message {
-    color: #ccc;
-    font-size: 10px;
-    line-height: 1.5;
-    margin-bottom: 3px;
-    word-break: break-word;
-}
-
-.notification-time {
-    color: #666;
-    font-size: 8px;
-}
-
-.notification-actions-item {
-    display: flex;
-    gap: 4px;
-    margin-top: 4px;
-    flex-wrap: wrap;
-}
-
-.notif-item-btn {
-    background: rgba(255,215,0,0.15);
-    border: none;
-    border-radius: 10px;
-    padding: 2px 8px;
-    color: #FFD700;
-    font-size: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.notif-item-btn:hover {
-    background: rgba(255,215,0,0.3);
-}
-
-.notif-item-btn.nav-btn {
-    background: rgba(14,203,129,0.2);
-    color: #0ECB81;
-}
-
-.notif-item-btn.nav-btn:hover {
-    background: rgba(14,203,129,0.4);
-}
-
-.notif-item-btn.delete {
-    background: rgba(246,70,93,0.15);
-    color: #F6465D;
-}
-
-.notif-item-btn.delete:hover {
-    background: rgba(246,70,93,0.3);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 30px 16px;
-    color: #888;
-}
-
-.empty-state i {
-    font-size: 30px;
-    color: rgba(255,215,0,0.3);
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    font-size: 10px;
-}
-
-.toast-notification {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    color: white;
-    z-index: 9999;
-    animation: slideInRight 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    font-size: 11px;
-}
+    display: inline-block;
+    animation: livePulse 1.5s infinite;
+}
+@keyframes livePulse {
+    0% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(14,203,129,0.7); }
+    70% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 5px rgba(14,203,129,0); }
+    100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(14,203,129,0); }
+}
+
+/* ===== PUSH MODAL ===== */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal.active { display: flex; }
+.modal-content { background: linear-gradient(145deg, #1e1e2e, #161626); border-radius: 24px; padding: 28px; max-width: 500px; width: 100%; border: 1px solid rgba(255,215,0,0.3); position: relative; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+body.light-theme .modal-content { background: linear-gradient(145deg, #ffffff, #f5f5f5); border-color: rgba(128,0,0,0.15); }
+.modal-close { position: absolute; top: 14px; right: 18px; font-size: 22px; cursor: pointer; color: #FFD700; transition: 0.3s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.modal-close:hover { background: rgba(255,215,0,0.1); transform: rotate(90deg); }
+.modal-content h3 { color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 18px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 12px; }
+.modal-edit-input { width: 100%; height: 40px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px 12px; color: white; font-size: 12px; outline: none; transition: 0.3s; }
+.modal-edit-input:focus { border-color: #FFD700; box-shadow: 0 0 0 2px rgba(255,215,0,0.1); }
+.push-modal-input { width: 100%; min-height: 80px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 10px 12px; color: white; font-size: 12px; outline: none; resize: vertical; transition: 0.3s; margin-top: 8px; }
+.push-modal-input:focus { border-color: #FFD700; box-shadow: 0 0 0 2px rgba(255,215,0,0.1); }
+.input-group { margin-bottom: 12px; }
+.input-group label { color: #FFD700; font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px; }
+.input-group label i { margin-right: 4px; }
+.edit-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+.btn-send-push { background: linear-gradient(135deg, #2196F3, #1976D2); border: none; border-radius: 10px; padding: 10px 20px; color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+.btn-send-push:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(33,150,243,0.4); }
+.btn-send-push:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-cancel-edit { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 20px; color: #aaa; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; }
+.btn-cancel-edit:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+/* ===== CONFIRM MODAL ===== */
+.confirm-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(16px); z-index: 20000; display: none; align-items: center; justify-content: center; }
+.confirm-modal.active { display: flex; }
+.confirm-modal-card { background: linear-gradient(145deg, #1e1e2e, #14141f); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 90%; border: 1px solid rgba(255,215,0,0.25); box-shadow: 0 30px 80px rgba(0,0,0,0.6); animation: modalSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1); text-align: center; }
+@keyframes modalSlideUp { from { transform: translateY(40px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+body.light-theme .confirm-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); border: 1px solid rgba(128,0,0,0.2); }
+.confirm-modal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 28px; }
+.confirm-modal-icon.warning { background: rgba(255,215,0,0.15); color: #FFD700; }
+.confirm-modal-icon.danger { background: rgba(246,70,93,0.15); color: #F6465D; }
+.confirm-modal-title { color: #FFFFFF; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+body.light-theme .confirm-modal-title { color: #1a1a1a; }
+.confirm-modal-subtitle { color: #aaa; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+.confirm-modal-details { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 12px 14px; margin: 12px 0; text-align: left; border: 1px solid rgba(255,255,255,0.06); }
+.confirm-modal-details .detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.confirm-modal-details .detail-label { color: #888; }
+.confirm-modal-details .detail-value { color: #FFD700; font-weight: 600; }
+.confirm-modal-warning { background: rgba(246,70,93,0.1); border-radius: 10px; padding: 8px 12px; margin: 10px 0; color: #F6465D; font-size: 12px; border: 1px solid rgba(246,70,93,0.2); display: flex; align-items: center; gap: 6px; }
+.confirm-modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.confirm-modal-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 30px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.confirm-modal-btn.cancel { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.08); }
+.confirm-modal-btn.cancel:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.confirm-modal-btn.confirm { background: linear-gradient(135deg, #F6465D, #D43F52); color: white; }
+.confirm-modal-btn.confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(246,70,93,0.4); }
+.confirm-modal-btn.confirm-success { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.confirm-modal-btn.confirm-success:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14,203,129,0.4); }
+
+/* ===== NOTIFICATION PANEL ===== */
+.notification-panel { position: fixed; top: 65px; right: -380px; width: 380px; height: calc(100vh - 65px); background: rgba(10,10,10,0.98); backdrop-filter: blur(12px); z-index: 150; transition: right 0.3s cubic-bezier(0.68,-0.55,0.265,1.55); border-left: 1px solid rgba(255,215,0,0.2); overflow-y: auto; display: flex; flex-direction: column; }
+.notification-panel.open { right: 0; }
+body.light-theme .notification-panel { background: white; border-left: 1px solid rgba(128,0,0,0.1); }
+.notification-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,215,0,0.2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: inherit; z-index: 1; }
+.notification-header h3 { color: #FFD700; font-size: 15px; }
+.notification-actions { display: flex; gap: 6px; }
+.notif-action-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 16px; padding: 3px 8px; color: #FFD700; font-size: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 3px; }
+.notif-action-btn:hover { background: rgba(255,215,0,0.3); }
+.notif-action-btn.clear-all { background: rgba(246,70,93,0.15); color: #F6465D; }
+.notif-action-btn.clear-all:hover { background: rgba(246,70,93,0.3); }
+.close-notif { background: none; border: none; color: #FFD700; font-size: 20px; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.close-notif:hover { background: rgba(255,215,0,0.15); }
+.notification-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.notification-item { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: default; transition: 0.2s; display: flex; align-items: flex-start; gap: 10px; }
+.notification-item:hover { background: rgba(255,215,0,0.05); }
+.notification-item.unread { background: rgba(255,215,0,0.08); border-left: 3px solid #FFD700; }
+.notification-icon-small { width: 32px; height: 32px; background: rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.notification-icon-small i { font-size: 14px; color: #FFD700; }
+.notification-content { flex: 1; min-width: 0; }
+.notification-title { color: #FFD700; font-size: 11px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.notification-message { color: #ccc; font-size: 10px; line-height: 1.5; margin-bottom: 3px; word-break: break-word; }
+.notification-time { color: #666; font-size: 8px; }
+.notification-actions-item { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.notif-item-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 2px 8px; color: #FFD700; font-size: 8px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 3px; }
+.notif-item-btn:hover { background: rgba(255,215,0,0.3); }
+.notif-item-btn.nav-btn { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.notif-item-btn.nav-btn:hover { background: rgba(14,203,129,0.4); }
+.notif-item-btn.delete { background: rgba(246,70,93,0.15); color: #F6465D; }
+.notif-item-btn.delete:hover { background: rgba(246,70,93,0.3); }
+.empty-state { text-align: center; padding: 30px 16px; color: #888; }
+.empty-state i { font-size: 30px; color: rgba(255,215,0,0.3); margin-bottom: 8px; }
+.empty-state p { font-size: 10px; }
+.loading-spinner { width: 28px; height: 28px; border: 2px solid rgba(255,215,0,0.2); border-top: 2px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.toast-notification { position: fixed; bottom: 25px; right: 25px; padding: 10px 16px; border-radius: 10px; color: white; z-index: 9999; animation: slideInRight 0.3s ease; display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 11px; }
 .toast-notification.success { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
 .toast-notification.error { background: linear-gradient(135deg, #F6465D, #D43F52); }
 .toast-notification.info { background: linear-gradient(135deg, #FFD700, #b8860b); color: #1a1a1a; }
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(100%); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@media(max-width: 768px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .stat-value { font-size: 16px; }
-    .stat-icon { width: 32px; height: 32px; font-size: 14px; }
-    .logo-area p { display: none; }
-    .menu-btn span { display: none; }
-    .menu-btn { padding: 8px 10px; }
-    .main-content { padding: 12px; margin-top: 70px; }
-    .page-title { font-size: 18px; }
-    .notification-panel { width: 100%; right: -100%; }
-    .modal-content { padding: 18px; max-width: 95%; }
-    .modal-detail-row { flex-direction: column; }
-    .modal-detail-value { text-align: left; max-width: 100%; }
-}
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@media(max-width:768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .stat-value { font-size: 16px; } .stat-icon { width: 32px; height: 32px; font-size: 14px; } .logo-area p { display: none; } .menu-btn span { display: none; } .menu-btn { padding: 8px 10px; } .main-content { padding: 12px; margin-top: 70px; } .page-title { font-size: 18px; } .notification-panel { width: 100%; right: -100%; } .modal-content { padding: 18px; max-width: 95%; } }
 </style>
 </head>
 <body>
@@ -1297,17 +217,11 @@ body.light-theme .notification-panel {
         <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
         <div class="logo-area">
             <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
-            <div>
-                <h2>ABOTRA-PROAI</h2>
-                <p>Admin Dashboard</p>
-            </div>
+            <div><h2>ABOTRA-PROAI</h2><p>Admin Dashboard</p></div>
         </div>
     </div>
     <div class="header-right">
-        <div class="notif-icon" id="notifIcon">
-            <i class="fas fa-bell"></i>
-            <span class="notif-badge" id="notifBadge">0</span>
-        </div>
+        <div class="notif-icon" id="notifIcon"><i class="fas fa-bell"></i><span class="notif-badge" id="notifBadge">0</span></div>
         <button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i> <span>Theme</span></button>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
@@ -1317,13 +231,6 @@ body.light-theme .notification-panel {
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
-        <div>
-            <h3>ABOTRA-PROAI</h3>
-            <p>Administrator Panel</p>
-        </div>
-    </div>
     <div class="nav-menu">
         <a href="admin-dashboard.html" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="admin-users.html" class="nav-item"><i class="fas fa-users"></i> Users</a>
@@ -1349,9 +256,7 @@ body.light-theme .notification-panel {
             <button class="close-notif" id="closeNotif">&times;</button>
         </div>
     </div>
-    <div class="notification-list" id="notificationList">
-        <div class="empty-state"><div class="loading-spinner" style="width:30px;height:30px;"></div><p>Loading notifications...</p></div>
-    </div>
+    <div class="notification-list" id="notificationList"><div class="empty-state"><div class="loading-spinner"></div><p>Loading notifications...</p></div></div>
 </div>
 
 <!-- Push Modal -->
@@ -1399,7 +304,9 @@ body.light-theme .notification-panel {
 <div class="main-content">
     <div class="page-title">
         <i class="fas fa-tachometer-alt"></i> Admin Dashboard
-        <button class="btn-push-all" id="pushAllBtn" style="margin-left:auto;"><i class="fas fa-bell"></i> Push to All Users</button>
+        <button class="btn-push-all" id="pushAllBtn" style="margin-left:auto;">
+            <span class="push-dot"></span> <i class="fas fa-bell"></i> Push to All Users
+        </button>
     </div>
 
     <div class="stats-grid">
@@ -1483,86 +390,36 @@ const auth = firebase.auth();
 let currentAdminId = null;
 let currentAdminEmail = null;
 let notificationListener = null;
-let swRegistration = null;
 
-const VAPID_PUBLIC_KEY = CONFIG.VAPID_PUBLIC_KEY;
+const VAPID_PUBLIC_KEY = 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z';
+let swRegistration = null;
+let pushSubscription = null;
 
 // ============================================================
-// SERVICE WORKER REGISTRATION - FIXED
+// SERVICE WORKER REGISTRATION
 // ============================================================
 async function registerServiceWorker() {
     try {
         if ('serviceWorker' in navigator) {
-            // Check if SW already registered
-            const existingRegistration = await navigator.serviceWorker.getRegistration();
-            if (existingRegistration) {
-                console.log('[SW] Already registered:', existingRegistration);
-                swRegistration = existingRegistration;
-                return existingRegistration;
+            const existing = await navigator.serviceWorker.getRegistration();
+            if (existing) {
+                swRegistration = existing;
+                console.log('[SW] Already registered');
+                return existing;
             }
             
-            // Register new SW
             const registration = await navigator.serviceWorker.register('/sw.js', {
                 scope: '/'
             });
             
             console.log('[SW] ✅ Service Worker registered:', registration);
             swRegistration = registration;
-            
-            // Handle waiting state
-            if (registration.waiting) {
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-            
-            // Handle updating
-            registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'activated') {
-                        console.log('[SW] ✅ New worker activated');
-                    }
-                });
-            });
-            
             return registration;
         }
     } catch (error) {
-        console.warn('[SW] Service Worker registration failed:', error);
-        // Continue without SW - notifications will still work via browser API
-        return null;
+        console.warn('[SW] Registration failed:', error);
     }
     return null;
-}
-
-// ============================================================
-// FALLBACK: Browser Notification API
-// ============================================================
-function sendBrowserNotification(title, body, link = null) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-            const options = {
-                body: body,
-                icon: '../assets/images/logo.png',
-                badge: '../assets/images/logo.png',
-                vibrate: [200, 100, 200],
-                requireInteraction: true,
-                tag: 'admin_' + Date.now()
-            };
-            
-            const notif = new Notification(title, options);
-            notif.onclick = () => {
-                window.focus();
-                if (link) window.location.href = link;
-            };
-            
-            console.log('[PUSH] Browser notification sent:', title);
-            return true;
-        } catch (e) {
-            console.warn('[PUSH] Browser notification error:', e);
-            return false;
-        }
-    }
-    return false;
 }
 
 // ============================================================
@@ -1596,7 +453,7 @@ async function requestPushPermission() {
 }
 
 // ============================================================
-// SUBSCRIBE TO PUSH
+// SUBSCRIBE TO PUSH NOTIFICATIONS
 // ============================================================
 async function subscribeToPush() {
     try {
@@ -1616,6 +473,7 @@ async function subscribeToPush() {
         });
         
         console.log('[PUSH] Admin subscribed:', subscription.endpoint);
+        pushSubscription = subscription;
         return subscription;
     } catch (error) {
         console.warn('[PUSH] Subscription error:', error);
@@ -1626,28 +484,158 @@ async function subscribeToPush() {
 // ============================================================
 // SEND DEVICE PUSH NOTIFICATION
 // ============================================================
-function sendDevicePushNotification(title, body, type = 'info', link = null) {
-    // Try Service Worker push first
-    if (swRegistration) {
+function sendDevicePushNotification(title, body, link = null) {
+    if ('Notification' in window && Notification.permission === 'granted') {
         try {
-            swRegistration.showNotification(title, {
+            const options = {
                 body: body,
-                icon: '../assets/images/logo.png',
-                badge: '../assets/images/logo.png',
+                icon: '/assets/images/logo-192.png',
+                badge: '/assets/images/logo-192.png',
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
-                tag: 'admin_' + Date.now()
-            });
-            console.log('[PUSH] SW notification sent:', title);
+                tag: 'abotra_' + Date.now(),
+                data: { url: link || '/admin-dashboard.html' }
+            };
+            
+            const notif = new Notification(title, options);
+            notif.onclick = () => {
+                window.focus();
+                if (link) window.location.href = link;
+            };
+            
+            console.log('[PUSH] Admin notification sent:', title);
             return true;
         } catch (e) {
-            console.warn('[PUSH] SW notification error:', e);
+            console.warn('[PUSH] Notification error:', e);
         }
     }
-    
-    // Fallback to browser notification
-    return sendBrowserNotification(title, body, link);
+    return false;
 }
+
+// ============================================================
+// SEND PUSH TO ALL USERS - VIA SERVICE WORKER
+// ============================================================
+async function sendPushToAllUsers(title, message, link = null) {
+    try {
+        const usersSnap = await db.ref('users').once('value');
+        const userIds = [];
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                const user = child.val();
+                const uid = user.uid || child.key;
+                userIds.push(uid);
+            });
+        }
+        
+        if (userIds.length === 0) {
+            return { success: false, error: 'No users found' };
+        }
+        
+        // Save notification to each user
+        const promises = [];
+        for (const userId of userIds) {
+            const notifRef = db.ref(`notifications/${userId}`).push();
+            const notifData = {
+                id: notifRef.key,
+                title: title,
+                message: message,
+                type: 'broadcast',
+                read: false,
+                timestamp: Date.now(),
+                date: new Date().toISOString(),
+                link: link || 'dashboard.html'
+            };
+            promises.push(notifRef.set(notifData));
+        }
+        
+        await Promise.all(promises);
+        
+        // Send device notifications to all users via Service Worker
+        const notificationPromises = userIds.map(async (userId) => {
+            try {
+                // Try to send via Service Worker
+                if (swRegistration) {
+                    await swRegistration.showNotification(title, {
+                        body: message,
+                        icon: '/assets/images/logo-192.png',
+                        badge: '/assets/images/logo-192.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: true,
+                        tag: 'abotra_' + Date.now()
+                    });
+                }
+                
+                // Also send via browser notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notif = new Notification(title, {
+                        body: message,
+                        icon: '/assets/images/logo-192.png',
+                        badge: '/assets/images/logo-192.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: true,
+                        tag: 'abotra_' + Date.now()
+                    });
+                    notif.onclick = () => window.focus();
+                }
+            } catch (e) {
+                // Silent fail for individual pushes
+            }
+        });
+        
+        await Promise.allSettled(notificationPromises);
+        
+        // Also send to admin
+        sendDevicePushNotification('✅ Push Sent', `Successfully sent to ${userIds.length} users`, '/admin-dashboard.html');
+        
+        return { success: true, totalUsers: userIds.length };
+        
+    } catch (error) {
+        console.error('[PUSH] Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// PUSH ALL BUTTON
+// ============================================================
+document.getElementById('pushAllBtn').addEventListener('click', async () => {
+    const usersCount = document.getElementById('totalUsers').textContent || '0';
+    document.getElementById('pushRecipientCount').textContent = `${usersCount} Users`;
+    document.getElementById('pushTitle').value = '📢 Admin Announcement';
+    document.getElementById('pushMessage').value = 'Hello ABOTRA-PROAI users! Important announcement from the admin team.';
+    openModal('pushModal');
+});
+
+document.getElementById('sendPushBtn').addEventListener('click', async function() {
+    const title = document.getElementById('pushTitle').value.trim();
+    const message = document.getElementById('pushMessage').value.trim();
+    
+    if (!title || !message) {
+        showToast('Please enter both title and message', 'error');
+        return;
+    }
+    
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const result = await sendPushToAllUsers(title, message);
+        
+        if (result.success) {
+            showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
+        } else {
+            showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
+        }
+        closeModal('pushModal');
+    } catch (error) {
+        showToast('❌ Error: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
+    }
+});
 
 // ============================================================
 // TOAST
@@ -1660,11 +648,6 @@ function showToast(message, type) {
     toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
-    
-    // Also send device push for important notifications
-    if (type === 'success' || type === 'info') {
-        sendDevicePushNotification('🔔 Admin Alert', message, type);
-    }
 }
 
 function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
@@ -1803,41 +786,25 @@ function getNotificationType(type) {
 
 function loadAdminNotifications() {
     const notifRef = db.ref('adminNotifications');
-    
-    if (notificationListener) {
-        notifRef.off('value', notificationListener);
-    }
-    
+    if (notificationListener) { notifRef.off('value', notificationListener); }
     notificationListener = notifRef.on('value', (snapshot) => {
         const list = document.getElementById('notificationList');
         const notifications = [];
         if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                notifications.push({ id: child.key, ...child.val() });
-            });
+            snapshot.forEach(child => { notifications.push({ id: child.key, ...child.val() }); });
         }
-        
         notifications.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        
         const unreadCount = notifications.filter(n => !n.read).length;
         const badge = document.getElementById('notifBadge');
-        if (unreadCount > 0) {
-            badge.textContent = unreadCount;
-            badge.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
-        }
-        
+        if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
         if (notifications.length === 0) {
             list.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No notifications</p></div>';
             return;
         }
-        
         list.innerHTML = '';
         notifications.forEach(notif => {
             const isUnread = !notif.read;
             const typeInfo = getNotificationType(notif.type);
-            
             const item = document.createElement('div');
             item.className = `notification-item ${isUnread ? 'unread' : ''}`;
             item.innerHTML = `
@@ -1857,32 +824,21 @@ function loadAdminNotifications() {
             `;
             list.appendChild(item);
         });
-        
         document.querySelectorAll('.notif-item-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const notifId = btn.dataset.id;
                 const action = btn.dataset.action;
                 const page = btn.dataset.page;
-                
                 if (action === 'read') {
                     await db.ref(`adminNotifications/${notifId}`).update({ read: true });
                     loadAdminNotifications();
                 } else if (action === 'delete') {
-                    if (await showConfirmModal({
-                        title: 'Delete Notification?',
-                        subtitle: 'This notification will be permanently removed.',
-                        icon: '🗑️',
-                        iconClass: 'danger',
-                        btnText: 'Delete',
-                        btnIcon: 'fa-trash-alt'
-                    })) {
+                    if (await showConfirmModal({ title: 'Delete Notification?', subtitle: 'This notification will be permanently removed.', icon: '🗑️', iconClass: 'danger', btnText: 'Delete', btnIcon: 'fa-trash-alt' })) {
                         await db.ref(`adminNotifications/${notifId}`).remove();
                         loadAdminNotifications();
                     }
-                } else if (page) {
-                    window.location.href = page;
-                }
+                } else if (page) { window.location.href = page; }
             });
         });
     });
@@ -1899,9 +855,7 @@ document.getElementById('markAllReadBtn').addEventListener('click', async () => 
     const snapshot = await db.ref('adminNotifications').once('value');
     if (snapshot.exists()) {
         const updates = {};
-        snapshot.forEach(child => {
-            if (!child.val().read) updates[`${child.key}/read`] = true;
-        });
+        snapshot.forEach(child => { if (!child.val().read) updates[`${child.key}/read`] = true; });
         if (Object.keys(updates).length > 0) {
             await db.ref('adminNotifications').update(updates);
             showToast('All notifications marked as read', 'success');
@@ -1911,175 +865,12 @@ document.getElementById('markAllReadBtn').addEventListener('click', async () => 
 });
 
 document.getElementById('clearAllNotifBtn').addEventListener('click', async () => {
-    if (await showConfirmModal({
-        title: 'Clear All Notifications?',
-        subtitle: 'This will permanently delete all admin notifications.',
-        icon: '🗑️',
-        iconClass: 'danger',
-        warning: 'This action cannot be undone!',
-        btnText: 'Clear All',
-        btnIcon: 'fa-trash-alt'
-    })) {
+    if (await showConfirmModal({ title: 'Clear All Notifications?', subtitle: 'This will permanently delete all admin notifications.', icon: '🗑️', iconClass: 'danger', warning: 'This action cannot be undone!', btnText: 'Clear All', btnIcon: 'fa-trash-alt' })) {
         await db.ref('adminNotifications').remove();
         showToast('All notifications cleared', 'success');
         loadAdminNotifications();
     }
 });
-
-// ============================================================
-// SEND PUSH NOTIFICATION TO ALL USERS
-// ============================================================
-async function sendPushToAllUsers(title, message) {
-    try {
-        // Get all users
-        const usersSnap = await db.ref('users').once('value');
-        const userIds = [];
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach(child => {
-                const user = child.val();
-                const uid = user.uid || child.key;
-                userIds.push(uid);
-            });
-        }
-        
-        if (userIds.length === 0) {
-            return { success: false, error: 'No users found' };
-        }
-        
-        // Save notification to each user
-        const promises = [];
-        for (const userId of userIds) {
-            const notifRef = db.ref(`notifications/${userId}`).push();
-            const notifData = {
-                id: notifRef.key,
-                title: title,
-                message: message,
-                type: 'broadcast',
-                read: false,
-                timestamp: Date.now(),
-                date: new Date().toISOString(),
-                link: 'dashboard.html'
-            };
-            promises.push(notifRef.set(notifData));
-        }
-        
-        await Promise.all(promises);
-        
-        // Send device push notifications
-        const notificationPromises = userIds.map(async (userId) => {
-            try {
-                // Try to send via Service Worker
-                if (swRegistration) {
-                    await swRegistration.showNotification(title, {
-                        body: message,
-                        icon: '../assets/images/logo.png',
-                        badge: '../assets/images/logo.png',
-                        vibrate: [200, 100, 200],
-                        requireInteraction: true,
-                        tag: 'admin_broadcast_' + Date.now()
-                    });
-                }
-                
-                // Also send via browser notification
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    const notif = new Notification(title, {
-                        body: message,
-                        icon: '../assets/images/logo.png',
-                        badge: '../assets/images/logo.png',
-                        vibrate: [200, 100, 200],
-                        requireInteraction: true
-                    });
-                    notif.onclick = () => window.focus();
-                }
-            } catch (e) {
-                // Silent fail for individual pushes
-            }
-        });
-        
-        // Wait for all device notifications
-        await Promise.allSettled(notificationPromises);
-        
-        return { success: true, totalUsers: userIds.length };
-        
-    } catch (error) {
-        console.error('❌ Push error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ============================================================
-// PUSH ALL BUTTON
-// ============================================================
-document.getElementById('pushAllBtn').addEventListener('click', () => {
-    const usersCount = document.getElementById('totalUsers').textContent || '0';
-    document.getElementById('pushRecipientCount').textContent = `${usersCount} Users`;
-    document.getElementById('pushTitle').value = '📢 Admin Announcement';
-    document.getElementById('pushMessage').value = 'Hello ABOTRA-PROAI users! Important announcement from the admin team.';
-    openModal('pushModal');
-});
-
-document.getElementById('sendPushBtn').addEventListener('click', async function() {
-    const title = document.getElementById('pushTitle').value.trim();
-    const message = document.getElementById('pushMessage').value.trim();
-    
-    if (!title || !message) {
-        showToast('Please enter both title and message', 'error');
-        return;
-    }
-    
-    const btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    
-    try {
-        const result = await sendPushToAllUsers(title, message);
-        
-        if (result.success) {
-            showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
-            // Send device notification to admin
-            sendDevicePushNotification('✅ Push Sent', `Successfully sent to ${result.totalUsers} users`, 'success');
-        } else {
-            showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
-        }
-        closeModal('pushModal');
-    } catch (error) {
-        showToast('❌ Error: ' + error.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
-    }
-});
-
-// ============================================================
-// CHECK ADMIN SESSION
-// ============================================================
-async function checkAdminSession(user) {
-    if (!user) return false;
-    try {
-        const snapshot = await db.ref('admins').once('value');
-        if (snapshot.exists()) {
-            const admins = snapshot.val();
-            for (const key in admins) {
-                const admin = admins[key];
-                if (admin === true && key === user.uid) {
-                    currentAdminId = user.uid;
-                    currentAdminEmail = user.email;
-                    return true;
-                }
-                if (typeof admin === 'object' && (admin.email === user.email || admin.uid === user.uid)) {
-                    currentAdminId = user.uid;
-                    currentAdminEmail = user.email;
-                    return true;
-                }
-            }
-        }
-        return false;
-    } catch (error) { 
-        console.error("Admin check error:", error);
-        return false; 
-    }
-}
 
 // ============================================================
 // LOAD STATS
@@ -2089,14 +880,12 @@ async function loadStats() {
         const usersSnap = await db.ref('users').once('value');
         let totalUsers = 0;
         let totalBalance = 0;
-        
         if (usersSnap.exists()) {
             usersSnap.forEach(child => {
                 totalUsers++;
                 totalBalance += getSafeNumber(child.val().balance);
             });
         }
-        
         document.getElementById('totalUsers').textContent = totalUsers;
         document.getElementById('totalBalance').innerHTML = `$${totalBalance.toFixed(2)}`;
 
@@ -2144,10 +933,7 @@ async function loadStats() {
         const pendingKyc = pendingKycSnap.exists() ? Object.keys(pendingKycSnap.val()).length : 0;
         if (kycBadge) { kycBadge.textContent = pendingKyc; kycBadge.style.display = pendingKyc > 0 ? 'inline-block' : 'none'; }
 
-    } catch (error) { 
-        console.error("Stats error:", error); 
-        document.getElementById('totalUsers').textContent = '0';
-    }
+    } catch (error) { console.error("Stats error:", error); }
 }
 
 // ============================================================
@@ -2158,9 +944,7 @@ async function loadRecentDeposits() {
         const snapshot = await db.ref('adminDeposits').once('value');
         const deposits = [];
         if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                deposits.push({ id: child.key, ...child.val() });
-            });
+            snapshot.forEach(child => { deposits.push({ id: child.key, ...child.val() }); });
         }
         deposits.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         const recent = deposits.slice(0, 8);
@@ -2204,9 +988,7 @@ async function loadRecentWithdrawals() {
         const snapshot = await db.ref('adminWithdrawals').once('value');
         const withdrawals = [];
         if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                withdrawals.push({ id: child.key, ...child.val() });
-            });
+            snapshot.forEach(child => { withdrawals.push({ id: child.key, ...child.val() }); });
         }
         withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         const recent = withdrawals.slice(0, 8);
@@ -2245,22 +1027,38 @@ async function loadRecentWithdrawals() {
 // LOGOUT
 // ============================================================
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-    if (await showConfirmModal({
-        title: 'Logout?',
-        subtitle: 'Are you sure you want to logout?',
-        icon: '🚪',
-        iconClass: 'warning',
-        btnText: 'Logout',
-        btnIcon: 'fa-sign-out-alt'
-    })) {
+    if (await showConfirmModal({ title: 'Logout?', subtitle: 'Are you sure you want to logout?', icon: '🚪', iconClass: 'warning', btnText: 'Logout', btnIcon: 'fa-sign-out-alt' })) {
         await auth.signOut();
         localStorage.removeItem('abotra_admin_logged_in');
-        localStorage.removeItem('abotra_admin_email');
-        localStorage.removeItem('abotra_admin_uid');
-        localStorage.removeItem('abotra_admin_session_expiry');
         window.location.href = 'login.html';
     }
 });
+
+// ============================================================
+// CHECK ADMIN SESSION
+// ============================================================
+async function checkAdminSession(user) {
+    if (!user) return false;
+    try {
+        const snapshot = await db.ref('admins').once('value');
+        if (snapshot.exists()) {
+            for (const key in snapshot.val()) {
+                const admin = snapshot.val()[key];
+                if (admin === true && key === user.uid) {
+                    currentAdminId = user.uid;
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+                if (typeof admin === 'object' && (admin.email === user.email || admin.uid === user.uid)) {
+                    currentAdminId = user.uid;
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+            }
+        }
+        return false;
+    } catch (error) { console.error("Admin check error:", error); return false; }
+}
 
 // ============================================================
 // INIT
@@ -2268,14 +1066,16 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 async function init() {
     initTheme();
     
-    // Register service worker for push
+    // Register Service Worker
     await registerServiceWorker();
     
+    // Request push permission after login
+    setTimeout(async () => {
+        await requestPushPermission();
+    }, 2000);
+    
     auth.onAuthStateChanged(async (user) => {
-        if (!user) { 
-            window.location.href = 'login.html'; 
-            return; 
-        }
+        if (!user) { window.location.href = 'login.html'; return; }
         const isAdmin = await checkAdminSession(user);
         if (!isAdmin) {
             showToast('Admin access only', 'error');
@@ -2286,11 +1086,6 @@ async function init() {
         await loadRecentDeposits();
         await loadRecentWithdrawals();
         loadAdminNotifications();
-        
-        // Request push permission after login
-        setTimeout(async () => {
-            await requestPushPermission();
-        }, 2000);
         
         setInterval(async () => {
             await loadStats();

@@ -1,34 +1,58 @@
 // functions/calculations/pnl.js
+const config = require('../config');
+
 function calculatePnL(trade, currentPrice) {
-    if (!currentPrice || !trade) return 0;
-    const size = (trade.margin * trade.leverage) / trade.entryPrice;
+    if (!trade || !trade.entryPrice || !currentPrice) return 0;
+    const positionSize = (trade.margin * trade.leverage) / trade.entryPrice;
+    let pnl = 0;
     if (trade.type === 'BUY') {
-        return (currentPrice - trade.entryPrice) * size;
+        pnl = (currentPrice - trade.entryPrice) * positionSize;
     } else {
-        return (trade.entryPrice - currentPrice) * size;
+        pnl = (trade.entryPrice - currentPrice) * positionSize;
     }
+    return pnl;
 }
 
-function calculateTotalPnL(trades, prices) {
-    let total = 0;
-    for (const trade of trades) {
-        const price = prices[trade.symbol] || trade.entryPrice;
-        total += calculatePnL(trade, price);
+function calculateLiquidationPrice(margin, leverage, entryPrice, type) {
+    const buffer = 0.005;
+    let liquidationPrice;
+    if (type === 'BUY') {
+        liquidationPrice = entryPrice * (1 - buffer * leverage);
+    } else {
+        liquidationPrice = entryPrice * (1 + buffer * leverage);
     }
-    return total;
+    if (type === 'BUY') {
+        liquidationPrice = Math.max(liquidationPrice, 0.01);
+        liquidationPrice = Math.min(liquidationPrice, entryPrice * 0.99);
+    } else {
+        liquidationPrice = Math.max(liquidationPrice, entryPrice * 1.01);
+        liquidationPrice = Math.min(liquidationPrice, entryPrice * 100);
+    }
+    return liquidationPrice;
 }
 
-function calculateEquity(tradingBalance, trades, prices) {
-    let totalMargin = 0;
-    let totalPnL = 0;
-    
+function calculateEquity(balance, trades, prices) {
+    let equity = balance || 0;
+    if (!trades || trades.length === 0) return equity;
     for (const trade of trades) {
-        totalMargin += trade.margin || 0;
-        const price = prices[trade.symbol] || trade.entryPrice;
-        totalPnL += calculatePnL(trade, price);
+        if (trade.status === 'open') {
+            const price = prices[trade.symbol] || trade.entryPrice;
+            const pnl = calculatePnL(trade, price);
+            equity += pnl;
+        }
     }
-    
-    return tradingBalance + totalMargin + totalPnL;
+    return equity;
+}
+
+function calculateUsedMargin(trades) {
+    if (!trades || trades.length === 0) return 0;
+    let used = 0;
+    for (const trade of trades) {
+        if (trade.status === 'open') {
+            used += trade.margin || 0;
+        }
+    }
+    return used;
 }
 
 function calculateFreeMargin(equity, usedMargin) {
@@ -40,32 +64,33 @@ function calculateMarginLevel(equity, usedMargin) {
     return (equity / usedMargin) * 100;
 }
 
-function calculateUsedMargin(trades) {
-    let total = 0;
-    for (const trade of trades) {
-        total += trade.margin || 0;
-    }
-    return total;
-}
-
-function calculateLiquidation(margin, leverage, entryPrice, type, bufferPercent = 0.005) {
-    const positionValue = margin * leverage;
-    const size = positionValue / entryPrice;
-    const maxLoss = margin * (1 - bufferPercent);
+function getClosingReason(trade, currentPrice) {
+    if (!trade || !currentPrice) return null;
     
-    if (type === 'BUY') {
-        return entryPrice - (maxLoss / size);
-    } else {
-        return entryPrice + (maxLoss / size);
+    if (trade.takeProfit) {
+        if (trade.type === 'BUY' && currentPrice >= trade.takeProfit) return 'Take Profit';
+        if (trade.type === 'SELL' && currentPrice <= trade.takeProfit) return 'Take Profit';
     }
+    
+    if (trade.stopLoss) {
+        if (trade.type === 'BUY' && currentPrice <= trade.stopLoss) return 'Stop Loss';
+        if (trade.type === 'SELL' && currentPrice >= trade.stopLoss) return 'Stop Loss';
+    }
+    
+    if (trade.liquidationPrice) {
+        if (trade.type === 'BUY' && currentPrice <= trade.liquidationPrice) return 'Liquidation';
+        if (trade.type === 'SELL' && currentPrice >= trade.liquidationPrice) return 'Liquidation';
+    }
+    
+    return null;
 }
 
 module.exports = {
     calculatePnL,
-    calculateTotalPnL,
+    calculateLiquidationPrice,
     calculateEquity,
+    calculateUsedMargin,
     calculateFreeMargin,
     calculateMarginLevel,
-    calculateUsedMargin,
-    calculateLiquidation
+    getClosingReason
 };

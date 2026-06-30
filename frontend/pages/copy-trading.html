@@ -7,29 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
-<script>
-const CONFIG = {
-    API_URL: 'https://abotra-backend-production.up.railway.app',
-    WS_URL: 'wss://abotra-backend-production.up.railway.app',
-    ENVIRONMENT: 'production',
-    VERSION: '2.0.0'
-};
-window.CONFIG = CONFIG;
-console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
-
 <style>
-
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Inter', sans-serif;
-}
-
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 body {
 background: #050505;
 background-image: url("../assets/images/background.png");
@@ -42,15 +21,11 @@ padding-bottom: 75px;
 position: relative;
 font-size: 11px;
 }
-
 body.light-theme {
 background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
 }
-
-body.light-theme .overlay {
-background: rgba(255,255,255,0.85);
-}
-
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 body.light-theme .top-bar,
 body.light-theme .copy-container,
 body.light-theme .trade-card,
@@ -58,528 +33,74 @@ body.light-theme .info-card {
 background: rgba(255,255,255,0.95);
 border: 1px solid rgba(0,0,0,0.08);
 }
-
 body.light-theme .top-bar h2,
-body.light-theme .page-title {
-color: #800000;
-}
+body.light-theme .page-title { color: #800000; }
+body.light-theme .trade-info-value { color: #800000; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
 
-body.light-theme .trade-info-value {
-color: #800000;
-}
+.skeleton-info-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 18px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-info-icon { width: 36px; height: 36px; background: linear-gradient(90deg, rgba(255,215,0,0.1) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.1) 75%); background-size: 200% 100%; border-radius: 50%; animation: shimmer 1.5s infinite; }
+.skeleton-info-text { flex: 1; }
+.skeleton-info-title { height: 14px; width: 100px; background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%); background-size: 200% 100%; border-radius: 5px; margin-bottom: 6px; animation: shimmer 1.5s infinite; }
+.skeleton-info-desc { height: 9px; width: 160px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.12) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 3px; animation: shimmer 1.5s infinite; }
+.skeleton-trade-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 20px; margin-bottom: 16px; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-trade-type { height: 26px; width: 120px; background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%); background-size: 200% 100%; border-radius: 6px; margin: 0 auto; animation: shimmer 1.5s infinite; }
+.skeleton-trade-amount { height: 36px; width: 150px; background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%); background-size: 200% 100%; border-radius: 8px; margin: 16px auto; animation: shimmer 1.5s infinite; }
+.skeleton-trade-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+.skeleton-trade-info-item { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 12px; text-align: center; height: 70px; animation: pulseOpacity 1.5s ease-in-out infinite; }
+.skeleton-trade-label { height: 9px; width: 50px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.12) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 3px; margin: 0 auto 6px; animation: shimmer 1.5s infinite; }
+.skeleton-trade-value { height: 18px; width: 70px; background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%); background-size: 200% 100%; border-radius: 5px; margin: 0 auto; animation: shimmer 1.5s infinite; }
+.skeleton-copy-btn { width: 100%; height: 48px; background: linear-gradient(90deg, rgba(14,203,129,0.15) 25%, rgba(14,203,129,0.3) 50%, rgba(14,203,129,0.15) 75%); background-size: 200% 100%; border-radius: 14px; margin-top: 16px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes pulseOpacity { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.8; } }
 
-body.light-theme .theme-toggle {
-background: rgba(0,0,0,0.08);
-border-color: rgba(128,0,0,0.3);
-}
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 12px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
 
-body.light-theme .theme-toggle i {
-color: #800000;
-}
+.copy-container { position: relative; z-index: 2; max-width: 750px; margin: 70px auto 20px; padding: 0 12px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-body.light-theme .bottom-nav {
-background: rgba(255,255,255,0.95);
-border-top: 1px solid rgba(128,0,0,0.2);
-}
+.info-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.info-text { display: flex; align-items: center; gap: 10px; }
+.info-text i { font-size: 18px; color: #FFD700; }
+.info-text div h4 { color: #FFD700; font-size: 12px; margin-bottom: 3px; }
+.info-text div p { color: #AAAAAA; font-size: 10px; }
 
-body.light-theme .bottom-nav a {
-color: #888;
-}
+.trade-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+.trade-type-BUY { color: #0ECB81; font-size: 18px; font-weight: 800; }
+.trade-type-SELL { color: #F6465D; font-size: 18px; font-weight: 800; }
+.trade-amount { font-size: 24px; font-weight: 800; color: #FFD700; }
+.trade-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+.trade-info-item { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 12px; text-align: center; }
+.trade-info-label { color: #888; font-size: 9px; margin-bottom: 4px; }
+.trade-info-value { color: #FFD700; font-size: 14px; font-weight: 700; }
+.expiry-badge { display: inline-block; background: rgba(246,70,93,0.2); border: 1px solid rgba(246,70,93,0.3); border-radius: 20px; padding: 3px 12px; font-size: 10px; color: #F6465D; margin-top: 8px; }
+.copy-btn { width: 100%; background: linear-gradient(135deg, #0ECB81, #0A9E65); border: none; border-radius: 14px; padding: 12px; color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+.copy-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(14,203,129,0.4); }
+.copy-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.loading-state { text-align: center; padding: 50px; color: #888; }
+.loading-state i { font-size: 40px; margin-bottom: 12px; }
 
-body.light-theme .bottom-nav a.active {
-color: #800000;
-}
-
-.skeleton-info-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 18px;
-padding: 16px;
-margin-bottom: 16px;
-display: flex;
-align-items: center;
-gap: 10px;
-animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-.skeleton-info-icon {
-width: 36px;
-height: 36px;
-background: linear-gradient(90deg, rgba(255,215,0,0.1) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.1) 75%);
-background-size: 200% 100%;
-border-radius: 50%;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-info-text {
-flex: 1;
-}
-.skeleton-info-title {
-height: 14px;
-width: 100px;
-background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-margin-bottom: 6px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-info-desc {
-height: 9px;
-width: 160px;
-background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.12) 50%, rgba(255,215,0,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 3px;
-animation: shimmer 1.5s infinite;
-}
-
-.skeleton-trade-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 20px;
-padding: 20px;
-margin-bottom: 16px;
-animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-.skeleton-trade-type {
-height: 26px;
-width: 120px;
-background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%);
-background-size: 200% 100%;
-border-radius: 6px;
-margin: 0 auto;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-trade-amount {
-height: 36px;
-width: 150px;
-background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%);
-background-size: 200% 100%;
-border-radius: 8px;
-margin: 16px auto;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-trade-info-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-gap: 12px;
-margin: 16px 0;
-}
-.skeleton-trade-info-item {
-background: rgba(255,255,255,0.05);
-border-radius: 14px;
-padding: 12px;
-text-align: center;
-height: 70px;
-animation: pulseOpacity 1.5s ease-in-out infinite;
-}
-.skeleton-trade-label {
-height: 9px;
-width: 50px;
-background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.12) 50%, rgba(255,215,0,0.05) 75%);
-background-size: 200% 100%;
-border-radius: 3px;
-margin: 0 auto 6px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-trade-value {
-height: 18px;
-width: 70px;
-background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.18) 50%, rgba(255,215,0,0.08) 75%);
-background-size: 200% 100%;
-border-radius: 5px;
-margin: 0 auto;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-copy-btn {
-width: 100%;
-height: 48px;
-background: linear-gradient(90deg, rgba(14,203,129,0.15) 25%, rgba(14,203,129,0.3) 50%, rgba(14,203,129,0.15) 75%);
-background-size: 200% 100%;
-border-radius: 14px;
-margin-top: 16px;
-animation: shimmer 1.5s infinite;
-}
-.skeleton-warning {
-height: 10px;
-width: 220px;
-background: linear-gradient(90deg, rgba(255,215,0,0.03) 25%, rgba(255,215,0,0.08) 50%, rgba(255,215,0,0.03) 75%);
-background-size: 200% 100%;
-border-radius: 3px;
-margin: 12px auto 0;
-animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-0% { background-position: -200% 0; }
-100% { background-position: 200% 0; }
-}
-@keyframes skeletonPulse {
-0%, 100% { opacity: 0.6; }
-50% { opacity: 1; }
-}
-@keyframes pulseOpacity {
-0%, 100% { opacity: 0.5; }
-50% { opacity: 0.8; }
-}
-
-.theme-toggle {
-background: rgba(0,0,0,0.7);
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255,215,0,0.3);
-border-radius: 10px;
-padding: 8px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: 0.3s;
-}
-
-.theme-toggle:hover {
-background: rgba(255,215,0,0.2);
-transform: scale(1.05);
-}
-
-.theme-toggle i {
-font-size: 15px;
-color: #FFFFFF;
-}
-
-.overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.82);
-backdrop-filter: blur(4px);
-z-index: 1;
-}
-
-.top-bar {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-z-index: 100;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(12px);
-border-bottom: 1px solid rgba(255,215,0,0.2);
-padding: 8px 16px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-}
-
-.logo-area {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.logo-area img {
-width: 32px;
-height: 32px;
-border-radius: 8px;
-object-fit: cover;
-background: transparent;
-}
-
-.logo-area h2 {
-color: #FFD700;
-font-size: 14px;
-margin-bottom: 2px;
-}
-
-.logo-area p {
-color: #AAAAAA;
-font-size: 7px;
-}
-
-.top-bar-right {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.back-btn-top {
-background: rgba(255,215,0,0.15);
-border: none;
-border-radius: 8px;
-padding: 6px 12px;
-color: #FFD700;
-cursor: pointer;
-transition: 0.3s;
-display: flex;
-align-items: center;
-gap: 5px;
-font-size: 9px;
-font-weight: 500;
-}
-
-.back-btn-top:hover {
-background: rgba(255,215,0,0.3);
-}
-
-.copy-container {
-position: relative;
-z-index: 2;
-max-width: 750px;
-margin: 70px auto 20px;
-padding: 0 12px;
-}
-
-.page-title {
-text-align: center;
-font-size: 20px;
-font-weight: 800;
-color: #FFD700;
-margin-bottom: 16px;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-}
-
-.info-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-backdrop-filter: blur(10px);
-border-radius: 16px;
-padding: 16px;
-margin-bottom: 16px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-flex-wrap: wrap;
-gap: 12px;
-}
-
-.info-text {
-display: flex;
-align-items: center;
-gap: 10px;
-}
-
-.info-text i {
-font-size: 18px;
-color: #FFD700;
-}
-
-.info-text div h4 {
-color: #FFD700;
-font-size: 12px;
-margin-bottom: 3px;
-}
-
-.info-text div p {
-color: #AAAAAA;
-font-size: 10px;
-}
-
-.trade-card {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,215,0,0.2);
-border-radius: 20px;
-padding: 20px;
-margin-bottom: 16px;
-backdrop-filter: blur(10px);
-}
-
-.trade-type-BUY {
-color: #0ECB81;
-font-size: 18px;
-font-weight: 800;
-}
-
-.trade-type-SELL {
-color: #F6465D;
-font-size: 18px;
-font-weight: 800;
-}
-
-.trade-amount {
-font-size: 24px;
-font-weight: 800;
-color: #FFD700;
-}
-
-.trade-info {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-gap: 12px;
-margin: 16px 0;
-}
-
-.trade-info-item {
-background: rgba(255,255,255,0.05);
-border-radius: 14px;
-padding: 12px;
-text-align: center;
-}
-
-.trade-info-label {
-color: #888;
-font-size: 9px;
-margin-bottom: 4px;
-}
-
-.trade-info-value {
-color: #FFD700;
-font-size: 14px;
-font-weight: 700;
-}
-
-.expiry-badge {
-display: inline-block;
-background: rgba(246,70,93,0.2);
-border: 1px solid rgba(246,70,93,0.3);
-border-radius: 20px;
-padding: 3px 12px;
-font-size: 10px;
-color: #F6465D;
-margin-top: 8px;
-}
-
-.copy-btn {
-width: 100%;
-background: linear-gradient(135deg, #0ECB81, #0A9E65);
-border: none;
-border-radius: 14px;
-padding: 12px;
-color: white;
-font-weight: 700;
-font-size: 13px;
-cursor: pointer;
-transition: 0.3s;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-margin-top: 16px;
-}
-
-.copy-btn:hover {
-transform: translateY(-2px);
-box-shadow: 0 5px 20px rgba(14,203,129,0.4);
-}
-
-.copy-btn:disabled {
-opacity: 0.6;
-cursor: not-allowed;
-transform: none;
-}
-
-.loading-state {
-text-align: center;
-padding: 50px;
-color: #888;
-}
-
-.loading-state i {
-font-size: 40px;
-margin-bottom: 12px;
-}
-
-.bottom-nav {
-position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(12px);
-border-top: 1px solid rgba(255,215,0,0.2);
-border-radius: 18px 18px 0 0;
-display: flex;
-justify-content: space-around;
-padding: 6px 10px;
-z-index: 100;
-}
-
-.bottom-nav a {
-display: flex;
-flex-direction: column;
-align-items: center;
-text-decoration: none;
-color: #888;
-font-size: 7px;
-transition: 0.3s;
-gap: 2px;
-}
-
-.bottom-nav a i {
-font-size: 16px;
-}
-
-.bottom-nav a.active {
-color: #FFD700;
-}
-
-.bottom-nav a:hover {
-color: #FFD700;
-}
-
-.notification-popup {
-position: fixed;
-top: 70px;
-right: 15px;
-min-width: 240px;
-max-width: 300px;
-padding: 10px 14px;
-border-radius: 14px;
-display: flex;
-align-items: center;
-gap: 10px;
-z-index: 99999;
-backdrop-filter: blur(20px);
-border: 1px solid rgba(255,255,255,0.08);
-box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-animation: slideInRight 0.3s ease;
-border-left: 4px solid;
-font-size: 10px;
-}
-
-.notification-popup.success {
-background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08));
-border-left-color: #00FF88;
-}
-
-.notification-popup.error {
-background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08));
-border-left-color: #FF4D4D;
-}
-
-.notification-popup.info {
-background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08));
-border-left-color: #FFD700;
-}
-
-.notification-popup i {
-font-size: 18px;
-}
-
-.notification-popup .popup-message {
-flex: 1;
-font-size: 10px;
-line-height: 1.4;
-color: #FFFFFF;
-font-weight: 500;
-}
-
-.notification-popup .close-notif {
-cursor: pointer;
-opacity: 0.7;
-transition: 0.3s;
-font-size: 12px;
-}
-
-@keyframes slideInRight {
-from { opacity: 0; transform: translateX(100%); }
-to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeOut {
-from { opacity: 1; transform: translateX(0); }
-to { opacity: 0; transform: translateX(100%); }
-}
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 16px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup { display: none !important; }
 
 @media(max-width: 700px) {
 .copy-container { padding: 0 12px; margin-top: 65px; }
@@ -611,62 +132,36 @@ to { opacity: 0; transform: translateX(100%); }
 <div class="overlay"></div>
 
 <div class="copy-container">
-<div class="page-title">
-<i class="fas fa-copy"></i> Copy Master Trade
-</div>
+<div class="page-title"><i class="fas fa-copy"></i> Copy Master Trade</div>
 
 <div id="skeletonInfoCard" class="skeleton-info-card">
-<div class="skeleton-info-icon"></div>
-<div class="skeleton-info-text">
-<div class="skeleton-info-title"></div>
-<div class="skeleton-info-desc"></div>
+<div class="skeleton-info-icon"></div><div class="skeleton-info-text"><div class="skeleton-info-title"></div><div class="skeleton-info-desc"></div></div>
 </div>
-</div>
-
 <div id="skeletonTradeCard" class="skeleton-trade-card">
-<div class="skeleton-trade-type"></div>
-<div class="skeleton-trade-amount"></div>
-<div class="skeleton-trade-info-grid">
-<div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div>
-<div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div>
-<div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div>
-<div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div>
-</div>
+<div class="skeleton-trade-type"></div><div class="skeleton-trade-amount"></div>
+<div class="skeleton-trade-info-grid"><div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div><div class="skeleton-trade-info-item"><div class="skeleton-trade-label"></div><div class="skeleton-trade-value"></div></div></div>
 <div class="skeleton-copy-btn"></div>
-<div class="skeleton-warning"></div>
 </div>
 
 <div id="realContent" style="display: none;">
 <div class="info-card">
-<div class="info-text">
-<i class="fas fa-info-circle"></i>
-<div>
-<h4>How It Works</h4>
-<p>View the latest master trade from admin and copy it to your account. <span style="color:#FFD700;">10% performance fee</span> applies on profits.</p>
+<div class="info-text"><i class="fas fa-info-circle"></i><div><h4>How It Works</h4><p>View the latest master trade from admin and copy it. <span style="color:#FFD700;">10% performance fee</span> applies on profits.</p></div></div>
 </div>
-</div>
-</div>
-
-<div id="masterTradeContainer">
-<div class="loading-state">
-<i class="fas fa-spinner fa-spin"></i>
-<p>Loading latest master trade...</p>
-</div>
-</div>
+<div id="masterTradeContainer"><div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading latest master trade...</p></div></div>
 </div>
 </div>
 
 <div class="bottom-nav">
 <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
 <a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
-<a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
-<a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
+<a href="trade.html"><i class="fas fa-chart-line"></i><span>Trade</span></a>
+<a href="copy-trading.html" class="active"><i class="fas fa-copy"></i><span>Copy Trade</span></a>
 <a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get, query, orderByChild, limitToLast, push, set, update, runTransaction, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, push, set, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -687,21 +182,9 @@ let currentUser = null;
 let latestMasterTrade = null;
 let isCopying = false;
 let refreshInterval = null;
-
 const EXPIRY_HOURS = 6;
 const EXPIRY_MS = EXPIRY_HOURS * 60 * 60 * 1000;
-const PERFORMANCE_FEE_PERCENT = 0.10; // 10%
-
-function showToast(message, type) {
-    const existing = document.querySelector('.notification-popup');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = `notification-popup ${type}`;
-    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
-    document.body.appendChild(toast);
-    toast.querySelector('.close-notif').addEventListener('click', () => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); });
-    setTimeout(() => { if(toast.parentNode) { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); } }, 4000);
-}
+const PERFORMANCE_FEE_PERCENT = 0.10;
 
 function initTheme() {
     const saved = localStorage.getItem('abotra_theme');
@@ -709,10 +192,6 @@ function initTheme() {
         document.body.classList.add('light-theme');
         document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
         document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
-    } else {
-        document.body.classList.remove('light-theme');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
     }
 }
 document.getElementById('themeToggle').addEventListener('click', () => {
@@ -729,392 +208,15 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     }
 });
 
-async function addNotification(userId, title, message, type = 'info', link = null) {
-    if (!userId) return;
-    try {
-        const notifRef = push(ref(db, `notifications/${userId}`));
-        await set(notifRef, {
-            id: notifRef.key,
-            title,
-            message,
-            type,
-            read: false,
-            link: link,
-            timestamp: Date.now(),
-            date: new Date().toISOString()
-        });
-    } catch(e) { console.error("Notification error:", e); }
-}
-
-function formatExpiryTime(createdAt) {
-    const expiryTime = createdAt + EXPIRY_MS;
-    const remaining = expiryTime - Date.now();
-    if (remaining <= 0) return 'Expired';
-    const hours = Math.floor(remaining / (60 * 60 * 1000));
-    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-    return `${hours}h ${minutes}m remaining`;
-}
-
-async function updatePlatformStatsForFee(amount) {
-    try {
-        const statsRef = ref(db, 'platformStats');
-        const snap = await get(statsRef);
-        const current = snap.exists() ? snap.val() : {};
-        
-        await update(statsRef, {
-            totalPerformanceFees: (current.totalPerformanceFees || 0) + amount,
-            totalFeesCollected: (current.totalFeesCollected || 0) + amount,
-            lastPerformanceFeeAt: Date.now()
-        });
-        console.log(`✅ Performance fee $${amount.toFixed(2)} added to platformStats`);
-    } catch(e) {
-        console.error("Error updating platform stats:", e);
-    }
-}
-
-async function copyMasterTrade() {
-    if (!currentUser) {
-        showToast('Please login first', 'error');
-        return;
-    }
-    if (!latestMasterTrade) {
-        showToast('No active master trade available', 'error');
-        return;
-    }
-    
-    const now = Date.now();
-    const tradeAge = now - (latestMasterTrade.createdAt || 0);
-    if (tradeAge > EXPIRY_MS) {
-        showToast(`This trade has expired! Master trades expire after ${EXPIRY_HOURS} hours.`, 'error');
-        return;
-    }
-    
-    if (isCopying) return;
-    
-    const copyBtn = document.getElementById('copyBtn');
-    isCopying = true;
-    copyBtn.disabled = true;
-    copyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    
-    try {
-        const userRef = ref(db, `users/${currentUser.uid}`);
-        let userBalance = 0;
-        const userSnap = await get(userRef);
-        if (userSnap.exists()) {
-            userBalance = userSnap.val().balance || 0;
-        }
-        
-        if (userBalance < latestMasterTrade.amount) {
-            showToast(`Insufficient balance! Need $${latestMasterTrade.amount}`, 'error');
-            copyBtn.disabled = false;
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy This Trade';
-            isCopying = false;
-            return;
-        }
-        
-        const result = await runTransaction(userRef, (currentData) => {
-            if (currentData) {
-                const currentBalance = currentData.balance || 0;
-                if (currentBalance >= latestMasterTrade.amount) {
-                    return { ...currentData, balance: currentBalance - latestMasterTrade.amount };
-                }
-                return currentData;
-            }
-            return currentData;
-        });
-        
-        if (!result.committed) {
-            showToast('Insufficient balance!', 'error');
-            copyBtn.disabled = false;
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy This Trade';
-            isCopying = false;
-            return;
-        }
-        
-        const copiedTradeRef = push(ref(db, `copiedTrades/${currentUser.uid}`));
-        const copiedTradeId = copiedTradeRef.key;
-        
-        await set(copiedTradeRef, {
-            id: copiedTradeId,
-            originalTradeId: latestMasterTrade.id,
-            masterTradeId: latestMasterTrade.id,
-            type: latestMasterTrade.type,
-            amount: latestMasterTrade.amount,
-            leverage: latestMasterTrade.leverage,
-            entryPrice: latestMasterTrade.entryPrice,
-            takeProfit: latestMasterTrade.takeProfit || null,
-            stopLoss: latestMasterTrade.stopLoss || null,
-            status: 'active',
-            copiedAt: Date.now(),
-            createdAt: latestMasterTrade.createdAt,
-            note: latestMasterTrade.note || '',
-            performanceFeeApplied: false,
-            isCopiedTrade: true
-        });
-        
-        const masterTradeRef = ref(db, `masterTrades/${latestMasterTrade.id}`);
-        const masterSnap = await get(masterTradeRef);
-        if (masterSnap.exists()) {
-            const currentFollowers = masterSnap.val().totalFollowers || 0;
-            const currentVolume = masterSnap.val().totalVolume || 0;
-            await update(masterTradeRef, {
-                totalFollowers: currentFollowers + 1,
-                totalVolume: currentVolume + latestMasterTrade.amount
-            });
-        }
-        
-        const userTradeRef = push(ref(db, `trades/${currentUser.uid}`));
-        const tradeId = userTradeRef.key;
-        await set(userTradeRef, {
-            id: tradeId,
-            type: latestMasterTrade.type,
-            margin: latestMasterTrade.amount,
-            amount: latestMasterTrade.amount,
-            leverage: latestMasterTrade.leverage,
-            entryPrice: latestMasterTrade.entryPrice,
-            takeProfit: latestMasterTrade.takeProfit || null,
-            stopLoss: latestMasterTrade.stopLoss || null,
-            status: 'open',
-            createdAt: Date.now(),
-            timestamp: Date.now(),
-            copiedFrom: latestMasterTrade.id,
-            isCopiedTrade: true,
-            originalTradeId: latestMasterTrade.id,
-            symbol: 'BTC/USDT',
-            positionValue: latestMasterTrade.amount * latestMasterTrade.leverage,
-            openDate: new Date().toISOString(),
-            performanceFeePending: true,
-            performanceFeePercent: PERFORMANCE_FEE_PERCENT,
-            liquidationPrice: latestMasterTrade.entryPrice * (1 - 0.005),
-            openFee: 0
-        });
-        
-        const perfFeeRef = ref(db, `performanceFees/${currentUser.uid}/${tradeId}`);
-        await set(perfFeeRef, {
-            tradeId: tradeId,
-            masterTradeId: latestMasterTrade.id,
-            amount: latestMasterTrade.amount,
-            entryPrice: latestMasterTrade.entryPrice,
-            type: latestMasterTrade.type,
-            leverage: latestMasterTrade.leverage,
-            feePercent: PERFORMANCE_FEE_PERCENT,
-            status: 'open',
-            createdAt: Date.now()
-        });
-        
-        await addNotification(
-            currentUser.uid,
-            '✅ Master Trade Copied Successfully',
-            `You successfully copied ${latestMasterTrade.type === 'BUY' ? '📈 LONG' : '📉 SHORT'} trade of $${latestMasterTrade.amount} with ${latestMasterTrade.leverage}x leverage! 10% performance fee applies on profits.`,
-            'success',
-            'trade.html'
-        );
-        
-        showToast(`✅ Trade copied! Redirecting to trade page...`, 'success');
-        
-        copyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Copied!';
-        setTimeout(() => {
-            window.location.href = 'trade.html?symbol=BTC&copied=true';
-        }, 1500);
-        
-    } catch (error) {
-        console.error("Copy error:", error);
-        showToast('Error copying trade: ' + error.message, 'error');
-        copyBtn.disabled = false;
-        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy This Trade';
-        isCopying = false;
-    }
-}
-
-async function cleanupExpiredTrades() {
-    try {
-        const tradesRef = ref(db, 'masterTrades');
-        const snapshot = await get(tradesRef);
-        if (!snapshot.exists()) return;
-        
-        const now = Date.now();
-        let markedCount = 0;
-        
-        snapshot.forEach(child => {
-            const trade = child.val();
-            const tradeAge = now - (trade.createdAt || 0);
-            if (tradeAge > EXPIRY_MS && trade.status !== 'inactive') {
-                update(ref(db, `masterTrades/${child.key}`), { status: 'inactive' });
-                markedCount++;
-                console.log(`Marked inactive expired master trade: ${child.key}`);
-            }
-        });
-        
-        if (markedCount > 0) {
-            console.log(`Marked ${markedCount} expired master trades as inactive`);
-        }
-    } catch (error) {
-        console.error("Cleanup error:", error);
-    }
-}
-
-async function loadLatestMasterTrade() {
-    const container = document.getElementById('masterTradeContainer');
-    
-    try {
-        await cleanupExpiredTrades();
-        
-        const tradesRef = query(ref(db, 'masterTrades'), orderByChild('createdAt'), limitToLast(10));
-        const snapshot = await get(tradesRef);
-        
-        if (!snapshot.exists()) {
-            container.innerHTML = `
-                <div class="trade-card">
-                    <div class="loading-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>No active master trades available</p>
-                        <p style="font-size:10px; margin-top:8px;">Check back later for trading opportunities</p>
-                    </div>
-                </div>
-            `;
-            latestMasterTrade = null;
-            return;
-        }
-        
-        let allTrades = [];
-        snapshot.forEach(child => {
-            const trade = { id: child.key, ...child.val() };
-            if (trade.status !== 'inactive' && trade.status !== 'closed') {
-                allTrades.push(trade);
-            }
-        });
-        
-        if (allTrades.length === 0) {
-            container.innerHTML = `
-                <div class="trade-card">
-                    <div class="loading-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>No active master trades available</p>
-                        <p style="font-size:10px; margin-top:8px;">Check back later for trading opportunities</p>
-                    </div>
-                </div>
-            `;
-            latestMasterTrade = null;
-            return;
-        }
-        
-        allTrades.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        const trade = allTrades[0];
-        
-        if (!trade || !trade.type || !trade.amount) {
-            container.innerHTML = `
-                <div class="trade-card">
-                    <div class="loading-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Invalid trade data found</p>
-                        <p style="font-size:10px; margin-top:8px;">Please contact admin to fix the master trade data</p>
-                    </div>
-                </div>
-            `;
-            latestMasterTrade = null;
-            return;
-        }
-        
-        const now = Date.now();
-        const tradeAge = now - (trade.createdAt || 0);
-        const isExpired = tradeAge > EXPIRY_MS;
-        
-        if (isExpired) {
-            await update(ref(db, `masterTrades/${trade.id}`), { status: 'inactive' });
-            container.innerHTML = `
-                <div class="trade-card">
-                    <div class="loading-state">
-                        <i class="fas fa-clock"></i>
-                        <p>Previous trade has expired after ${EXPIRY_HOURS} hours</p>
-                        <p style="font-size:10px; margin-top:8px;">Waiting for new master trade...</p>
-                    </div>
-                </div>
-            `;
-            latestMasterTrade = null;
-            return;
-        }
-        
-        latestMasterTrade = trade;
-        
-        const tradeTypeClass = trade.type === 'BUY' ? 'trade-type-BUY' : 'trade-type-SELL';
-        const tradeTypeText = trade.type === 'BUY' ? '📈 BUY / LONG' : '📉 SELL / SHORT';
-        const tradeDate = trade.createdAt ? new Date(trade.createdAt).toLocaleString() : 'Unknown';
-        const tradeCreator = trade.createdByEmail || 'Master Trader';
-        const expiryDisplay = formatExpiryTime(trade.createdAt);
-        const expiryWarning = tradeAge > (EXPIRY_MS * 0.8) ? true : false;
-        
-        container.innerHTML = `
-            <div class="trade-card">
-                <div style="text-align: center;">
-                    <span class="${tradeTypeClass}">${tradeTypeText}</span>
-                    ${expiryWarning ? '<div class="expiry-badge" style="margin-top:6px;">⚠️ Expires in ' + expiryDisplay + '</div>' : '<div class="expiry-badge" style="margin-top:6px;">⏰ ' + expiryDisplay + '</div>'}
-                </div>
-                <div style="text-align: center; margin: 12px 0;">
-                    <span class="trade-amount">$${trade.amount}</span>
-                </div>
-                <div class="trade-info">
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Entry Price</div>
-                        <div class="trade-info-value">$${trade.entryPrice}</div>
-                    </div>
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Leverage</div>
-                        <div class="trade-info-value">${trade.leverage}x</div>
-                    </div>
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Take Profit</div>
-                        <div class="trade-info-value">${trade.takeProfit ? `$${trade.takeProfit}` : 'N/A'}</div>
-                    </div>
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Stop Loss</div>
-                        <div class="trade-info-value">${trade.stopLoss ? `$${trade.stopLoss}` : 'N/A'}</div>
-                    </div>
-                </div>
-                <div class="trade-info">
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Created By</div>
-                        <div class="trade-info-value">${escapeHtml(tradeCreator)}</div>
-                    </div>
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Created At</div>
-                        <div class="trade-info-value">${tradeDate}</div>
-                    </div>
-                    <div class="trade-info-item">
-                        <div class="trade-info-label">Total Followers</div>
-                        <div class="trade-info-value">${trade.totalFollowers || 0}</div>
-                    </div>
-                </div>
-                <div style="background: rgba(255,215,0,0.08); border-radius: 10px; padding: 10px; margin: 12px 0; text-align:center;">
-                    <small style="color:#FFD700; font-size:10px;">💰 Performance Fee: <strong>10%</strong> of profit</small>
-                </div>
-                ${trade.note ? `<div style="background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px;">
-                    <small style="color:#FFD700; font-size:9px;">📝 Note: ${escapeHtml(trade.note)}</small>
-                </div>` : ''}
-                <button class="copy-btn" id="copyBtn">
-                    <i class="fas fa-copy"></i> Copy This Trade
-                </button>
-                <div style="text-align: center; margin-top: 12px;">
-                    <small style="color:#888; font-size:9px;">⚠️ By copying this trade, $${trade.amount} will be deducted from your balance<br>Trade expires ${EXPIRY_HOURS} hours after creation</small>
-                </div>
-            </div>
-        `;
-        
-        const copyBtn = document.getElementById('copyBtn');
-        if (copyBtn) copyBtn.addEventListener('click', copyMasterTrade);
-        
-    } catch (error) {
-        console.error("Load master trade error:", error);
-        container.innerHTML = `
-            <div class="trade-card">
-                <div class="loading-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Error loading master trade</p>
-                    <p style="font-size:10px; color:#F6465D;">${error.message || 'Please check console for details'}</p>
-                    <button onclick="location.reload()" style="margin-top:12px; padding:6px 16px; background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer;">Refresh</button>
-                </div>
-            </div>
-        `;
-    }
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 function escapeHtml(text) {
@@ -1124,27 +226,198 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function startAutoRefresh() {
-    if (refreshInterval) clearInterval(refreshInterval);
-    refreshInterval = setInterval(() => {
-        loadLatestMasterTrade();
-    }, 30000);
+function formatExpiryTime(createdAt) {
+    const remaining = (createdAt + EXPIRY_MS) - Date.now();
+    if (remaining <= 0) return 'Expired';
+    const hours = Math.floor(remaining / (60 * 60 * 1000));
+    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+    return `${hours}h ${minutes}m remaining`;
+}
+
+async function copyMasterTrade() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    if (!latestMasterTrade) { showNotification('No active master trade available', 'error'); return; }
+    if (Date.now() - latestMasterTrade.createdAt > EXPIRY_MS) { showNotification('Trade has expired!', 'error'); return; }
+    if (isCopying) return;
+    
+    const copyBtn = document.getElementById('copyBtn');
+    isCopying = true;
+    copyBtn.disabled = true;
+    copyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const userSnap = await get(userRef);
+        let userBalance = userSnap.exists() ? (userSnap.val().balance || 0) : 0;
+        if (userBalance < latestMasterTrade.amount) {
+            showNotification(`Insufficient balance! Need $${latestMasterTrade.amount}`, 'error');
+            copyBtn.disabled = false;
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy This Trade';
+            isCopying = false;
+            return;
+        }
+        
+        await runTransaction(userRef, (current) => {
+            if (current && (current.balance || 0) >= latestMasterTrade.amount) {
+                current.balance = (current.balance || 0) - latestMasterTrade.amount;
+            }
+            return current;
+        });
+        
+        const copiedTradeRef = push(ref(db, `copiedTrades/${currentUser.uid}`));
+        const copiedTradeId = copiedTradeRef.key;
+        await set(copiedTradeRef, {
+            id: copiedTradeId, originalTradeId: latestMasterTrade.id, type: latestMasterTrade.type,
+            amount: latestMasterTrade.amount, leverage: latestMasterTrade.leverage,
+            entryPrice: latestMasterTrade.entryPrice, takeProfit: latestMasterTrade.takeProfit || null,
+            stopLoss: latestMasterTrade.stopLoss || null, status: 'active',
+            copiedAt: Date.now(), createdAt: latestMasterTrade.createdAt, isCopiedTrade: true
+        });
+        
+        const masterRef = ref(db, `masterTrades/${latestMasterTrade.id}`);
+        const masterSnap = await get(masterRef);
+        if (masterSnap.exists()) {
+            const current = masterSnap.val();
+            await update(masterRef, {
+                totalFollowers: (current.totalFollowers || 0) + 1,
+                totalVolume: (current.totalVolume || 0) + latestMasterTrade.amount
+            });
+        }
+        
+        const userTradeRef = push(ref(db, `trades/${currentUser.uid}`));
+        await set(userTradeRef, {
+            id: userTradeRef.key, type: latestMasterTrade.type, margin: latestMasterTrade.amount,
+            amount: latestMasterTrade.amount, leverage: latestMasterTrade.leverage,
+            entryPrice: latestMasterTrade.entryPrice, takeProfit: latestMasterTrade.takeProfit || null,
+            stopLoss: latestMasterTrade.stopLoss || null, status: 'open',
+            createdAt: Date.now(), copiedFrom: latestMasterTrade.id, isCopiedTrade: true,
+            symbol: 'BTC/USDT', performanceFeePending: true, performanceFeePercent: PERFORMANCE_FEE_PERCENT
+        });
+        
+        const perfFeeRef = ref(db, `performanceFees/${currentUser.uid}/${userTradeRef.key}`);
+        await set(perfFeeRef, {
+            tradeId: userTradeRef.key, masterTradeId: latestMasterTrade.id,
+            amount: latestMasterTrade.amount, entryPrice: latestMasterTrade.entryPrice,
+            type: latestMasterTrade.type, feePercent: PERFORMANCE_FEE_PERCENT,
+            status: 'open', createdAt: Date.now()
+        });
+        
+        showNotification(`✅ Trade copied! Redirecting...`, 'success');
+        copyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Copied!';
+        setTimeout(() => { window.location.href = 'trade.html'; }, 1500);
+        
+    } catch (error) {
+        showNotification('Error copying trade', 'error');
+        copyBtn.disabled = false;
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy This Trade';
+        isCopying = false;
+    }
+}
+
+// ✅ FIXED: loadLatestMasterTrade - Simple read without orderByChild
+async function loadLatestMasterTrade() {
+    const container = document.getElementById('masterTradeContainer');
+    try {
+        // ✅ Simple read - no query/orderByChild needed
+        const snapshot = await get(ref(db, 'masterTrades'));
+        let allTrades = [];
+        
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const trade = { id: child.key, ...child.val() };
+                // Only include active trades
+                if (trade.status !== 'inactive' && trade.status !== 'closed') {
+                    allTrades.push(trade);
+                }
+            });
+        }
+        
+        if (allTrades.length === 0) {
+            container.innerHTML = `<div class="trade-card"><div class="loading-state"><i class="fas fa-inbox"></i><p>No active master trades available</p><p style="font-size:10px; margin-top:8px;">Admin will post trading opportunities here</p></div></div>`;
+            latestMasterTrade = null;
+            return;
+        }
+        
+        // ✅ Sort manually by createdAt (newest first)
+        allTrades.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const trade = allTrades[0];
+        
+        if (!trade || !trade.type || !trade.amount) {
+            container.innerHTML = `<div class="trade-card"><div class="loading-state"><i class="fas fa-exclamation-triangle"></i><p>Invalid trade data</p></div></div>`;
+            latestMasterTrade = null;
+            return;
+        }
+        
+        // Check if expired
+        if (Date.now() - trade.createdAt > EXPIRY_MS) {
+            await update(ref(db, `masterTrades/${trade.id}`), { status: 'inactive' });
+            container.innerHTML = `<div class="trade-card"><div class="loading-state"><i class="fas fa-clock"></i><p>Previous trade expired. Waiting for new one...</p></div></div>`;
+            latestMasterTrade = null;
+            return;
+        }
+        
+        latestMasterTrade = trade;
+        const tradeTypeClass = trade.type === 'BUY' ? 'trade-type-BUY' : 'trade-type-SELL';
+        const tradeTypeText = trade.type === 'BUY' ? '📈 BUY / LONG' : '📉 SELL / SHORT';
+        const tradeCreator = trade.createdByEmail || trade.createdBy || 'Master Trader';
+        
+        container.innerHTML = `
+            <div class="trade-card">
+                <div style="text-align:center;">
+                    <span class="${tradeTypeClass}">${tradeTypeText}</span>
+                    <div class="expiry-badge">⏰ ${formatExpiryTime(trade.createdAt)}</div>
+                </div>
+                <div style="text-align:center;margin:12px 0;">
+                    <span class="trade-amount">$${trade.amount}</span>
+                </div>
+                <div class="trade-info">
+                    <div class="trade-info-item"><div class="trade-info-label">Entry Price</div><div class="trade-info-value">$${trade.entryPrice}</div></div>
+                    <div class="trade-info-item"><div class="trade-info-label">Leverage</div><div class="trade-info-value">${trade.leverage}x</div></div>
+                    <div class="trade-info-item"><div class="trade-info-label">Take Profit</div><div class="trade-info-value">${trade.takeProfit ? `$${trade.takeProfit}` : 'N/A'}</div></div>
+                    <div class="trade-info-item"><div class="trade-info-label">Stop Loss</div><div class="trade-info-value">${trade.stopLoss ? `$${trade.stopLoss}` : 'N/A'}</div></div>
+                </div>
+                <div class="trade-info" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="trade-info-item"><div class="trade-info-label">Created By</div><div class="trade-info-value" style="font-size:11px;">${escapeHtml(tradeCreator)}</div></div>
+                    <div class="trade-info-item"><div class="trade-info-label">Total Followers</div><div class="trade-info-value">${trade.totalFollowers || 0}</div></div>
+                </div>
+                ${trade.note ? `<div style="background:rgba(255,215,0,0.08);border-radius:10px;padding:8px;margin:10px 0;text-align:center;"><small style="color:#FFD700;font-size:10px;">📝 ${escapeHtml(trade.note)}</small></div>` : ''}
+                <div style="background:rgba(255,215,0,0.08);border-radius:10px;padding:10px;text-align:center;">
+                    <small style="color:#FFD700;font-size:10px;">💰 Performance Fee: <strong>10%</strong> of profit</small>
+                </div>
+                <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> Copy This Trade</button>
+                <div style="text-align:center;margin-top:12px;">
+                    <small style="color:#888;font-size:9px;">⚠️ $${trade.amount} will be deducted from your balance<br>Trade expires ${EXPIRY_HOURS} hours after creation</small>
+                </div>
+            </div>
+        `;
+        
+        const copyBtn = document.getElementById('copyBtn');
+        if (copyBtn) copyBtn.addEventListener('click', copyMasterTrade);
+        
+    } catch (error) {
+        console.error('Load master trade error:', error);
+        container.innerHTML = `
+            <div class="trade-card">
+                <div class="loading-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading master trade</p>
+                    <p style="font-size:10px; color:#F6465D;">${error.message || 'Please try again'}</p>
+                    <button onclick="location.reload()" style="margin-top:12px; padding:6px 16px; background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer;">Refresh</button>
+                </div>
+            </div>
+        `;
+        latestMasterTrade = null;
+    }
 }
 
 onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
+    if (!user) { window.location.href = 'login.html'; return; }
     currentUser = user;
-    
     document.getElementById('skeletonInfoCard').style.display = 'flex';
     document.getElementById('skeletonTradeCard').style.display = 'block';
     document.getElementById('realContent').style.display = 'none';
-    
     await loadLatestMasterTrade();
-    startAutoRefresh();
-    
+    refreshInterval = setInterval(loadLatestMasterTrade, 30000);
     setTimeout(() => {
         document.getElementById('skeletonInfoCard').style.display = 'none';
         document.getElementById('skeletonTradeCard').style.display = 'none';

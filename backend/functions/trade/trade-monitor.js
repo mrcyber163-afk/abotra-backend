@@ -1,117 +1,106 @@
-// functions/trade/trade-monitor.js
+// backend/functions/trade/trade-monitor.js
 const { getDB } = require('../firebase');
-const { getPriceStream } = require('../streaming/price-stream');
-const { getClosingReason } = require('../calculations/liquidation');
+const { getAllOpenTrades } = require('./trade-open');
 const { closeTrade } = require('./trade-close');
-const { calculateEquity, calculateFreeMargin, calculateMarginLevel, calculateUsedMargin } = require('../calculations/pnl');
+const { getClosingReason, calculateEquity, calculateUsedMargin, calculateFreeMargin, calculateMarginLevel } = require('../calculations/pnl');
 
-async function getAllOpenTrades() {
-    const db = getDB();
-    const snapshot = await db.ref('trades').once('value');
-    const trades = [];
-    
-    // REST API returns data directly, not a snapshot with exists()
-    const data = snapshot.val();
-    if (data && typeof data === 'object') {
-        // Iterate through users
-        for (const userId of Object.keys(data)) {
-            const userTrades = data[userId];
-            if (userTrades && typeof userTrades === 'object') {
-                // Iterate through trades for this user
-                for (const tradeId of Object.keys(userTrades)) {
-                    const trade = userTrades[tradeId];
-                    if (trade && trade.status === 'open') {
-                        trades.push({ id: tradeId, userId: userId, ...trade });
-                    }
-                }
-            }
-        }
-    }
-    return trades;
-}
-
+// ✅ Monitor trades - Simplified
 async function monitorTrades() {
     try {
-        const priceStream = getPriceStream();
+        const db = getDB();
         const trades = await getAllOpenTrades();
+        
         if (trades.length === 0) return;
         
-        const userTrades = {};
-        for (const trade of trades) {
-            if (!userTrades[trade.userId]) userTrades[trade.userId] = [];
-            userTrades[trade.userId].push(trade);
-        }
+        console.log(`[MONITOR] Checking ${trades.length} open trades...`);
         
-        for (const [userId, userTradesList] of Object.entries(userTrades)) {
+        let closedCount = 0;
+        const errors = [];
+        
+        // ✅ Process each trade
+        for (const trade of trades) {
             try {
-                const prices = {};
-                for (const trade of userTradesList) {
-                    const symbol = trade.symbol || 'BTC/USDT';
-                    const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
-                    prices[symbol] = priceStream.getPrice(symbolClean) || trade.entryPrice;
-                }
+                const userId = trade.userId || trade.uid;
+                if (!userId) continue;
                 
-                for (const trade of userTradesList) {
-                    const symbol = trade.symbol || 'BTC/USDT';
-                    const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
-                    const currentPrice = prices[symbol] || trade.entryPrice;
-                    
-                    const reason = getClosingReason(trade, currentPrice);
-                    if (reason) {
-                        console.log(`[MONITOR] Closing ${trade.id} for ${userId}: ${reason}`);
-                        await closeTrade(userId, trade.id, reason);
-                    }
+                // Get current price from Binance
+                const symbol = trade.symbol || 'BTC/USDT';
+                const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
+                const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolClean}`);
+                const priceData = await priceRes.json();
+                const currentPrice = parseFloat(priceData.price) || trade.entryPrice;
+                
+                // Check if should close
+                const reason = getClosingReason(trade, currentPrice);
+                if (reason) {
+                    console.log(`[MONITOR] Closing ${trade.id} for ${userId}: ${reason}`);
+                    const result = await closeTrade(userId, trade.id, reason);
+                    if (result.success) closedCount++;
                 }
             } catch (error) {
-                console.error(`[MONITOR] Error processing user ${userId}:`, error);
+                errors.push(error.message);
             }
         }
+        
+        if (closedCount > 0 || trades.length > 0) {
+            console.log(`[MONITOR] ✅ ${closedCount} closed, ${trades.length} checked`);
+        }
+        
+        if (errors.length > 0) {
+            console.error('[MONITOR] Errors:', errors);
+        }
+        
     } catch (error) {
-        console.error('[MONITOR] Error:', error);
+        console.error('[MONITOR] Error:', error.message);
     }
 }
 
+// ✅ Update user stats - Simplified
 async function updateUserStats() {
     try {
         const db = getDB();
-        const priceStream = getPriceStream();
-        const usersSnap = await db.ref('users').once('value');
+        const trades = await getAllOpenTrades();
         
-        // REST API returns data directly
-        const usersData = usersSnap.val();
-        if (!usersData || typeof usersData !== 'object') return;
+        if (trades.length === 0) return;
         
-        for (const userId of Object.keys(usersData)) {
+        // Group trades by user
+        const userTrades = {};
+        for (const trade of trades) {
+            const userId = trade.userId || trade.uid;
+            if (!userId) continue;
+            if (!userTrades[userId]) userTrades[userId] = [];
+            userTrades[userId].push(trade);
+        }
+        
+        let updatedCount = 0;
+        
+        // ✅ Update each user's stats
+        for (const [userId, userTradesList] of Object.entries(userTrades)) {
             try {
-                const userData = usersData[userId];
-                const tradesSnap = await db.ref(`trades/${userId}`).once('value');
-                const tradesData = tradesSnap.val();
-                const openTrades = [];
+                // Get user data
+                const userSnap = await db.ref(`users/${userId}`).once('value');
+                if (!userSnap.exists()) continue;
                 
-                if (tradesData && typeof tradesData === 'object') {
-                    for (const tradeId of Object.keys(tradesData)) {
-                        const trade = tradesData[tradeId];
-                        if (trade && trade.status === 'open') {
-                            openTrades.push({ id: tradeId, ...trade });
-                        }
-                    }
-                }
-                
-                if (openTrades.length === 0) continue;
-                
+                const userData = userSnap.val();
                 const tradingBalance = userData.tradingBalance || 0;
+                
+                // Get prices for each symbol
                 const prices = {};
-                for (const trade of openTrades) {
+                for (const trade of userTradesList) {
                     const symbol = trade.symbol || 'BTC/USDT';
                     const symbolClean = symbol.replace('/USDT', '').toUpperCase() + 'USDT';
-                    prices[symbol] = priceStream.getPrice(symbolClean) || trade.entryPrice;
+                    const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbolClean}`);
+                    const priceData = await priceRes.json();
+                    prices[symbol] = parseFloat(priceData.price) || trade.entryPrice;
                 }
                 
-                const equity = calculateEquity(tradingBalance, openTrades, prices);
-                const usedMargin = calculateUsedMargin(openTrades);
+                // Calculate stats
+                const equity = calculateEquity(tradingBalance, userTradesList, prices);
+                const usedMargin = calculateUsedMargin(userTradesList);
                 const freeMargin = calculateFreeMargin(equity, usedMargin);
                 const marginLevel = calculateMarginLevel(equity, usedMargin);
                 
+                // Update user
                 await db.ref(`users/${userId}`).update({
                     equity: equity,
                     usedMargin: usedMargin,
@@ -119,17 +108,23 @@ async function updateUserStats() {
                     marginLevel: marginLevel,
                     lastUpdated: Date.now()
                 });
+                
+                updatedCount++;
             } catch (error) {
-                console.error(`[MONITOR] Error updating user ${userId}:`, error);
+                console.error(`[STATS] Error updating user ${userId}:`, error.message);
             }
         }
+        
+        if (updatedCount > 0) {
+            console.log(`[STATS] ✅ Updated ${updatedCount} users`);
+        }
+        
     } catch (error) {
-        console.error('[MONITOR] Error updating user stats:', error);
+        console.error('[STATS] Error:', error.message);
     }
 }
 
 module.exports = {
     monitorTrades,
-    updateUserStats,
-    getAllOpenTrades
+    updateUserStats
 };

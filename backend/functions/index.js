@@ -1,104 +1,173 @@
-// ============================================================
-// INDEX.JS - WITH AUTH
-// ============================================================
-
+// functions/index.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const axios = require('axios');
 
+// ============================================================
+// INIT FIREBASE
+// ============================================================
+const { initializeFirebase } = require('./firebase');
+initializeFirebase();
+
+// ============================================================
+// ROUTES
+// ============================================================
+const authRoutes = require('./routes/auth');
+const tradeRoutes = require('./routes/trade');
+const userRoutes = require('./routes/user');
+const depositRoutes = require('./routes/deposit');
+const withdrawRoutes = require('./routes/withdraw');
+const walletRoutes = require('./routes/wallet');
+const tradeHistoryRoutes = require('./routes/trade-history');
+const p2pRoutes = require('./routes/p2p');
+const orderRoutes = require('./routes/orders');
+const chatRoutes = require('./routes/chat');
+const notificationRoutes = require('./routes/notifications');
+const robotRoutes = require('./routes/robots');
+const botRoutes = require('./routes/bot');
+const subscriptionRoutes = require('./routes/subscription');
+const signalRoutes = require('./routes/signals');
+const affiliateRoutes = require('./routes/affiliate');
+const marketRoutes = require('./routes/market');
+const copyTradingRoutes = require('./routes/copy-trading');
+const chartRoutes = require('./routes/chart');
+const kycRoutes = require('./routes/kyc');
+const leaderboardRoutes = require('./routes/leaderboard');
+const adminRoutes = require('./routes/admin');
+
+// ============================================================
+// SCHEDULER & PRICE STREAM
+// ============================================================
+const { startScheduler } = require('./scheduler/scheduler');
+const { getPriceStream } = require('./streaming/price-stream');
+
+// ============================================================
+// EXPRESS APP
+// ============================================================
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-app.use(cors());
-app.use(express.json());
-
-// ============================================================
-// FIREBASE HELPERS
-// ============================================================
-const FIREBASE_DB_URL = process.env.FIREBASE_DATABASE_URL || 'https://abotra-proa1-default-rtdb.firebaseio.com';
-const API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM';
-
-async function authGetUser(idToken) {
-    try {
-        const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`;
-        const response = await axios.post(url, { idToken });
-        return response.data;
-    } catch (error) {
-        return null;
-    }
-}
+// Middleware
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============================================================
-// MIDDLEWARE
+// HEALTH CHECK
 // ============================================================
-async function verifyToken(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ success: false, error: 'Missing authorization token' });
-    }
-    const token = authHeader.split('Bearer ')[1];
-    try {
-        const userInfo = await authGetUser(token);
-        if (!userInfo || !userInfo.users || userInfo.users.length === 0) {
-            return res.status(401).json({ success: false, error: 'Invalid or expired token' });
-        }
-        req.user = { uid: userInfo.users[0].localId };
-        next();
-    } catch (error) {
-        return res.status(401).json({ success: false, error: 'Invalid or expired token' });
-    }
-}
-
-// ============================================================
-// HEALTH
-// ============================================================
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// ============================================================
-// TRADE ROUTES
-// ============================================================
-app.get('/api/trades/open', verifyToken, (req, res) => {
-    res.json({ success: true, trades: [] });
-});
-
-app.post('/api/trades/open', verifyToken, (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Trade opened!',
-        trade: { id: 'test_' + Date.now(), ...req.body, entryPrice: 65000, status: 'open' }
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 
-app.post('/api/trades/:tradeId/close', verifyToken, (req, res) => {
-    res.json({ success: true, message: 'Trade closed!', pnl: 10.50 });
-});
-
-app.get('/api/trades/stats', verifyToken, (req, res) => {
-    res.json({ success: true, stats: { total: 0, open: 0, closed: 0, winning: 0, losing: 0, winRate: 0, netPnl: 0 } });
-});
-
-app.post('/api/trades/add', verifyToken, (req, res) => {
-    res.json({ success: true, message: 'Added!', amount: req.body.amount || 10 });
-});
-
-app.post('/api/trades/move', verifyToken, (req, res) => {
-    res.json({ success: true, message: 'Moved!', amount: 50 });
-});
-
-app.get('/api/trades/history', verifyToken, (req, res) => {
-    res.json({ success: true, trades: [] });
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.npm_package_version || '2.0.0'
+    });
 });
 
 // ============================================================
-// 404
+// API ROUTES
+// ============================================================
+app.use('/api/auth', authRoutes);
+app.use('/api/trade', tradeRoutes);
+app.use('/api/trades', tradeRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/deposit', depositRoutes);
+app.use('/api/withdraw', withdrawRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/trade-history', tradeHistoryRoutes);
+app.use('/api/p2p', p2pRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/robots', robotRoutes);
+app.use('/api/bot', botRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/signals', signalRoutes);
+app.use('/api/affiliate', affiliateRoutes);
+app.use('/api/market', marketRoutes);
+app.use('/api/copy', copyTradingRoutes);
+app.use('/api/copy-trading', copyTradingRoutes);
+app.use('/api/chart', chartRoutes);
+app.use('/api/kyc', kycRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/admin', adminRoutes);
+
+// ============================================================
+// 404 HANDLER
 // ============================================================
 app.use((req, res) => {
-    res.status(404).json({ success: false, error: 'Route not found', path: req.path });
+    res.status(404).json({
+        success: false,
+        error: `Route ${req.method} ${req.url} not found`
+    });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[SERVER] ✅ Running on port ${PORT}`);
+// ============================================================
+// ERROR HANDLER
+// ============================================================
+app.use((err, req, res, next) => {
+    console.error('[ERROR]', err.stack);
+    res.status(500).json({
+        success: false,
+        error: err.message || 'Internal server error'
+    });
 });
+
+// ============================================================
+// START SERVER
+// ============================================================
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () => {
+    console.log(`[SERVER] ✅ Running on port ${PORT}`);
+    console.log(`[SERVER] Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[SERVER] Routes loaded:`);
+    console.log(`  - /api/auth   (Auth routes)`);
+    console.log(`  - /api/trade  (Trade routes)`);
+    console.log(`  - /api/user   (User routes)`);
+    console.log(`  - /api/admin  (Admin routes)`);
+    
+    // Start Price Stream
+    try {
+        const priceStream = getPriceStream();
+        console.log('[SERVER] ✅ Price stream started');
+    } catch (error) {
+        console.error('[SERVER] ❌ Price stream failed:', error.message);
+    }
+    
+    // Start Scheduler
+    try {
+        startScheduler();
+        console.log('[SERVER] ✅ Scheduler started');
+    } catch (error) {
+        console.error('[SERVER] ❌ Scheduler failed:', error.message);
+    }
+});
+
+// ============================================================
+// GRACEFUL SHUTDOWN
+// ============================================================
+process.on('SIGINT', () => {
+    console.log('[SERVER] Shutting down gracefully...');
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('[SERVER] Shutting down gracefully...');
+    process.exit(0);
+});
+
+module.exports = app;

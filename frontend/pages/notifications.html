@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
 <script>
 const CONFIG = {
     API_URL: 'https://abotra-backend-production.up.railway.app',
@@ -73,7 +70,6 @@ body.light-theme .clear-notifications-btn {
 }
 body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3); }
 
-/* ===== PERMISSION BANNER ===== */
 .permission-banner {
     background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(128,0,0,0.1));
     border: 1px solid rgba(255,215,0,0.3);
@@ -108,7 +104,6 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
     cursor: pointer;
 }
 
-/* ===== SKELETON ===== */
 .skeleton {
     animation: skeletonPulse 1s ease-in-out infinite;
 }
@@ -339,6 +334,14 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
 .notification-icon.copy-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
 .notification-icon.security { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.system { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.affiliate { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.robot { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.subscription { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.leaderboard { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.candle { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.ai-signal { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
+.notification-icon.privacy { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.terms { background: rgba(255,215,0,0.2); color: #FFD700; }
 
 .notification-content { flex: 1; }
 .notification-title { font-weight: 700; color: #FFD700; font-size: 11px; margin-bottom: 3px; }
@@ -358,6 +361,7 @@ body.light-theme .clear-notifications-btn:hover { background: rgba(246,70,93,0.3
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    text-decoration: none;
 }
 .action-btn:hover { background: rgba(255,215,0,0.4); }
 
@@ -495,13 +499,213 @@ let notificationsListener = null;
 let unreadCount = 0;
 let swRegistration = null;
 let pushSubscription = null;
-let oneSignalInitialized = false;
-
-const ONESIGNAL_APP_ID = "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc";
-const API_BASE_URL = CONFIG.API_URL;
 
 // ============================================================
-// SERVICE WORKER REGISTRATION
+// PAGE ROUTING - Complete mapping for all notification types
+// ============================================================
+const PAGE_ROUTES = {
+    // Wallet & Transactions
+    'deposit': 'wallet.html',
+    'withdrawal': 'wallet.html',
+    'withdraw': 'wallet.html',
+    'transfer': 'wallet.html',
+    'wallet': 'wallet.html',
+    'transaction': 'wallet.html',
+    
+    // Trading
+    'trade': 'trade.html',
+    'trade-opened': 'trade.html',
+    'trade-open': 'trade.html',
+    'trade-closed': 'trade-history.html',
+    'trade-close': 'trade-history.html',
+    'trade-history': 'trade-history.html',
+    'trades': 'trade-history.html',
+    'history': 'trade-history.html',
+    
+    // Copy Trading
+    'copy-trade': 'copy-trading.html',
+    'copy-trading': 'copy-trading.html',
+    'master-trade': 'copy-trading.html',
+    'master': 'copy-trading.html',
+    
+    // P2P
+    'p2p': 'p2p-market.html',
+    'p2p-market': 'p2p-market.html',
+    'p2p-order': 'p2p-order.html',
+    'p2p-chat': 'p2p-chat.html',
+    'p2p-message': 'p2p-chat.html',
+    'peer-to-peer': 'p2p-market.html',
+    
+    // KYC & Security
+    'kyc': 'kyc.html',
+    'verification': 'kyc.html',
+    'security': 'kyc.html',
+    'privacy': 'privacy.html',
+    'terms': 'terms.html',
+    'policy': 'privacy.html',
+    
+    // Marketing & Social
+    'affiliate': 'affiliate.html',
+    'invite': 'affiliate.html',
+    'referral': 'affiliate.html',
+    'leaderboard': 'leaderboard.html',
+    'ranking': 'leaderboard.html',
+    
+    // Robots & Automation
+    'robot': 'robots.html',
+    'robots': 'robots.html',
+    'auto-bot': 'auto-bot.html',
+    'bot': 'auto-bot.html',
+    'automation': 'auto-bot.html',
+    
+    // Subscriptions
+    'subscription': 'subscriptions.html',
+    'subscriptions': 'subscriptions.html',
+    'subscribe': 'subscriptions.html',
+    'premium': 'subscriptions.html',
+    'plan': 'subscriptions.html',
+    
+    // Market & Analytics
+    'market': 'market.html',
+    'candle': 'candles.html',
+    'candles': 'candles.html',
+    'chart': 'candles.html',
+    'ai-signal': 'ai-signal.html',
+    'signal': 'ai-signal.html',
+    'analysis': 'ai-signal.html',
+    
+    // Account
+    'account': 'account.html',
+    'profile': 'account.html',
+    'settings': 'account.html',
+    
+    // System
+    'system': 'dashboard.html',
+    'info': 'dashboard.html',
+    'warning': 'dashboard.html',
+    'error': 'dashboard.html',
+    'success': 'dashboard.html',
+    'welcome': 'dashboard.html'
+};
+
+// ============================================================
+// GET PAGE LINK FOR NOTIFICATION TYPE
+// ============================================================
+function getPageLink(notification) {
+    const type = (notification.type || '').toLowerCase();
+    const link = notification.link || '';
+    
+    // If direct link is provided, use it
+    if (link && link.includes('.html')) {
+        return link;
+    }
+    
+    // Check if type has direct mapping
+    return PAGE_ROUTES[type] || PAGE_ROUTES[type.split('-')[0]] || 'dashboard.html';
+}
+
+// ============================================================
+// GET BUTTON TEXT AND ICON
+// ============================================================
+function getButtonInfo(notification) {
+    const type = (notification.type || '').toLowerCase();
+    const page = getPageLink(notification);
+    
+    const buttonMap = {
+        // Wallet
+        'deposit': { text: '💰 Deposit', icon: 'fa-wallet' },
+        'withdrawal': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
+        'withdraw': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
+        'transfer': { text: '🔄 Transfer', icon: 'fa-exchange-alt' },
+        'wallet': { text: '💰 Wallet', icon: 'fa-wallet' },
+        'transaction': { text: '💰 Transactions', icon: 'fa-receipt' },
+        
+        // Trading
+        'trade': { text: '📊 Trade Now', icon: 'fa-chart-line' },
+        'trade-opened': { text: '📈 Open Trade', icon: 'fa-arrow-up' },
+        'trade-open': { text: '📈 Open Trade', icon: 'fa-arrow-up' },
+        'trade-closed': { text: '📉 View History', icon: 'fa-arrow-down' },
+        'trade-close': { text: '📉 View History', icon: 'fa-arrow-down' },
+        'trade-history': { text: '📉 History', icon: 'fa-clock' },
+        'trades': { text: '📊 View Trades', icon: 'fa-chart-bar' },
+        'history': { text: '📉 History', icon: 'fa-clock' },
+        
+        // Copy Trading
+        'copy-trade': { text: '📋 Copy Trade', icon: 'fa-copy' },
+        'copy-trading': { text: '📋 Copy Trading', icon: 'fa-copy' },
+        'master-trade': { text: '👑 Master Trade', icon: 'fa-crown' },
+        'master': { text: '👑 Master Trade', icon: 'fa-crown' },
+        
+        // P2P
+        'p2p': { text: '🤝 P2P Market', icon: 'fa-handshake' },
+        'p2p-market': { text: '🤝 P2P Market', icon: 'fa-store' },
+        'p2p-order': { text: '📦 View Order', icon: 'fa-shopping-cart' },
+        'p2p-chat': { text: '💬 Open Chat', icon: 'fa-comments' },
+        'p2p-message': { text: '💬 Open Chat', icon: 'fa-comments' },
+        'peer-to-peer': { text: '🤝 P2P Market', icon: 'fa-handshake' },
+        
+        // KYC
+        'kyc': { text: '📋 Verify Now', icon: 'fa-id-card' },
+        'verification': { text: '📋 Verify Now', icon: 'fa-id-card' },
+        'security': { text: '🔐 Security', icon: 'fa-shield-alt' },
+        
+        // Marketing
+        'affiliate': { text: '👥 Affiliate', icon: 'fa-user-plus' },
+        'invite': { text: '👥 Invite Friends', icon: 'fa-user-plus' },
+        'referral': { text: '👥 Referrals', icon: 'fa-user-friends' },
+        'leaderboard': { text: '🏆 Leaderboard', icon: 'fa-trophy' },
+        'ranking': { text: '🏆 Rankings', icon: 'fa-trophy' },
+        
+        // Robots
+        'robot': { text: '🤖 AI Robot', icon: 'fa-robot' },
+        'robots': { text: '🤖 AI Robots', icon: 'fa-microchip' },
+        'auto-bot': { text: '⚡ Auto Trade', icon: 'fa-bolt' },
+        'bot': { text: '⚡ Auto Bot', icon: 'fa-bolt' },
+        'automation': { text: '⚡ Automation', icon: 'fa-cogs' },
+        
+        // Subscriptions
+        'subscription': { text: '👑 Subscribe', icon: 'fa-crown' },
+        'subscriptions': { text: '👑 Subscriptions', icon: 'fa-crown' },
+        'subscribe': { text: '👑 Subscribe Now', icon: 'fa-crown' },
+        'premium': { text: '👑 Premium Plans', icon: 'fa-crown' },
+        'plan': { text: '👑 View Plans', icon: 'fa-crown' },
+        
+        // Market
+        'market': { text: '📊 Market', icon: 'fa-store' },
+        'candle': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
+        'candles': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
+        'chart': { text: '📊 Charts', icon: 'fa-chart-pie' },
+        'ai-signal': { text: '📡 AI Signal', icon: 'fa-brain' },
+        'signal': { text: '📡 Signals', icon: 'fa-brain' },
+        'analysis': { text: '📊 Analysis', icon: 'fa-chart-pie' },
+        
+        // Account
+        'account': { text: '👤 Account', icon: 'fa-user' },
+        'profile': { text: '👤 Profile', icon: 'fa-user' },
+        'settings': { text: '⚙️ Settings', icon: 'fa-cog' },
+        
+        // Privacy & Terms
+        'privacy': { text: '🔐 Privacy', icon: 'fa-lock' },
+        'policy': { text: '🔐 Privacy Policy', icon: 'fa-lock' },
+        'terms': { text: '📜 Terms', icon: 'fa-file-contract' },
+        
+        // System
+        'system': { text: '🏠 Home', icon: 'fa-home' },
+        'info': { text: '🏠 Home', icon: 'fa-home' },
+        'warning': { text: '🏠 Home', icon: 'fa-home' },
+        'error': { text: '🏠 Home', icon: 'fa-home' },
+        'success': { text: '🏠 Home', icon: 'fa-home' },
+        'welcome': { text: '🏠 Home', icon: 'fa-home' }
+    };
+    
+    const defaultBtn = { text: '📱 View', icon: 'fa-arrow-right' };
+    const btn = buttonMap[type] || buttonMap[type.split('-')[0]] || defaultBtn;
+    
+    return btn;
+}
+
+// ============================================================
+// SERVICE WORKER & PUSH NOTIFICATIONS
 // ============================================================
 async function registerServiceWorker() {
     try {
@@ -519,49 +723,6 @@ async function registerServiceWorker() {
     return null;
 }
 
-// ============================================================
-// REQUEST PUSH PERMISSION
-// ============================================================
-async function requestPushPermission() {
-    try {
-        if (!('Notification' in window)) {
-            showToast('Notifications not supported on this device', 'error');
-            return false;
-        }
-        
-        if (Notification.permission === 'granted') {
-            showToast('Notifications already enabled!', 'success');
-            document.getElementById('permissionBanner').style.display = 'none';
-            localStorage.setItem('onesignal_banner_dismissed', 'true');
-            await subscribeToPush();
-            return true;
-        }
-        
-        if (Notification.permission === 'denied') {
-            showToast('Notification permission denied. Please enable in settings.', 'error');
-            return false;
-        }
-        
-        const permission = await Notification.requestPermission();
-        console.log('[NOTIF] Permission result:', permission);
-        
-        if (permission === 'granted') {
-            document.getElementById('permissionBanner').style.display = 'none';
-            localStorage.setItem('onesignal_banner_dismissed', 'true');
-            showToast('Notifications enabled! You will receive alerts on your phone.', 'success');
-            await subscribeToPush();
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.warn('[NOTIF] Permission request failed:', error);
-        return false;
-    }
-}
-
-// ============================================================
-// SUBSCRIBE TO PUSH NOTIFICATIONS
-// ============================================================
 async function subscribeToPush() {
     try {
         if (!swRegistration) {
@@ -583,10 +744,9 @@ async function subscribeToPush() {
         console.log('[PUSH] Subscribed successfully:', subscription.endpoint);
         pushSubscription = subscription;
         
-        // Send subscription to backend
         try {
             const token = await getFirebaseToken();
-            const response = await fetch(`${API_BASE_URL}/api/notifications/subscribe`, {
+            const response = await fetch(`${CONFIG.API_URL}/api/notifications/subscribe`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -609,9 +769,6 @@ async function subscribeToPush() {
     }
 }
 
-// ============================================================
-// GET FIREBASE TOKEN
-// ============================================================
 async function getFirebaseToken() {
     return new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -630,75 +787,76 @@ async function getFirebaseToken() {
     });
 }
 
-// ============================================================
-// DEVICE PUSH NOTIFICATION
-// ============================================================
-function sendDevicePushNotification(title, body, type = 'info', link = null) {
-    // Browser Notification API - Shows on device
-    if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-            const options = {
-                body: body,
-                icon: '../assets/images/logo.png',
-                badge: '../assets/images/logo.png',
-                vibrate: [200, 100, 200],
-                requireInteraction: true,
-                tag: Date.now().toString(),
-                data: {
-                    url: link || window.location.href
-                }
-            };
-            
-            const notif = new Notification(title, options);
-            
-            notif.onclick = (event) => {
-                event.preventDefault();
-                window.focus();
-                if (link) {
-                    window.location.href = link;
-                }
-            };
-            
-            console.log('[NOTIF] Device notification sent:', title);
-        } catch (e) {
-            console.warn('[NOTIF] Device notification error:', e);
-        }
+async function requestPushPermission() {
+    if (typeof Notification === 'undefined') {
+        showToast('Notifications not supported', 'error');
+        return;
     }
-    
-    // Also show in-app notification
-    showToast(body, type);
+    if (Notification.permission === 'granted') {
+        showToast('Notifications already enabled!', 'success');
+        document.getElementById('permissionBanner').style.display = 'none';
+        localStorage.setItem('onesignal_banner_dismissed', 'true');
+        await subscribeToPush();
+        return;
+    }
+    if (Notification.permission === 'denied') {
+        showToast('Notification permission denied. Please enable in settings.', 'error');
+        return;
+    }
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            document.getElementById('permissionBanner').style.display = 'none';
+            localStorage.setItem('onesignal_banner_dismissed', 'true');
+            showToast('Notifications enabled! You will receive alerts on your phone.', 'success');
+            await subscribeToPush();
+        }
+    } catch (error) {
+        console.warn('[NOTIF] Permission request failed:', error);
+    }
 }
 
-// ============================================================
-// INIT PUSH NOTIFICATIONS
-// ============================================================
+function sendDevicePushNotification(title, body, link = '/dashboard.html', type = 'info') {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    try {
+        const options = {
+            body: body,
+            icon: '../assets/images/logo.png',
+            badge: '../assets/images/logo.png',
+            vibrate: [200, 100, 200],
+            requireInteraction: true,
+            tag: Date.now().toString(),
+            data: { url: link }
+        };
+        const notif = new Notification(title, options);
+        notif.onclick = (event) => {
+            event.preventDefault();
+            window.focus();
+            if (link) window.location.href = link;
+        };
+    } catch (e) {
+        console.warn('[NOTIF] Device notification error:', e);
+    }
+}
+
 async function initPushNotifications() {
     if (!currentUser) return;
-    
     try {
         const registration = await registerServiceWorker();
-        if (!registration) {
-            console.log('[PUSH] No service worker, skipping');
-            return;
-        }
-        
-        // Check if already granted
+        if (!registration) return;
         if (Notification.permission === 'granted') {
             await subscribeToPush();
         }
-        
-        // Show permission banner if not decided
         if (Notification.permission === 'default' && !localStorage.getItem('onesignal_banner_dismissed')) {
             document.getElementById('permissionBanner').style.display = 'flex';
         }
-        
     } catch (error) {
         console.warn('[PUSH] Initialization failed:', error);
     }
 }
 
 // ============================================================
-// ORIGINAL NOTIFICATION FUNCTIONS
+// NOTIFICATION FUNCTIONS
 // ============================================================
 function showToast(message, type) {
     const existing = document.querySelector('.notification-popup');
@@ -759,7 +917,6 @@ async function markAsRead(notificationId, event) {
     if (!currentUser) return;
     await update(ref(db, `notifications/${currentUser.uid}/${notificationId}`), { read: true });
     await updateUnreadCountAndBadge();
-    showToast('Marked as read', 'success');
 }
 
 async function markAllAsRead() {
@@ -775,7 +932,7 @@ async function markAllAsRead() {
             showToast(`${Object.keys(updates).length} marked as read`, 'success');
             await updateUnreadCountAndBadge();
         } else {
-            showToast('No unread', 'info');
+            showToast('No unread notifications', 'info');
         }
     }
 }
@@ -783,7 +940,6 @@ async function markAllAsRead() {
 async function clearAllNotifications() {
     if (!currentUser) return;
     if (!confirm('⚠️ Delete ALL notifications? This cannot be undone.')) return;
-    
     try {
         await remove(ref(db, `notifications/${currentUser.uid}`));
         showToast('All notifications cleared', 'success');
@@ -799,7 +955,6 @@ async function deleteSingleNotification(notificationId, event) {
     if (event) event.stopPropagation();
     if (!currentUser) return;
     if (!confirm('Delete this notification?')) return;
-    
     try {
         await remove(ref(db, `notifications/${currentUser.uid}/${notificationId}`));
         showToast('Deleted', 'success');
@@ -819,7 +974,6 @@ async function updateUnreadCountAndBadge() {
         snapshot.forEach(child => { if (!child.val().read) unread++; });
     }
     unreadCount = unread;
-    
     const badgeSpan = document.getElementById('unreadCountBadge');
     if (badgeSpan) {
         if (unread > 0) {
@@ -829,73 +983,101 @@ async function updateUnreadCountAndBadge() {
             badgeSpan.style.display = 'none';
         }
     }
-    
     localStorage.setItem('abotra_unread_notifications', unread);
     return unread;
 }
 
 // ============================================================
-// GET ICON AND PAGE BUTTON FOR NOTIFICATION TYPE
+// GET ICON FOR NOTIFICATION TYPE
 // ============================================================
 function getNotificationIcon(type) {
     const typeMap = {
-        'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
+        // Wallet
         'deposit': { icon: 'fas fa-arrow-down', class: 'deposit' },
         'withdrawal': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
+        'withdraw': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
         'transfer': { icon: 'fas fa-exchange-alt', class: 'transfer' },
-        'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
-        'p2p-order': { icon: 'fas fa-shopping-cart', class: 'p2p' },
-        'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
+        'wallet': { icon: 'fas fa-wallet', class: 'info' },
+        'transaction': { icon: 'fas fa-receipt', class: 'info' },
+        
+        // Trading
         'trade': { icon: 'fas fa-chart-line', class: 'trade' },
         'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
+        'trade-open': { icon: 'fas fa-arrow-up', class: 'trade' },
         'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-close': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-history': { icon: 'fas fa-clock', class: 'trade' },
+        'trades': { icon: 'fas fa-chart-bar', class: 'trade' },
+        'history': { icon: 'fas fa-clock', class: 'trade' },
+        
+        // Copy Trading
         'copy-trade': { icon: 'fas fa-copy', class: 'copy-trade' },
-        'success': { icon: 'fas fa-check-circle', class: 'success' },
-        'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
-        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
+        'copy-trading': { icon: 'fas fa-copy', class: 'copy-trade' },
+        'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
+        'master': { icon: 'fas fa-crown', class: 'master-trade' },
+        
+        // P2P
+        'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
+        'p2p-market': { icon: 'fas fa-store', class: 'p2p' },
+        'p2p-order': { icon: 'fas fa-shopping-cart', class: 'p2p' },
+        'p2p-chat': { icon: 'fas fa-comments', class: 'p2p' },
+        'p2p-message': { icon: 'fas fa-comments', class: 'p2p' },
+        'peer-to-peer': { icon: 'fas fa-handshake', class: 'p2p' },
+        
+        // KYC
+        'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
+        'verification': { icon: 'fas fa-id-card', class: 'kyc' },
         'security': { icon: 'fas fa-shield-alt', class: 'security' },
-        'system': { icon: 'fas fa-bell', class: 'system' }
+        
+        // Marketing
+        'affiliate': { icon: 'fas fa-user-plus', class: 'affiliate' },
+        'invite': { icon: 'fas fa-user-plus', class: 'affiliate' },
+        'referral': { icon: 'fas fa-user-friends', class: 'affiliate' },
+        'leaderboard': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        'ranking': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        
+        // Robots
+        'robot': { icon: 'fas fa-robot', class: 'robot' },
+        'robots': { icon: 'fas fa-microchip', class: 'robot' },
+        'auto-bot': { icon: 'fas fa-bolt', class: 'robot' },
+        'bot': { icon: 'fas fa-bolt', class: 'robot' },
+        'automation': { icon: 'fas fa-cogs', class: 'robot' },
+        
+        // Subscriptions
+        'subscription': { icon: 'fas fa-crown', class: 'subscription' },
+        'subscriptions': { icon: 'fas fa-crown', class: 'subscription' },
+        'subscribe': { icon: 'fas fa-crown', class: 'subscription' },
+        'premium': { icon: 'fas fa-crown', class: 'subscription' },
+        'plan': { icon: 'fas fa-crown', class: 'subscription' },
+        
+        // Market
+        'market': { icon: 'fas fa-store', class: 'info' },
+        'candle': { icon: 'fas fa-chart-bar', class: 'candle' },
+        'candles': { icon: 'fas fa-chart-bar', class: 'candle' },
+        'chart': { icon: 'fas fa-chart-pie', class: 'candle' },
+        'ai-signal': { icon: 'fas fa-brain', class: 'ai-signal' },
+        'signal': { icon: 'fas fa-brain', class: 'ai-signal' },
+        'analysis': { icon: 'fas fa-chart-pie', class: 'ai-signal' },
+        
+        // Account
+        'account': { icon: 'fas fa-user', class: 'info' },
+        'profile': { icon: 'fas fa-user', class: 'info' },
+        'settings': { icon: 'fas fa-cog', class: 'info' },
+        
+        // Privacy & Terms
+        'privacy': { icon: 'fas fa-lock', class: 'security' },
+        'policy': { icon: 'fas fa-lock', class: 'security' },
+        'terms': { icon: 'fas fa-file-contract', class: 'info' },
+        
+        // System
+        'system': { icon: 'fas fa-bell', class: 'system' },
+        'info': { icon: 'fas fa-info-circle', class: 'info' },
+        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
+        'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
+        'success': { icon: 'fas fa-check-circle', class: 'success' },
+        'welcome': { icon: 'fas fa-star', class: 'success' }
     };
-    return typeMap[type] || { icon: 'fas fa-bell', class: 'info' };
-}
-
-function getPageButton(notification) {
-    const type = notification.type || '';
-    const link = notification.link || '';
-    let buttonText = 'View';
-    let icon = 'fa-arrow-right';
-    let pageLink = link || '#';
-    
-    // Type-based page routing
-    const pageMap = {
-        'deposit': { text: '💰 Deposit', icon: 'fa-wallet', page: 'deposit.html' },
-        'withdrawal': { text: '💳 Withdraw', icon: 'fa-arrow-up', page: 'withdraw.html' },
-        'kyc': { text: '📋 KYC', icon: 'fa-id-card', page: 'kyc.html' },
-        'trade': { text: '📊 Trades', icon: 'fa-chart-line', page: 'trade-history.html' },
-        'trade-opened': { text: '📈 Trade', icon: 'fa-chart-line', page: 'trade.html' },
-        'trade-closed': { text: '📉 Trade', icon: 'fa-chart-line', page: 'trade-history.html' },
-        'master-trade': { text: '👑 Master Trade', icon: 'fa-crown', page: 'copy-trading.html' },
-        'copy-trade': { text: '📋 Copy Trade', icon: 'fa-copy', page: 'copy-trading.html' },
-        'p2p': { text: '🤝 P2P', icon: 'fa-handshake', page: 'p2p-market.html' },
-        'p2p-order': { text: '📦 Order', icon: 'fa-shopping-cart', page: 'p2p-order.html' },
-        'transfer': { text: '🔄 Transfer', icon: 'fa-exchange-alt', page: 'wallet.html' },
-        'security': { text: '🔐 Security', icon: 'fa-shield-alt', page: 'security.html' },
-        'success': { text: '✅ Success', icon: 'fa-check-circle', page: 'dashboard.html' },
-        'system': { text: '⚙️ Settings', icon: 'fa-cog', page: 'settings.html' }
-    };
-    
-    const pageInfo = pageMap[type];
-    if (pageInfo) {
-        buttonText = pageInfo.text;
-        icon = pageInfo.icon;
-        pageLink = pageInfo.page;
-    }
-    
-    if (link) {
-        pageLink = link;
-    }
-    
-    return `<div class="notification-action"><button class="action-btn" onclick="event.stopPropagation(); window.location.href='${pageLink}'"><i class="fas ${icon}"></i> ${buttonText}</button></div>`;
+    return typeMap[type] || typeMap[type.split('-')[0]] || { icon: 'fas fa-bell', class: 'info' };
 }
 
 function timeAgo(timestamp) {
@@ -931,17 +1113,29 @@ function renderNotifications(notifications) {
     container.innerHTML = '';
     notifications.forEach(notif => {
         const icon = getNotificationIcon(notif.type);
-        const pageButton = getPageButton(notif);
+        const pageLink = getPageLink(notif);
+        const btnInfo = getButtonInfo(notif);
+        
         const notifCard = document.createElement('div');
         notifCard.className = `notification-card ${notif.read ? '' : 'unread'}`;
         notifCard.onclick = () => markAsRead(notif.id, null);
+        
+        // Build action button with proper link
+        const actionHtml = `
+            <div class="notification-action">
+                <a href="${pageLink}" class="action-btn" onclick="event.stopPropagation();">
+                    <i class="fas ${btnInfo.icon}"></i> ${btnInfo.text}
+                </a>
+            </div>
+        `;
+        
         notifCard.innerHTML = `
             <div class="notification-icon ${icon.class}"><i class="${icon.icon}"></i></div>
             <div class="notification-content">
                 ${notif.title ? `<div class="notification-title">${escapeHtml(notif.title)}</div>` : ''}
                 <div class="message">${escapeHtml(notif.message || '')}</div>
                 <div class="time"><i class="far fa-clock"></i> ${timeAgo(notif.timestamp)} ${!notif.read ? '<span style="color:#FFD700;"> • Unread</span>' : ''}</div>
-                ${pageButton}
+                ${actionHtml}
             </div>
             <button class="delete-notif-btn" onclick="event.stopPropagation(); window.deleteNotification('${notif.id}')"><i class="fas fa-trash-alt"></i></button>
         `;
@@ -970,7 +1164,7 @@ function loadNotifications(userId) {
         await updateUnreadCountAndBadge();
     }, (error) => {
         console.error("Error loading notifications:", error);
-        document.getElementById('notificationsList').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading.</p></div>';
+        document.getElementById('notificationsList').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading notifications.</p></div>';
     });
 }
 
@@ -997,7 +1191,7 @@ async function checkRegistrationAndDevice() {
         await addNotificationWithPush(currentUser.uid, '🎉 Welcome!', 'Welcome to ABOTRA-PROAI! Start your trading journey.', 'success', 'dashboard.html');
         localStorage.setItem(deviceStorageKey, currentDevice);
     } else if (lastDevice !== currentDevice && lastDevice !== null) {
-        await addNotificationWithPush(currentUser.uid, '🔐 New Device Login', `Login from: ${currentDevice}. If not you, secure your account.`, 'warning', 'security.html');
+        await addNotificationWithPush(currentUser.uid, '🔐 New Device Login', `Login from: ${currentDevice}. If not you, secure your account.`, 'warning', 'kyc.html');
         localStorage.setItem(deviceStorageKey, currentDevice);
     } else if (!lastDevice) {
         localStorage.setItem(deviceStorageKey, currentDevice);
@@ -1005,22 +1199,19 @@ async function checkRegistrationAndDevice() {
 }
 
 // ============================================================
-// ADD NOTIFICATION WITH PUSH TO DEVICE
+// ADD NOTIFICATION WITH PUSH
 // ============================================================
 async function addNotificationWithPush(userId, title, message, type = 'info', link = null, actionData = null) {
     if (!userId) return;
-    
     const notifRef = push(ref(db, `notifications/${userId}`));
     await set(notifRef, {
         id: notifRef.key, title, message, type, read: false,
         timestamp: Date.now(), date: new Date().toISOString(), link, actionData
     });
-    
-    // Send push notification to device
     if (userId === currentUser?.uid) {
-        sendDevicePushNotification(title, message, type, link);
+        const pageLink = link || getPageLink({ type, link });
+        sendDevicePushNotification(title, message, pageLink, type);
     }
-    
     return notifRef.key;
 }
 

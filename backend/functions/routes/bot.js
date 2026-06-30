@@ -1,13 +1,9 @@
-// ============================================================
-// BOT ROUTES - REST API Version (No Admin SDK)
-// ============================================================
-
 const express = require('express');
 const router = express.Router();
-const { restGet, restPut, restPost, restDelete, restPatch } = require('../firebase');
+const { getDB, admin } = require('../firebase');
 
 // ============================================================
-// MIDDLEWARE: Verify Firebase Token (REST API Version)
+// MIDDLEWARE: Verify Firebase Token
 // ============================================================
 async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -15,24 +11,20 @@ async function verifyToken(req, res, next) {
         return res.status(401).json({ success: false, error: 'Missing authorization token' });
     }
     const token = authHeader.split('Bearer ')[1];
-    
     try {
-        const { authGetUser } = require('../firebase');
-        const userInfo = await authGetUser(token);
-        
-        if (!userInfo || !userInfo.users || userInfo.users.length === 0) {
-            return res.status(401).json({ success: false, error: 'Invalid or expired token' });
-        }
-        
-        req.user = {
-            uid: userInfo.users[0].localId,
-            email: userInfo.users[0].email
-        };
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        req.user = decodedToken;
         next();
     } catch (error) {
-        console.error('[BOT] Token verification error:', error);
         return res.status(401).json({ success: false, error: 'Invalid or expired token' });
     }
+}
+
+// ============================================================
+// HELPER: Format Price
+// ============================================================
+function formatPrice(amount) {
+    return amount.toFixed(2);
 }
 
 // ============================================================
@@ -40,15 +32,16 @@ async function verifyToken(req, res, next) {
 // ============================================================
 router.get('/robots', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const robots = [];
 
-        const data = await restGet(`userRobots/${userId}`);
-        if (data) {
-            Object.keys(data).forEach(key => {
+        const snapshot = await db.ref(`userRobots/${userId}`).once('value');
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
                 robots.push({
-                    id: key,
-                    ...data[key]
+                    id: child.key,
+                    ...child.val()
                 });
             });
         }
@@ -69,6 +62,7 @@ router.get('/robots', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/start', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const { robotId, robotName, lockAmount, dailyProfit, durationDays, minTrade } = req.body;
 
@@ -76,9 +70,10 @@ router.post('/start', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Invalid request' });
         }
 
-        // Check user balance
-        const userData = await restGet(`users/${userId}`);
-        const currentBalance = userData?.balance || 0;
+        const userRef = db.ref(`users/${userId}`);
+        const userSnap = await userRef.once('value');
+        const userData = userSnap.val() || {};
+        const currentBalance = userData.balance || 0;
 
         if (currentBalance < lockAmount) {
             return res.status(400).json({ 
@@ -87,21 +82,19 @@ router.post('/start', verifyToken, async (req, res) => {
             });
         }
 
-        // Deduct balance
-        await restPatch(`users/${userId}`, {
+        await userRef.update({
             balance: currentBalance - lockAmount
         });
 
-        // Update robot
         const endTime = Date.now() + (durationDays * 24 * 60 * 60 * 1000);
-        const robotRef = `userRobots/${userId}/${robotId}`;
-        const robotData = await restGet(robotRef);
+        const robotRef = db.ref(`userRobots/${userId}/${robotId}`);
+        const robotSnap = await robotRef.once('value');
 
-        if (!robotData) {
+        if (!robotSnap.exists()) {
             return res.status(404).json({ success: false, error: 'Robot not found' });
         }
 
-        await restPatch(robotRef, {
+        await robotRef.update({
             status: 'active',
             startTime: Date.now(),
             endTime: endTime,
@@ -114,12 +107,23 @@ router.post('/start', verifyToken, async (req, res) => {
             tradePercent: 100
         });
 
-        // Add notification
-        await restPost(`notifications/${userId}`, {
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({
             title: '🚀 Robot Started',
             message: `${robotName} started with ${lockAmount} USDT locked for ${durationDays} days.`,
             type: 'success',
             read: false,
+            timestamp: Date.now()
+        });
+
+        // ✅ Add log
+        const logRef = db.ref(`tradingLogs/${userId}`).push();
+        await logRef.set({
+            id: logRef.key,
+            robot: robotName,
+            message: `🚀 Robot STARTED - ${lockAmount} USDT locked for ${durationDays} days. Daily profit: ${dailyProfit}%`,
+            type: 'info',
+            time: new Date().toLocaleTimeString(),
             timestamp: Date.now()
         });
 
@@ -139,6 +143,7 @@ router.post('/start', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/restart', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const { robotId, robotName, lockAmount, dailyProfit, durationDays, minTrade } = req.body;
 
@@ -146,8 +151,10 @@ router.post('/restart', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Invalid request' });
         }
 
-        const userData = await restGet(`users/${userId}`);
-        const currentBalance = userData?.balance || 0;
+        const userRef = db.ref(`users/${userId}`);
+        const userSnap = await userRef.once('value');
+        const userData = userSnap.val() || {};
+        const currentBalance = userData.balance || 0;
 
         if (currentBalance < lockAmount) {
             return res.status(400).json({ 
@@ -156,14 +163,14 @@ router.post('/restart', verifyToken, async (req, res) => {
             });
         }
 
-        await restPatch(`users/${userId}`, {
+        await userRef.update({
             balance: currentBalance - lockAmount
         });
 
         const endTime = Date.now() + (durationDays * 24 * 60 * 60 * 1000);
-        const robotRef = `userRobots/${userId}/${robotId}`;
+        const robotRef = db.ref(`userRobots/${userId}/${robotId}`);
 
-        await restPatch(robotRef, {
+        await robotRef.update({
             status: 'active',
             startTime: Date.now(),
             endTime: endTime,
@@ -177,11 +184,23 @@ router.post('/restart', verifyToken, async (req, res) => {
             completedAt: null
         });
 
-        await restPost(`notifications/${userId}`, {
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({
             title: '🔄 Robot Restarted',
             message: `${robotName} restarted with ${lockAmount} USDT locked for ${durationDays} days.`,
             type: 'success',
             read: false,
+            timestamp: Date.now()
+        });
+
+        // ✅ Add log
+        const logRef = db.ref(`tradingLogs/${userId}`).push();
+        await logRef.set({
+            id: logRef.key,
+            robot: robotName,
+            message: `🔄 Robot RESTARTED - ${lockAmount} USDT locked for ${durationDays} days.`,
+            type: 'info',
+            time: new Date().toLocaleTimeString(),
             timestamp: Date.now()
         });
 
@@ -201,6 +220,7 @@ router.post('/restart', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/add-capital/:robotId', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const { robotId } = req.params;
         const { amount } = req.body;
@@ -209,8 +229,10 @@ router.post('/add-capital/:robotId', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Invalid amount' });
         }
 
-        const userData = await restGet(`users/${userId}`);
-        const currentBalance = userData?.balance || 0;
+        const userRef = db.ref(`users/${userId}`);
+        const userSnap = await userRef.once('value');
+        const userData = userSnap.val() || {};
+        const currentBalance = userData.balance || 0;
 
         if (currentBalance < amount) {
             return res.status(400).json({ 
@@ -219,28 +241,41 @@ router.post('/add-capital/:robotId', verifyToken, async (req, res) => {
             });
         }
 
-        const robotRef = `userRobots/${userId}/${robotId}`;
-        const robotData = await restGet(robotRef);
-        if (!robotData) {
+        const robotRef = db.ref(`userRobots/${userId}/${robotId}`);
+        const robotSnap = await robotRef.once('value');
+        if (!robotSnap.exists()) {
             return res.status(404).json({ success: false, error: 'Robot not found' });
         }
 
-        const newInvested = (robotData.investedAmount || robotData.amount || 0) + amount;
+        const robot = robotSnap.val();
+        const newInvested = (robot.investedAmount || robot.amount || 0) + amount;
 
-        await restPatch(`users/${userId}`, {
+        await userRef.update({
             balance: currentBalance - amount
         });
 
-        await restPatch(robotRef, {
+        await robotRef.update({
             investedAmount: newInvested,
             amount: newInvested
         });
 
-        await restPost(`notifications/${userId}`, {
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({
             title: '💰 Capital Added',
-            message: `Added ${amount} USDT to ${robotData.name || 'Robot'}. New total: ${newInvested} USDT`,
+            message: `Added ${amount} USDT to ${robot.name || 'Robot'}. New total: ${newInvested} USDT`,
             type: 'success',
             read: false,
+            timestamp: Date.now()
+        });
+
+        // ✅ Add log
+        const logRef = db.ref(`tradingLogs/${userId}`).push();
+        await logRef.set({
+            id: logRef.key,
+            robot: robot.name || 'Robot',
+            message: `💰 CAPITAL ADDED: +${formatPrice(amount)} USDT. New total: ${formatPrice(newInvested)} USDT`,
+            type: 'profit',
+            time: new Date().toLocaleTimeString(),
             timestamp: Date.now()
         });
 
@@ -261,13 +296,14 @@ router.post('/add-capital/:robotId', verifyToken, async (req, res) => {
 // ============================================================
 router.get('/stats', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const stats = {};
 
-        const data = await restGet(`robotStats/${userId}`);
-        if (data) {
-            Object.keys(data).forEach(key => {
-                stats[key] = data[key];
+        const snapshot = await db.ref(`robotStats/${userId}`).once('value');
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                stats[child.key] = child.val();
             });
         }
 
@@ -287,26 +323,27 @@ router.get('/stats', verifyToken, async (req, res) => {
 // ============================================================
 router.get('/logs', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const { limit = 50 } = req.query;
         const logs = [];
 
-        const data = await restGet(`tradingLogs/${userId}`);
-        if (data) {
-            Object.keys(data).forEach(key => {
-                logs.push({
-                    id: key,
-                    ...data[key]
-                });
+        const snapshot = await db.ref(`tradingLogs/${userId}`)
+            .orderByChild('timestamp')
+            .limitToLast(parseInt(limit))
+            .once('value');
+
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                logs.push(child.val());
             });
         }
 
         logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        const limited = logs.slice(0, parseInt(limit));
 
         res.json({
             success: true,
-            logs: limited
+            logs: logs
         });
 
     } catch (error) {
@@ -320,6 +357,7 @@ router.get('/logs', verifyToken, async (req, res) => {
 // ============================================================
 router.post('/logs', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
         const { robot, message, type, time, timestamp } = req.body;
 
@@ -337,7 +375,26 @@ router.post('/logs', verifyToken, async (req, res) => {
             timestamp: timestamp || Date.now()
         };
 
-        await restPut(`tradingLogs/${userId}/${logId}`, logData);
+        await db.ref(`tradingLogs/${userId}/${logId}`).set(logData);
+
+        // Keep only last 200 logs
+        const snapshot = await db.ref(`tradingLogs/${userId}`)
+            .orderByChild('timestamp')
+            .limitToLast(200)
+            .once('value');
+
+        if (snapshot.exists()) {
+            const toRemove = [];
+            snapshot.forEach(child => {
+                toRemove.push(child.key);
+            });
+            if (toRemove.length > 150) {
+                const remove = toRemove.slice(0, toRemove.length - 150);
+                for (const key of remove) {
+                    await db.ref(`tradingLogs/${userId}/${key}`).remove();
+                }
+            }
+        }
 
         res.json({
             success: true,
@@ -355,9 +412,10 @@ router.post('/logs', verifyToken, async (req, res) => {
 // ============================================================
 router.delete('/logs/clear', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
 
-        await restDelete(`tradingLogs/${userId}`);
+        await db.ref(`tradingLogs/${userId}`).remove();
 
         res.json({
             success: true,
@@ -371,81 +429,36 @@ router.delete('/logs/clear', verifyToken, async (req, res) => {
 });
 
 // ============================================================
-// 9. PROCESS DAILY PROFIT
+// 9. PROCESS DAILY PROFIT - FIXED ✅
 // ============================================================
 router.post('/process-daily', verifyToken, async (req, res) => {
     try {
+        const db = getDB();
         const userId = req.user.uid;
 
-        // Get all active robots
-        const robotsData = await restGet(`userRobots/${userId}`);
-        if (!robotsData) {
+        // ✅ Get all active robots
+        const snapshot = await db.ref(`userRobots/${userId}`).once('value');
+        
+        if (!snapshot.exists()) {
             return res.json({ success: true, processed: 0 });
         }
 
         let processed = 0;
-        const userData = await restGet(`users/${userId}`) || {};
+        const userRef = db.ref(`users/${userId}`);
+        const userSnap = await userRef.once('value');
+        const userData = userSnap.val() || {};
 
-        for (const [robotId, robot] of Object.entries(robotsData)) {
-            if (robot.status !== 'active') continue;
-
-            const now = Date.now();
-            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
-            const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
-
-            if (now >= nextProfitTime) {
-                const investedAmount = robot.investedAmount || robot.amount || 0;
-                if (investedAmount <= 0) continue;
-
-                const dailyPercent = robot.dailyProfit || 3;
-                const grossProfit = (investedAmount * dailyPercent) / 100;
-                const hiddenFee = grossProfit * 0.10;
-                const netProfit = grossProfit - hiddenFee;
-
-                const profitDays = robot.profitDays || 0;
-                const totalDays = robot.durationDays || 30;
-                const isLastDay = (profitDays + 1) >= totalDays;
-
-                let finalNetReturn = netProfit;
-
-                if (isLastDay) {
-                    const totalReturn = investedAmount + netProfit;
-                    const finalFee = totalReturn * 0.10;
-                    finalNetReturn = totalReturn - finalFee;
-
-                    await restPatch(`userRobots/${userId}/${robotId}`, {
-                        status: 'completed',
-                        completedAt: now,
-                        investedAmount: 0,
-                        amount: 0
-                    });
-
-                } else {
-                    await restPatch(`userRobots/${userId}/${robotId}`, {
-                        lastProfitTime: now,
-                        lastProfitAmount: netProfit,
-                        profitDays: profitDays + 1
-                    });
-                }
-
-                // Add profit to user balance
-                const currentBalance = userData.balance || 0;
-                await restPatch(`users/${userId}`, {
-                    balance: currentBalance + finalNetReturn
-                });
-
-                // Update robot stats
-                const statsData = await restGet(`robotStats/${userId}/${robotId}`) || {};
-                const currentStats = statsData || { profit: 0, trades: 0, wins: 0 };
-                await restPut(`robotStats/${userId}/${robotId}`, {
-                    profit: (currentStats.profit || 0) + finalNetReturn,
-                    trades: (currentStats.trades || 0) + 1,
-                    wins: (currentStats.wins || 0) + 1
-                });
-
-                processed++;
+        const promises = [];
+        snapshot.forEach(child => {
+            const robot = child.val();
+            if (robot.status === 'active') {
+                promises.push(processRobotProfit(child, userRef, userId, db));
             }
-        }
+        });
+
+        // ✅ Wait for all promises and count successful ones
+        const results = await Promise.all(promises);
+        processed = results.filter(r => r === true).length;
 
         res.json({
             success: true,
@@ -457,5 +470,97 @@ router.post('/process-daily', verifyToken, async (req, res) => {
         res.status(400).json({ success: false, error: error.message });
     }
 });
+
+// ============================================================
+// ✅ HELPER: Process a single robot's profit - FIXED
+// ============================================================
+async function processRobotProfit(child, userRef, userId, db) {
+    try {
+        const robot = child.val();
+        const robotId = child.key;
+        const now = Date.now();
+
+        // Check if 24 hours passed since last profit
+        const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
+        const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
+
+        if (now < nextProfitTime) return false;
+
+        const investedAmount = robot.investedAmount || robot.amount || 0;
+        if (investedAmount <= 0) return false;
+
+        const dailyPercent = robot.dailyProfit || 3;
+        const grossProfit = (investedAmount * dailyPercent) / 100;
+        const hiddenFee = grossProfit * 0.10;
+        const netProfit = grossProfit - hiddenFee;
+
+        const profitDays = robot.profitDays || 0;
+        const totalDays = robot.durationDays || 30;
+        const isLastDay = (profitDays + 1) >= totalDays;
+
+        let finalNetReturn = netProfit;
+        let isCompleted = false;
+
+        if (isLastDay) {
+            const totalReturn = investedAmount + netProfit;
+            const finalFee = totalReturn * 0.10;
+            finalNetReturn = totalReturn - finalFee;
+            isCompleted = true;
+        }
+
+        // ✅ Update robot
+        const robotRef = db.ref(`userRobots/${userId}/${robotId}`);
+        
+        if (isCompleted) {
+            await robotRef.update({
+                status: 'completed',
+                completedAt: now,
+                investedAmount: 0,
+                amount: 0
+            });
+        } else {
+            await robotRef.update({
+                lastProfitTime: now,
+                lastProfitAmount: netProfit,
+                profitDays: profitDays + 1
+            });
+        }
+
+        // ✅ Update user balance with transaction
+        await userRef.transaction((current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + finalNetReturn;
+            }
+            return current;
+        });
+
+        // ✅ Update robot stats
+        const statsRef = db.ref(`robotStats/${userId}/${robotId}`);
+        await statsRef.transaction((current) => {
+            if (!current) current = { profit: 0, trades: 0, wins: 0 };
+            current.profit += finalNetReturn;
+            current.trades += 1;
+            current.wins += 1;
+            return current;
+        });
+
+        // ✅ Add log
+        const logRef = db.ref(`tradingLogs/${userId}`).push();
+        await logRef.set({
+            id: logRef.key,
+            robot: robot.name || 'Robot',
+            message: `💰 Daily profit: +${formatPrice(finalNetReturn)} USDT (${dailyPercent}%)`,
+            type: 'profit',
+            time: new Date().toLocaleTimeString(),
+            timestamp: Date.now()
+        });
+
+        return true;
+
+    } catch (error) {
+        console.error('[BOT] Process robot profit error:', error);
+        return false;
+    }
+}
 
 module.exports = router;
