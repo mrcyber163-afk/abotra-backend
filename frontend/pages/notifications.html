@@ -504,31 +504,41 @@ let pushSubscription = null;
 // PAGE ROUTING - Complete mapping for all notification types
 // ============================================================
 const PAGE_ROUTES = {
-    // Wallet & Transactions
+    // ===== WALLET =====
     'deposit': 'wallet.html',
+    'deposit-approved': 'wallet.html',
+    'deposit-pending': 'wallet.html',
+    'deposit-rejected': 'wallet.html',
     'withdrawal': 'wallet.html',
     'withdraw': 'wallet.html',
+    'withdraw-approved': 'wallet.html',
+    'withdraw-pending': 'wallet.html',
+    'withdraw-rejected': 'wallet.html',
     'transfer': 'wallet.html',
     'wallet': 'wallet.html',
     'transaction': 'wallet.html',
+    'transactions': 'wallet.html',
     
-    // Trading
+    // ===== TRADING =====
     'trade': 'trade.html',
-    'trade-opened': 'trade.html',
     'trade-open': 'trade.html',
-    'trade-closed': 'trade-history.html',
+    'trade-opened': 'trade.html',
     'trade-close': 'trade-history.html',
+    'trade-closed': 'trade-history.html',
+    'trade-profit': 'trade-history.html',
+    'trade-loss': 'trade-history.html',
+    'trade-liquidated': 'trade-history.html',
     'trade-history': 'trade-history.html',
-    'trades': 'trade-history.html',
     'history': 'trade-history.html',
+    'trades': 'trade-history.html',
     
-    // Copy Trading
+    // ===== COPY TRADING =====
     'copy-trade': 'copy-trading.html',
     'copy-trading': 'copy-trading.html',
-    'master-trade': 'copy-trading.html',
     'master': 'copy-trading.html',
+    'master-trade': 'copy-trading.html',
     
-    // P2P
+    // ===== P2P =====
     'p2p': 'p2p-market.html',
     'p2p-market': 'p2p-market.html',
     'p2p-order': 'p2p-order.html',
@@ -536,55 +546,71 @@ const PAGE_ROUTES = {
     'p2p-message': 'p2p-chat.html',
     'peer-to-peer': 'p2p-market.html',
     
-    // KYC & Security
+    // ===== KYC =====
     'kyc': 'kyc.html',
     'verification': 'kyc.html',
-    'security': 'kyc.html',
-    'privacy': 'privacy.html',
-    'terms': 'terms.html',
-    'policy': 'privacy.html',
+    'verification-approved': 'kyc.html',
+    'verification-pending': 'kyc.html',
+    'verification-rejected': 'kyc.html',
     
-    // Marketing & Social
-    'affiliate': 'affiliate.html',
-    'invite': 'affiliate.html',
-    'referral': 'affiliate.html',
-    'leaderboard': 'leaderboard.html',
-    'ranking': 'leaderboard.html',
-    
-    // Robots & Automation
+    // ===== ROBOTS =====
     'robot': 'robots.html',
     'robots': 'robots.html',
     'auto-bot': 'auto-bot.html',
     'bot': 'auto-bot.html',
     'automation': 'auto-bot.html',
     
-    // Subscriptions
+    // ===== AFFILIATE =====
+    'affiliate': 'affiliate.html',
+    'referral': 'affiliate.html',
+    'referral-bonus': 'affiliate.html',
+    'commission': 'affiliate.html',
+    'invite': 'affiliate.html',
+    
+    // ===== SUBSCRIPTIONS =====
     'subscription': 'subscriptions.html',
     'subscriptions': 'subscriptions.html',
-    'subscribe': 'subscriptions.html',
     'premium': 'subscriptions.html',
     'plan': 'subscriptions.html',
+    'renewal': 'subscriptions.html',
+    'expired': 'subscriptions.html',
     
-    // Market & Analytics
-    'market': 'market.html',
-    'candle': 'candles.html',
-    'candles': 'candles.html',
-    'chart': 'candles.html',
+    // ===== LEADERBOARD =====
+    'leaderboard': 'leaderboard.html',
+    'ranking': 'leaderboard.html',
+    'reward': 'leaderboard.html',
+    
+    // ===== AI SIGNAL =====
     'ai-signal': 'ai-signal.html',
     'signal': 'ai-signal.html',
     'analysis': 'ai-signal.html',
     
-    // Account
+    // ===== CHARTS =====
+    'candle': 'candles.html',
+    'candles': 'candles.html',
+    'chart': 'candles.html',
+    
+    // ===== MARKET =====
+    'market': 'market.html',
+    
+    // ===== ACCOUNT =====
     'account': 'account.html',
     'profile': 'account.html',
     'settings': 'account.html',
     
-    // System
+    // ===== PRIVACY =====
+    'privacy': 'privacy.html',
+    'policy': 'privacy.html',
+    
+    // ===== TERMS =====
+    'terms': 'terms.html',
+    
+    // ===== SYSTEM =====
     'system': 'dashboard.html',
     'info': 'dashboard.html',
     'warning': 'dashboard.html',
-    'error': 'dashboard.html',
     'success': 'dashboard.html',
+    'error': 'dashboard.html',
     'welcome': 'dashboard.html'
 };
 
@@ -595,13 +621,29 @@ function getPageLink(notification) {
     const type = (notification.type || '').toLowerCase();
     const link = notification.link || '';
     
-    // If direct link is provided, use it
+    // If direct link is provided, use it (preserving query params)
     if (link && link.includes('.html')) {
+        // If link already has query params, use as is
+        if (link.includes('?')) {
+            return link;
+        }
+        // If link has no notification param, add it
+        if (notification.id) {
+            return `${link}?notification=${encodeURIComponent(notification.id)}`;
+        }
         return link;
     }
     
     // Check if type has direct mapping
-    return PAGE_ROUTES[type] || PAGE_ROUTES[type.split('-')[0]] || 'dashboard.html';
+    let page = PAGE_ROUTES[type] || PAGE_ROUTES[type.split('-')[0]] || 'dashboard.html';
+    
+    // Add notification ID as query param for tracking
+    if (notification.id && page) {
+        const separator = page.includes('?') ? '&' : '?';
+        page = `${page}${separator}notification=${encodeURIComponent(notification.id)}`;
+    }
+    
+    return page;
 }
 
 // ============================================================
@@ -614,27 +656,37 @@ function getButtonInfo(notification) {
     const buttonMap = {
         // Wallet
         'deposit': { text: '💰 Deposit', icon: 'fa-wallet' },
+        'deposit-approved': { text: '✅ Deposit Approved', icon: 'fa-check-circle' },
+        'deposit-pending': { text: '⏳ Deposit Pending', icon: 'fa-clock' },
+        'deposit-rejected': { text: '❌ Deposit Rejected', icon: 'fa-times-circle' },
         'withdrawal': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
         'withdraw': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
+        'withdraw-approved': { text: '✅ Withdrawal Approved', icon: 'fa-check-circle' },
+        'withdraw-pending': { text: '⏳ Withdrawal Pending', icon: 'fa-clock' },
+        'withdraw-rejected': { text: '❌ Withdrawal Rejected', icon: 'fa-times-circle' },
         'transfer': { text: '🔄 Transfer', icon: 'fa-exchange-alt' },
         'wallet': { text: '💰 Wallet', icon: 'fa-wallet' },
         'transaction': { text: '💰 Transactions', icon: 'fa-receipt' },
+        'transactions': { text: '💰 Transactions', icon: 'fa-receipt' },
         
         // Trading
         'trade': { text: '📊 Trade Now', icon: 'fa-chart-line' },
-        'trade-opened': { text: '📈 Open Trade', icon: 'fa-arrow-up' },
         'trade-open': { text: '📈 Open Trade', icon: 'fa-arrow-up' },
+        'trade-opened': { text: '📈 Open Trade', icon: 'fa-arrow-up' },
+        'trade-close': { text: '📉 Close Trade', icon: 'fa-arrow-down' },
         'trade-closed': { text: '📉 View History', icon: 'fa-arrow-down' },
-        'trade-close': { text: '📉 View History', icon: 'fa-arrow-down' },
+        'trade-profit': { text: '📈 Profit', icon: 'fa-arrow-up' },
+        'trade-loss': { text: '📉 Loss', icon: 'fa-arrow-down' },
+        'trade-liquidated': { text: '⚠️ Liquidated', icon: 'fa-exclamation-triangle' },
         'trade-history': { text: '📉 History', icon: 'fa-clock' },
-        'trades': { text: '📊 View Trades', icon: 'fa-chart-bar' },
         'history': { text: '📉 History', icon: 'fa-clock' },
+        'trades': { text: '📊 View Trades', icon: 'fa-chart-bar' },
         
         // Copy Trading
         'copy-trade': { text: '📋 Copy Trade', icon: 'fa-copy' },
         'copy-trading': { text: '📋 Copy Trading', icon: 'fa-copy' },
-        'master-trade': { text: '👑 Master Trade', icon: 'fa-crown' },
         'master': { text: '👑 Master Trade', icon: 'fa-crown' },
+        'master-trade': { text: '👑 Master Trade', icon: 'fa-crown' },
         
         // P2P
         'p2p': { text: '🤝 P2P Market', icon: 'fa-handshake' },
@@ -647,14 +699,9 @@ function getButtonInfo(notification) {
         // KYC
         'kyc': { text: '📋 Verify Now', icon: 'fa-id-card' },
         'verification': { text: '📋 Verify Now', icon: 'fa-id-card' },
-        'security': { text: '🔐 Security', icon: 'fa-shield-alt' },
-        
-        // Marketing
-        'affiliate': { text: '👥 Affiliate', icon: 'fa-user-plus' },
-        'invite': { text: '👥 Invite Friends', icon: 'fa-user-plus' },
-        'referral': { text: '👥 Referrals', icon: 'fa-user-friends' },
-        'leaderboard': { text: '🏆 Leaderboard', icon: 'fa-trophy' },
-        'ranking': { text: '🏆 Rankings', icon: 'fa-trophy' },
+        'verification-approved': { text: '✅ Verification Approved', icon: 'fa-check-circle' },
+        'verification-pending': { text: '⏳ Verification Pending', icon: 'fa-clock' },
+        'verification-rejected': { text: '❌ Verification Rejected', icon: 'fa-times-circle' },
         
         // Robots
         'robot': { text: '🤖 AI Robot', icon: 'fa-robot' },
@@ -663,21 +710,38 @@ function getButtonInfo(notification) {
         'bot': { text: '⚡ Auto Bot', icon: 'fa-bolt' },
         'automation': { text: '⚡ Automation', icon: 'fa-cogs' },
         
+        // Affiliate
+        'affiliate': { text: '👥 Affiliate', icon: 'fa-user-plus' },
+        'referral': { text: '👥 Referrals', icon: 'fa-user-friends' },
+        'referral-bonus': { text: '💰 Referral Bonus', icon: 'fa-gift' },
+        'commission': { text: '💰 Commission', icon: 'fa-hand-holding-usd' },
+        'invite': { text: '👥 Invite Friends', icon: 'fa-user-plus' },
+        
         // Subscriptions
         'subscription': { text: '👑 Subscribe', icon: 'fa-crown' },
         'subscriptions': { text: '👑 Subscriptions', icon: 'fa-crown' },
-        'subscribe': { text: '👑 Subscribe Now', icon: 'fa-crown' },
         'premium': { text: '👑 Premium Plans', icon: 'fa-crown' },
         'plan': { text: '👑 View Plans', icon: 'fa-crown' },
+        'renewal': { text: '🔄 Renew Subscription', icon: 'fa-sync' },
+        'expired': { text: '⚠️ Subscription Expired', icon: 'fa-exclamation-triangle' },
         
-        // Market
-        'market': { text: '📊 Market', icon: 'fa-store' },
-        'candle': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
-        'candles': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
-        'chart': { text: '📊 Charts', icon: 'fa-chart-pie' },
+        // Leaderboard
+        'leaderboard': { text: '🏆 Leaderboard', icon: 'fa-trophy' },
+        'ranking': { text: '🏆 Rankings', icon: 'fa-trophy' },
+        'reward': { text: '🎁 Claim Reward', icon: 'fa-gift' },
+        
+        // AI Signal
         'ai-signal': { text: '📡 AI Signal', icon: 'fa-brain' },
         'signal': { text: '📡 Signals', icon: 'fa-brain' },
         'analysis': { text: '📊 Analysis', icon: 'fa-chart-pie' },
+        
+        // Charts
+        'candle': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
+        'candles': { text: '🕯️ Candles', icon: 'fa-chart-bar' },
+        'chart': { text: '📊 Charts', icon: 'fa-chart-pie' },
+        
+        // Market
+        'market': { text: '📊 Market', icon: 'fa-store' },
         
         // Account
         'account': { text: '👤 Account', icon: 'fa-user' },
@@ -994,27 +1058,37 @@ function getNotificationIcon(type) {
     const typeMap = {
         // Wallet
         'deposit': { icon: 'fas fa-arrow-down', class: 'deposit' },
+        'deposit-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'deposit-pending': { icon: 'fas fa-clock', class: 'info' },
+        'deposit-rejected': { icon: 'fas fa-times-circle', class: 'error' },
         'withdrawal': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
         'withdraw': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
+        'withdraw-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'withdraw-pending': { icon: 'fas fa-clock', class: 'info' },
+        'withdraw-rejected': { icon: 'fas fa-times-circle', class: 'error' },
         'transfer': { icon: 'fas fa-exchange-alt', class: 'transfer' },
         'wallet': { icon: 'fas fa-wallet', class: 'info' },
         'transaction': { icon: 'fas fa-receipt', class: 'info' },
+        'transactions': { icon: 'fas fa-receipt', class: 'info' },
         
         // Trading
         'trade': { icon: 'fas fa-chart-line', class: 'trade' },
-        'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
         'trade-open': { icon: 'fas fa-arrow-up', class: 'trade' },
-        'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
         'trade-close': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-profit': { icon: 'fas fa-arrow-up', class: 'success' },
+        'trade-loss': { icon: 'fas fa-arrow-down', class: 'error' },
+        'trade-liquidated': { icon: 'fas fa-exclamation-triangle', class: 'error' },
         'trade-history': { icon: 'fas fa-clock', class: 'trade' },
-        'trades': { icon: 'fas fa-chart-bar', class: 'trade' },
         'history': { icon: 'fas fa-clock', class: 'trade' },
+        'trades': { icon: 'fas fa-chart-bar', class: 'trade' },
         
         // Copy Trading
         'copy-trade': { icon: 'fas fa-copy', class: 'copy-trade' },
         'copy-trading': { icon: 'fas fa-copy', class: 'copy-trade' },
-        'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
         'master': { icon: 'fas fa-crown', class: 'master-trade' },
+        'master-trade': { icon: 'fas fa-crown', class: 'master-trade' },
         
         // P2P
         'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
@@ -1027,14 +1101,9 @@ function getNotificationIcon(type) {
         // KYC
         'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
         'verification': { icon: 'fas fa-id-card', class: 'kyc' },
-        'security': { icon: 'fas fa-shield-alt', class: 'security' },
-        
-        // Marketing
-        'affiliate': { icon: 'fas fa-user-plus', class: 'affiliate' },
-        'invite': { icon: 'fas fa-user-plus', class: 'affiliate' },
-        'referral': { icon: 'fas fa-user-friends', class: 'affiliate' },
-        'leaderboard': { icon: 'fas fa-trophy', class: 'leaderboard' },
-        'ranking': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        'verification-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'verification-pending': { icon: 'fas fa-clock', class: 'info' },
+        'verification-rejected': { icon: 'fas fa-times-circle', class: 'error' },
         
         // Robots
         'robot': { icon: 'fas fa-robot', class: 'robot' },
@@ -1043,21 +1112,38 @@ function getNotificationIcon(type) {
         'bot': { icon: 'fas fa-bolt', class: 'robot' },
         'automation': { icon: 'fas fa-cogs', class: 'robot' },
         
+        // Affiliate
+        'affiliate': { icon: 'fas fa-user-plus', class: 'affiliate' },
+        'referral': { icon: 'fas fa-user-friends', class: 'affiliate' },
+        'referral-bonus': { icon: 'fas fa-gift', class: 'success' },
+        'commission': { icon: 'fas fa-hand-holding-usd', class: 'success' },
+        'invite': { icon: 'fas fa-user-plus', class: 'affiliate' },
+        
         // Subscriptions
         'subscription': { icon: 'fas fa-crown', class: 'subscription' },
         'subscriptions': { icon: 'fas fa-crown', class: 'subscription' },
-        'subscribe': { icon: 'fas fa-crown', class: 'subscription' },
         'premium': { icon: 'fas fa-crown', class: 'subscription' },
         'plan': { icon: 'fas fa-crown', class: 'subscription' },
+        'renewal': { icon: 'fas fa-sync', class: 'info' },
+        'expired': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
         
-        // Market
-        'market': { icon: 'fas fa-store', class: 'info' },
-        'candle': { icon: 'fas fa-chart-bar', class: 'candle' },
-        'candles': { icon: 'fas fa-chart-bar', class: 'candle' },
-        'chart': { icon: 'fas fa-chart-pie', class: 'candle' },
+        // Leaderboard
+        'leaderboard': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        'ranking': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        'reward': { icon: 'fas fa-gift', class: 'success' },
+        
+        // AI Signal
         'ai-signal': { icon: 'fas fa-brain', class: 'ai-signal' },
         'signal': { icon: 'fas fa-brain', class: 'ai-signal' },
         'analysis': { icon: 'fas fa-chart-pie', class: 'ai-signal' },
+        
+        // Charts
+        'candle': { icon: 'fas fa-chart-bar', class: 'candle' },
+        'candles': { icon: 'fas fa-chart-bar', class: 'candle' },
+        'chart': { icon: 'fas fa-chart-pie', class: 'candle' },
+        
+        // Market
+        'market': { icon: 'fas fa-store', class: 'info' },
         
         // Account
         'account': { icon: 'fas fa-user', class: 'info' },
@@ -1120,10 +1206,10 @@ function renderNotifications(notifications) {
         notifCard.className = `notification-card ${notif.read ? '' : 'unread'}`;
         notifCard.onclick = () => markAsRead(notif.id, null);
         
-        // Build action button with proper link
+        // Build action button with proper link - marks as read and navigates
         const actionHtml = `
             <div class="notification-action">
-                <a href="${pageLink}" class="action-btn" onclick="event.stopPropagation();">
+                <a href="${pageLink}" class="action-btn" onclick="event.stopPropagation(); window.markAndNavigate('${notif.id}', '${pageLink}')">
                     <i class="fas ${btnInfo.icon}"></i> ${btnInfo.text}
                 </a>
             </div>
@@ -1142,6 +1228,25 @@ function renderNotifications(notifications) {
         container.appendChild(notifCard);
     });
 }
+
+// ============================================================
+// WINDOW FUNCTIONS - Exposed for inline onclick
+// ============================================================
+window.markAndNavigate = async function(notificationId, destination) {
+    if (!currentUser) {
+        window.location.href = destination;
+        return;
+    }
+    try {
+        // Mark notification as read
+        await update(ref(db, `notifications/${currentUser.uid}/${notificationId}`), { read: true });
+        await updateUnreadCountAndBadge();
+    } catch (e) {
+        console.warn('[NOTIF] Could not mark as read:', e);
+    }
+    // Navigate to destination
+    window.location.href = destination;
+};
 
 window.deleteNotification = async function(notificationId) {
     await deleteSingleNotification(notificationId);
