@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Forgot Password | ABOTRA-PROAI - Reset Your Password</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CSS VARIABLES & BASE
+   ============================================================ */
+:root {
+    --bg-primary: #0A0A0A;
+    --bg-card: rgba(18,18,18,0.95);
+    --bg-input: rgba(255,255,255,0.04);
+    --bg-glass: rgba(255,255,255,0.03);
+    --text-primary: #FFFFFF;
+    --text-muted: #999999;
+    --text-secondary: #CCCCCC;
+    --gold: #FFD700;
+    --gold-dark: #B8860B;
+    --gold-glow: rgba(255,215,0,0.35);
+    --gold-gradient: linear-gradient(135deg, #FFD700, #FFB800);
+    --border-color: rgba(255,255,255,0.08);
+    --border-focus: rgba(255,215,0,0.5);
+    --shadow-card: 0 15px 40px rgba(0,0,0,0.6);
+    --shadow-glow: 0 0 30px rgba(255,215,0,0.1);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
+
+body {
+    background: var(--bg-primary);
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+    transition: background var(--transition);
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+/* ============================================================
+   LIGHT THEME
+   ============================================================ */
+body.light-theme {
+    background: #f5f5f5;
+    --bg-primary: #f5f5f5;
+    --bg-card: rgba(255,255,255,0.95);
+    --bg-input: rgba(0,0,0,0.04);
+    --bg-glass: rgba(255,255,255,0.8);
+    --text-primary: #1a1a2e;
+    --text-muted: #666666;
+    --text-secondary: #555555;
+    --border-color: rgba(0,0,0,0.08);
+    --border-focus: rgba(128,0,0,0.4);
+    --shadow-card: 0 15px 40px rgba(0,0,0,0.12);
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); }
+body.light-theme .forgot-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+body.light-theme .input-box input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+body.light-theme .input-box input::placeholder { color: #999999; }
+body.light-theme .sub-text { color: var(--text-muted); }
+body.light-theme .bottom-text { color: var(--text-muted); }
+body.light-theme .bottom-text a { color: #800000; }
+body.light-theme .info-box {
+    background: rgba(128,0,0,0.06);
+    border-left-color: #800000;
+}
+body.light-theme .info-box p { color: var(--text-secondary); }
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+.theme-toggle {
+    position: fixed; top: 20px; right: 20px; z-index: 10000;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    gap: 8px;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.15); transform: scale(1.05); border-color: var(--gold); }
+.theme-toggle i { font-size: 16px; color: var(--gold); transition: var(--transition); }
+.theme-toggle .theme-label { font-size: 10px; font-weight: 600; color: var(--text-muted); display: none; }
+@media(min-width: 480px) { .theme-toggle .theme-label { display: inline; } }
+
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+.overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1;
+}
+
+/* ============================================================
+   FORGOT CONTAINER
+   ============================================================ */
+.container {
+    position: relative; z-index: 2; width: 100%; display: flex; justify-content: center;
+    animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.forgot-box {
+    width: 100%; max-width: 480px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+    position: relative;
+}
+.forgot-box::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255,215,0,0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.logo {
+    width: 100%; height: 150px; object-fit: cover; display: block; background: var(--bg-primary);
+}
+.content { padding: 24px 28px 28px; position: relative; z-index: 1; }
+
+h1 {
+    text-align: center; font-size: 24px; font-weight: 800;
+    background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 4px; letter-spacing: -0.5px;
+}
+.sub-text {
+    text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 22px; font-weight: 400;
+}
+
+/* ============================================================
+   INPUT FIELDS
+   ============================================================ */
+.input-box {
+    width: 100%; margin-bottom: 16px; position: relative;
+}
+.input-box input {
+    width: 100%; height: 50px; border: none; outline: none; padding: 0 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: all var(--transition);
+    font-family: var(--font);
+}
+.input-box input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
+    background: rgba(255,255,255,0.06);
+}
+.input-box input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+/* ============================================================
+   INFO BOX
+   ============================================================ */
+.info-box {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    background: rgba(255,215,0,0.06);
+    border-radius: var(--radius-xs);
+    border-left: 3px solid var(--gold);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.info-box i {
+    color: var(--gold);
+    font-size: 14px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+.info-box p {
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ============================================================
+   RESET BUTTON
+   ============================================================ */
+.button-wrapper { display: flex; justify-content: center; width: 100%; margin-top: 4px; }
+.reset-btn {
+    width: 100%; height: 52px; border: none; border-radius: var(--radius-sm);
+    background: var(--gold-gradient); color: #0A0A0A;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: 0 4px 20px rgba(255,215,0,0.25);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+    font-family: var(--font);
+}
+.reset-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,215,0,0.4); }
+.reset-btn:active { transform: scale(0.98); }
+.reset-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.reset-btn .spinner {
+    width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #0A0A0A;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   BOTTOM TEXT
+   ============================================================ */
+.bottom-text {
+    text-align: center; margin-top: 18px; font-size: 11px; color: var(--text-muted);
+}
+.bottom-text a {
+    color: var(--gold); text-decoration: none; font-weight: 700; transition: var(--transition);
+}
+.bottom-text a:hover { text-decoration: underline; }
+
+/* ============================================================
+   NOTIFICATION
+   ============================================================ */
+.notification {
+    position: fixed; top: 80px; right: 25px; min-width: 260px; max-width: 330px;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 99999; backdrop-filter: blur(20px);
+    background: rgba(18,18,18,0.95); border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    animation: slideInRight 0.4s ease; border-left: 4px solid;
+}
+.notification.success { border-left-color: #0ECB81; }
+.notification.success i { color: #0ECB81; }
+.notification.error { border-left-color: #F6465D; }
+.notification.error i { color: #F6465D; }
+.notification.info { border-left-color: var(--gold); }
+.notification.info i { color: var(--gold); }
+.notification i { font-size: 18px; flex-shrink: 0; }
+.notification .message { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.notification .close-notif { cursor: pointer; opacity: 0.5; transition: var(--transition); font-size: 14px; color: var(--text-muted); }
+.notification .close-notif:hover { opacity: 1; color: var(--text-primary); }
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(100%) scale(0.95); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width: 480px) {
+    body { padding: 10px; }
+    .content { padding: 18px 16px 20px; }
+    h1 { font-size: 20px; }
+    .forgot-box { max-width: 100%; border-radius: var(--radius-sm); }
+    .logo { height: 110px; }
+    .input-box input { height: 46px; font-size: 12px; }
+    .reset-btn { height: 48px; font-size: 13px; }
+    .notification { right: 10px; left: 10px; min-width: auto; max-width: none; top: 70px; }
+    .theme-toggle { top: 12px; right: 12px; padding: 8px 10px; }
+    .theme-toggle .theme-label { display: none; }
+    .info-box p { font-size: 9px; }
+}
+@media(max-width: 360px) {
+    .content { padding: 14px 12px 16px; }
+    h1 { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== THEME TOGGLE ===== -->
+<div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-sun" id="sunIcon"></i>
+    <i class="fas fa-moon" id="moonIcon" style="display:none;"></i>
+    <span class="theme-label" id="themeLabel">Light</span>
+</div>
+
+<div class="overlay"></div>
+
+<!-- ===== FORGOT BOX ===== -->
+<div class="container">
+    <div class="forgot-box">
+        <img src="../assets/images/logo.png" alt="ABOTRA-PROAI" class="logo" onerror="this.src='https://placehold.co/480x150/800000/FFD700?text=ABOTRA-PROAI'">
+        <div class="content">
+            <h1>Reset Password</h1>
+            <p class="sub-text">Enter your email to receive reset instructions</p>
+
+            <div class="input-box">
+                <input type="email" id="resetEmail" placeholder="Email Address" autocomplete="email">
+            </div>
+
+            <div class="button-wrapper">
+                <button id="resetBtn" class="reset-btn">
+                    <i class="fas fa-paper-plane"></i> Send Reset Link
+                </button>
+            </div>
+
+            <p class="bottom-text">
+                Remember password? <a href="login.html">Back to Login</a>
+            </p>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Password reset link will be sent to your registered email address. Check your spam folder if you don't see it within 5 minutes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const label = document.getElementById('themeLabel');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        label.textContent = 'Dark';
+    } else {
+        document.body.classList.remove('light-theme');
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        label.textContent = 'Light';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const label = document.getElementById('themeLabel');
+    if (isLight) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        label.textContent = 'Dark';
+    } else {
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        label.textContent = 'Light';
+    }
+});
+
+// ============================================================
+// NOTIFICATION
+// ============================================================
+function showNotification(msg, type) {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    const n = document.createElement('div');
+    n.className = `notification ${type}`;
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    n.innerHTML = `
+        <i class="fas ${iconMap[type] || 'fa-info-circle'}"></i>
+        <div class="message">${msg}</div>
+        <div class="close-notif"><i class="fas fa-times"></i></div>
+    `;
+    document.body.appendChild(n);
+    setTimeout(() => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); }, 5000);
+    n.querySelector('.close-notif').onclick = () => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); };
+}
+
+// ============================================================
+// CHECK EMAIL IN RTDB
+// ============================================================
+async function checkEmailExistsInRTDB(email) {
+    if (!email) return false;
+    try {
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        if (snapshot.exists()) {
+            let emailFound = false;
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                    emailFound = true;
+                }
+            });
+            return emailFound;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking email in RTDB:", error);
+        return false;
+    }
+}
+
+// ============================================================
+// RESET PASSWORD
+// ============================================================
+async function resetPassword() {
+    const email = document.getElementById('resetEmail').value.trim();
+    const btn = document.getElementById('resetBtn');
+    
+    if (!email) { showNotification('Please enter your email address', 'error'); return; }
+    if (!email.includes('@') || !email.includes('.')) { showNotification('Please enter a valid email address', 'error'); return; }
+    
+    const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+    if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Checking email...';
+    
+    try {
+        const emailExists = await checkEmailExistsInRTDB(email);
+        if (!emailExists) {
+            showNotification('No account found with this email address. Please register first.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+            return;
+        }
+        
+        btn.innerHTML = '<span class="spinner"></span> Sending...';
+        
+        await sendPasswordResetEmail(auth, email);
+        showNotification(`✅ Password reset link sent to ${email}! Check your inbox and spam folder.`, 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 4000);
+        
+    } catch (error) {
+        let errorMessage = 'Failed to send reset email.';
+        if (error.code === 'auth/user-not-found') errorMessage = 'No account found with this email address. Please register first.';
+        else if (error.code === 'auth/invalid-email') errorMessage = 'Please enter a valid email address.';
+        else if (error.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Try again later.';
+        else if (error.code === 'auth/network-request-failed') errorMessage = 'Network error. Please check your connection.';
+        showNotification(errorMessage, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+    }
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('resetBtn').addEventListener('click', resetPassword);
+document.getElementById('resetEmail').addEventListener('keypress', (e) => { 
+    if(e.key === 'Enter') resetPassword(); 
+});
+
+// ============================================================
+// INIT
+// ============================================================
+initTheme();
+</script>
+</body>
+</html>
