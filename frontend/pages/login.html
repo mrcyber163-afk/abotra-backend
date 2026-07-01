@@ -6,7 +6,9 @@
 <title>Login | ABOTRA-PROAI - Sign In to Your Trading Account</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
 <!-- ============================================================ -->
 <!-- CONFIG - Backend Connection                                     -->
@@ -92,7 +94,6 @@ body.light-theme .login-box {
     border: 1px solid var(--border-color);
 }
 body.light-theme .input-box input,
-body.light-theme .country-code-select select,
 body.light-theme .phone-number-input input {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
@@ -115,6 +116,64 @@ body.light-theme .biometric-icon:hover { background: rgba(128,0,0,0.2); }
 body.light-theme .biometric-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); }
 body.light-theme .biometric-modal-card h3 { color: #800000; }
 body.light-theme .biometric-modal-card p { color: var(--text-muted); }
+
+/* ============================================================
+   CHOICES.JS - DARK THEME (Premium)
+   ============================================================ */
+body:not(.light-theme) .choices__inner {
+    background: rgba(255,255,255,0.06) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+body:not(.light-theme) .choices__list--dropdown {
+    background: #1a1a1a !important;
+    border-color: var(--border-color) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__item {
+    color: var(--text-primary) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background: rgba(255,215,0,0.15) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__input {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,215,0,0.3) !important;
+    color: var(--text-primary) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__input:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.15) !important;
+}
+body:not(.light-theme) .choices__placeholder { color: var(--text-muted) !important; }
+
+/* ============================================================
+   CHOICES.JS - LIGHT THEME (Clean White)
+   ============================================================ */
+body.light-theme .choices__inner {
+    background: rgba(0,0,0,0.04) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: var(--text-primary) !important;
+}
+body.light-theme .choices__list--dropdown {
+    background: #ffffff !important;
+    border-color: rgba(0,0,0,0.1) !important;
+}
+body.light-theme .choices__list--dropdown .choices__item {
+    color: #1a1a1a !important;
+}
+body.light-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background: rgba(128,0,0,0.08) !important;
+}
+body.light-theme .choices__list--dropdown .choices__input {
+    background: rgba(0,0,0,0.04) !important;
+    border: 1px solid rgba(128,0,0,0.2) !important;
+    color: #1a1a1a !important;
+}
+body.light-theme .choices__list--dropdown .choices__input:focus {
+    border-color: #800000 !important;
+    box-shadow: 0 0 0 3px rgba(128,0,0,0.1) !important;
+}
+body.light-theme .choices__placeholder { color: #999999 !important; }
 
 /* ============================================================
    THEME TOGGLE
@@ -258,38 +317,140 @@ h1 {
 .password-box .toggle-password:hover { color: var(--gold); }
 
 /* ============================================================
-   PHONE CONTAINER
+   PHONE CONTAINER - WITH CHOICES.JS
    ============================================================ */
 .phone-container {
     display: flex; gap: 10px; margin-bottom: 14px;
 }
 .country-code-select {
-    width: 150px; flex-shrink: 0;
+    width: 160px;
+    flex-shrink: 0;
 }
-.country-code-select select {
-    width: 100%; height: 50px; border: none; outline: none; padding: 0 12px;
+.country-code-select .choices {
+    width: 100%;
+}
+.country-code-select .choices__inner {
+    height: 50px;
     border-radius: var(--radius-sm);
     background: rgba(255,255,255,0.04);
     border: 1.5px solid var(--border-color);
+    padding: 8px 12px;
+    font-size: 13px;
     color: var(--text-primary);
-    font-size: 12px;
-    cursor: pointer;
     transition: all var(--transition);
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23FFD700' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 12px;
+    display: flex;
+    align-items: center;
 }
-.country-code-select select:focus {
+.country-code-select .choices__inner:hover {
+    border-color: rgba(255,215,0,0.3);
+}
+.country-code-select .choices.is-focused .choices__inner {
     border-color: var(--gold);
     box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
 }
-.country-code-select select option {
-    background: #1a1a1a; color: var(--text-primary);
+.country-code-select .choices__list--single .choices__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
 }
-body.light-theme .country-code-select select option { background: #ffffff; color: var(--text-primary); }
+.country-code-select .choices__list--single .choices__item .country-flag {
+    font-size: 20px;
+    line-height: 1;
+}
+.country-code-select .choices__list--single .choices__item .country-name {
+    font-weight: 500;
+}
+.country-code-select .choices__list--single .choices__item .country-code {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-left: auto;
+}
+.country-code-select .choices__list--dropdown {
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    max-height: 300px;
+    overflow: hidden;
+    margin-top: 4px;
+    backdrop-filter: blur(20px);
+}
+.country-code-select .choices__list--dropdown .choices__list {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 6px;
+}
+.country-code-select .choices__list--dropdown .choices__item {
+    color: var(--text-primary);
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all var(--transition);
+    cursor: pointer;
+}
+.country-code-select .choices__list--dropdown .choices__item .country-flag {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.country-code-select .choices__list--dropdown .choices__item .country-name {
+    flex: 1;
+    font-weight: 500;
+}
+.country-code-select .choices__list--dropdown .choices__item .country-code {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+.country-code-select .choices__list--dropdown .choices__item:hover {
+    background: rgba(255,215,0,0.08);
+}
+.country-code-select .choices__list--dropdown .choices__item.is-highlighted {
+    background: rgba(255,215,0,0.15);
+}
+.country-code-select .choices__list--dropdown .choices__item.is-selected {
+    background: rgba(255,215,0,0.2);
+    border-left: 3px solid var(--gold);
+}
+.country-code-select .choices__input {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+.country-code-select .choices__placeholder {
+    color: var(--text-muted);
+}
+
+/* Search input inside dropdown */
+.country-code-select .choices__list--dropdown .choices__input {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-xs) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 6px !important;
+}
+.country-code-select .choices__list--dropdown .choices__input:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.1) !important;
+}
+
+/* Scrollbar for dropdown */
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar {
+    width: 3px;
+}
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
 
 .phone-number-input { flex: 1; }
 .phone-number-input input {
@@ -559,7 +720,7 @@ body.light-theme .country-code-select select option { background: #ffffff; color
     .input-box input { height: 46px; font-size: 12px; }
     .phone-container { flex-direction: column; gap: 6px; }
     .country-code-select { width: 100%; }
-    .country-code-select select { height: 46px; }
+    .country-code-select .choices__inner { height: 46px; }
     .phone-number-input input { height: 46px; }
     .login-btn { height: 48px; font-size: 13px; }
     .notification { right: 10px; left: 10px; min-width: auto; max-width: none; top: 70px; }
@@ -637,8 +798,8 @@ body.light-theme .country-code-select select option { background: #ffffff; color
             <!-- PHONE LOGIN -->
             <div id="phoneLoginSection" style="display:none;">
                 <div class="phone-container">
-                    <div class="country-code-select">
-                        <select id="phoneCountryCode"><option value="">-- Select Country --</option></select>
+                    <div class="country-code-select" id="phoneCountryContainer">
+                        <select id="phoneCountryCode"></select>
                     </div>
                     <div class="phone-number-input">
                         <input type="tel" id="phoneNumber" placeholder="Phone Number">
@@ -917,41 +1078,80 @@ const countriesData = [
     { code: "+263", name: "Zimbabwe", flag: "🇿🇼", digits: 9 }
 ];
 
-function populateCountries() {
-    const select = document.getElementById('phoneCountryCode');
-    if (!select) return;
+// ============================================================
+// INIT COUNTRY DROPDOWN WITH CHOICES.JS
+// ============================================================
+let phoneCountryChoices = null;
+
+function initCountryDropdowns() {
+    const phoneSelect = document.getElementById('phoneCountryCode');
+    if (!phoneSelect) return;
+    
+    // Populate native selects with options
     const sorted = [...countriesData].sort((a, b) => a.name.localeCompare(b.name));
     sorted.forEach(c => {
-        const option = new Option(`${c.flag} ${c.name} (${c.code})`, c.code);
-        select.appendChild(option);
+        phoneSelect.appendChild(new Option(`${c.flag} ${c.name} (${c.code})`, c.code));
     });
+
+    if (typeof Choices === 'undefined') {
+        console.error('[CHOICES] Choices.js not loaded.');
+        return;
+    }
+
+    const commonConfig = {
+        searchEnabled: true,
+        searchPlaceholderValue: '🔍 Search country...',
+        itemSelectText: '',
+        shouldSort: false,
+        placeholder: true,
+        placeholderValue: '🇺🇳 Select Country',
+        allowHTML: false,
+        renderSelectedChoices: 'always'
+    };
+
+    try {
+        phoneCountryChoices = new Choices(phoneSelect, {
+            ...commonConfig,
+            classNames: {
+                containerOuter: 'choices country-code-select'
+            }
+        });
+
+        const defaultCountry = countriesData.find(c => c.code === '+255' || c.name === 'Tanzania');
+        if (defaultCountry) {
+            phoneCountryChoices.setChoiceByValue(defaultCountry.code);
+            updatePhoneHint(defaultCountry);
+        }
+
+        phoneSelect.addEventListener('change', () => {
+            const code = phoneSelect.value;
+            const country = countriesData.find(c => c.code === code);
+            if (country) {
+                updatePhoneHint(country);
+            }
+        });
+
+        console.log('[CHOICES] ✅ Initialized (allowHTML: false)');
+    } catch (error) {
+        console.error('[CHOICES] Error:', error);
+    }
 }
-populateCountries();
 
-// ============================================================
-// PHONE HINT
-// ============================================================
-const phoneCountrySelect = document.getElementById('phoneCountryCode');
-const phoneHint = document.getElementById('phoneHint');
-const phoneNumberInput = document.getElementById('phoneNumber');
-
-function updatePhoneHint() {
-    const selectedCode = phoneCountrySelect.value;
-    const matched = countriesData.find(c => c.code === selectedCode);
-    if (matched) {
-        phoneHint.innerHTML = `<i class="fas fa-check-circle"></i> ${matched.flag} ${matched.name} requires ${matched.digits} digits`;
-        phoneHint.className = 'phone-hint active';
-        phoneNumberInput.maxLength = matched.digits;
-        phoneNumberInput.placeholder = `Enter ${matched.digits} digits`;
+function updatePhoneHint(country) {
+    const hint = document.getElementById('phoneHint');
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    if (country) {
+        hint.innerHTML = `<i class="fas fa-check-circle"></i> ${country.flag} ${country.name} requires ${country.digits} digits`;
+        hint.className = 'phone-hint active';
+        phoneNumberInput.maxLength = country.digits;
+        phoneNumberInput.placeholder = `Enter ${country.digits} digits`;
     } else {
-        phoneHint.innerHTML = '<i class="fas fa-info-circle"></i> Select country to see required digits';
-        phoneHint.className = 'phone-hint';
+        hint.innerHTML = '<i class="fas fa-info-circle"></i> Select country to see required digits';
+        hint.className = 'phone-hint';
         phoneNumberInput.maxLength = 15;
         phoneNumberInput.placeholder = 'Phone Number';
     }
 }
-phoneCountrySelect.addEventListener('change', updatePhoneHint);
-updatePhoneHint();
 
 // ============================================================
 // AUTO-DETECT COUNTRY
@@ -962,19 +1162,20 @@ async function autoDetectCountry() {
         const data = await response.json();
         const detectedName = data.country_name;
         const matched = countriesData.find(c => c.name === detectedName);
-        if (matched) {
-            const phoneSelect = document.getElementById('phoneCountryCode');
-            for (let i = 0; i < phoneSelect.options.length; i++) {
-                if (phoneSelect.options[i].value === matched.code) {
-                    phoneSelect.selectedIndex = i;
-                    updatePhoneHint();
-                    break;
-                }
-            }
+        if (matched && phoneCountryChoices) {
+            phoneCountryChoices.setChoiceByValue(matched.code);
+            updatePhoneHint(matched);
+            return;
         }
     } catch (e) { console.log("[DETECT] Auto-detect failed"); }
+    
+    // Fallback: Try default
+    const defaultCountry = countriesData.find(c => c.code === '+255');
+    if (defaultCountry && phoneCountryChoices) {
+        phoneCountryChoices.setChoiceByValue(defaultCountry.code);
+        updatePhoneHint(defaultCountry);
+    }
 }
-autoDetectCountry();
 
 // ============================================================
 // THEME
@@ -1103,7 +1304,6 @@ async function updateUserInRTDB(userId, userData) {
 // BIOMETRIC - Firebase Auth Integration
 // ============================================================
 let rpId = window.location.hostname || "abotra-proai.com";
-let biometricCredential = null;
 
 async function checkBiometricEnabled() {
     const savedCredential = localStorage.getItem('abotra_biometric_credential');
@@ -1231,7 +1431,6 @@ async function loginWithEmail(email, password) {
     try {
         const result = await signInWithEmailAndPassword(auth, email, password);
         await updateUserInRTDB(result.user.uid, { email: result.user.email });
-        // Save for biometric
         localStorage.setItem('abotra_biometric_email', email);
         localStorage.setItem('abotra_biometric_password', password);
         showNotification('Login successful!', 'success');
@@ -1248,7 +1447,6 @@ async function loginWithPhone(phoneNumber, countryCode, password) {
     const fullPhone = countryCode + phoneNumber;
     const digitsOnly = phoneNumber.replace(/\D/g, '');
     
-    // Find user by phone
     const usersRef = ref(rtdb, 'users');
     const snapshot = await get(usersRef);
     let foundUser = null;
@@ -1274,8 +1472,6 @@ async function loginWithPhone(phoneNumber, countryCode, password) {
     try {
         await initRecaptcha();
         const result = await signInWithPhoneNumber(auth, fullPhone, recaptchaVerifier);
-        
-        // Show OTP prompt
         const otp = prompt("Enter 6-digit verification code:");
         if (!otp) { 
             btn.disabled = false; 
@@ -1368,12 +1564,9 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 // ============================================================
 onAuthStateChanged(auth, async (user) => {
     if (user && window.location.pathname.includes('login.html')) {
-        // Check if user has a saved biometric credential, if not, prompt to save
         const hasBiometric = localStorage.getItem('abotra_biometric_credential');
         if (!hasBiometric) {
-            // Save biometric credential for future use
             try {
-                // Generate a new credential for this user
                 const challenge = new Uint8Array(32);
                 crypto.getRandomValues(challenge);
                 const options = {
@@ -1393,7 +1586,6 @@ onAuthStateChanged(auth, async (user) => {
                     timeout: 60000,
                     attestation: "none"
                 };
-                // This will prompt the user to set up biometric
                 const credential = await SimpleWebAuthnBrowser.startRegistration(options);
                 if (credential) {
                     localStorage.setItem('abotra_biometric_credential', JSON.stringify(credential));
@@ -1412,6 +1604,13 @@ onAuthStateChanged(auth, async (user) => {
 // INIT
 // ============================================================
 initTheme();
+
+// Initialize country dropdown after DOM is ready
+setTimeout(() => {
+    initCountryDropdowns();
+    setTimeout(autoDetectCountry, 500);
+}, 100);
+
 checkBiometricEnabled();
 </script>
 </body>
