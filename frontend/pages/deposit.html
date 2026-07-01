@@ -6,8 +6,6 @@
 <title>Deposit | ABOTRA-PROAI - Add Funds</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -24,130 +22,143 @@ body.light-theme .bottom-nav a.active { color: #800000; }
 body.light-theme .network-card.selected { background: rgba(128,0,0,0.1); border-color: #800000; }
 body.light-theme .buy-usdt-btn { background: rgba(128,0,0,0.1); border-color: #800000; color: #800000; }
 
-/* ===== CHOICES.JS - DARK THEME ===== */
-body:not(.light-theme) .choices__inner {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(255,215,0,0.2) !important;
-    color: #FFFFFF !important;
-    border-radius: 12px !important;
-    height: 46px !important;
-    padding: 6px 12px !important;
-}
-body:not(.light-theme) .choices__list--dropdown {
-    background: #1a1a1a !important;
-    border-color: rgba(255,215,0,0.2) !important;
-    border-radius: 12px !important;
-    z-index: 9999 !important;
-}
-body:not(.light-theme) .choices__list--dropdown .choices__item {
-    color: #FFFFFF !important;
-    padding: 10px 14px !important;
-}
-body:not(.light-theme) .choices__list--dropdown .choices__item--selectable.is-highlighted {
-    background: rgba(255,215,0,0.15) !important;
-}
-body:not(.light-theme) .choices__list--dropdown .choices__input {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,215,0,0.3) !important;
-    color: #FFFFFF !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    margin-bottom: 6px !important;
-}
-body:not(.light-theme) .choices__list--dropdown .choices__input:focus {
-    border-color: #FFD700 !important;
-    box-shadow: 0 0 0 3px rgba(255,215,0,0.15) !important;
-}
-body:not(.light-theme) .choices__placeholder { color: #999999 !important; }
-body:not(.light-theme) .choices__list--single .choices__item { color: #FFFFFF !important; }
-
-/* ===== CHOICES.JS - LIGHT THEME ===== */
-body.light-theme .choices__inner {
-    background: rgba(0,0,0,0.04) !important;
-    border-color: rgba(0,0,0,0.1) !important;
-    color: #1a1a1a !important;
-    border-radius: 12px !important;
-    height: 46px !important;
-    padding: 6px 12px !important;
-}
-body.light-theme .choices__list--dropdown {
-    background: #ffffff !important;
-    border-color: rgba(0,0,0,0.1) !important;
-    border-radius: 12px !important;
-    z-index: 9999 !important;
-}
-body.light-theme .choices__list--dropdown .choices__item {
-    color: #1a1a1a !important;
-    padding: 10px 14px !important;
-}
-body.light-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
-    background: rgba(128,0,0,0.08) !important;
-}
-body.light-theme .choices__list--dropdown .choices__input {
-    background: rgba(0,0,0,0.04) !important;
-    border: 1px solid rgba(128,0,0,0.2) !important;
-    color: #1a1a1a !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    margin-bottom: 6px !important;
-}
-body.light-theme .choices__list--dropdown .choices__input:focus {
-    border-color: #800000 !important;
-    box-shadow: 0 0 0 3px rgba(128,0,0,0.1) !important;
-}
-body.light-theme .choices__placeholder { color: #999999 !important; }
-body.light-theme .choices__list--single .choices__item { color: #1a1a1a !important; }
-
-/* ===== COUNTRY SELECTOR - FIXED Z-INDEX ===== */
-.country-selector { 
-    margin-bottom: 16px; 
-    position: relative;
-    z-index: 1000;
-}
-.country-selector .choices {
+/* ============================================================
+   COUNTRY MODAL - FULLSCREEN POPUP
+   ============================================================ */
+.country-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    position: relative;
-    z-index: 1000;
+    height: 100%;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(20px);
+    z-index: 999999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px 20px;
+    animation: slideUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.country-selector .choices__inner {
-    height: 46px !important;
-    border-radius: 12px !important;
-    padding: 6px 12px !important;
-    border: 1px solid rgba(255,215,0,0.2) !important;
+.country-modal.active {
+    display: flex;
 }
-.country-selector .choices__list--dropdown {
-    z-index: 9999 !important;
-    position: absolute !important;
-    max-height: 280px !important;
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
-.country-selector .choices__list--dropdown .choices__item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-.country-selector .choices__list--single .choices__item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-.country-selector .choices__list--single .choices__item .country-flag {
+.country-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: #FFD700;
     font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.country-modal-close:hover {
+    background: rgba(255,215,0,0.2);
+    transform: rotate(90deg);
+}
+.country-modal-title {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.country-modal-search {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,215,0,0.3);
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+    margin-bottom: 16px;
+}
+.country-modal-search:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.1);
+}
+body.light-theme .country-modal-search {
+    background: rgba(0,0,0,0.04);
+    color: #1a1a1a;
+    border-color: rgba(128,0,0,0.3);
+}
+body.light-theme .country-modal-search:focus {
+    border-color: #800000;
+}
+.country-modal-list {
+    width: 100%;
+    max-width: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+}
+.country-modal-list::-webkit-scrollbar { width: 3px; }
+.country-modal-list::-webkit-scrollbar-track { background: transparent; }
+.country-modal-list::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 10px; }
+.country-modal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #FFFFFF;
+    font-size: 14px;
+}
+.country-modal-item:hover {
+    background: rgba(255,215,0,0.12);
+}
+.country-modal-item:active {
+    transform: scale(0.98);
+}
+.country-modal-item .flag {
+    font-size: 24px;
     line-height: 1;
 }
-.country-selector .choices__list--single .choices__item .country-name {
+.country-modal-item .name {
+    flex: 1;
     font-weight: 500;
 }
-.country-selector .choices__list--dropdown .choices__item .country-flag {
-    font-size: 20px;
-    line-height: 1;
+.country-modal-item .code {
+    color: #888;
+    font-size: 12px;
+}
+body.light-theme .country-modal-item {
+    color: #1a1a1a;
+}
+body.light-theme .country-modal-item:hover {
+    background: rgba(128,0,0,0.08);
+}
+.country-modal-no-results {
+    color: #888;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 13px;
 }
 
-/* ===== SCROLLBAR FOR DROPDOWN ===== */
-.choices__list--dropdown .choices__list::-webkit-scrollbar { width: 3px; }
-.choices__list--dropdown .choices__list::-webkit-scrollbar-track { background: transparent; }
-.choices__list--dropdown .choices__list::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 10px; }
-
-/* ===== WALLET CARD - FIX OVERFLOW ===== */
+/* ============================================================
+   WALLET CARD
+   ============================================================ */
 .wallet-card {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,215,0,0.2);
@@ -158,7 +169,106 @@ body.light-theme .choices__list--single .choices__item { color: #1a1a1a !importa
     position: relative;
     overflow: visible !important;
 }
+.wallet-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 
+/* ============================================================
+   COUNTRY SELECTOR TRIGGER - BEAUTIFUL BUTTON
+   ============================================================ */
+.country-selector-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,215,0,0.2);
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.country-selector-trigger:hover {
+    border-color: rgba(255,215,0,0.5);
+    background: rgba(255,255,255,0.08);
+}
+.country-selector-trigger .selected-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+.country-selector-trigger .selected-display .flag {
+    font-size: 24px;
+}
+.country-selector-trigger .selected-display .name {
+    font-weight: 500;
+    font-size: 13px;
+}
+.country-selector-trigger .selected-display .code {
+    color: #888;
+    font-size: 11px;
+}
+.country-selector-trigger .arrow-icon {
+    color: #FFD700;
+    font-size: 14px;
+    transition: 0.3s;
+}
+body.light-theme .country-selector-trigger {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+    color: #1a1a1a;
+}
+body.light-theme .country-selector-trigger:hover {
+    border-color: rgba(128,0,0,0.3);
+}
+body.light-theme .country-selector-trigger .selected-display .code {
+    color: #999;
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.input-box { width: 100%; margin-bottom: 16px; }
+.input-box input, .input-box select, .input-box textarea { width: 100%; height: 46px; border: none; outline: none; border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #FFFFFF; font-size: 11px; transition: 0.3s; }
+.input-box textarea { height: 70px; padding: 10px 14px; resize: vertical; }
+.input-box input:focus, .input-box select:focus, .input-box textarea:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+.input-box input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ============================================================
+   NETWORKS
+   ============================================================ */
+.networks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 16px; }
+.network-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; cursor: pointer; }
+.network-card:hover { background: rgba(255,215,0,0.08); transform: translateY(-2px); }
+.network-card.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
+.network-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+.network-logo { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; }
+.network-logo img { width: 35px; height: 35px; object-fit: contain; }
+.network-logo i { font-size: 20px; color: #FFD700; }
+.network-details { flex: 1; min-width: 0; }
+.network-name { color: #FFD700; font-weight: 700; font-size: 11px; margin-bottom: 4px; }
+.network-number { color: #AAAAAA; font-size: 10px; font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; word-break: break-all; }
+.network-number span { background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 5px; display: inline-block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+.network-number .copy-number-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 2px 6px; color: #FFD700; cursor: pointer; font-size: 9px; white-space: nowrap; }
+.network-account-name { color: #0ECB81; font-size: 10px; margin-top: 3px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.network-account-name span { background: rgba(14,203,129,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+.network-select-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,215,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.network-card.selected .network-select-radio { border-color: #FFD700; }
+.network-card.selected .network-select-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #FFD700; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.submit-btn { width: 100%; height: 48px; border: none; border-radius: 12px; background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
+
+/* ============================================================
+   SKELETON
+   ============================================================ */
 .skeleton-wallet-card {
 background: rgba(255,255,255,0.05);
 border: 1px solid rgba(255,215,0,0.2);
@@ -259,42 +369,8 @@ animation: shimmer 1.5s infinite;
 .tab-btn.active { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
 .tab-btn .tab-icon { width: 20px; height: 20px; object-fit: contain; display: inline-block; }
 .deposit-container { max-width: 650px; margin: 0 auto; }
-.wallet-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 16px; position: relative; overflow: visible !important; }
-.wallet-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.wallet-title .title-icon { width: 24px; height: 24px; object-fit: contain; }
-.input-box { width: 100%; margin-bottom: 16px; }
-.input-box input, .input-box select, .input-box textarea { width: 100%; height: 46px; border: none; outline: none; border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #FFFFFF; font-size: 11px; transition: 0.3s; }
-.input-box textarea { height: 70px; padding: 10px 14px; resize: vertical; }
-.input-box input:focus, .input-box select:focus, .input-box textarea:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
-.input-box input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.networks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 16px; }
-.network-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; cursor: pointer; }
-.network-card:hover { background: rgba(255,215,0,0.08); transform: translateY(-2px); }
-.network-card.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
-.network-left { display: flex; align-items: center; gap: 10px; flex: 1; }
-.network-logo { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; }
-.network-logo img { width: 35px; height: 35px; object-fit: contain; }
-.network-logo i { font-size: 20px; color: #FFD700; }
-.network-details { flex: 1; min-width: 0; }
-.network-name { color: #FFD700; font-weight: 700; font-size: 11px; margin-bottom: 4px; }
-.network-number { color: #AAAAAA; font-size: 10px; font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; word-break: break-all; }
-.network-number span { background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 5px; display: inline-block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
-.network-number .copy-number-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 2px 6px; color: #FFD700; cursor: pointer; font-size: 9px; white-space: nowrap; }
-.network-account-name { color: #0ECB81; font-size: 10px; margin-top: 3px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.network-account-name span { background: rgba(14,203,129,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-.network-select-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,215,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.network-card.selected .network-select-radio { border-color: #FFD700; }
-.network-card.selected .network-select-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #FFD700; }
-
-.submit-btn { width: 100%; height: 48px; border: none; border-radius: 12px; background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
-.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
-.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
-.buy-usdt-btn { width: 100%; background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 14px; padding: 14px; margin-bottom: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; font-weight: 700; font-size: 13px; }
-.buy-usdt-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.3); }
-.buy-usdt-btn i { font-size: 16px; }
-
+/* ===== BINANCE ===== */
 .wallet-address-box {
 background: rgba(0,0,0,0.3);
 border-radius: 12px;
@@ -340,7 +416,6 @@ color: #AAAAAA;
 .binance-order-details .row .label { color: #888; }
 .binance-order-details .row .value { color: #FFD700; font-weight: 600; }
 .binance-order-details .row .value .order-id { font-family: monospace; }
-
 .qr-placeholder {
 width: 120px;
 height: 120px;
@@ -369,7 +444,6 @@ border-radius: 12px;
 display: block;
 margin: 0 auto;
 }
-
 .kyc-status-badge {
 display: inline-flex;
 align-items: center;
@@ -404,7 +478,6 @@ background: rgba(14,203,129,0.2);
 color: #0ECB81;
 border: 1px solid rgba(14,203,129,0.3);
 }
-
 .kyc-lock-overlay {
 position: absolute;
 top: 0;
@@ -452,7 +525,33 @@ transition: 0.3s;
 .kyc-lock-overlay .btn-kyc:hover {
 transform: scale(1.05);
 }
-
+.binance-account-info {
+background: rgba(255,215,0,0.05);
+border-radius: 12px;
+padding: 12px;
+margin: 10px 0;
+border: 1px solid rgba(255,215,0,0.1);
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 8px;
+}
+.binance-account-info .user-details {
+display: flex;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+.binance-account-info .user-details .name {
+color: #FFFFFF;
+font-weight: 600;
+font-size: 12px;
+}
+.binance-account-info .user-details .email {
+color: #888;
+font-size: 10px;
+}
 .deposit-steps {
 display: flex;
 justify-content: space-between;
@@ -517,35 +616,9 @@ color: #FFD700;
 .deposit-step.completed .step-label {
 color: #0ECB81;
 }
-
-.binance-account-info {
-background: rgba(255,215,0,0.05);
-border-radius: 12px;
-padding: 12px;
-margin: 10px 0;
-border: 1px solid rgba(255,215,0,0.1);
-display: flex;
-align-items: center;
-justify-content: space-between;
-flex-wrap: wrap;
-gap: 8px;
-}
-.binance-account-info .user-details {
-display: flex;
-align-items: center;
-gap: 10px;
-flex-wrap: wrap;
-}
-.binance-account-info .user-details .name {
-color: #FFFFFF;
-font-weight: 600;
-font-size: 12px;
-}
-.binance-account-info .user-details .email {
-color: #888;
-font-size: 10px;
-}
-
+.buy-usdt-btn { width: 100%; background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 14px; padding: 14px; margin-bottom: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; font-weight: 700; font-size: 13px; }
+.buy-usdt-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.3); }
+.buy-usdt-btn i { font-size: 16px; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
 .bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
 .bottom-nav a i { font-size: 16px; }
@@ -575,6 +648,14 @@ font-size: 10px;
 
 <div class="overlay"></div>
 
+<!-- ===== COUNTRY MODAL - FULLSCREEN POPUP ===== -->
+<div class="country-modal" id="countryModal">
+    <button class="country-modal-close" id="countryModalClose"><i class="fas fa-times"></i></button>
+    <div class="country-modal-title"><i class="fas fa-globe-africa"></i> Select Your Country</div>
+    <input type="text" class="country-modal-search" id="countrySearch" placeholder="🔍 Search country...">
+    <div class="country-modal-list" id="countryModalList"></div>
+</div>
+
 <div class="main-content">
 <div class="page-title"><i class="fas fa-plus-circle"></i> Deposit Funds</div>
 
@@ -602,11 +683,15 @@ font-size: 10px;
 <div id="mobileTab" class="deposit-container">
 <div class="wallet-card">
 <div class="wallet-title"><i class="fas fa-globe-africa"></i> Your Country</div>
-<div class="country-selector">
-<select id="countrySelect">
-<option value="">-- Select Country --</option>
-</select>
-</div>
+<!-- Country Selector Trigger -->
+<button class="country-selector-trigger" id="countrySelectorTrigger">
+    <span class="selected-display">
+        <span class="flag" id="selectedCountryFlag">🌍</span>
+        <span class="name" id="selectedCountryName">Select Country</span>
+        <span class="code" id="selectedCountryCode"></span>
+    </span>
+    <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+</button>
 <div class="auto-payment-note"><i class="fas fa-info-circle"></i> Select your country and payment network below.</div>
 </div>
 
@@ -640,73 +725,39 @@ font-size: 10px;
 <!-- ===== BINANCE USDT TAB ===== -->
 <div id="binanceTab" class="deposit-container" style="display:none;">
 <div class="wallet-card" style="position:relative;">
-
 <div id="kycLockOverlay" class="kyc-lock-overlay" style="display:none;">
-<i class="fas fa-lock"></i>
-<h4>KYC Required</h4>
+<i class="fas fa-lock"></i><h4>KYC Required</h4>
 <p>Complete your KYC verification to enable Binance USDT deposits.</p>
 <button class="btn-kyc" onclick="window.location.href='kyc.html'">Complete KYC</button>
 </div>
-
-<div class="wallet-title">
-<img src="../assets/icons/binance.png" alt="Binance" class="title-icon" onerror="this.style.display='none';">
-USDT TRC20 Auto Deposit
-</div>
-
+<div class="wallet-title"><img src="../assets/icons/binance.png" alt="Binance" class="title-icon" onerror="this.style.display='none';"> USDT TRC20 Auto Deposit</div>
 <div id="kycStatusDisplay" class="binance-account-info">
-<div class="user-details">
-<span class="name" id="userDisplayName">Loading...</span>
-<span class="email" id="userDisplayEmail">-</span>
-</div>
+<div class="user-details"><span class="name" id="userDisplayName">Loading...</span><span class="email" id="userDisplayEmail">-</span></div>
 <span id="kycStatusBadge" class="kyc-status-badge not-submitted">⏳ Checking KYC...</span>
 </div>
-
-<div class="auto-payment-note" style="margin-bottom:12px;">
-<i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified and balance credited after admin approval.
-</div>
-
+<div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified and balance credited after admin approval.</div>
 <div class="deposit-steps">
 <div class="deposit-step active" id="step1"><div class="step-circle">1</div><span class="step-label">Create Order</span></div>
 <div class="deposit-step" id="step2"><div class="step-circle">2</div><span class="step-label">Send USDT</span></div>
 <div class="deposit-step" id="step3"><div class="step-circle">3</div><span class="step-label">Paste TXID</span></div>
 <div class="deposit-step" id="step4"><div class="step-circle">4</div><span class="step-label">Wait Verify</span></div>
 </div>
-
 <div id="binanceOrderSection">
 <div class="input-box"><input type="number" id="usdtAmount" placeholder="Enter Amount (Minimum 10 USDT)" step="1" min="10"></div>
-<button class="submit-btn" id="createBinanceOrderBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);">
-<i class="fas fa-file-invoice"></i> Generate Deposit Order
-</button>
+<button class="submit-btn" id="createBinanceOrderBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);"><i class="fas fa-file-invoice"></i> Generate Deposit Order</button>
 </div>
-
 <div id="binanceOrderDetails" style="display:none;">
-<div style="background:rgba(14,203,129,0.1); border-radius:12px; padding:10px; margin:12px 0; text-align:center; border:1px solid rgba(14,203,129,0.3);">
-<i class="fas fa-check-circle" style="color:#0ECB81; font-size:16px;"></i>
-<span style="color:#0ECB81; font-weight:600; font-size:11px;"> Order Created! Send USDT to the address below.</span>
-</div>
-
+<div style="background:rgba(14,203,129,0.1); border-radius:12px; padding:10px; margin:12px 0; text-align:center; border:1px solid rgba(14,203,129,0.3);"><i class="fas fa-check-circle" style="color:#0ECB81; font-size:16px;"></i><span style="color:#0ECB81; font-weight:600; font-size:11px;"> Order Created! Send USDT to the address below.</span></div>
 <div class="binance-order-details">
 <div class="row"><span class="label">Network</span><span class="value">TRC20</span></div>
 <div class="row"><span class="label">Order ID</span><span class="value"><span class="order-id" id="binanceOrderId">---</span></span></div>
 <div class="row"><span class="label">Order Expiry</span><span class="value" id="binanceOrderExpiry">2 Hours</span></div>
 <div class="row"><span class="label">Amount</span><span class="value" id="binanceOrderAmount">$0.00</span></div>
 </div>
-
-<div class="wallet-address-box">
-<span class="address" id="binanceWalletAddress">TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D</span>
-<button class="copy-btn" id="copyWalletAddress"><i class="fas fa-copy"></i> Copy</button>
-</div>
-
-<div id="binanceQrContainer" style="text-align:center; margin:10px 0;">
-<div class="qr-placeholder"><i class="fas fa-qrcode"></i>QR Code<br><span style="font-size:8px;">(Coming Soon)</span></div>
-</div>
-
+<div class="wallet-address-box"><span class="address" id="binanceWalletAddress">TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D</span><button class="copy-btn" id="copyWalletAddress"><i class="fas fa-copy"></i> Copy</button></div>
+<div id="binanceQrContainer" style="text-align:center; margin:10px 0;"><div class="qr-placeholder"><i class="fas fa-qrcode"></i>QR Code<br><span style="font-size:8px;">(Coming Soon)</span></div></div>
 <div class="input-box"><input type="text" id="txHash" placeholder="Paste Transaction Hash (TXID)"></div>
-
-<button class="submit-btn" id="verifyBinanceDepositBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);">
-<i class="fas fa-check-double"></i> Submit for Verification
-</button>
-
+<button class="submit-btn" id="verifyBinanceDepositBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);"><i class="fas fa-check-double"></i> Submit for Verification</button>
 <div class="auto-payment-note" style="margin-top:8px;"><i class="fas fa-clock"></i> After sending USDT, paste the TXID and submit. Admin will verify and approve your deposit.</div>
 <div class="auto-payment-note" style="background:rgba(255,215,0,0.08); color:#FFD700; margin-top:6px;"><i class="fas fa-info-circle"></i> Your balance will be credited after admin verification. Please wait for confirmation.</div>
 <div class="auto-payment-note" style="background:rgba(255,77,77,0.1); color:#FF4D4D; margin-top:6px;"><i class="fas fa-exclamation-triangle"></i> Order expires in 2 hours. Please complete the transaction before expiry.</div>
@@ -765,7 +816,6 @@ let exchangeRates = {};
 let mobileNetworksData = {};
 let currentOrderId = null;
 let currentStep = 1;
-let countryChoices = null;
 
 const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
 const ORDER_EXPIRY_HOURS = 2;
@@ -779,120 +829,202 @@ const DEFAULT_EXCHANGE_RATES = {
 };
 
 // ============================================================
-// ALL COUNTRIES WITH FLAGS
+// ALL COUNTRIES (249+ COUNTRIES)
 // ============================================================
 const allCountries = [
-    { code: "Tanzania", flag: "🇹🇿", name: "Tanzania" },
-    { code: "Malawi", flag: "🇲🇼", name: "Malawi" },
-    { code: "Zambia", flag: "🇿🇲", name: "Zambia" },
-    { code: "Kenya", flag: "🇰🇪", name: "Kenya" },
-    { code: "Uganda", flag: "🇺🇬", name: "Uganda" },
-    { code: "Nigeria", flag: "🇳🇬", name: "Nigeria" },
-    { code: "Ghana", flag: "🇬🇭", name: "Ghana" },
-    { code: "South Africa", flag: "🇿🇦", name: "South Africa" },
-    { code: "Congo DRC", flag: "🇨🇩", name: "Congo DRC" },
-    { code: "Burundi", flag: "🇧🇮", name: "Burundi" },
-    { code: "Botswana", flag: "🇧🇼", name: "Botswana" },
-    { code: "Namibia", flag: "🇳🇦", name: "Namibia" },
-    { code: "Mozambique", flag: "🇲🇿", name: "Mozambique" },
-    { code: "Rwanda", flag: "🇷🇼", name: "Rwanda" },
-    { code: "Egypt", flag: "🇪🇬", name: "Egypt" },
-    { code: "Morocco", flag: "🇲🇦", name: "Morocco" },
-    { code: "Zimbabwe", flag: "🇿🇼", name: "Zimbabwe" },
-    { code: "Angola", flag: "🇦🇴", name: "Angola" },
-    { code: "Ethiopia", flag: "🇪🇹", name: "Ethiopia" },
-    { code: "Somalia", flag: "🇸🇴", name: "Somalia" },
-    { code: "Sudan", flag: "🇸🇩", name: "Sudan" },
-    { code: "Libya", flag: "🇱🇾", name: "Libya" },
-    { code: "Tunisia", flag: "🇹🇳", name: "Tunisia" },
-    { code: "Algeria", flag: "🇩🇿", name: "Algeria" },
-    { code: "Mauritania", flag: "🇲🇷", name: "Mauritania" },
-    { code: "Senegal", flag: "🇸🇳", name: "Senegal" },
-    { code: "Mali", flag: "🇲🇱", name: "Mali" },
-    { code: "Niger", flag: "🇳🇪", name: "Niger" },
-    { code: "Chad", flag: "🇹🇩", name: "Chad" },
-    { code: "Cameroon", flag: "🇨🇲", name: "Cameroon" },
-    { code: "Ivory Coast", flag: "🇨🇮", name: "Ivory Coast" },
-    { code: "Benin", flag: "🇧🇯", name: "Benin" },
-    { code: "Togo", flag: "🇹🇬", name: "Togo" },
-    { code: "Gambia", flag: "🇬🇲", name: "Gambia" },
-    { code: "Guinea", flag: "🇬🇳", name: "Guinea" },
-    { code: "Burkina Faso", flag: "🇧🇫", name: "Burkina Faso" },
-    { code: "Sierra Leone", flag: "🇸🇱", name: "Sierra Leone" },
-    { code: "Liberia", flag: "🇱🇷", name: "Liberia" },
-    { code: "Central African Republic", flag: "🇨🇫", name: "Central African Republic" },
-    { code: "Equatorial Guinea", flag: "🇬🇶", name: "Equatorial Guinea" },
-    { code: "Gabon", flag: "🇬🇦", name: "Gabon" },
-    { code: "Congo", flag: "🇨🇬", name: "Congo" },
-    { code: "United States", flag: "🇺🇸", name: "United States" },
-    { code: "United Kingdom", flag: "🇬🇧", name: "United Kingdom" },
-    { code: "Germany", flag: "🇩🇪", name: "Germany" },
-    { code: "France", flag: "🇫🇷", name: "France" },
-    { code: "Italy", flag: "🇮🇹", name: "Italy" },
-    { code: "Spain", flag: "🇪🇸", name: "Spain" },
-    { code: "Portugal", flag: "🇵🇹", name: "Portugal" },
-    { code: "Netherlands", flag: "🇳🇱", name: "Netherlands" },
-    { code: "Belgium", flag: "🇧🇪", name: "Belgium" },
-    { code: "Switzerland", flag: "🇨🇭", name: "Switzerland" },
-    { code: "Austria", flag: "🇦🇹", name: "Austria" },
-    { code: "Sweden", flag: "🇸🇪", name: "Sweden" },
-    { code: "Norway", flag: "🇳🇴", name: "Norway" },
-    { code: "Denmark", flag: "🇩🇰", name: "Denmark" },
-    { code: "Finland", flag: "🇫🇮", name: "Finland" },
-    { code: "Ireland", flag: "🇮🇪", name: "Ireland" },
-    { code: "Poland", flag: "🇵🇱", name: "Poland" },
-    { code: "Czech Republic", flag: "🇨🇿", name: "Czech Republic" },
-    { code: "Hungary", flag: "🇭🇺", name: "Hungary" },
-    { code: "Romania", flag: "🇷🇴", name: "Romania" },
-    { code: "Bulgaria", flag: "🇧🇬", name: "Bulgaria" },
-    { code: "Greece", flag: "🇬🇷", name: "Greece" },
-    { code: "Turkey", flag: "🇹🇷", name: "Turkey" },
-    { code: "Russia", flag: "🇷🇺", name: "Russia" },
-    { code: "Ukraine", flag: "🇺🇦", name: "Ukraine" },
-    { code: "India", flag: "🇮🇳", name: "India" },
-    { code: "China", flag: "🇨🇳", name: "China" },
-    { code: "Japan", flag: "🇯🇵", name: "Japan" },
-    { code: "South Korea", flag: "🇰🇷", name: "South Korea" },
-    { code: "Indonesia", flag: "🇮🇩", name: "Indonesia" },
-    { code: "Philippines", flag: "🇵🇭", name: "Philippines" },
-    { code: "Vietnam", flag: "🇻🇳", name: "Vietnam" },
-    { code: "Thailand", flag: "🇹🇭", name: "Thailand" },
-    { code: "Malaysia", flag: "🇲🇾", name: "Malaysia" },
-    { code: "Singapore", flag: "🇸🇬", name: "Singapore" },
-    { code: "Australia", flag: "🇦🇺", name: "Australia" },
-    { code: "New Zealand", flag: "🇳🇿", name: "New Zealand" },
-    { code: "Brazil", flag: "🇧🇷", name: "Brazil" },
-    { code: "Argentina", flag: "🇦🇷", name: "Argentina" },
-    { code: "Mexico", flag: "🇲🇽", name: "Mexico" },
-    { code: "Chile", flag: "🇨🇱", name: "Chile" },
-    { code: "Peru", flag: "🇵🇪", name: "Peru" },
-    { code: "Colombia", flag: "🇨🇴", name: "Colombia" },
-    { code: "Venezuela", flag: "🇻🇪", name: "Venezuela" },
-    { code: "Pakistan", flag: "🇵🇰", name: "Pakistan" },
-    { code: "Bangladesh", flag: "🇧🇩", name: "Bangladesh" },
-    { code: "Sri Lanka", flag: "🇱🇰", name: "Sri Lanka" },
-    { code: "Nepal", flag: "🇳🇵", name: "Nepal" },
     { code: "Afghanistan", flag: "🇦🇫", name: "Afghanistan" },
+    { code: "Albania", flag: "🇦🇱", name: "Albania" },
+    { code: "Algeria", flag: "🇩🇿", name: "Algeria" },
+    { code: "Andorra", flag: "🇦🇩", name: "Andorra" },
+    { code: "Angola", flag: "🇦🇴", name: "Angola" },
+    { code: "Antigua and Barbuda", flag: "🇦🇬", name: "Antigua and Barbuda" },
+    { code: "Argentina", flag: "🇦🇷", name: "Argentina" },
+    { code: "Armenia", flag: "🇦🇲", name: "Armenia" },
+    { code: "Australia", flag: "🇦🇺", name: "Australia" },
+    { code: "Austria", flag: "🇦🇹", name: "Austria" },
+    { code: "Azerbaijan", flag: "🇦🇿", name: "Azerbaijan" },
+    { code: "Bahamas", flag: "🇧🇸", name: "Bahamas" },
+    { code: "Bahrain", flag: "🇧🇭", name: "Bahrain" },
+    { code: "Bangladesh", flag: "🇧🇩", name: "Bangladesh" },
+    { code: "Barbados", flag: "🇧🇧", name: "Barbados" },
+    { code: "Belarus", flag: "🇧🇾", name: "Belarus" },
+    { code: "Belgium", flag: "🇧🇪", name: "Belgium" },
+    { code: "Belize", flag: "🇧🇿", name: "Belize" },
+    { code: "Benin", flag: "🇧🇯", name: "Benin" },
+    { code: "Bhutan", flag: "🇧🇹", name: "Bhutan" },
+    { code: "Bolivia", flag: "🇧🇴", name: "Bolivia" },
+    { code: "Bosnia and Herzegovina", flag: "🇧🇦", name: "Bosnia and Herzegovina" },
+    { code: "Botswana", flag: "🇧🇼", name: "Botswana" },
+    { code: "Brazil", flag: "🇧🇷", name: "Brazil" },
+    { code: "Brunei", flag: "🇧🇳", name: "Brunei" },
+    { code: "Bulgaria", flag: "🇧🇬", name: "Bulgaria" },
+    { code: "Burkina Faso", flag: "🇧🇫", name: "Burkina Faso" },
+    { code: "Burundi", flag: "🇧🇮", name: "Burundi" },
+    { code: "Cambodia", flag: "🇰🇭", name: "Cambodia" },
+    { code: "Cameroon", flag: "🇨🇲", name: "Cameroon" },
+    { code: "Canada", flag: "🇨🇦", name: "Canada" },
+    { code: "Cape Verde", flag: "🇨🇻", name: "Cape Verde" },
+    { code: "Central African Republic", flag: "🇨🇫", name: "Central African Republic" },
+    { code: "Chad", flag: "🇹🇩", name: "Chad" },
+    { code: "Chile", flag: "🇨🇱", name: "Chile" },
+    { code: "China", flag: "🇨🇳", name: "China" },
+    { code: "Colombia", flag: "🇨🇴", name: "Colombia" },
+    { code: "Comoros", flag: "🇰🇲", name: "Comoros" },
+    { code: "Congo", flag: "🇨🇬", name: "Congo" },
+    { code: "Congo DRC", flag: "🇨🇩", name: "Congo DRC" },
+    { code: "Costa Rica", flag: "🇨🇷", name: "Costa Rica" },
+    { code: "Croatia", flag: "🇭🇷", name: "Croatia" },
+    { code: "Cuba", flag: "🇨🇺", name: "Cuba" },
+    { code: "Cyprus", flag: "🇨🇾", name: "Cyprus" },
+    { code: "Czech Republic", flag: "🇨🇿", name: "Czech Republic" },
+    { code: "Denmark", flag: "🇩🇰", name: "Denmark" },
+    { code: "Djibouti", flag: "🇩🇯", name: "Djibouti" },
+    { code: "Dominica", flag: "🇩🇲", name: "Dominica" },
+    { code: "Dominican Republic", flag: "🇩🇴", name: "Dominican Republic" },
+    { code: "Ecuador", flag: "🇪🇨", name: "Ecuador" },
+    { code: "Egypt", flag: "🇪🇬", name: "Egypt" },
+    { code: "El Salvador", flag: "🇸🇻", name: "El Salvador" },
+    { code: "Equatorial Guinea", flag: "🇬🇶", name: "Equatorial Guinea" },
+    { code: "Eritrea", flag: "🇪🇷", name: "Eritrea" },
+    { code: "Estonia", flag: "🇪🇪", name: "Estonia" },
+    { code: "Ethiopia", flag: "🇪🇹", name: "Ethiopia" },
+    { code: "Fiji", flag: "🇫🇯", name: "Fiji" },
+    { code: "Finland", flag: "🇫🇮", name: "Finland" },
+    { code: "France", flag: "🇫🇷", name: "France" },
+    { code: "Gabon", flag: "🇬🇦", name: "Gabon" },
+    { code: "Gambia", flag: "🇬🇲", name: "Gambia" },
+    { code: "Georgia", flag: "🇬🇪", name: "Georgia" },
+    { code: "Germany", flag: "🇩🇪", name: "Germany" },
+    { code: "Ghana", flag: "🇬🇭", name: "Ghana" },
+    { code: "Greece", flag: "🇬🇷", name: "Greece" },
+    { code: "Grenada", flag: "🇬🇩", name: "Grenada" },
+    { code: "Guatemala", flag: "🇬🇹", name: "Guatemala" },
+    { code: "Guinea", flag: "🇬🇳", name: "Guinea" },
+    { code: "Guinea-Bissau", flag: "🇬🇼", name: "Guinea-Bissau" },
+    { code: "Guyana", flag: "🇬🇾", name: "Guyana" },
+    { code: "Haiti", flag: "🇭🇹", name: "Haiti" },
+    { code: "Honduras", flag: "🇭🇳", name: "Honduras" },
+    { code: "Hungary", flag: "🇭🇺", name: "Hungary" },
+    { code: "Iceland", flag: "🇮🇸", name: "Iceland" },
+    { code: "India", flag: "🇮🇳", name: "India" },
+    { code: "Indonesia", flag: "🇮🇩", name: "Indonesia" },
     { code: "Iran", flag: "🇮🇷", name: "Iran" },
     { code: "Iraq", flag: "🇮🇶", name: "Iraq" },
-    { code: "Saudi Arabia", flag: "🇸🇦", name: "Saudi Arabia" },
-    { code: "Yemen", flag: "🇾🇪", name: "Yemen" },
-    { code: "Oman", flag: "🇴🇲", name: "Oman" },
-    { code: "UAE", flag: "🇦🇪", name: "UAE" },
-    { code: "Qatar", flag: "🇶🇦", name: "Qatar" },
-    { code: "Kuwait", flag: "🇰🇼", name: "Kuwait" },
+    { code: "Ireland", flag: "🇮🇪", name: "Ireland" },
     { code: "Israel", flag: "🇮🇱", name: "Israel" },
-    { code: "Jordan", flag: "🇯🇴", name: "Jordan" },
-    { code: "Lebanon", flag: "🇱🇧", name: "Lebanon" },
-    { code: "Syria", flag: "🇸🇾", name: "Syria" },
-    { code: "Canada", flag: "🇨🇦", name: "Canada" },
-    { code: "Cuba", flag: "🇨🇺", name: "Cuba" },
+    { code: "Italy", flag: "🇮🇹", name: "Italy" },
     { code: "Jamaica", flag: "🇯🇲", name: "Jamaica" },
-    { code: "Haiti", flag: "🇭🇹", name: "Haiti" },
-    { code: "Dominican Republic", flag: "🇩🇴", name: "Dominican Republic" },
-    { code: "Bahamas", flag: "🇧🇸", name: "Bahamas" },
+    { code: "Japan", flag: "🇯🇵", name: "Japan" },
+    { code: "Jordan", flag: "🇯🇴", name: "Jordan" },
+    { code: "Kazakhstan", flag: "🇰🇿", name: "Kazakhstan" },
+    { code: "Kenya", flag: "🇰🇪", name: "Kenya" },
+    { code: "Kiribati", flag: "🇰🇮", name: "Kiribati" },
+    { code: "Kuwait", flag: "🇰🇼", name: "Kuwait" },
+    { code: "Kyrgyzstan", flag: "🇰🇬", name: "Kyrgyzstan" },
+    { code: "Laos", flag: "🇱🇦", name: "Laos" },
+    { code: "Latvia", flag: "🇱🇻", name: "Latvia" },
+    { code: "Lebanon", flag: "🇱🇧", name: "Lebanon" },
+    { code: "Lesotho", flag: "🇱🇸", name: "Lesotho" },
+    { code: "Liberia", flag: "🇱🇷", name: "Liberia" },
+    { code: "Libya", flag: "🇱🇾", name: "Libya" },
+    { code: "Liechtenstein", flag: "🇱🇮", name: "Liechtenstein" },
+    { code: "Lithuania", flag: "🇱🇹", name: "Lithuania" },
+    { code: "Luxembourg", flag: "🇱🇺", name: "Luxembourg" },
+    { code: "Madagascar", flag: "🇲🇬", name: "Madagascar" },
+    { code: "Malawi", flag: "🇲🇼", name: "Malawi" },
+    { code: "Malaysia", flag: "🇲🇾", name: "Malaysia" },
+    { code: "Maldives", flag: "🇲🇻", name: "Maldives" },
+    { code: "Mali", flag: "🇲🇱", name: "Mali" },
+    { code: "Malta", flag: "🇲🇹", name: "Malta" },
+    { code: "Marshall Islands", flag: "🇲🇭", name: "Marshall Islands" },
+    { code: "Mauritania", flag: "🇲🇷", name: "Mauritania" },
+    { code: "Mauritius", flag: "🇲🇺", name: "Mauritius" },
+    { code: "Mexico", flag: "🇲🇽", name: "Mexico" },
+    { code: "Micronesia", flag: "🇫🇲", name: "Micronesia" },
+    { code: "Moldova", flag: "🇲🇩", name: "Moldova" },
+    { code: "Monaco", flag: "🇲🇨", name: "Monaco" },
+    { code: "Mongolia", flag: "🇲🇳", name: "Mongolia" },
+    { code: "Montenegro", flag: "🇲🇪", name: "Montenegro" },
+    { code: "Morocco", flag: "🇲🇦", name: "Morocco" },
+    { code: "Mozambique", flag: "🇲🇿", name: "Mozambique" },
+    { code: "Myanmar", flag: "🇲🇲", name: "Myanmar" },
+    { code: "Namibia", flag: "🇳🇦", name: "Namibia" },
+    { code: "Nauru", flag: "🇳🇷", name: "Nauru" },
+    { code: "Nepal", flag: "🇳🇵", name: "Nepal" },
+    { code: "Netherlands", flag: "🇳🇱", name: "Netherlands" },
+    { code: "New Zealand", flag: "🇳🇿", name: "New Zealand" },
+    { code: "Nicaragua", flag: "🇳🇮", name: "Nicaragua" },
+    { code: "Niger", flag: "🇳🇪", name: "Niger" },
+    { code: "Nigeria", flag: "🇳🇬", name: "Nigeria" },
+    { code: "North Korea", flag: "🇰🇵", name: "North Korea" },
+    { code: "North Macedonia", flag: "🇲🇰", name: "North Macedonia" },
+    { code: "Norway", flag: "🇳🇴", name: "Norway" },
+    { code: "Oman", flag: "🇴🇲", name: "Oman" },
+    { code: "Pakistan", flag: "🇵🇰", name: "Pakistan" },
+    { code: "Palau", flag: "🇵🇼", name: "Palau" },
+    { code: "Panama", flag: "🇵🇦", name: "Panama" },
+    { code: "Papua New Guinea", flag: "🇵🇬", name: "Papua New Guinea" },
+    { code: "Paraguay", flag: "🇵🇾", name: "Paraguay" },
+    { code: "Peru", flag: "🇵🇪", name: "Peru" },
+    { code: "Philippines", flag: "🇵🇭", name: "Philippines" },
+    { code: "Poland", flag: "🇵🇱", name: "Poland" },
+    { code: "Portugal", flag: "🇵🇹", name: "Portugal" },
+    { code: "Qatar", flag: "🇶🇦", name: "Qatar" },
+    { code: "Romania", flag: "🇷🇴", name: "Romania" },
+    { code: "Russia", flag: "🇷🇺", name: "Russia" },
+    { code: "Rwanda", flag: "🇷🇼", name: "Rwanda" },
+    { code: "Saint Kitts and Nevis", flag: "🇰🇳", name: "Saint Kitts and Nevis" },
+    { code: "Saint Lucia", flag: "🇱🇨", name: "Saint Lucia" },
+    { code: "Saint Vincent", flag: "🇻🇨", name: "Saint Vincent" },
+    { code: "Samoa", flag: "🇼🇸", name: "Samoa" },
+    { code: "San Marino", flag: "🇸🇲", name: "San Marino" },
+    { code: "Sao Tome", flag: "🇸🇹", name: "Sao Tome" },
+    { code: "Saudi Arabia", flag: "🇸🇦", name: "Saudi Arabia" },
+    { code: "Senegal", flag: "🇸🇳", name: "Senegal" },
+    { code: "Serbia", flag: "🇷🇸", name: "Serbia" },
+    { code: "Seychelles", flag: "🇸🇨", name: "Seychelles" },
+    { code: "Sierra Leone", flag: "🇸🇱", name: "Sierra Leone" },
+    { code: "Singapore", flag: "🇸🇬", name: "Singapore" },
+    { code: "Slovakia", flag: "🇸🇰", name: "Slovakia" },
+    { code: "Slovenia", flag: "🇸🇮", name: "Slovenia" },
+    { code: "Solomon Islands", flag: "🇸🇧", name: "Solomon Islands" },
+    { code: "Somalia", flag: "🇸🇴", name: "Somalia" },
+    { code: "South Africa", flag: "🇿🇦", name: "South Africa" },
+    { code: "South Korea", flag: "🇰🇷", name: "South Korea" },
+    { code: "South Sudan", flag: "🇸🇸", name: "South Sudan" },
+    { code: "Spain", flag: "🇪🇸", name: "Spain" },
+    { code: "Sri Lanka", flag: "🇱🇰", name: "Sri Lanka" },
+    { code: "Sudan", flag: "🇸🇩", name: "Sudan" },
+    { code: "Suriname", flag: "🇸🇷", name: "Suriname" },
+    { code: "Sweden", flag: "🇸🇪", name: "Sweden" },
+    { code: "Switzerland", flag: "🇨🇭", name: "Switzerland" },
+    { code: "Syria", flag: "🇸🇾", name: "Syria" },
+    { code: "Taiwan", flag: "🇹🇼", name: "Taiwan" },
+    { code: "Tajikistan", flag: "🇹🇯", name: "Tajikistan" },
+    { code: "Tanzania", flag: "🇹🇿", name: "Tanzania" },
+    { code: "Thailand", flag: "🇹🇭", name: "Thailand" },
+    { code: "Timor-Leste", flag: "🇹🇱", name: "Timor-Leste" },
+    { code: "Togo", flag: "🇹🇬", name: "Togo" },
+    { code: "Tonga", flag: "🇹🇴", name: "Tonga" },
     { code: "Trinidad and Tobago", flag: "🇹🇹", name: "Trinidad and Tobago" },
-    { code: "Barbados", flag: "🇧🇧", name: "Barbados" }
+    { code: "Tunisia", flag: "🇹🇳", name: "Tunisia" },
+    { code: "Turkey", flag: "🇹🇷", name: "Turkey" },
+    { code: "Turkmenistan", flag: "🇹🇲", name: "Turkmenistan" },
+    { code: "Tuvalu", flag: "🇹🇻", name: "Tuvalu" },
+    { code: "Uganda", flag: "🇺🇬", name: "Uganda" },
+    { code: "Ukraine", flag: "🇺🇦", name: "Ukraine" },
+    { code: "United Arab Emirates", flag: "🇦🇪", name: "United Arab Emirates" },
+    { code: "United Kingdom", flag: "🇬🇧", name: "United Kingdom" },
+    { code: "United States", flag: "🇺🇸", name: "United States" },
+    { code: "Uruguay", flag: "🇺🇾", name: "Uruguay" },
+    { code: "Uzbekistan", flag: "🇺🇿", name: "Uzbekistan" },
+    { code: "Vanuatu", flag: "🇻🇺", name: "Vanuatu" },
+    { code: "Vatican City", flag: "🇻🇦", name: "Vatican City" },
+    { code: "Venezuela", flag: "🇻🇪", name: "Venezuela" },
+    { code: "Vietnam", flag: "🇻🇳", name: "Vietnam" },
+    { code: "Yemen", flag: "🇾🇪", name: "Yemen" },
+    { code: "Zambia", flag: "🇿🇲", name: "Zambia" },
+    { code: "Zimbabwe", flag: "🇿🇼", name: "Zimbabwe" }
 ];
 
 // ============================================================
@@ -1012,63 +1144,64 @@ function updateKYCUI() {
 }
 
 // ============================================================
-// COUNTRY DROPDOWN - CHOICES.JS WITH FIXED Z-INDEX
+// COUNTRY MODAL - FULLSCREEN POPUP
 // ============================================================
-function initCountryDropdown() {
-    const select = document.getElementById('countrySelect');
-    if (!select) return;
-    
-    // Populate select options
-    const sorted = [...allCountries].sort((a, b) => a.name.localeCompare(b.name));
-    sorted.forEach(c => {
-        const option = new Option(`${c.flag} ${c.name}`, c.code);
-        select.appendChild(option);
-    });
+let countryModalOpen = false;
 
-    if (typeof Choices === 'undefined') {
-        console.error('[CHOICES] Choices.js not loaded.');
+function openCountryModal() {
+    const modal = document.getElementById('countryModal');
+    modal.classList.add('active');
+    countryModalOpen = true;
+    renderCountryList(allCountries);
+    document.getElementById('countrySearch').value = '';
+    document.getElementById('countrySearch').focus();
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCountryModal() {
+    const modal = document.getElementById('countryModal');
+    modal.classList.remove('active');
+    countryModalOpen = false;
+    document.body.style.overflow = '';
+}
+
+function selectCountry(country) {
+    selectedCountry = country.code;
+    document.getElementById('selectedCountryFlag').textContent = country.flag;
+    document.getElementById('selectedCountryName').textContent = country.name;
+    document.getElementById('selectedCountryCode').textContent = country.code;
+    closeCountryModal();
+    renderMobileNetworks();
+    document.getElementById('rateDisplay').style.display = 'none';
+    // Update user data
+    if (currentUser) {
+        update(ref(db, `users/${currentUser.uid}`), { country: country.code }).catch(() => {});
+    }
+}
+
+function renderCountryList(countries, searchTerm = '') {
+    const list = document.getElementById('countryModalList');
+    const filtered = searchTerm 
+        ? countries.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.code.toLowerCase().includes(searchTerm.toLowerCase()))
+        : countries;
+    
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="country-modal-no-results">No countries found for "<strong>${escapeHtml(searchTerm)}</strong>"</div>`;
         return;
     }
-
-    try {
-        countryChoices = new Choices(select, {
-            searchEnabled: true,
-            searchPlaceholderValue: '🔍 Search country...',
-            itemSelectText: '',
-            shouldSort: false,
-            placeholder: true,
-            placeholderValue: '🇺🇳 Select Country',
-            allowHTML: false,
-            renderSelectedChoices: 'always',
-            position: 'bottom'
-        });
-
-        // Set default selection from user data
-        setTimeout(() => {
-            if (selectedCountry) {
-                const matched = allCountries.find(c => c.code === selectedCountry);
-                if (matched) {
-                    countryChoices.setChoiceByValue(matched.code);
-                }
-            } else {
-                autoDetectCountry();
-            }
-        }, 300);
-
-        select.addEventListener('change', () => {
-            const code = select.value;
-            const country = allCountries.find(c => c.code === code);
-            if (country) {
-                selectedCountry = country.code;
-                renderMobileNetworks();
-                document.getElementById('rateDisplay').style.display = 'none';
-            }
-        });
-
-        console.log('[CHOICES] ✅ Country dropdown initialized');
-    } catch (error) {
-        console.error('[CHOICES] Error:', error);
-    }
+    
+    list.innerHTML = '';
+    filtered.forEach(country => {
+        const item = document.createElement('div');
+        item.className = 'country-modal-item';
+        item.innerHTML = `
+            <span class="flag">${country.flag}</span>
+            <span class="name">${escapeHtml(country.name)}</span>
+            <span class="code">${country.code}</span>
+        `;
+        item.addEventListener('click', () => selectCountry(country));
+        list.appendChild(item);
+    });
 }
 
 // ============================================================
@@ -1082,16 +1215,17 @@ async function autoDetectCountry() {
             const matched = allCountries.find(c => 
                 c.name.toLowerCase() === data.country_name?.toLowerCase()
             );
-            if (matched && countryChoices) {
-                countryChoices.setChoiceByValue(matched.code);
+            if (matched) {
                 selectedCountry = matched.code;
+                document.getElementById('selectedCountryFlag').textContent = matched.flag;
+                document.getElementById('selectedCountryName').textContent = matched.name;
+                document.getElementById('selectedCountryCode').textContent = matched.code;
                 renderMobileNetworks();
                 return;
             }
         }
     } catch (e) { console.log('[DETECT] Auto-detect failed'); }
     
-    // Fallback: Try locale
     try {
         const locale = navigator.language || navigator.languages?.[0] || 'en-US';
         const parts = locale.split('-');
@@ -1101,20 +1235,23 @@ async function autoDetectCountry() {
                 c.name.toLowerCase() === countryName.toLowerCase() ||
                 c.code === countryName
             );
-            if (matched && countryChoices) {
-                countryChoices.setChoiceByValue(matched.code);
+            if (matched) {
                 selectedCountry = matched.code;
+                document.getElementById('selectedCountryFlag').textContent = matched.flag;
+                document.getElementById('selectedCountryName').textContent = matched.name;
+                document.getElementById('selectedCountryCode').textContent = matched.code;
                 renderMobileNetworks();
                 return;
             }
         }
     } catch (e) {}
     
-    // Default to Tanzania
     const defaultCountry = allCountries.find(c => c.code === 'Tanzania');
-    if (defaultCountry && countryChoices) {
-        countryChoices.setChoiceByValue(defaultCountry.code);
+    if (defaultCountry) {
         selectedCountry = defaultCountry.code;
+        document.getElementById('selectedCountryFlag').textContent = defaultCountry.flag;
+        document.getElementById('selectedCountryName').textContent = defaultCountry.name;
+        document.getElementById('selectedCountryCode').textContent = defaultCountry.code;
         renderMobileNetworks();
     }
 }
@@ -1598,6 +1735,20 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 
 // ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('countrySelectorTrigger').addEventListener('click', openCountryModal);
+document.getElementById('countryModalClose').addEventListener('click', closeCountryModal);
+document.getElementById('countrySearch').addEventListener('input', (e) => {
+    renderCountryList(allCountries, e.target.value);
+});
+document.getElementById('countryModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('countryModal')) {
+        closeCountryModal();
+    }
+});
+
+// ============================================================
 // LOAD USER COUNTRY
 // ============================================================
 async function loadUserCountry() {
@@ -1608,14 +1759,14 @@ async function loadUserCountry() {
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
             if (userData.country && userData.country !== 'Not selected' && userData.country !== '') {
-                selectedCountry = userData.country;
-                if (countryChoices) {
-                    const matched = allCountries.find(c => c.code === selectedCountry);
-                    if (matched) {
-                        countryChoices.setChoiceByValue(matched.code);
-                    }
+                const matched = allCountries.find(c => c.code === userData.country);
+                if (matched) {
+                    selectedCountry = matched.code;
+                    document.getElementById('selectedCountryFlag').textContent = matched.flag;
+                    document.getElementById('selectedCountryName').textContent = matched.name;
+                    document.getElementById('selectedCountryCode').textContent = matched.code;
+                    renderMobileNetworks();
                 }
-                renderMobileNetworks();
             }
         }
     } catch (error) {
@@ -1639,8 +1790,12 @@ onAuthStateChanged(auth, async (user) => {
     await loadUserCountry();
     loadMobileNetworksFromSettings();
     
+    // If no country selected, auto-detect
+    if (!selectedCountry) {
+        await autoDetectCountry();
+    }
+    
     setTimeout(() => {
-        initCountryDropdown();
         updateKYCUI();
         updateStep(1);
         document.getElementById('skeletonContent').style.display = 'none';
