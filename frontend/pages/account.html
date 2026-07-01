@@ -158,11 +158,37 @@ transition:0.2s;
 .profile-info-text h3 { color:#FFD700; font-size:14px; margin-bottom:3px; display: inline-flex; align-items: center; gap: 4px; }
 .profile-info-text p { color:#AAAAAA; font-size:9px; }
 
-.info-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); flex-wrap:wrap; gap:6px; }
-.info-label { color:#AAAAAA; font-size:9px; display:flex; align-items:center; gap:5px; }
-.info-value { color:#FFFFFF; font-size:10px; font-weight:500; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.info-row { 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    padding:10px 0; 
+    border-bottom:1px solid rgba(255,255,255,0.05); 
+    min-height:44px;
+    flex-wrap:nowrap;
+}
+.info-label { 
+    color:#AAAAAA; 
+    font-size:10px; 
+    display:flex; 
+    align-items:center; 
+    gap:6px; 
+    flex-shrink:0;
+    min-width:120px;
+}
+.info-value { 
+    color:#FFFFFF; 
+    font-size:10px; 
+    font-weight:500; 
+    display:flex; 
+    align-items:center; 
+    gap:6px; 
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    text-align:right;
+}
 
-.username-container { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.username-container { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content:flex-end; }
 .username-text { color: #FFD700; font-weight: 600; font-size:11px; }
 .username-edit-icon { cursor: pointer; color: #FFD700; font-size: 9px; opacity: 0.7; transition: 0.2s; }
 .username-edit-icon:hover { opacity: 1; }
@@ -171,30 +197,29 @@ transition:0.2s;
 display: flex;
 justify-content: space-between;
 align-items: center;
-padding: 8px 0;
+padding: 10px 0;
 border-bottom: 1px solid rgba(255,255,255,0.05);
-flex-wrap: wrap;
-gap: 10px;
+min-height:44px;
 }
-.info-stats-inline .info-label { color: #AAAAAA; font-size: 9px; display: flex; align-items: center; gap: 5px; }
-.info-stats-inline .info-value { color: #FFFFFF; font-size: 10px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
-.inline-stats-number { background: rgba(255,215,0,0.15); padding: 2px 8px; border-radius: 20px; font-weight: 700; color: #FFD700; font-size: 10px; }
+.info-stats-inline .info-label { color: #AAAAAA; font-size: 10px; display: flex; align-items: center; gap: 6px; flex-shrink:0; min-width:120px; }
+.info-stats-inline .info-value { color: #FFFFFF; font-size: 10px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.inline-stats-number { background: rgba(255,215,0,0.15); padding: 2px 10px; border-radius: 20px; font-weight: 700; color: #FFD700; font-size: 10px; }
 
-.inline-btn { background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; padding:3px 8px; font-size:8px; font-weight:600; color:#FFD700; cursor:pointer; transition:0.2s; }
+.inline-btn { background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; padding:3px 10px; font-size:8px; font-weight:600; color:#FFD700; cursor:pointer; transition:0.2s; white-space:nowrap; }
 .inline-btn:hover { background:#FFD700; color:#800000; }
 .add-btn { background:rgba(0,255,136,0.15); border-color:#00FF88; color:#00FF88; }
 .add-btn:hover { background:#00FF88; color:#000; }
 .edit-btn { background:rgba(255,215,0,0.15); border-color:#FFD700; color:#FFD700; }
 .edit-btn:hover { background:#FFD700; color:#800000; }
 
-.kyc-status { display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:50px; font-size:8px; font-weight:600; }
+.kyc-status { display:inline-flex; align-items:center; gap:3px; padding:2px 10px; border-radius:50px; font-size:8px; font-weight:600; }
 .kyc-approved { background:rgba(14,203,129,0.2); color:#0ECB81; }
 .kyc-verified { background:rgba(14,203,129,0.2); color:#0ECB81; }
 .kyc-pending { background:rgba(255,215,0,0.2); color:#FFD700; }
 .kyc-rejected { background:rgba(255,77,77,0.2); color:#F6465D; }
 .kyc-none { background:rgba(255,77,77,0.2); color:#F6465D; }
 
-.setting-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+.setting-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:0.2s; min-height:48px; }
 .setting-item:hover { transform:translateX(3px); }
 .setting-item span { color:#FFFFFF; font-size:10px; display:flex; align-items:center; gap:8px; }
 .setting-item .arrow { color:#888; font-size:9px; }
@@ -206,12 +231,12 @@ gap: 10px;
 .toggle-switch.active::after { left:19px; }
 
 .referral-link { background:rgba(255,255,255,0.08); border-radius:12px; padding:8px; display:flex; align-items:center; justify-content:space-between; gap:6px; margin:10px 0; flex-wrap:wrap; }
-.referral-link input { background:transparent; border:none; color:#FFD700; font-size:9px; flex:1; outline:none; }
-.referral-link button { background:rgba(255,215,0,0.2); border:none; border-radius:6px; padding:5px 10px; color:#FFD700; cursor:pointer; font-size:9px; }
+.referral-link input { background:transparent; border:none; color:#FFD700; font-size:9px; flex:1; outline:none; min-width:100px; }
+.referral-link button { background:rgba(255,215,0,0.2); border:none; border-radius:6px; padding:5px 10px; color:#FFD700; cursor:pointer; font-size:9px; white-space:nowrap; }
 
-.btn-primary { width:100%; background:linear-gradient(135deg,#800000,#FFD700); border:none; border-radius:12px; padding:8px; color:white; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:8px; font-size:10px; }
+.btn-primary { width:100%; background:linear-gradient(135deg,#800000,#FFD700); border:none; border-radius:12px; padding:10px; color:white; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:8px; font-size:10px; }
 
-.country-flag { font-size: 13px; margin-right: 3px; }
+.country-flag-svg { height:18px; width:auto; border-radius:2px; }
 
 .bottom-nav {
 position:fixed; bottom:0; left:0; right:0; background:rgba(10,10,10,0.95);
@@ -272,7 +297,7 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
     align-items: center;
     gap: 4px;
     font-size: 8px;
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: 20px;
 }
 .biometric-status-small.enabled {
@@ -303,7 +328,11 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 
 @media(max-width:480px){ 
     .account-container { margin-top:65px; } 
-    .info-row { flex-direction:column; align-items:flex-start; } 
+    .info-row { flex-direction:row; flex-wrap:wrap; gap:4px; } 
+    .info-label { min-width:90px; font-size:9px; }
+    .info-value { justify-content:flex-start; text-align:left; font-size:9px; }
+    .info-stats-inline { flex-direction:row; flex-wrap:wrap; }
+    .info-stats-inline .info-label { min-width:90px; font-size:9px; }
     .otp-input { width:32px; height:32px; font-size:12px; } 
     .bottom-nav a span { font-size:7px; } 
     .bottom-nav a i { font-size:14px; }
@@ -326,6 +355,9 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 <!-- OTP MODAL -->
 <div class="modal-overlay" id="otpModal"><div class="modal-container"><i class="fas fa-key" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3>Verify Phone Number</h3><p>Enter the 6-digit OTP sent to your phone</p><div class="otp-input-group"><input type="text" maxlength="1" class="otp-input" id="otp1"><input type="text" maxlength="1" class="otp-input" id="otp2"><input type="text" maxlength="1" class="otp-input" id="otp3"><input type="text" maxlength="1" class="otp-input" id="otp4"><input type="text" maxlength="1" class="otp-input" id="otp5"><input type="text" maxlength="1" class="otp-input" id="otp6"></div><div class="error-message" id="otpError">Invalid OTP.</div><div class="modal-buttons"><button class="modal-btn cancel" id="closeOtpModal">Cancel</button><button class="modal-btn confirm" id="verifyOtpBtn">Verify</button></div></div></div>
 
+<!-- BIOMETRIC CONFIRM MODAL -->
+<div class="modal-overlay" id="bioConfirmModal"><div class="modal-container"><i class="fas fa-fingerprint" style="font-size:32px; color:#FFD700; margin-bottom:8px;"></i><h3 id="bioModalTitle">Disable Biometric Login?</h3><p id="bioModalDesc">You will need to use your password to login.</p><div class="modal-buttons"><button class="modal-btn cancel" id="closeBioModal">Cancel</button><button class="modal-btn confirm" id="confirmBioModal">Confirm</button></div></div></div>
+
 <div class="top-bar"><div class="logo-area"><img src="../assets/images/logo.png" onerror="this.src='https://placehold.co/34x34/800000/FFD700?text=AI'"><div><h2>ABOTRA-PROAI</h2></div></div><div class="top-right"><div class="logout-top" id="logoutTopBtn"><i class="fas fa-sign-out-alt"></i></div><div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div></div></div>
 
 <div class="account-container">
@@ -336,13 +368,9 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
         <div class="profile-avatar-large"><img id="profileAvatar" src="../assets/images/avatar.png"><div class="avatar-upload-btn" id="avatarUploadBtn"><i class="fas fa-camera"></i></div><input type="file" id="avatarInput" accept="image/*" style="display:none"></div>
         <div class="profile-info-text"><div class="skeleton-text" style="width: 90px; height: 12px; margin-bottom: 5px;"></div><div class="skeleton-text" style="width: 70px; height: 8px;"></div></div>
     </div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="skeleton-text" style="width: 70px; height: 10px;"></div></div></div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><div class="skeleton-text" style="width: 120px; height: 10px;"></div></div></div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><div class="skeleton-text" style="width: 90px; height: 10px;"></div></div></div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><div class="skeleton-text" style="width: 70px; height: 10px;"></div></div></div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value"><div class="skeleton-text" style="width: 60px; height: 10px;"></div></div></div>
-    <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><div class="skeleton-text" style="width: 30px; height: 10px;"></div></div></div>
-    <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value"><div class="skeleton-text" style="width: 90px; height: 10px;"></div></div></div>
+    <div id="userInfoContainer">
+        <!-- Rendered by JS -->
+    </div>
 </div>
 
 <div class="settings-card"><div class="section-title"><i class="fas fa-sliders-h"></i> Account Settings</div>
@@ -353,7 +381,7 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 </div>
 
 <div class="referral-card"><div class="section-title"><i class="fas fa-users"></i> Referral Program</div>
-<div class="referral-link"><div class="skeleton-text" style="width: 160px; height: 10px;"></div></div>
+<div class="referral-link"><input type="text" id="referralLink" readonly value="Loading..."><button id="copyReferralBtn"><i class="fas fa-copy"></i> Copy</button></div>
 <div class="referral-stats" style="display:flex; justify-content:space-around; text-align:center; margin-top:8px;">
     <div><div class="value" id="refCount" style="font-size:15px; font-weight:800; color:#FFD700;">0</div><div class="label" style="font-size:8px;">Referrals</div></div>
     <div><div class="value" id="totalCommission" style="font-size:15px; font-weight:800; color:#FFD700;">$0</div><div class="label" style="font-size:8px;">Total Commission</div></div>
@@ -371,7 +399,7 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 
 <script type="module">
 // ============================================================
-// FIREBASE IMPORTS - Pure RTDB Only
+// FIREBASE IMPORTS
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signOut, updateEmail, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -379,7 +407,7 @@ import { getDatabase, ref, set, get, update, remove, onValue } from "https://www
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ============================================================
-// FIREBASE CONFIG
+// CONFIG
 // ============================================================
 const firebaseConfig = { 
     apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM", 
@@ -396,30 +424,73 @@ const auth = getAuth(app);
 const rtdb = getDatabase(app);
 const storage = getStorage(app);
 
-let currentUser = null, userData = null, recaptchaVerifier = null, pendingPhoneNumber = null, phoneConfirmationResult = null;
+let currentUser = null;
+let userData = null;
+let recaptchaVerifier = null;
+let pendingPhoneNumber = null;
+let phoneConfirmationResult = null;
 let rtdbListeners = [];
-let rpId = window.location.hostname || "abotra-proai.com";
 
 // ============================================================
-// COUNTRY FLAGS
+// SVG COUNTRY FLAGS (REPLACES EMOJI)
 // ============================================================
-const countryFlags = {
-    "Tanzania":"🇹🇿","Kenya":"🇰🇪","Uganda":"🇺🇬","Malawi":"🇲🇼","Zambia":"🇿🇲","South Africa":"🇿🇦","Nigeria":"🇳🇬","Ghana":"🇬🇭","Egypt":"🇪🇬","Morocco":"🇲🇦","Algeria":"🇩🇿","Tunisia":"🇹🇳","Libya":"🇱🇾","Sudan":"🇸🇩","Ethiopia":"🇪🇹","Somalia":"🇸🇴","Rwanda":"🇷🇼","Burundi":"🇧🇮","Mozambique":"🇲🇿","Angola":"🇦🇴","Botswana":"🇧🇼","Namibia":"🇳🇦","Zimbabwe":"🇿🇼","United States":"🇺🇸","United Kingdom":"🇬🇧","Germany":"🇩🇪","France":"🇫🇷","Italy":"🇮🇹","Spain":"🇪🇸","Portugal":"🇵🇹","Netherlands":"🇳🇱","Belgium":"🇧🇪","Switzerland":"🇨🇭","Austria":"🇦🇹","Sweden":"🇸🇪","Norway":"🇳🇴","Denmark":"🇩🇰","Finland":"🇫🇮","Ireland":"🇮🇪","Poland":"🇵🇱","Czech Republic":"🇨🇿","Hungary":"🇭🇺","Romania":"🇷🇴","Bulgaria":"🇧🇬","Greece":"🇬🇷","Turkey":"🇹🇷","Russia":"🇷🇺","Ukraine":"🇺🇦","India":"🇮🇳","China":"🇨🇳","Japan":"🇯🇵","South Korea":"🇰🇷","Indonesia":"🇮🇩","Philippines":"🇵🇭","Vietnam":"🇻🇳","Thailand":"🇹🇭","Malaysia":"🇲🇾","Singapore":"🇸🇬","Australia":"🇦🇺","New Zealand":"🇳🇿","Brazil":"🇧🇷","Argentina":"🇦🇷","Mexico":"🇲🇽","Chile":"🇨🇱","Peru":"🇵🇪","Colombia":"🇨🇴","Venezuela":"🇻🇪","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Sri Lanka":"🇱🇰","Nepal":"🇳🇵","Afghanistan":"🇦🇫","Iraq":"🇮🇶","Iran":"🇮🇷","Saudi Arabia":"🇸🇦","Yemen":"🇾🇪","Oman":"🇴🇲","UAE":"🇦🇪","Qatar":"🇶🇦","Kuwait":"🇰🇼","Israel":"🇮🇱","Jordan":"🇯🇴","Lebanon":"🇱🇧","Syria":"🇸🇾","Canada":"🇨🇦","Cuba":"🇨🇺","Jamaica":"🇯🇲","Haiti":"🇭🇹","Dominican Republic":"🇩🇴","Bahamas":"🇧🇸","Trinidad and Tobago":"🇹🇹","Barbados":"🇧🇧"
+const countryCodeMap = {
+    "Tanzania":"tz","Kenya":"ke","Uganda":"ug","Malawi":"mw","Zambia":"zm",
+    "South Africa":"za","Nigeria":"ng","Ghana":"gh","Egypt":"eg","Morocco":"ma",
+    "Algeria":"dz","Tunisia":"tn","Libya":"ly","Sudan":"sd","Ethiopia":"et",
+    "Somalia":"so","Rwanda":"rw","Burundi":"bi","Mozambique":"mz","Angola":"ao",
+    "Botswana":"bw","Namibia":"na","Zimbabwe":"zw","United States":"us",
+    "United Kingdom":"gb","Germany":"de","France":"fr","Italy":"it","Spain":"es",
+    "Portugal":"pt","Netherlands":"nl","Belgium":"be","Switzerland":"ch",
+    "Austria":"at","Sweden":"se","Norway":"no","Denmark":"dk","Finland":"fi",
+    "Ireland":"ie","Poland":"pl","Czech Republic":"cz","Hungary":"hu",
+    "Romania":"ro","Bulgaria":"bg","Greece":"gr","Turkey":"tr","Russia":"ru",
+    "Ukraine":"ua","India":"in","China":"cn","Japan":"jp","South Korea":"kr",
+    "Indonesia":"id","Philippines":"ph","Vietnam":"vn","Thailand":"th",
+    "Malaysia":"my","Singapore":"sg","Australia":"au","New Zealand":"nz",
+    "Brazil":"br","Argentina":"ar","Mexico":"mx","Chile":"cl","Peru":"pe",
+    "Colombia":"co","Venezuela":"ve","Pakistan":"pk","Bangladesh":"bd",
+    "Sri Lanka":"lk","Nepal":"np","Afghanistan":"af","Iraq":"iq","Iran":"ir",
+    "Saudi Arabia":"sa","Yemen":"ye","Oman":"om","UAE":"ae","Qatar":"qa",
+    "Kuwait":"kw","Israel":"il","Jordan":"jo","Lebanon":"lb","Syria":"sy",
+    "Canada":"ca","Cuba":"cu","Jamaica":"jm","Haiti":"ht","Dominican Republic":"do",
+    "Bahamas":"bs","Trinidad and Tobago":"tt","Barbados":"bb"
 };
-function getFlag(country) { return countryFlags[country] || "🌍"; }
 
-// ============================================================
-// NOTIFICATION
-// ============================================================
-function showNotification(msg, type) { 
-    const existing = document.querySelector('.notification-popup'); if(existing) existing.remove(); 
-    const n = document.createElement('div'); n.className = `notification-popup ${type}`; 
-    const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle');
-    n.innerHTML = `<i class="fas ${icon}"></i><div class="message">${msg}</div>`; 
-    document.body.appendChild(n); setTimeout(() => n.remove(), 4000); 
+function getCountryFlagUrl(country) {
+    const code = countryCodeMap[country] || 'un';
+    return `https://flagcdn.com/w40/${code}.png`;
 }
 
-function escapeHtml(t) { if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function getCountryFlagHtml(country) {
+    const url = getCountryFlagUrl(country);
+    return `<img src="${url}" class="country-flag-svg" alt="${country}" loading="lazy">`;
+}
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function showNotification(msg, type) { 
+    const existing = document.querySelector('.notification-popup'); 
+    if(existing) existing.remove(); 
+    const n = document.createElement('div'); 
+    n.className = `notification-popup ${type}`; 
+    const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle');
+    n.innerHTML = `<i class="fas ${icon}"></i><div class="message">${msg}</div>`; 
+    document.body.appendChild(n); 
+    setTimeout(() => n.remove(), 4000); 
+}
+
+function escapeHtml(t) { 
+    if(!t) return ''; 
+    const d=document.createElement('div'); 
+    d.textContent=t; 
+    return d.innerHTML; 
+}
+
+function getFlag(country) {
+    return getCountryFlagHtml(country);
+}
 
 // ============================================================
 // COMPRESS IMAGE
@@ -458,140 +529,465 @@ async function initRecaptcha() {
 }
 
 // ============================================================
-// BIOMETRIC - FIREBASE ONLY (No Routes)
+// BIOMETRIC MANAGER
 // ============================================================
-async function setupBiometric() {
-    if (!currentUser) return;
-    try {
-        // Check if biometric is already setup
-        const biometricRef = ref(rtdb, `biometric/${currentUser.uid}`);
-        const snap = await get(biometricRef);
-        
-        if (snap.exists()) {
-            // Biometric already setup
-            updateBiometricUI(true);
-            return;
+const BiometricManager = {
+    isSupported: function() {
+        return typeof SimpleWebAuthnBrowser !== 'undefined' && 
+               typeof navigator.credentials !== 'undefined' &&
+               typeof PublicKeyCredential !== 'undefined';
+    },
+    
+    getRpId: function() {
+        return window.location.hostname || 'abotra-proai.com';
+    },
+    
+    setup: async function(user) {
+        if (!this.isSupported()) {
+            showNotification('Biometric not supported on this device/browser.', 'error');
+            return false;
         }
         
-        // Generate biometric credential using WebAuthn
-        const challenge = new Uint8Array(32);
-        crypto.getRandomValues(challenge);
-        
-        const options = {
-            challenge: challenge,
-            rp: { name: "ABOTRA-PROAI", id: rpId },
-            user: {
-                id: currentUser.uid,
-                name: currentUser.email || currentUser.uid,
-                displayName: userData?.username || currentUser.email || 'User'
-            },
-            pubKeyCredParams: [
-                { type: "public-key", alg: -7 },
-                { type: "public-key", alg: -257 }
-            ],
-            authenticatorSelection: {
-                authenticatorAttachment: "platform",
-                residentKey: "preferred",
-                userVerification: "required"
-            },
-            timeout: 60000,
-            attestation: "none"
-        };
-        
-        const credential = await SimpleWebAuthnBrowser.startRegistration(options);
-        
-        if (credential) {
-            // Save biometric credential to Firebase RTDB
-            await set(ref(rtdb, `biometric/${currentUser.uid}`), {
+        try {
+            showNotification('Setting up biometric. Please confirm with fingerprint/face...', 'info');
+            
+            const challenge = new Uint8Array(32);
+            crypto.getRandomValues(challenge);
+            
+            const options = {
+                challenge: challenge,
+                rp: { name: "ABOTRA-PROAI", id: this.getRpId() },
+                user: {
+                    id: user.uid,
+                    name: user.email || user.uid,
+                    displayName: userData?.username || user.email || 'User'
+                },
+                pubKeyCredParams: [
+                    { type: "public-key", alg: -7 },
+                    { type: "public-key", alg: -257 }
+                ],
+                authenticatorSelection: {
+                    authenticatorAttachment: "platform",
+                    residentKey: "preferred",
+                    userVerification: "required"
+                },
+                timeout: 60000,
+                attestation: "none"
+            };
+            
+            let credential;
+            try {
+                credential = await SimpleWebAuthnBrowser.startRegistration(options);
+            } catch (webauthnError) {
+                // Fallback to native WebAuthn API if SimpleWebAuthn fails
+                try {
+                    const nativeOptions = {
+                        publicKey: {
+                            challenge: challenge,
+                            rp: { name: "ABOTRA-PROAI", id: this.getRpId() },
+                            user: {
+                                id: new TextEncoder().encode(user.uid),
+                                name: user.email || user.uid,
+                                displayName: userData?.username || user.email || 'User'
+                            },
+                            pubKeyCredParams: [
+                                { type: "public-key", alg: -7 },
+                                { type: "public-key", alg: -257 }
+                            ],
+                            authenticatorSelection: {
+                                authenticatorAttachment: "platform",
+                                residentKey: "preferred",
+                                userVerification: "required"
+                            },
+                            timeout: 60000,
+                            attestation: "none"
+                        }
+                    };
+                    const nativeCredential = await navigator.credentials.create(nativeOptions);
+                    if (nativeCredential) {
+                        credential = {
+                            id: nativeCredential.id,
+                            response: {
+                                publicKey: nativeCredential.response.getPublicKey ? 
+                                    new Uint8Array(nativeCredential.response.getPublicKey()) : 
+                                    new Uint8Array(nativeCredential.response.attestationObject)
+                            }
+                        };
+                    }
+                } catch (nativeError) {
+                    throw new Error('Both WebAuthn methods failed: ' + nativeError.message);
+                }
+            }
+            
+            if (!credential) {
+                throw new Error('No credential returned');
+            }
+            
+            const credentialData = {
                 credentialId: credential.id,
                 publicKey: credential.response.publicKey || credential.response.attestationObject,
-                userId: currentUser.uid,
-                email: currentUser.email,
+                userId: user.uid,
+                email: user.email,
                 createdAt: Date.now(),
                 deviceInfo: navigator.userAgent || 'Unknown'
-            });
+            };
             
-            // Also save to localStorage for quick check
-            localStorage.setItem('abotra_biometric_credential', JSON.stringify(credential));
-            localStorage.setItem('abotra_biometric_email', currentUser.email || '');
+            await set(ref(rtdb, `users/${user.uid}/biometricCredential`), credentialData);
+            localStorage.setItem('abotra_biometric_enabled', 'true');
             
-            updateBiometricUI(true);
-            showNotification('🔐 Biometric login enabled! You can now login with fingerprint/face.', 'success');
+            this.updateUI(true);
+            showNotification('🔐 Biometric login enabled!', 'success');
+            return true;
+            
+        } catch (error) {
+            console.error('[BIOMETRIC] Setup error:', error);
+            if (error.name === 'NotAllowedError') {
+                showNotification('Biometric setup cancelled or not allowed.', 'error');
+            } else if (error.name === 'NotSupportedError') {
+                showNotification('Biometric not supported on this device.', 'error');
+            } else {
+                showNotification('Failed to setup biometric: ' + error.message, 'error');
+            }
+            this.updateUI(false);
+            return false;
         }
-    } catch (error) {
-        console.error('[BIOMETRIC] Setup error:', error);
-        if (error.name === 'NotAllowedError') {
-            showNotification('Biometric setup cancelled or not allowed.', 'error');
-        } else if (error.name === 'NotSupportedError') {
-            showNotification('Biometric not supported on this device.', 'error');
+    },
+    
+    remove: async function(user) {
+        if (!user) return false;
+        try {
+            await remove(ref(rtdb, `users/${user.uid}/biometricCredential`));
+            localStorage.removeItem('abotra_biometric_enabled');
+            this.updateUI(false);
+            showNotification('Biometric login disabled.', 'info');
+            return true;
+        } catch (error) {
+            console.error('[BIOMETRIC] Remove error:', error);
+            showNotification('Failed to disable biometric.', 'error');
+            return false;
+        }
+    },
+    
+    checkStatus: async function(user) {
+        if (!user) return false;
+        try {
+            const bioRef = ref(rtdb, `users/${user.uid}/biometricCredential`);
+            const snap = await get(bioRef);
+            const exists = snap.exists();
+            this.updateUI(exists);
+            return exists;
+        } catch (error) {
+            console.error('[BIOMETRIC] Check status error:', error);
+            this.updateUI(false);
+            return false;
+        }
+    },
+    
+    updateUI: function(enabled) {
+        const badge = document.getElementById('biometricStatusBadge');
+        const settingItem = document.getElementById('biometricSetupBtn');
+        if (!badge) return;
+        
+        if (enabled) {
+            badge.className = 'biometric-status-small enabled';
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> Enabled';
+            if (settingItem) {
+                settingItem.onclick = () => {
+                    openBioModal('disable');
+                };
+            }
         } else {
-            showNotification('Failed to setup biometric: ' + error.message, 'error');
+            badge.className = 'biometric-status-small disabled';
+            badge.innerHTML = '<i class="fas fa-times"></i> Not Setup';
+            if (settingItem) {
+                settingItem.onclick = () => {
+                    openBioModal('setup');
+                };
+            }
         }
-        updateBiometricUI(false);
     }
-}
+};
 
-async function removeBiometric() {
-    if (!currentUser) return;
-    try {
-        await remove(ref(rtdb, `biometric/${currentUser.uid}`));
-        localStorage.removeItem('abotra_biometric_credential');
-        localStorage.removeItem('abotra_biometric_email');
-        localStorage.removeItem('abotra_biometric_password');
-        updateBiometricUI(false);
-        showNotification('Biometric login disabled.', 'info');
-    } catch (error) {
-        console.error('[BIOMETRIC] Remove error:', error);
-        showNotification('Failed to disable biometric.', 'error');
-    }
-}
+// ============================================================
+// BIOMETRIC MODAL
+// ============================================================
+let bioAction = 'setup';
 
-async function checkBiometricStatus() {
-    if (!currentUser) return false;
-    try {
-        const biometricRef = ref(rtdb, `biometric/${currentUser.uid}`);
-        const snap = await get(biometricRef);
-        const exists = snap.exists();
-        updateBiometricUI(exists);
-        return exists;
-    } catch (error) {
-        console.error('[BIOMETRIC] Check status error:', error);
-        updateBiometricUI(false);
-        return false;
-    }
-}
-
-function updateBiometricUI(enabled) {
-    const badge = document.getElementById('biometricStatusBadge');
-    if (!badge) return;
-    if (enabled) {
-        badge.className = 'biometric-status-small enabled';
-        badge.innerHTML = '<i class="fas fa-check-circle"></i> Enabled';
-        // Update the setting item to show "Disable" option
-        const settingItem = document.getElementById('biometricSetupBtn');
-        if (settingItem) {
-            settingItem.onclick = async () => {
-                if (confirm('Disable Biometric Login? You will need to use password to login.')) {
-                    await removeBiometric();
-                }
-            };
-        }
+function openBioModal(action) {
+    bioAction = action;
+    const modal = document.getElementById('bioConfirmModal');
+    const title = document.getElementById('bioModalTitle');
+    const desc = document.getElementById('bioModalDesc');
+    
+    if (action === 'disable') {
+        title.textContent = 'Disable Biometric Login?';
+        desc.textContent = 'You will need to use your password to login.';
+        document.getElementById('confirmBioModal').innerHTML = '<i class="fas fa-fingerprint"></i> Disable';
     } else {
-        badge.className = 'biometric-status-small disabled';
-        badge.innerHTML = '<i class="fas fa-times"></i> Not Setup';
-        const settingItem = document.getElementById('biometricSetupBtn');
-        if (settingItem) {
-            settingItem.onclick = async () => {
-                await setupBiometric();
-            };
-        }
+        title.textContent = 'Enable Biometric Login?';
+        desc.textContent = 'You will be prompted to use fingerprint or face ID for login.';
+        document.getElementById('confirmBioModal').innerHTML = '<i class="fas fa-fingerprint"></i> Enable';
     }
+    modal.classList.add('active');
 }
+
+function closeBioModal() {
+    document.getElementById('bioConfirmModal').classList.remove('active');
+}
+
+document.getElementById('closeBioModal')?.addEventListener('click', closeBioModal);
+document.getElementById('confirmBioModal')?.addEventListener('click', async () => {
+    closeBioModal();
+    if (bioAction === 'disable') {
+        await BiometricManager.remove(currentUser);
+    } else {
+        await BiometricManager.setup(currentUser);
+    }
+});
+
+// ============================================================
+// RENDER USER UI
+// ============================================================
+function renderUserUI(user, data) {
+    const container = document.getElementById('userInfoContainer');
+    if (!container) return;
+    
+    const username = data.username || user.email?.split('@')[0] || 'User';
+    const isVerified = data.isVerified === true;
+    const blueTick = isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
+    const createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
+    const formattedDate = createdAt.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const userCountry = data.country || 'Tanzania';
+    const countryFlag = getFlag(userCountry);
+    
+    let kycHtml = '';
+    const kycStatus = data.kycStatus || 'none';
+    if(kycStatus === 'approved' || kycStatus === 'verified') {
+        kycHtml = '<span class="kyc-status kyc-approved"><i class="fas fa-check-circle"></i> APPROVED</span>';
+    } else if(kycStatus === 'pending') {
+        kycHtml = '<span class="kyc-status kyc-pending"><i class="fas fa-clock"></i> PENDING</span>';
+    } else if(kycStatus === 'rejected') {
+        kycHtml = '<span class="kyc-status kyc-rejected"><i class="fas fa-times-circle"></i> REJECTED</span>';
+    } else {
+        kycHtml = '<span class="kyc-status kyc-none"><i class="fas fa-times-circle"></i> Not Submitted</span>';
+    }
+    
+    const isPhoneUser = data.isPhoneUser === true || 
+                        (user.email && (user.email.includes('temporary') || user.email.includes('temp') || user.email.includes('phone')));
+    
+    let emailHtml = '';
+    if(isPhoneUser) {
+        emailHtml = `<button class="inline-btn edit-btn" id="editEmailBtn"><i class="fas fa-edit"></i> Edit</button>`;
+    }
+    if(!user.emailVerified && user.email && !isPhoneUser) {
+        emailHtml += ` <button class="inline-btn" id="verifyEmailBtn"><i class="fas fa-envelope"></i> Verify</button>`;
+    } else if(user.emailVerified && !isPhoneUser) {
+        emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
+    }
+    
+    let phoneHtml = '';
+    if(data.phone && data.phoneVerified) {
+        phoneHtml = `<button class="inline-btn edit-btn" id="editPhoneBtn"><i class="fas fa-edit"></i> Edit</button> <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
+    } else if(data.phone && !data.phoneVerified) {
+        phoneHtml = `<button class="inline-btn" id="verifyPhoneBtn"><i class="fas fa-check"></i> Verify</button> <span style="color:#FFD700;">${escapeHtml(data.phone)}</span>`;
+    } else {
+        phoneHtml = `<button class="inline-btn add-btn" id="addPhoneBtn"><i class="fas fa-plus"></i> Add Phone</button>`;
+    }
+    
+    const referralCount = data.referralCount || 0;
+    const totalCommission = data.commissionEarned || 0;
+    const activeRobots = data.activeRobots || 0;
+    
+    // Update profile picture
+    if (data.profilePicture) {
+        document.getElementById('profileAvatar').src = data.profilePicture;
+    }
+    
+    // Update profile info text
+    const profileText = document.querySelector('.profile-info-text');
+    if (profileText) {
+        profileText.innerHTML = `<h3>${escapeHtml(username)}${blueTick}</h3><p>Member since: ${formattedDate}</p>`;
+    }
+    
+    container.innerHTML = `
+        <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="username-container"><span class="username-text" id="usernameDisplay">${escapeHtml(username)}</span><i class="fas fa-edit username-edit-icon" id="editUsernameBtn"></i></div></div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><span id="accountEmail">${escapeHtml(user.email || 'Not set')}</span> ${emailHtml}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><span id="accountPhone">${data.phone || 'Not added'}</span> ${phoneHtml}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><span class="country-flag-svg-container">${countryFlag}</span> ${escapeHtml(userCountry)}</div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value" id="accountKyc">${kycHtml}</div></div>
+        <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><span class="inline-stats-number">${activeRobots}</span></div></div>
+        <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value">${formattedDate}</div></div>
+    `;
+    
+    // Update referral stats
+    document.getElementById('refCount').textContent = referralCount;
+    document.getElementById('totalCommission').textContent = `$${totalCommission.toFixed(2)}`;
+    
+    // Update referral link
+    const refCode = data.referralCode || 'ABOTRA' + Math.random().toString(36).substring(2,8).toUpperCase();
+    const domain = window.location.origin;
+    const refLinkInput = document.getElementById('referralLink');
+    if (refLinkInput) {
+        refLinkInput.value = `${domain}/register.html?ref=${refCode}`;
+    }
+    
+    // Setup event listeners
+    setupUIListeners(user, data);
+}
+
+// ============================================================
+// SETUP UI LISTENERS
+// ============================================================
+function setupUIListeners(user, data) {
+    // Avatar upload
+    const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+    const avatarInput = document.getElementById('avatarInput');
+    if (avatarUploadBtn) {
+        avatarUploadBtn.onclick = () => avatarInput?.click();
+    }
+    if (avatarInput) {
+        avatarInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const compressed = await compressImage(file, 800, 800, 0.8);
+            const fileName = `profile_${user.uid}_${Date.now()}.jpg`;
+            const uploadResult = await uploadBytes(storageRef(storage, `profilePictures/${fileName}`), compressed);
+            const url = await getDownloadURL(uploadResult.ref);
+            await update(ref(rtdb, `users/${user.uid}`), { profilePicture: url });
+            document.getElementById('profileAvatar').src = url;
+            showNotification('Profile picture updated!', 'success');
+        };
+    }
+    
+    // Edit username
+    document.getElementById('editUsernameBtn')?.addEventListener('click', () => {
+        document.getElementById('newUsername').value = data.username || '';
+        document.getElementById('usernameModal').classList.add('active');
+    });
+    
+    // Edit email
+    document.getElementById('editEmailBtn')?.addEventListener('click', () => {
+        document.getElementById('modalEmail').value = user.email || '';
+        document.getElementById('emailModal').classList.add('active');
+    });
+    
+    // Edit phone
+    document.getElementById('editPhoneBtn')?.addEventListener('click', () => {
+        document.getElementById('modalPhoneNumber').value = data.phone || '';
+        document.getElementById('phoneModal').classList.add('active');
+    });
+    
+    // Add phone
+    document.getElementById('addPhoneBtn')?.addEventListener('click', () => {
+        document.getElementById('modalPhoneNumber').value = '';
+        document.getElementById('phoneModal').classList.add('active');
+    });
+    
+    // Verify email
+    document.getElementById('verifyEmailBtn')?.addEventListener('click', async () => {
+        await sendEmailVerification(user);
+        showNotification('Verification email sent!', 'success');
+    });
+    
+    // Verify phone
+    document.getElementById('verifyPhoneBtn')?.addEventListener('click', async () => {
+        await initRecaptcha();
+        const conf = await signInWithPhoneNumber(auth, data.phone, recaptchaVerifier);
+        phoneConfirmationResult = conf;
+        pendingPhoneNumber = data.phone;
+        document.getElementById('otpModal').classList.add('active');
+        for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
+        showNotification('OTP sent', 'info');
+    });
+    
+    // Copy referral link
+    document.getElementById('copyReferralBtn')?.addEventListener('click', () => {
+        const inp = document.getElementById('referralLink');
+        if(inp) { inp.select(); navigator.clipboard.writeText(inp.value); showNotification('Referral link copied!','success'); }
+    });
+    
+    // Invite button
+    document.getElementById('inviteBtn')?.addEventListener('click', () => {
+        window.location.href = 'affiliate.html';
+    });
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function closeModal(id) {
+    document.getElementById(id)?.classList.remove('active');
+}
+
+function openModal(id) {
+    document.getElementById(id)?.classList.add('active');
+}
+
+document.getElementById('closePhoneModal')?.addEventListener('click', () => closeModal('phoneModal'));
+document.getElementById('closeEmailModal')?.addEventListener('click', () => closeModal('emailModal'));
+document.getElementById('closeUsernameModal')?.addEventListener('click', () => closeModal('usernameModal'));
+document.getElementById('closeOtpModal')?.addEventListener('click', () => closeModal('otpModal'));
+
+// Phone save
+document.getElementById('savePhoneModal')?.addEventListener('click', async () => {
+    const phone = document.getElementById('modalPhoneNumber').value.trim();
+    if(!phone) return showNotification('Enter phone number', 'error');
+    await initRecaptcha();
+    const conf = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+    phoneConfirmationResult = conf;
+    pendingPhoneNumber = phone;
+    closeModal('phoneModal');
+    openModal('otpModal');
+    for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
+    showNotification('OTP sent', 'info');
+});
+
+// OTP verify
+document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
+    const otp = (document.getElementById('otp1')?.value||'')+(document.getElementById('otp2')?.value||'')+(document.getElementById('otp3')?.value||'')+(document.getElementById('otp4')?.value||'')+(document.getElementById('otp5')?.value||'')+(document.getElementById('otp6')?.value||'');
+    if(otp.length !== 6) return showNotification('Enter 6-digit code', 'error');
+    await phoneConfirmationResult.confirm(otp);
+    await update(ref(rtdb, `users/${currentUser.uid}`), { phone: pendingPhoneNumber, phoneVerified: true });
+    showNotification('Phone verified!', 'success');
+    closeModal('otpModal');
+    // Refresh data
+    await loadUserData(currentUser);
+});
+
+// OTP auto-focus
+for(let i=1;i<=6;i++) {
+    document.getElementById(`otp${i}`)?.addEventListener('input', function(e){
+        if(this.value.length===1 && i<6) document.getElementById(`otp${i+1}`)?.focus();
+    });
+}
+
+// Email save
+document.getElementById('saveEmailModal')?.addEventListener('click', async () => {
+    const newEmail = document.getElementById('modalEmail').value.trim();
+    if(!newEmail.includes('@')) return showNotification('Invalid email', 'error');
+    await updateEmail(currentUser, newEmail);
+    await update(ref(rtdb, `users/${currentUser.uid}`), { email: newEmail, emailVerified: false });
+    await sendEmailVerification(currentUser);
+    showNotification('Email updated! Verification sent.', 'success');
+    closeModal('emailModal');
+    await loadUserData(currentUser);
+});
+
+// Username save
+document.getElementById('saveUsernameModal')?.addEventListener('click', async () => {
+    const newUsername = document.getElementById('newUsername').value.trim();
+    if(newUsername.length < 3) return showNotification('Username must be at least 3 chars', 'error');
+    await update(ref(rtdb, `users/${currentUser.uid}`), { username: newUsername });
+    showNotification('Username updated!', 'success');
+    closeModal('usernameModal');
+    await loadUserData(currentUser);
+});
 
 // ============================================================
 // LOAD USER DATA
 // ============================================================
-async function loadAllUserData(user) {
+async function loadUserData(user) {
+    if (!user) return;
     try {
         const userRef = ref(rtdb, `users/${user.uid}`);
         const robotsRef = ref(rtdb, `userRobots/${user.uid}`);
@@ -622,6 +1018,7 @@ async function loadAllUserData(user) {
                 if(val.status === 'active') activeRobots++; 
             });
         }
+        userData.activeRobots = activeRobots;
         
         let kycStatus = userData.kycStatus || 'none';
         if(kycStatus === 'none' && kycSnap.exists()) {
@@ -630,259 +1027,106 @@ async function loadAllUserData(user) {
             else if(kycData.status === 'pending') kycStatus = 'pending';
             else if(kycData.status === 'rejected') kycStatus = 'rejected';
         }
+        userData.kycStatus = kycStatus;
         
-        const referralCount = userData.referralCount || 0;
-        const commissionEarned = userData.commissionEarned || 0;
+        renderUserUI(user, userData);
+        await BiometricManager.checkStatus(user);
         
-        return { userData, activeRobots, kycStatus, referralCount, commissionEarned };
     } catch (error) {
         console.error('[RTDB] Load user error:', error);
-        return { 
-            userData: { username: 'User', email: user.email || '', createdAt: Date.now(), country: 'Tanzania' },
-            activeRobots: 0,
-            kycStatus: 'none',
-            referralCount: 0,
-            commissionEarned: 0
-        };
     }
 }
 
 // ============================================================
-// SETUP RTDB LISTENERS
+// RTDB LISTENERS
 // ============================================================
 function setupRTDBListeners(user) {
     rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
     rtdbListeners = [];
     
-    const userRef = ref(rtdb, `users/${user.uid}`);
-    const userUnsub = onValue(userRef, (snapshot) => {
+    // User data listener
+    const userUnsub = onValue(ref(rtdb, `users/${user.uid}`), (snapshot) => {
         if (snapshot.exists()) {
             userData = snapshot.val();
-            loadUserData(user);
+            renderUserUI(user, userData);
         }
     });
     rtdbListeners.push(userUnsub);
     
-    const kycRef = ref(rtdb, `kyc/${user.uid}`);
-    const kycUnsub = onValue(kycRef, (snapshot) => {
-        if (snapshot.exists()) {
-            loadUserData(user);
-        }
+    // KYC listener
+    const kycUnsub = onValue(ref(rtdb, `kyc/${user.uid}`), () => {
+        loadUserData(user);
     });
     rtdbListeners.push(kycUnsub);
     
-    // Listen for biometric changes
-    const bioRef = ref(rtdb, `biometric/${user.uid}`);
-    const bioUnsub = onValue(bioRef, (snapshot) => {
-        updateBiometricUI(snapshot.exists());
+    // Robots listener
+    const robotsUnsub = onValue(ref(rtdb, `userRobots/${user.uid}`), () => {
+        loadUserData(user);
+    });
+    rtdbListeners.push(robotsUnsub);
+    
+    // Biometric listener
+    const bioUnsub = onValue(ref(rtdb, `users/${user.uid}/biometricCredential`), (snapshot) => {
+        BiometricManager.updateUI(snapshot.exists());
     });
     rtdbListeners.push(bioUnsub);
 }
 
 // ============================================================
-// LOAD USER DATA - Render UI
+// SETTINGS EVENTS
 // ============================================================
-async function loadUserData(user) {
-    const data = await loadAllUserData(user);
-    
-    const username = data.userData.username || user.email?.split('@')[0] || 'User';
-    const isVerified = data.userData.isVerified === true;
-    const blueTick = isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
-    const createdAt = data.userData.createdAt ? new Date(data.userData.createdAt) : new Date();
-    const formattedDate = createdAt.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-    const userCountry = data.userData.country || 'Tanzania';
-    const countryFlag = getFlag(userCountry);
-    
-    let kycHtml = '';
-    if(data.kycStatus === 'approved' || data.kycStatus === 'verified') {
-        kycHtml = '<span class="kyc-status kyc-approved"><i class="fas fa-check-circle"></i> APPROVED</span>';
-    } else if(data.kycStatus === 'pending') {
-        kycHtml = '<span class="kyc-status kyc-pending"><i class="fas fa-clock"></i> PENDING</span>';
-    } else if(data.kycStatus === 'rejected') {
-        kycHtml = '<span class="kyc-status kyc-rejected"><i class="fas fa-times-circle"></i> REJECTED</span>';
-    } else {
-        kycHtml = '<span class="kyc-status kyc-none"><i class="fas fa-times-circle"></i> Not Submitted</span>';
-    }
-    
-    const isPhoneUser = data.userData.isPhoneUser === true || 
-                        (user.email && (user.email.includes('temporary') || user.email.includes('temp') || user.email.includes('phone')));
-    
-    let emailHtml = '';
-    if(isPhoneUser) {
-        emailHtml = `<button class="inline-btn edit-btn" id="editEmailBtn"><i class="fas fa-edit"></i> Edit</button>`;
-    }
-    if(!user.emailVerified && user.email && !isPhoneUser) {
-        emailHtml += ` <button class="inline-btn" id="verifyEmailBtn"><i class="fas fa-envelope"></i> Verify</button>`;
-    } else if(user.emailVerified && !isPhoneUser) {
-        emailHtml += ` <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
-    }
-    
-    let phoneHtml = '';
-    if(data.userData.phone && data.userData.phoneVerified) {
-        phoneHtml = `<button class="inline-btn edit-btn" id="editPhoneBtn"><i class="fas fa-edit"></i> Edit</button> <span style="color:#00FF88;"><i class="fas fa-check-circle"></i> Verified</span>`;
-    } else if(data.userData.phone && !data.userData.phoneVerified) {
-        phoneHtml = `<button class="inline-btn" id="verifyPhoneBtn"><i class="fas fa-check"></i> Verify</button> <span style="color:#FFD700;">${escapeHtml(data.userData.phone)}</span>`;
-    } else {
-        phoneHtml = `<button class="inline-btn add-btn" id="addPhoneBtn"><i class="fas fa-plus"></i> Add Phone</button>`;
-    }
-    
-    const referralCount = data.referralCount || 0;
-    const totalCommission = data.commissionEarned || 0;
-    const activeRobots = data.activeRobots || 0;
-    
-    document.getElementById('accountCard').innerHTML = `
-        <div class="profile-picture-box">
-            <div class="profile-avatar-large"><img id="profileAvatar" src="${data.userData.profilePicture || '../assets/images/avatar.png'}" onerror="this.src='https://placehold.co/70x70/FFD700/800000?text=User'"><div class="avatar-upload-btn" id="avatarUploadBtn"><i class="fas fa-camera"></i></div><input type="file" id="avatarInput" accept="image/*" style="display:none"></div>
-            <div class="profile-info-text"><h3>${escapeHtml(username)}${blueTick}</h3><p>Member since: ${formattedDate}</p></div>
-        </div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-user-tag"></i> Username</div><div class="info-value"><div class="username-container"><span class="username-text" id="usernameDisplay">${escapeHtml(username)}</span><i class="fas fa-edit username-edit-icon" id="editUsernameBtn"></i></div></div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email Address</div><div class="info-value"><span id="accountEmail">${escapeHtml(user.email || 'Not set')}</span> ${emailHtml}</div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Phone Number</div><div class="info-value"><span id="accountPhone">${data.userData.phone || 'Not added'}</span> ${phoneHtml}</div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt"></i> Country</div><div class="info-value"><span class="country-flag">${countryFlag}</span> ${escapeHtml(userCountry)}</div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-id-card"></i> KYC Status</div><div class="info-value" id="accountKyc">${kycHtml}</div></div>
-        <div class="info-stats-inline"><div class="info-label"><i class="fas fa-robot"></i> Active Robots</div><div class="info-value"><span class="inline-stats-number">${activeRobots}</span></div></div>
-        <div class="info-row"><div class="info-label"><i class="fas fa-calendar-alt"></i> Joined Date</div><div class="info-value">${formattedDate}</div></div>
-    `;
-    
-    document.getElementById('refCount').innerHTML = referralCount;
-    document.getElementById('totalCommission').innerHTML = `$${totalCommission.toFixed(2)}`;
-    
-    let refCode = data.userData.referralCode;
-    if(!refCode){ 
-        refCode = 'ABOTRA' + Math.random().toString(36).substring(2,8).toUpperCase(); 
-        update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode }).catch(() => {}); 
-    }
-    const refLinkDiv = document.querySelector('.referral-link');
-    if(refLinkDiv){ 
-        const domain = window.location.origin; 
-        refLinkDiv.innerHTML = `<input type="text" id="referralLink" readonly value="${domain}/register.html?ref=${refCode}"><button id="copyReferralBtn"><i class="fas fa-copy"></i> Copy</button>`; 
-        document.getElementById('copyReferralBtn')?.addEventListener('click',()=>{ 
-            const inp=document.getElementById('referralLink'); 
-            if(inp){ inp.select(); navigator.clipboard.writeText(inp.value); showNotification('Referral link copied!','success'); } 
-        }); 
-    }
-    
-    const inviteBtn = document.getElementById('inviteBtn');
-    if(inviteBtn){
-        inviteBtn.onclick = () => { window.location.href = 'affiliate.html'; };
-    }
-    
-    document.getElementById('avatarUploadBtn')?.addEventListener('click',()=>{ document.getElementById('avatarInput')?.click(); });
-    const avatarInput = document.getElementById('avatarInput');
-    if(avatarInput) avatarInput.addEventListener('change', async (e)=>{
-        const file = e.target.files[0];
-        if(!file) return;
-        const compressed = await compressImage(file, 800, 800, 0.8);
-        const fileName = `profile_${user.uid}_${Date.now()}.jpg`;
-        const uploadResult = await uploadBytes(storageRef(storage, `profilePictures/${fileName}`), compressed);
-        const url = await getDownloadURL(uploadResult.ref);
-        await update(ref(rtdb, `users/${user.uid}`), { profilePicture: url });
-        document.getElementById('profileAvatar').src = url;
-        showNotification('Profile picture updated!', 'success');
-    });
-    
-    document.getElementById('editUsernameBtn')?.addEventListener('click', () => { document.getElementById('newUsername').value = data.userData.username || ''; openUsernameModal(); });
-    document.getElementById('editEmailBtn')?.addEventListener('click', () => { document.getElementById('modalEmail').value = user.email || ''; openEmailModal(); });
-    document.getElementById('editPhoneBtn')?.addEventListener('click', () => { 
-        document.getElementById('modalPhoneNumber').value = data.userData.phone || ''; 
-        openPhoneModal(); 
-    });
-    document.getElementById('verifyEmailBtn')?.addEventListener('click', async()=>{ await sendEmailVerification(user); showNotification('Verification email sent!', 'success'); });
-    document.getElementById('addPhoneBtn')?.addEventListener('click', () => { document.getElementById('modalPhoneNumber').value = ''; openPhoneModal(); });
-    document.getElementById('verifyPhoneBtn')?.addEventListener('click', async()=>{ 
-        await initRecaptcha(); 
-        const conf = await signInWithPhoneNumber(auth, data.userData.phone, recaptchaVerifier);
-        phoneConfirmationResult = conf; pendingPhoneNumber = data.userData.phone;
-        openOtpModal(); for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
-        showNotification('OTP sent', 'info');
-    });
-}
+document.getElementById('logoutTopBtn')?.addEventListener('click', async () => { 
+    await signOut(auth); 
+    window.location.href = 'login.html'; 
+});
+
+document.getElementById('changePasswordBtn')?.addEventListener('click', () => { 
+    sendPasswordResetEmail(auth, currentUser?.email); 
+    showNotification('Reset link sent!', 'success'); 
+});
+
+document.getElementById('twoFactorBtn')?.addEventListener('click', () => {
+    showNotification('2FA coming soon', 'info');
+});
+
+document.getElementById('kycBtn')?.addEventListener('click', () => {
+    window.location.href = 'kyc.html';
+});
 
 // ============================================================
-// MODAL FUNCTIONS
+// THEME
 // ============================================================
-const phoneModal = document.getElementById('phoneModal'), emailModal = document.getElementById('emailModal'), usernameModal = document.getElementById('usernameModal'), otpModal = document.getElementById('otpModal');
-
-function openPhoneModal() { phoneModal?.classList.add('active'); }
-function closePhoneModal() { phoneModal?.classList.remove('active'); }
-function openEmailModal() { emailModal?.classList.add('active'); }
-function closeEmailModal() { emailModal?.classList.remove('active'); }
-function openUsernameModal() { usernameModal?.classList.add('active'); }
-function closeUsernameModal() { usernameModal?.classList.remove('active'); }
-function openOtpModal() { otpModal?.classList.add('active'); }
-function closeOtpModal() { otpModal?.classList.remove('active'); }
-
-document.getElementById('closePhoneModal')?.addEventListener('click', closePhoneModal);
-document.getElementById('closeEmailModal')?.addEventListener('click', closeEmailModal);
-document.getElementById('closeUsernameModal')?.addEventListener('click', closeUsernameModal);
-document.getElementById('closeOtpModal')?.addEventListener('click', closeOtpModal);
-
-document.getElementById('savePhoneModal')?.addEventListener('click', async () => {
-    const phone = document.getElementById('modalPhoneNumber').value.trim();
-    if(!phone) return showNotification('Enter phone number', 'error');
-    await initRecaptcha();
-    const conf = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-    phoneConfirmationResult = conf; pendingPhoneNumber = phone;
-    closePhoneModal(); openOtpModal();
-    for(let i=1;i<=6;i++) document.getElementById(`otp${i}`).value = '';
-    showNotification('OTP sent', 'info');
-});
-
-document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
-    const otp = (document.getElementById('otp1')?.value||'')+(document.getElementById('otp2')?.value||'')+(document.getElementById('otp3')?.value||'')+(document.getElementById('otp4')?.value||'')+(document.getElementById('otp5')?.value||'')+(document.getElementById('otp6')?.value||'');
-    if(otp.length !== 6) return showNotification('Enter 6-digit code', 'error');
-    await phoneConfirmationResult.confirm(otp);
-    await update(ref(rtdb, `users/${currentUser.uid}`), { phone: pendingPhoneNumber, phoneVerified: true });
-    await loadUserData(currentUser);
-    showNotification('Phone verified!', 'success');
-    closeOtpModal();
-});
-
-for(let i=1;i<=6;i++) document.getElementById(`otp${i}`)?.addEventListener('input', function(e){ if(this.value.length===1 && i<6) document.getElementById(`otp${i+1}`)?.focus(); });
-
-document.getElementById('saveEmailModal')?.addEventListener('click', async () => {
-    const newEmail = document.getElementById('modalEmail').value.trim();
-    if(!newEmail.includes('@')) return showNotification('Invalid email', 'error');
-    await updateEmail(currentUser, newEmail);
-    await update(ref(rtdb, `users/${currentUser.uid}`), { email: newEmail, emailVerified: false });
-    await sendEmailVerification(currentUser);
-    await loadUserData(currentUser);
-    showNotification('Email updated! Verification sent.', 'success');
-    closeEmailModal();
-});
-
-document.getElementById('saveUsernameModal')?.addEventListener('click', async () => {
-    const newUsername = document.getElementById('newUsername').value.trim();
-    if(newUsername.length < 3) return showNotification('Username must be at least 3 chars', 'error');
-    await update(ref(rtdb, `users/${currentUser.uid}`), { username: newUsername });
-    await loadUserData(currentUser);
-    showNotification('Username updated!', 'success');
-    closeUsernameModal();
-});
-
-document.getElementById('logoutTopBtn')?.addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
-document.getElementById('changePasswordBtn')?.addEventListener('click', () => { sendPasswordResetEmail(auth, currentUser.email); showNotification('Reset link sent!', 'success'); });
-document.getElementById('twoFactorBtn')?.addEventListener('click', () => showNotification('2FA coming soon', 'info'));
-document.getElementById('kycBtn')?.addEventListener('click', () => window.location.href = 'kyc.html');
-
 function initTheme() { 
     const saved = localStorage.getItem('abotra_theme');
-    if(saved === 'light') { document.body.classList.add('light-theme'); document.querySelector('#themeToggle i.fa-sun').style.display = 'none'; document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block'; }
+    if(saved === 'light') { 
+        document.body.classList.add('light-theme'); 
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none'; 
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block'; 
+    }
 }
-document.getElementById('themeToggle')?.addEventListener('click', () => { document.body.classList.toggle('light-theme'); localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); });
+
+document.getElementById('themeToggle')?.addEventListener('click', () => { 
+    document.body.classList.toggle('light-theme'); 
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); 
+});
 
 // ============================================================
 // INIT
 // ============================================================
 onAuthStateChanged(auth, async(user) => { 
-    if(!user){ window.location.href='login.html'; return; } 
+    if(!user){ 
+        window.location.href='login.html'; 
+        return; 
+    } 
     currentUser = user; 
     console.log('[Account] User logged in:', user.uid);
     await loadUserData(user);
     setupRTDBListeners(user);
-    await checkBiometricStatus();
 });
+
 initTheme();
+
+console.log('[Account] ✅ Page loaded with SVG flags + Biometric Manager');
 </script>
 </body>
 </html>
