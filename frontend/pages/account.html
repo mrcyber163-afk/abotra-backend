@@ -6,20 +6,7 @@
 <title>Account | ABOTRA-PROAI - Manage Your Profile</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- ============================================================ -->
-<!-- CONFIG - Backend Connection                                     -->
-<!-- ============================================================ -->
-<script>
-    const CONFIG = {
-        API_URL: 'https://abotra-backend-production.up.railway.app',
-        WS_URL: 'wss://abotra-backend-production.up.railway.app',
-        ENVIRONMENT: 'production',
-        VERSION: '2.0.0'
-    };
-    window.CONFIG = CONFIG;
-    console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
@@ -280,6 +267,23 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 .otp-input-group { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
 .otp-input { width: 38px; height: 38px; text-align: center; font-size: 15px; font-weight: bold; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; color: #FFD700; }
 
+.biometric-status-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 8px;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.biometric-status-small.enabled {
+    background: rgba(14,203,129,0.2);
+    color: #0ECB81;
+}
+.biometric-status-small.disabled {
+    background: rgba(255,255,255,0.08);
+    color: #888;
+}
+
 .notification-popup { 
     position:fixed; top:65px; right:20px; min-width:240px; max-width:320px;
     padding:8px 12px; border-radius:12px; display:flex; align-items:center; gap:8px;
@@ -344,6 +348,7 @@ body.light-theme .modal-container { background:linear-gradient(145deg, #ffffff, 
 <div class="settings-card"><div class="section-title"><i class="fas fa-sliders-h"></i> Account Settings</div>
 <div class="setting-item" id="changePasswordBtn"><span><i class="fas fa-lock"></i> Change Password</span><i class="fas fa-chevron-right arrow"></i></div>
 <div class="setting-item" id="twoFactorBtn"><span><i class="fas fa-shield-alt"></i> Two-Factor Authentication</span><i class="fas fa-chevron-right arrow"></i></div>
+<div class="setting-item" id="biometricSetupBtn"><span><i class="fas fa-fingerprint"></i> Biometric Login</span><span id="biometricStatusBadge" class="biometric-status-small disabled"><i class="fas fa-times"></i> Not Setup</span></div>
 <div class="setting-item" id="kycBtn"><span><i class="fas fa-id-card"></i> Submit KYC Documents</span><i class="fas fa-chevron-right arrow"></i></div>
 </div>
 
@@ -393,6 +398,7 @@ const storage = getStorage(app);
 
 let currentUser = null, userData = null, recaptchaVerifier = null, pendingPhoneNumber = null, phoneConfirmationResult = null;
 let rtdbListeners = [];
+let rpId = window.location.hostname || "abotra-proai.com";
 
 // ============================================================
 // COUNTRY FLAGS
@@ -403,7 +409,7 @@ const countryFlags = {
 function getFlag(country) { return countryFlags[country] || "🌍"; }
 
 // ============================================================
-// NOTIFICATION FUNCTIONS
+// NOTIFICATION
 // ============================================================
 function showNotification(msg, type) { 
     const existing = document.querySelector('.notification-popup'); if(existing) existing.remove(); 
@@ -452,7 +458,138 @@ async function initRecaptcha() {
 }
 
 // ============================================================
-// 🔥 DIRECT RTDB LOAD FUNCTIONS - No API
+// BIOMETRIC - FIREBASE ONLY (No Routes)
+// ============================================================
+async function setupBiometric() {
+    if (!currentUser) return;
+    try {
+        // Check if biometric is already setup
+        const biometricRef = ref(rtdb, `biometric/${currentUser.uid}`);
+        const snap = await get(biometricRef);
+        
+        if (snap.exists()) {
+            // Biometric already setup
+            updateBiometricUI(true);
+            return;
+        }
+        
+        // Generate biometric credential using WebAuthn
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        
+        const options = {
+            challenge: challenge,
+            rp: { name: "ABOTRA-PROAI", id: rpId },
+            user: {
+                id: currentUser.uid,
+                name: currentUser.email || currentUser.uid,
+                displayName: userData?.username || currentUser.email || 'User'
+            },
+            pubKeyCredParams: [
+                { type: "public-key", alg: -7 },
+                { type: "public-key", alg: -257 }
+            ],
+            authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                residentKey: "preferred",
+                userVerification: "required"
+            },
+            timeout: 60000,
+            attestation: "none"
+        };
+        
+        const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+        
+        if (credential) {
+            // Save biometric credential to Firebase RTDB
+            await set(ref(rtdb, `biometric/${currentUser.uid}`), {
+                credentialId: credential.id,
+                publicKey: credential.response.publicKey || credential.response.attestationObject,
+                userId: currentUser.uid,
+                email: currentUser.email,
+                createdAt: Date.now(),
+                deviceInfo: navigator.userAgent || 'Unknown'
+            });
+            
+            // Also save to localStorage for quick check
+            localStorage.setItem('abotra_biometric_credential', JSON.stringify(credential));
+            localStorage.setItem('abotra_biometric_email', currentUser.email || '');
+            
+            updateBiometricUI(true);
+            showNotification('🔐 Biometric login enabled! You can now login with fingerprint/face.', 'success');
+        }
+    } catch (error) {
+        console.error('[BIOMETRIC] Setup error:', error);
+        if (error.name === 'NotAllowedError') {
+            showNotification('Biometric setup cancelled or not allowed.', 'error');
+        } else if (error.name === 'NotSupportedError') {
+            showNotification('Biometric not supported on this device.', 'error');
+        } else {
+            showNotification('Failed to setup biometric: ' + error.message, 'error');
+        }
+        updateBiometricUI(false);
+    }
+}
+
+async function removeBiometric() {
+    if (!currentUser) return;
+    try {
+        await remove(ref(rtdb, `biometric/${currentUser.uid}`));
+        localStorage.removeItem('abotra_biometric_credential');
+        localStorage.removeItem('abotra_biometric_email');
+        localStorage.removeItem('abotra_biometric_password');
+        updateBiometricUI(false);
+        showNotification('Biometric login disabled.', 'info');
+    } catch (error) {
+        console.error('[BIOMETRIC] Remove error:', error);
+        showNotification('Failed to disable biometric.', 'error');
+    }
+}
+
+async function checkBiometricStatus() {
+    if (!currentUser) return false;
+    try {
+        const biometricRef = ref(rtdb, `biometric/${currentUser.uid}`);
+        const snap = await get(biometricRef);
+        const exists = snap.exists();
+        updateBiometricUI(exists);
+        return exists;
+    } catch (error) {
+        console.error('[BIOMETRIC] Check status error:', error);
+        updateBiometricUI(false);
+        return false;
+    }
+}
+
+function updateBiometricUI(enabled) {
+    const badge = document.getElementById('biometricStatusBadge');
+    if (!badge) return;
+    if (enabled) {
+        badge.className = 'biometric-status-small enabled';
+        badge.innerHTML = '<i class="fas fa-check-circle"></i> Enabled';
+        // Update the setting item to show "Disable" option
+        const settingItem = document.getElementById('biometricSetupBtn');
+        if (settingItem) {
+            settingItem.onclick = async () => {
+                if (confirm('Disable Biometric Login? You will need to use password to login.')) {
+                    await removeBiometric();
+                }
+            };
+        }
+    } else {
+        badge.className = 'biometric-status-small disabled';
+        badge.innerHTML = '<i class="fas fa-times"></i> Not Setup';
+        const settingItem = document.getElementById('biometricSetupBtn');
+        if (settingItem) {
+            settingItem.onclick = async () => {
+                await setupBiometric();
+            };
+        }
+    }
+}
+
+// ============================================================
+// LOAD USER DATA
 // ============================================================
 async function loadAllUserData(user) {
     try {
@@ -511,7 +648,7 @@ async function loadAllUserData(user) {
 }
 
 // ============================================================
-// SETUP RTDB LISTENERS - Realtime Updates
+// SETUP RTDB LISTENERS
 // ============================================================
 function setupRTDBListeners(user) {
     rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
@@ -533,6 +670,13 @@ function setupRTDBListeners(user) {
         }
     });
     rtdbListeners.push(kycUnsub);
+    
+    // Listen for biometric changes
+    const bioRef = ref(rtdb, `biometric/${user.uid}`);
+    const bioUnsub = onValue(bioRef, (snapshot) => {
+        updateBiometricUI(snapshot.exists());
+    });
+    rtdbListeners.push(bioUnsub);
 }
 
 // ============================================================
@@ -736,6 +880,7 @@ onAuthStateChanged(auth, async(user) => {
     console.log('[Account] User logged in:', user.uid);
     await loadUserData(user);
     setupRTDBListeners(user);
+    await checkBiometricStatus();
 });
 initTheme();
 </script>
