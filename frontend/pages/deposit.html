@@ -37,6 +37,7 @@ body:not(.light-theme) .choices__list--dropdown {
     background: #1a1a1a !important;
     border-color: rgba(255,215,0,0.2) !important;
     border-radius: 12px !important;
+    z-index: 9999 !important;
 }
 body:not(.light-theme) .choices__list--dropdown .choices__item {
     color: #FFFFFF !important;
@@ -73,6 +74,7 @@ body.light-theme .choices__list--dropdown {
     background: #ffffff !important;
     border-color: rgba(0,0,0,0.1) !important;
     border-radius: 12px !important;
+    z-index: 9999 !important;
 }
 body.light-theme .choices__list--dropdown .choices__item {
     color: #1a1a1a !important;
@@ -96,10 +98,66 @@ body.light-theme .choices__list--dropdown .choices__input:focus {
 body.light-theme .choices__placeholder { color: #999999 !important; }
 body.light-theme .choices__list--single .choices__item { color: #1a1a1a !important; }
 
+/* ===== COUNTRY SELECTOR - FIXED Z-INDEX ===== */
+.country-selector { 
+    margin-bottom: 16px; 
+    position: relative;
+    z-index: 1000;
+}
+.country-selector .choices {
+    width: 100%;
+    position: relative;
+    z-index: 1000;
+}
+.country-selector .choices__inner {
+    height: 46px !important;
+    border-radius: 12px !important;
+    padding: 6px 12px !important;
+    border: 1px solid rgba(255,215,0,0.2) !important;
+}
+.country-selector .choices__list--dropdown {
+    z-index: 9999 !important;
+    position: absolute !important;
+    max-height: 280px !important;
+}
+.country-selector .choices__list--dropdown .choices__item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+.country-selector .choices__list--single .choices__item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+.country-selector .choices__list--single .choices__item .country-flag {
+    font-size: 18px;
+    line-height: 1;
+}
+.country-selector .choices__list--single .choices__item .country-name {
+    font-weight: 500;
+}
+.country-selector .choices__list--dropdown .choices__item .country-flag {
+    font-size: 20px;
+    line-height: 1;
+}
+
 /* ===== SCROLLBAR FOR DROPDOWN ===== */
 .choices__list--dropdown .choices__list::-webkit-scrollbar { width: 3px; }
 .choices__list--dropdown .choices__list::-webkit-scrollbar-track { background: transparent; }
 .choices__list--dropdown .choices__list::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 10px; }
+
+/* ===== WALLET CARD - FIX OVERFLOW ===== */
+.wallet-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: visible !important;
+}
 
 .skeleton-wallet-card {
 background: rgba(255,255,255,0.05);
@@ -201,7 +259,7 @@ animation: shimmer 1.5s infinite;
 .tab-btn.active { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
 .tab-btn .tab-icon { width: 20px; height: 20px; object-fit: contain; display: inline-block; }
 .deposit-container { max-width: 650px; margin: 0 auto; }
-.wallet-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 16px; position: relative; }
+.wallet-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 16px; position: relative; overflow: visible !important; }
 .wallet-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .wallet-title .title-icon { width: 24px; height: 24px; object-fit: contain; }
 .input-box { width: 100%; margin-bottom: 16px; }
@@ -209,37 +267,6 @@ animation: shimmer 1.5s infinite;
 .input-box textarea { height: 70px; padding: 10px 14px; resize: vertical; }
 .input-box input:focus, .input-box select:focus, .input-box textarea:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
 .input-box input:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* ===== COUNTRY SELECTOR - CHOICES.JS ===== */
-.country-selector { margin-bottom: 16px; }
-.country-selector .choices { width: 100%; }
-.country-selector .choices__inner {
-    height: 46px !important;
-    border-radius: 12px !important;
-    padding: 6px 12px !important;
-    border: 1px solid rgba(255,215,0,0.2) !important;
-}
-.country-selector .choices__list--dropdown .choices__item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-.country-selector .choices__list--single .choices__item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-.country-selector .choices__list--single .choices__item .country-flag {
-    font-size: 18px;
-    line-height: 1;
-}
-.country-selector .choices__list--single .choices__item .country-name {
-    font-weight: 500;
-}
-.country-selector .choices__list--dropdown .choices__item .country-flag {
-    font-size: 20px;
-    line-height: 1;
-}
 
 .networks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 16px; }
 .network-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; cursor: pointer; }
@@ -772,7 +799,6 @@ const allCountries = [
     { code: "Egypt", flag: "🇪🇬", name: "Egypt" },
     { code: "Morocco", flag: "🇲🇦", name: "Morocco" },
     { code: "Zimbabwe", flag: "🇿🇼", name: "Zimbabwe" },
-    { code: "Zambia", flag: "🇿🇲", name: "Zambia" },
     { code: "Angola", flag: "🇦🇴", name: "Angola" },
     { code: "Ethiopia", flag: "🇪🇹", name: "Ethiopia" },
     { code: "Somalia", flag: "🇸🇴", name: "Somalia" },
@@ -986,7 +1012,7 @@ function updateKYCUI() {
 }
 
 // ============================================================
-// COUNTRY DROPDOWN - CHOICES.JS
+// COUNTRY DROPDOWN - CHOICES.JS WITH FIXED Z-INDEX
 // ============================================================
 function initCountryDropdown() {
     const select = document.getElementById('countrySelect');
@@ -1013,7 +1039,8 @@ function initCountryDropdown() {
             placeholder: true,
             placeholderValue: '🇺🇳 Select Country',
             allowHTML: false,
-            renderSelectedChoices: 'always'
+            renderSelectedChoices: 'always',
+            position: 'bottom'
         });
 
         // Set default selection from user data
@@ -1024,7 +1051,6 @@ function initCountryDropdown() {
                     countryChoices.setChoiceByValue(matched.code);
                 }
             } else {
-                // Try to auto-detect
                 autoDetectCountry();
             }
         }, 300);
