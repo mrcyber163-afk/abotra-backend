@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Auto Trading Bot | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body {
+    background: #050505;
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding-bottom: 75px;
+    position: relative;
+    font-size: 11px;
+}
+body.light-theme {
+    background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .bot-container,
+body.light-theme .robot-card,
+body.light-theme .stats-card,
+body.light-theme .logs-card,
+body.light-theme .global-balance,
+body.light-theme .instructions-box {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .robot-name { color: #800000; }
+body.light-theme .stats-title { color: #555; }
+body.light-theme .stat-value { color: #800000; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .log-message { color: #333; }
+body.light-theme .log-robot { color: #800000; }
+body.light-theme .instructions-box li { color: #444; }
+body.light-theme .modal-container { background: #f5f5f5; border-color: rgba(128,0,0,0.3); }
+body.light-theme .modal-title { color: #800000; }
+body.light-theme .modal-message { color: #333; }
+body.light-theme .signal-box-mini { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+body.light-theme .signal-box-mini .signal-coin-mini { color: #800000; }
+body.light-theme .signal-box-mini .signal-type-mini.buy { color: #0A9E65; }
+body.light-theme .signal-box-mini .signal-type-mini.sell { color: #D43F52; }
+body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
+
+.theme-toggle {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+
+.currency-toggle-btn {
+    background: rgba(255,215,0,0.15);
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 10px;
+    padding: 4px 12px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    height: 32px;
+}
+.currency-toggle-btn:hover {
+    background: rgba(255,215,0,0.3);
+    transform: scale(1.02);
+}
+.currency-toggle-btn i { font-size: 11px; }
+
+.overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+.top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background:transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top {
+    background: rgba(255,215,0,0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    font-weight: 500;
+}
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+.bot-container {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: 70px auto 20px;
+    padding: 0 12px;
+}
+.page-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFD700;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.global-balance {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 10px 15px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.global-balance .label { color: #AAAAAA; font-size: 10px; }
+.global-balance .value { color: #FFD700; font-size: 20px; font-weight: 800; transition: all 0.3s ease; }
+.global-balance .value.currency-updated {
+    animation: priceUpdate 0.3s ease;
+}
+@keyframes priceUpdate {
+    0% { transform: scale(1); color: #FFD700; }
+    50% { transform: scale(1.05); color: #0ECB81; }
+    100% { transform: scale(1); color: #FFD700; }
+}
+.global-balance .global-actions { display: flex; gap: 6px; }
+.global-actions button {
+    background: rgba(255,215,0,0.15);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 8px;
+    padding: 5px 14px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 9px;
+    font-weight: 600;
+}
+.global-actions button:hover { background: rgba(255,215,0,0.3); }
+.section-title {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 15px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.robots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.robot-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 15px;
+    transition: 0.3s;
+}
+.robot-card:hover { border-color: #FFD700; transform: translateY(-2px); }
+.robot-card.active-robot {
+    border-color: #0ECB81;
+    box-shadow: 0 0 20px rgba(14,203,129,0.1);
+}
+.robot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.robot-name { color: #FFD700; font-size: 14px; font-weight: 800; }
+.robot-level { background: rgba(255,215,0,0.2); padding: 2px 8px; border-radius: 16px; font-size: 8px; color: #FFD700; }
+.robot-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 6px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.robot-stat { text-align: center; flex: 1; }
+.robot-stat-label { color: #888; font-size: 7px; margin-bottom: 2px; }
+.robot-stat-value { color: #FFD700; font-size: 11px; font-weight: 700; }
+.robot-stat-value.currency-updated {
+    animation: priceUpdate 0.3s ease;
+}
+.invested-amount {
+    background: rgba(255,215,0,0.1);
+    border-radius: 10px;
+    padding: 8px;
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+}
+.invested-amount .invested-label { color: #aaa; }
+.invested-amount .invested-value { color: #0ECB81; font-weight: 700; }
+.robot-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 6px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.status-indicator { width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; }
+.status-indicator.active { background: #0ECB81; box-shadow: 0 0 5px #0ECB81; animation: pulse 1.5s infinite; }
+.status-indicator.inactive { background: #F6465D; }
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.status-text { color: #FFFFFF; font-size: 9px; }
+.robot-profit { color: #0ECB81; font-size: 11px; font-weight: 700; }
+.robot-progress { color: #FFD700; font-size: 8px; margin-top: 3px; }
+.robot-buttons { display: flex; gap: 6px; margin-top: 6px; }
+.btn-start-robot {
+    background: linear-gradient(135deg, #0ECB81, #0A9E65);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: white;
+    font-weight: 600;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    flex: 1;
+}
+.btn-restart-robot {
+    background: linear-gradient(135deg, #FFD700, #F0A500);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    flex: 1;
+}
+.btn-add-capital {
+    background: linear-gradient(135deg, #800000, #FFD700);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: white;
+    font-weight: 600;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    flex: 1;
+}
+.btn-start-robot:disabled, .btn-add-capital:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-start-robot:hover:not(:disabled), .btn-restart-robot:hover:not(:disabled), .btn-add-capital:hover:not(:disabled) { transform: translateY(-1px); }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.stats-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 10px;
+    text-align: center;
+}
+.stats-title { color: #AAAAAA; font-size: 8px; margin-bottom: 3px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+.stat-value { color: #FFD700; font-size: 15px; font-weight: 800; }
+.stat-value.currency-updated {
+    animation: priceUpdate 0.3s ease;
+}
+.logs-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.logs-title { color: #FFD700; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.clear-logs {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #FFD700;
+    font-size: 8px;
+    cursor: pointer;
+}
+.clear-logs:hover { background: rgba(255,215,0,0.2); }
+.logs-container { 
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    scroll-behavior: smooth;
+}
+.logs-container::-webkit-scrollbar {
+    width: 4px;
+}
+.logs-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+.logs-container::-webkit-scrollbar-thumb {
+    background: rgba(255,215,0,0.4);
+    border-radius: 10px;
+}
+.logs-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,215,0,0.6);
+}
+.log-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 9px;
+    flex-wrap: wrap;
+    gap: 6px;
+    transition: background 0.2s;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid transparent;
+    margin-bottom: 2px;
+    min-height: 28px;
+}
+.log-item:hover { background: rgba(255,215,0,0.05); }
+.log-item .log-time {
+    font-size: 7px;
+    color: #666;
+    font-family: monospace;
+    min-width: 50px;
+    flex-shrink: 0;
+}
+.log-item .log-icon {
+    font-size: 10px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.log-item .log-robot {
+    color: #FFD700;
+    font-weight: 600;
+    font-size: 9px;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+.log-item .log-message {
+    flex: 1;
+    font-size: 9px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.log-item.win { border-left-color: #0ECB81; background: rgba(14,203,129,0.06); }
+.log-item.win .log-message { color: #0ECB81; }
+.log-item.loss { border-left-color: #F6465D; background: rgba(246,70,93,0.06); }
+.log-item.loss .log-message { color: #F6465D; }
+.log-item.info { border-left-color: #FFD700; background: rgba(255,215,0,0.04); }
+.log-item.info .log-message { color: #FFD700; }
+.log-item.profit { border-left-color: #00FF88; background: rgba(0,255,136,0.06); }
+.log-item.profit .log-message { color: #00FF88; }
+.log-item.warning { border-left-color: #FF9800; background: rgba(255,152,0,0.06); }
+.log-item.warning .log-message { color: #FF9800; }
+
+.log-count-badge {
+    background: rgba(255,215,0,0.2);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 8px;
+    color: #FFD700;
+    margin-left: 5px;
+}
+.empty-state { text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.03); border-radius: 16px; }
+.empty-state i { font-size: 45px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
+.empty-state p { color: #AAAAAA; font-size: 11px; }
+.empty-state button {
+    background: linear-gradient(135deg, #800000, #FFD700);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    color: white;
+    font-weight: 600;
+    margin-top: 15px;
+    cursor: pointer;
+    font-size: 10px;
+}
+.live-badge {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #0ECB81;
+    border-radius: 50%;
+    margin-left: 5px;
+    animation: pulse 1.5s infinite;
+    vertical-align: middle;
+}
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,215,0,0.2);
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 10px;
+    z-index: 100;
+}
+.bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #888;
+    font-size: 7px;
+    transition: 0.3s;
+    gap: 2px;
+}
+.bottom-nav a i { font-size: 15px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup { display: none !important; }
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.modal-container {
+    background: linear-gradient(145deg, #1e1e2e, #161626);
+    border-radius: 24px;
+    padding: 22px;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid rgba(255,215,0,0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+@keyframes modalSlideIn {
+    from { transform: scale(0.9) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-title { color: #FFD700; font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 10px; }
+.modal-message { color: #ccc; font-size: 11px; text-align: center; margin-bottom: 18px; white-space: pre-line; line-height: 1.6; }
+.modal-buttons { display: flex; gap: 10px; justify-content: center; }
+.modal-btn {
+    flex: 1; padding: 10px; border: none; border-radius: 12px;
+    font-weight: 700; font-size: 11px; cursor: pointer;
+    transition: 0.3s;
+}
+.modal-btn-confirm { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.modal-btn-confirm:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(14,203,129,0.4); }
+.modal-btn-cancel { background: rgba(255,255,255,0.08); color: #aaa; }
+.modal-btn-cancel:hover { background: rgba(255,255,255,0.15); }
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 6px 0;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ECB81, #FFD700);
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+.instructions-box {
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    backdrop-filter: blur(10px);
+}
+.instructions-box h3 {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.instructions-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.instructions-box li {
+    color: #CCCCCC;
+    font-size: 10px;
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+}
+.instructions-box li i {
+    color: #FFD700;
+    margin-top: 2px;
+    min-width: 16px;
+}
+.instructions-box li .highlight {
+    color: #0ECB81;
+    font-weight: 600;
+}
+.instructions-box li .warning {
+    color: #F6465D;
+    font-weight: 600;
+}
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.skeleton-robot-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 15px;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.skeleton-name { width: 60%; height: 16px; background: rgba(255,215,0,0.2); border-radius: 6px; }
+.skeleton-level { width: 30%; height: 16px; background: rgba(255,215,0,0.2); border-radius: 6px; }
+.skeleton-stats-row { display: flex; gap: 10px; margin: 8px 0; }
+.skeleton-stat-item { flex: 1; height: 30px; background: rgba(255,215,0,0.15); border-radius: 8px; }
+.skeleton-controls { display: flex; gap: 10px; margin: 8px 0; }
+.skeleton-control { flex: 1; height: 20px; background: rgba(255,215,0,0.1); border-radius: 6px; }
+.skeleton-buttons { display: flex; gap: 8px; margin-top: 8px; }
+.skeleton-btn { flex: 1; height: 32px; background: rgba(255,215,0,0.15); border-radius: 6px; }
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* ============================================================
+   SIGNAL BOX MINI - Inaonekana juu ya robot cards
+   ============================================================ */
+.signal-box-mini {
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(6px);
+}
+.signal-box-mini:hover {
+    transform: scale(1.01);
+    border-color: #FFD700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.08);
+}
+.signal-box-mini .signal-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.signal-box-mini .signal-coin-mini {
+    color: #FFD700;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.signal-box-mini .signal-type-mini {
+    font-size: 18px;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 30px;
+}
+.signal-box-mini .signal-type-mini.buy {
+    background: rgba(14,203,129,0.15);
+    color: #0ECB81;
+}
+.signal-box-mini .signal-type-mini.sell {
+    background: rgba(246,70,93,0.15);
+    color: #F6465D;
+}
+.signal-box-mini .signal-type-mini.hold {
+    background: rgba(255,255,255,0.05);
+    color: #888;
+}
+.signal-box-mini .signal-price-mini {
+    color: #AAAAAA;
+    font-size: 11px;
+}
+.signal-box-mini .signal-price-mini span {
+    color: #FFD700;
+    font-weight: 700;
+}
+.signal-box-mini .signal-arrow {
+    color: #FFD700;
+    font-size: 14px;
+    animation: signalPulse 1.2s infinite;
+}
+@keyframes signalPulse {
+    0%, 100% { opacity: 1; transform: translateX(0); }
+    50% { opacity: 0.5; transform: translateX(4px); }
+}
+.signal-box-mini .signal-confidence-mini {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #888;
+}
+.signal-box-mini .signal-confidence-mini .conf-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.signal-box-mini .signal-confidence-mini .conf-dot.high { background: #0ECB81; }
+.signal-box-mini .signal-confidence-mini .conf-dot.medium { background: #FFD700; }
+.signal-box-mini .signal-confidence-mini .conf-dot.low { background: #F6465D; }
+
+/* ============================================================
+   LIVE INDICATOR KWA SIGNAL BOX MINI
+   ============================================================ */
+.signal-box-mini .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #0ECB81;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    margin-right: 4px;
+}
+
+@media(max-width: 700px) {
+    .bot-container { padding: 0 12px; margin-top: 65px; }
+    .page-title { font-size: 18px; }
+    .global-balance { flex-direction: column; text-align: center; }
+    .global-balance .value { font-size: 18px; }
+    .robots-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .theme-toggle { padding: 8px; }
+    .logo-area h2 { font-size: 13px; }
+    .logo-area p { display: none; }
+    .bottom-nav a span { font-size: 6px; }
+    .bottom-nav a i { font-size: 14px; }
+    .log-robot { min-width: 55px; font-size: 8px; }
+    .log-message { font-size: 8px; }
+    .log-time { font-size: 6px; min-width: 45px; }
+    .logs-container { gap: 3px; padding: 5px 8px; }
+    .currency-toggle-btn { padding: 3px 8px; font-size: 9px; height: 28px; }
+    .currency-toggle-btn i { font-size: 10px; }
+    .skeleton-grid { grid-template-columns: 1fr; }
+    .log-item .log-icon { width: 16px; font-size: 9px; }
+    .signal-box-mini { flex-direction: column; align-items: stretch; text-align: center; }
+    .signal-box-mini .signal-left { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="logo-area">
+        <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+        <div><h2>ABOTRA-PROAI</h2><p>Auto Trading Bot</p></div>
+    </div>
+    <div class="top-bar-right">
+        <button class="currency-toggle-btn" id="currencyToggleBtn">
+            <i class="fas fa-exchange-alt"></i> 
+            <span id="currencyDisplay">USD</span>
+        </button>
+        <button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+        <div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></div>
+    </div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="bot-container">
+    <div class="page-title"><i class="fas fa-robot"></i> AI Auto Trading Bot <span class="live-badge"></span></div>
+    
+    <div class="global-balance">
+        <span class="label"><i class="fas fa-wallet"></i> Available Balance</span>
+        <span class="value" id="globalBalance">$0.00</span>
+        <div class="global-actions">
+            <button onclick="window.location.href='deposit.html'"><i class="fas fa-plus"></i> Deposit</button>
+            <button onclick="window.location.href='withdraw.html'"><i class="fas fa-minus"></i> Withdraw</button>
+        </div>
+    </div>
+
+    <div id="statsGrid" class="stats-grid">
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-microchip"></i> Active Robots</div><div class="stat-value" id="statActiveRobots">0</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-exchange-alt"></i> Total Trades</div><div class="stat-value" id="statTotalTrades">0</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-coins"></i> Total Profit</div><div class="stat-value" id="statTotalProfit">$0.00</div></div>
+        <div class="stats-card"><div class="stats-title"><i class="fas fa-percent"></i> Win Rate</div><div class="stat-value" id="statWinRate">0%</div></div>
+    </div>
+
+    <!-- ===== SIGNAL BOX MINI - Inaonekana juu ya robots ===== -->
+    <div class="signal-box-mini" id="signalBoxMini" onclick="window.location.href='ai-signal.html'">
+        <div class="signal-left">
+            <span class="live-dot"></span>
+            <span class="signal-coin-mini"><i class="fab fa-bitcoin"></i> BTC/USDT</span>
+            <span class="signal-type-mini" id="signalTypeMini">HOLD</span>
+            <span class="signal-price-mini">Price: <span id="signalPriceMini">$0.00</span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span class="signal-confidence-mini">
+                <span class="conf-dot" id="confDot"></span>
+                <span id="confTextMini">0%</span>
+            </span>
+            <span class="signal-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+    </div>
+
+    <div class="section-title"><i class="fas fa-microchip"></i> My AI Robots</div>
+    <div id="robotsList">
+        <div class="skeleton-grid">
+            <div class="skeleton-robot-card">
+                <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+            </div>
+            <div class="skeleton-robot-card">
+                <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="logs-card">
+        <div class="logs-header">
+            <div class="logs-title"><i class="fas fa-list"></i> Trading Logs <span class="live-badge"></span><span class="log-count-badge" id="logCount">0</span></div>
+            <button class="clear-logs" id="clearLogsBtn"><i class="fas fa-trash-alt"></i> Clear Logs</button>
+        </div>
+        <div class="logs-container" id="logsContainer">
+            <div style="padding: 15px; text-align: center; color: #888; font-size: 10px;">Loading logs...</div>
+        </div>
+    </div>
+
+    <div class="instructions-box">
+        <h3><i class="fas fa-info-circle"></i> How AI Auto Trading Works</h3>
+        <ul>
+            <li><i class="fas fa-lock"></i> <span>When you start a robot, <strong class="highlight">100% of your balance is locked</strong> for <strong class="highlight">365 days</strong>.</span></li>
+            <li><i class="fas fa-chart-line"></i> <span>Daily profits are calculated based on your robot's daily percentage and <strong class="highlight">credited to your balance every 24 hours</strong>.</span></li>
+            <li><i class="fas fa-coins"></i> <span>Your locked capital (principal) is <strong class="highlight">released after 365 days</strong> along with the final day's profit.</span></li>
+            <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Important:</strong> Daily returns are <strong class="warning">approximations and NOT guaranteed</strong>. Actual returns depend on market conditions, AI performance, and trading strategies.</span></li>
+            <li><i class="fas fa-robot"></i> <span>Higher level robots have <strong class="highlight">higher daily profit percentages</strong> but also higher investment requirements.</span></li>
+            <li><i class="fas fa-play-circle"></i> <span>Once started, the robot runs automatically for <strong class="highlight">365 days</strong>. You cannot withdraw the locked capital until the 365 days are complete.</span></li>
+            <li><i class="fas fa-plus-circle"></i> <span>You can <strong class="highlight">add more capital</strong> to an active robot to increase potential earnings.</span></li>
+            <li><i class="fas fa-shield-alt"></i> <span>All trading is automated by AI - <strong class="highlight">no manual intervention needed</strong> after starting.</span></li>
+            <li><i class="fas fa-undo"></i> <span>After 365 days, you can <strong class="highlight">manually restart</strong> the robot using the <strong class="highlight">"Restart Robot"</strong> button.</span></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="auto-bot.html" class="active"><i class="fas fa-robot"></i><span>Auto Bot</span></a>
+    <a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+    <a href="subscriptions.html"><i class="fas fa-crown"></i><span>Subscribe</span></a>
+    <a href="robots.html"><i class="fas fa-microchip"></i><span>Robots</span></a>
+    <a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, get, push, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// ROBOT CONFIG - SIKU 365
+// ============================================================
+const robotProfits = {
+    0: { name: "Starter Bot", dailyProfit: 3 },
+    1: { name: "Bronze Bot", dailyProfit: 4 },
+    2: { name: "Silver Bot", dailyProfit: 5 },
+    3: { name: "Gold Bot", dailyProfit: 7 },
+    4: { name: "Platinum Bot", dailyProfit: 9 },
+    5: { name: "Diamond Bot", dailyProfit: 11 },
+    6: { name: "Emerald Bot", dailyProfit: 15 },
+    7: { name: "Ruby Bot", dailyProfit: 19 },
+    8: { name: "Sapphire Bot", dailyProfit: 23 },
+    9: { name: "Onyx Bot", dailyProfit: 28 },
+    10: { name: "Legendary Bot", dailyProfit: 38 }
+};
+
+const robotMinTrade = {
+    0: 3, 1: 10, 2: 30, 3: 50, 4: 90,
+    5: 120, 6: 150, 7: 200, 8: 250, 9: 300, 10: 500
+};
+
+const DEFAULT_DURATION_DAYS = 365; // <<< SIKU 365
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let userBalance = 0;
+let subscriptionMultiplier = 1;
+let activeRobots = [];
+let robotStats = {};
+let tradeLogs = [];
+let currentCurrency = 'USD';
+let localRate = 2800;
+let localSymbol = 'TZS';
+let userCountry = 'Tanzania';
+let rtdbListeners = [];
+
+// ============================================================
+// SIGNAL STATE KWA SIGNAL BOX MINI
+// ============================================================
+let currentSignal = 'HOLD';
+let currentConfidence = 0;
+let currentPrice = 0;
+let priceHistory = [];
+let ws = null;
+let wsReconnectAttempts = 0;
+let maxReconnectAttempts = 5;
+let wsReconnectTimer = null;
+
+// ============================================================
+// CURRENCY FUNCTIONS
+// ============================================================
+const countryCurrencies = {
+    'Tanzania': { symbol: 'TZS', rate: 2800 },
+    'Malawi': { symbol: 'MWK', rate: 5600 },
+    'Zambia': { symbol: 'ZMW', rate: 30 },
+    'Kenya': { symbol: 'KES', rate: 140 },
+    'Uganda': { symbol: 'UGX', rate: 3800 },
+    'Nigeria': { symbol: 'NGN', rate: 1500 },
+    'Ghana': { symbol: 'GHS', rate: 15 },
+    'South Africa': { symbol: 'ZAR', rate: 19 },
+    'Congo DRC': { symbol: 'CDF', rate: 2850 },
+    'Burundi': { symbol: 'BIF', rate: 3500 },
+    'Botswana': { symbol: 'BWP', rate: 13 },
+    'Namibia': { symbol: 'NAD', rate: 19 },
+    'Mozambique': { symbol: 'MZN', rate: 64 },
+    'Rwanda': { symbol: 'RWF', rate: 1300 },
+    'Egypt': { symbol: 'EGP', rate: 48 },
+    'Morocco': { symbol: 'MAD', rate: 10 }
+};
+
+function getLocalCurrencyInfo(country) {
+    return countryCurrencies[country] || { symbol: 'TZS', rate: 2800 };
+}
+
+function formatPrice(usdAmount) {
+    if (currentCurrency === 'USD') {
+        return `$${usdAmount.toFixed(2)}`;
+    }
+    const converted = usdAmount * localRate;
+    const decimals = (localSymbol === 'TZS' || localSymbol === 'MWK' || localSymbol === 'UGX' || localSymbol === 'CDF' || localSymbol === 'BIF') ? 0 : 2;
+    return `${localSymbol} ${converted.toFixed(decimals)}`;
+}
+
+function updateCurrencyDisplay() {
+    const display = document.getElementById('currencyDisplay');
+    if (display) {
+        display.textContent = currentCurrency === 'USD' ? 'USD' : localSymbol;
+    }
+}
+
+function toggleCurrency() {
+    if (currentCurrency === 'USD') {
+        currentCurrency = localSymbol;
+    } else {
+        currentCurrency = 'USD';
+    }
+    updateCurrencyDisplay();
+    updateAllPrices();
+}
+
+function updateAllPrices() {
+    const balanceEl = document.getElementById('globalBalance');
+    if (balanceEl && userBalance !== undefined) {
+        const formatted = formatPrice(userBalance);
+        if (balanceEl.textContent !== formatted) {
+            balanceEl.textContent = formatted;
+            balanceEl.classList.remove('currency-updated');
+            void balanceEl.offsetWidth;
+            balanceEl.classList.add('currency-updated');
+        }
+    }
+    // Update signal price mini
+    updateSignalPriceMini();
+}
+
+// ============================================================
+// SIGNAL BOX MINI - WEBSOCKET
+// ============================================================
+function connectSignalWebSocket() {
+    if (ws) { try { ws.close(); } catch(e) {} }
+    ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+    ws.onopen = () => { console.log('[SignalWS] Connected'); wsReconnectAttempts = 0; };
+    ws.onmessage = (e) => {
+        try {
+            const data = JSON.parse(e.data);
+            const price = parseFloat(data.p);
+            currentPrice = price;
+            updateSignalPriceMini();
+            processPriceForSignal(price);
+        } catch(err) {
+            console.error('[SignalWS] Error:', err);
+        }
+    };
+    ws.onerror = () => { console.error('[SignalWS] Error'); };
+    ws.onclose = () => {
+        console.log('[SignalWS] Closed');
+        if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+        wsReconnectAttempts++;
+        const delay = Math.min(5000 * Math.pow(1.5, wsReconnectAttempts - 1), 30000);
+        wsReconnectTimer = setTimeout(() => {
+            if (wsReconnectAttempts < maxReconnectAttempts) {
+                connectSignalWebSocket();
+            }
+        }, delay);
+    };
+}
+
+function processPriceForSignal(price) {
+    priceHistory.push(price);
+    if (priceHistory.length > 100) priceHistory.shift();
+    if (priceHistory.length < 14) return;
+    
+    // Simple signal detection
+    const rsi = calculateRSI(priceHistory, 14);
+    const macd = calculateMACD(priceHistory, 12, 26);
+    const ma = calculateMA(priceHistory, 20);
+    const priceChange = priceHistory.length > 1 ? ((price - priceHistory[priceHistory.length - 2]) / priceHistory[priceHistory.length - 2]) * 100 : 0;
+    
+    let strength = 0;
+    if (rsi < 30) strength += 2;
+    if (rsi > 70) strength -= 2;
+    if (macd.macd > 0) strength += 1.5;
+    else strength -= 1.5;
+    if (price > ma) strength += 1;
+    else strength -= 1;
+    if (priceChange > 0.2) strength += 1;
+    if (priceChange < -0.2) strength -= 1;
+    
+    let signal = "HOLD";
+    let confidence = 50 + strength * 5;
+    confidence = Math.min(95, Math.max(55, confidence));
+    
+    if (strength > 1.5) signal = "BUY";
+    else if (strength < -1.5) signal = "SELL";
+    
+    currentSignal = signal;
+    currentConfidence = Math.round(confidence);
+    updateSignalBoxMini();
+}
+
+function calculateRSI(prices, period = 14) {
+    if (prices.length < period + 1) return 50;
+    let gains = 0, losses = 0;
+    for (let i = prices.length - period; i < prices.length; i++) {
+        const change = prices[i] - prices[i - 1];
+        if (change >= 0) gains += change;
+        else losses -= change;
+    }
+    const avgGain = gains / period, avgLoss = losses / period;
+    if (avgLoss === 0) return 100;
+    return 100 - (100 / (1 + (avgGain / avgLoss)));
+}
+
+function calculateMACD(prices, fast = 12, slow = 26) {
+    if (prices.length < slow) return { macd: 0, signal: 0 };
+    const fastEMA = prices.slice(-fast).reduce((a, b) => a + b, 0) / fast;
+    const slowEMA = prices.slice(-slow).reduce((a, b) => a + b, 0) / slow;
+    return { macd: fastEMA - slowEMA, signal: (fastEMA - slowEMA) * 0.8 };
+}
+
+function calculateMA(prices, period = 20) {
+    if (prices.length < period) return prices[prices.length - 1] || 0;
+    return prices.slice(-period).reduce((a, b) => a + b, 0) / period;
+}
+
+function updateSignalPriceMini() {
+    const el = document.getElementById('signalPriceMini');
+    if (el && currentPrice > 0) {
+        el.textContent = formatPrice(currentPrice);
+    }
+}
+
+function updateSignalBoxMini() {
+    const typeEl = document.getElementById('signalTypeMini');
+    const confText = document.getElementById('confTextMini');
+    const confDot = document.getElementById('confDot');
+    
+    if (typeEl) {
+        typeEl.textContent = currentSignal;
+        typeEl.className = 'signal-type-mini';
+        if (currentSignal === 'BUY') typeEl.classList.add('buy');
+        else if (currentSignal === 'SELL') typeEl.classList.add('sell');
+        else typeEl.classList.add('hold');
+    }
+    
+    if (confText) confText.textContent = `${currentConfidence}%`;
+    if (confDot) {
+        confDot.className = 'conf-dot';
+        if (currentConfidence >= 70) confDot.classList.add('high');
+        else if (currentConfidence >= 50) confDot.classList.add('medium');
+        else confDot.classList.add('low');
+    }
+}
+
+// ============================================================
+// DIRECT FIREBASE LOAD FUNCTIONS
+// ============================================================
+async function loadUserDataDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            userCountry = data.country || 'Tanzania';
+            updateAllPrices();
+            return data;
+        }
+    } catch (error) {
+        console.error('[RTDB] Load user error:', error);
+    }
+    return null;
+}
+
+async function loadSubscriptionDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.subscription && data.subscription.expiry > Date.now()) {
+                subscriptionMultiplier = data.subscription.multiplier || 1;
+                return;
+            }
+        }
+        subscriptionMultiplier = 1;
+    } catch (error) {
+        console.error('[RTDB] Load subscription error:', error);
+        subscriptionMultiplier = 1;
+    }
+}
+
+async function loadActiveRobotsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `userRobots/${currentUser.uid}`));
+        activeRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                activeRobots.push({ id: child.key, ...robot });
+            });
+        }
+        renderRobots();
+        updateStatsUI();
+    } catch (error) {
+        console.error('[RTDB] Load robots error:', error);
+        renderRobots();
+    }
+}
+
+async function loadRobotStatsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `robotStats/${currentUser.uid}`));
+        robotStats = {};
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                robotStats[child.key] = child.val();
+            });
+        }
+        updateStatsUI();
+    } catch (error) {
+        console.error('[RTDB] Load stats error:', error);
+    }
+}
+
+async function loadTradingLogsDirect() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `tradingLogs/${currentUser.uid}`));
+        tradeLogs = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                tradeLogs.push(child.val());
+            });
+        }
+        tradeLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderLogs();
+    } catch (error) {
+        console.error('[RTDB] Load logs error:', error);
+    }
+}
+
+// ============================================================
+// PROCESS DAILY PROFITS - SIKU 365
+// ============================================================
+async function processDailyProfitsDirect() {
+    if (!currentUser) return;
+    try {
+        console.log('[BOT] Processing daily profits...');
+        const uid = currentUser.uid;
+        const now = Date.now();
+        let processed = 0;
+        
+        const snapshot = await get(ref(db, `userRobots/${uid}`));
+        if (!snapshot.exists()) return;
+        
+        const promises = [];
+        snapshot.forEach(child => {
+            const robot = child.val();
+            const robotId = child.key;
+            if (robot.status !== 'active') return;
+            
+            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
+            const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
+            if (now < nextProfitTime) return;
+            
+            promises.push(processSingleRobotProfitDirect(robot, robotId, uid));
+        });
+        
+        const results = await Promise.all(promises);
+        processed = results.filter(r => r === true).length;
+        
+        if (processed > 0) {
+            console.log(`[BOT] ✅ Processed ${processed} daily profits`);
+            await Promise.all([
+                loadUserDataDirect(),
+                loadActiveRobotsDirect(),
+                loadRobotStatsDirect(),
+                loadTradingLogsDirect()
+            ]);
+        }
+    } catch (error) {
+        console.error('[BOT] Daily profit error:', error);
+    }
+}
+
+async function processSingleRobotProfitDirect(robot, robotId, uid) {
+    try {
+        const now = Date.now();
+        const investedAmount = robot.investedAmount || robot.amount || 0;
+        if (investedAmount <= 0) return false;
+        
+        const dailyPercent = robot.dailyProfit || 3;
+        const grossProfit = (investedAmount * dailyPercent) / 100;
+        const hiddenFee = grossProfit * 0.10;
+        const netProfit = grossProfit - hiddenFee;
+        
+        const profitDays = robot.profitDays || 0;
+        const totalDays = robot.durationDays || 365;
+        const isLastDay = (profitDays + 1) >= totalDays;
+        
+        let finalNetReturn = netProfit;
+        let isCompleted = false;
+        
+        if (isLastDay) {
+            const totalReturn = investedAmount + netProfit;
+            const finalFee = totalReturn * 0.10;
+            finalNetReturn = totalReturn - finalFee;
+            isCompleted = true;
+        }
+        
+        const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
+        
+        if (isCompleted) {
+            await update(robotRef, {
+                status: 'completed',
+                completedAt: now,
+                investedAmount: 0,
+                amount: 0
+            });
+        } else {
+            await update(robotRef, {
+                lastProfitTime: now,
+                lastProfitAmount: netProfit,
+                profitDays: profitDays + 1
+            });
+        }
+        
+        await runTransaction(ref(db, `users/${uid}`), (current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + finalNetReturn;
+            }
+            return current;
+        });
+        
+        await runTransaction(ref(db, `robotStats/${uid}/${robotId}`), (current) => {
+            if (!current) current = { profit: 0, trades: 0, wins: 0 };
+            current.profit += finalNetReturn;
+            current.trades += 1;
+            current.wins += 1;
+            return current;
+        });
+        
+        const profitDisplay = formatPrice(finalNetReturn);
+        const logRef = push(ref(db, `tradingLogs/${uid}`));
+        await set(logRef, {
+            id: logRef.key,
+            robot: robot.name || 'Robot',
+            message: `💰 Daily profit: +${profitDisplay} (${dailyPercent}%)`,
+            type: 'profit',
+            time: new Date().toLocaleTimeString(),
+            timestamp: Date.now()
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('[BOT] Process robot profit error:', error);
+        return false;
+    }
+}
+
+// ============================================================
+// SETUP RTDB LISTENERS
+// ============================================================
+function setupRTDBListeners() {
+    if (!currentUser) return;
+    rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
+    rtdbListeners = [];
+    
+    const uid = currentUser.uid;
+    
+    const userRef = ref(db, `users/${uid}`);
+    const userUnsub = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            userBalance = data.balance || 0;
+            userCountry = data.country || 'Tanzania';
+            updateAllPrices();
+        }
+    });
+    rtdbListeners.push(userUnsub);
+    
+    const robotsRef = ref(db, `userRobots/${uid}`);
+    const robotsUnsub = onValue(robotsRef, (snapshot) => {
+        activeRobots = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const robot = child.val();
+                activeRobots.push({ id: child.key, ...robot });
+            });
+        }
+        renderRobots();
+        updateStatsUI();
+    });
+    rtdbListeners.push(robotsUnsub);
+    
+    const statsRef = ref(db, `robotStats/${uid}`);
+    const statsUnsub = onValue(statsRef, (snapshot) => {
+        robotStats = {};
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                robotStats[child.key] = child.val();
+            });
+        }
+        updateStatsUI();
+    });
+    rtdbListeners.push(statsUnsub);
+    
+    const logsRef = ref(db, `tradingLogs/${uid}`);
+    const logsUnsub = onValue(logsRef, (snapshot) => {
+        tradeLogs = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                tradeLogs.push(child.val());
+            });
+        }
+        tradeLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderLogs();
+    });
+    rtdbListeners.push(logsUnsub);
+}
+
+// ============================================================
+// UI RENDER FUNCTIONS
+// ============================================================
+function updateStatsUI() {
+    let activeCount = activeRobots.filter(r => r.status === 'active').length;
+    let totalTrades = 0, totalProfit = 0, totalWins = 0;
+    Object.values(robotStats).forEach(s => {
+        totalTrades += s.trades || 0;
+        totalProfit += s.profit || 0;
+        totalWins += s.wins || 0;
+    });
+    const winRate = totalTrades > 0 ? (totalWins / totalTrades * 100).toFixed(1) : 0;
+    
+    document.getElementById('statActiveRobots').textContent = activeCount;
+    document.getElementById('statTotalTrades').textContent = totalTrades;
+    document.getElementById('statTotalProfit').textContent = formatPrice(totalProfit);
+    document.getElementById('statWinRate').textContent = `${winRate}%`;
+}
+
+function renderRobots() {
+    const container = document.getElementById('robotsList');
+    if (!container) return;
+    
+    if (activeRobots.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-robot"></i>
+                <p>You don't have any AI robots yet.</p>
+                <button onclick="window.location.href='robots.html'">Purchase a Robot</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="robots-grid">';
+    activeRobots.forEach(robot => {
+        const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+        const isActive = robot.status === 'active';
+        const isCompleted = robot.status === 'completed';
+        const stats = robotStats[robot.id] || { profit: 0, trades: 0, wins: 0 };
+        const invested = robot.investedAmount || robot.amount || 0;
+        const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+        const estimatedDaily = (invested * dailyPercent) / 100;
+        const totalProfit = stats.profit || 0;
+        const winRate = stats.trades > 0 ? (stats.wins / stats.trades * 100).toFixed(1) : 0;
+        const minTrade = robotMinTrade[robot.robotId] || 3;
+        
+        let progressPercent = 0;
+        let daysCompleted = robot.profitDays || 0;
+        if (isActive && robot.endTime) {
+            const now = Date.now();
+            const totalDuration = robot.endTime - (robot.startTime || now);
+            const elapsed = now - (robot.startTime || now);
+            progressPercent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+        } else if (isCompleted) {
+            progressPercent = 100;
+        }
+        
+        const cardClass = isActive ? 'robot-card active-robot' : 'robot-card';
+        html += `
+            <div class="${cardClass}">
+                <div class="robot-header">
+                    <span class="robot-name">${info.name}</span>
+                    <span class="robot-level">Level ${robot.robotId}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px; margin-bottom:6px;">
+                    <span style="color:#888; font-size:8px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
+                    <span style="color:#0ECB81; font-weight:700; font-size:12px;">${formatPrice(minTrade)}</span>
+                </div>
+                <div class="invested-amount">
+                    <span class="invested-label"><i class="fas fa-lock"></i> Invested:</span>
+                    <span class="invested-value">${formatPrice(invested)}</span>
+                </div>
+                <div class="robot-stats">
+                    <div class="robot-stat"><div class="robot-stat-label">Daily</div><div class="robot-stat-value">${dailyPercent}%</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Est. Daily</div><div class="robot-stat-value" style="color:#0ECB81">≈${formatPrice(estimatedDaily)}</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Multiplier</div><div class="robot-stat-value">${subscriptionMultiplier}x</div></div>
+                </div>
+                <div class="robot-stats">
+                    <div class="robot-stat"><div class="robot-stat-label">Total Profit</div><div class="robot-stat-value" style="color:${totalProfit>=0?'#0ECB81':'#F6465D'}">${formatPrice(totalProfit)}</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Win Rate</div><div class="robot-stat-value">${winRate}%</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Days</div><div class="robot-stat-value">${daysCompleted}/${DEFAULT_DURATION_DAYS}</div></div>
+                </div>
+                <div class="robot-status">
+                    <div>
+                        <span class="status-indicator ${isActive?'active':'inactive'}"></span>
+                        <span class="status-text">${isActive?'🤖 Active':(isCompleted?'✅ Completed':'⏸ Inactive')}</span>
+                    </div>
+                    <div class="robot-profit">💰 ${formatPrice(totalProfit)}</div>
+                </div>
+                ${isActive ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
+                <div class="robot-buttons">
+                    ${isCompleted ? 
+                        `<button class="btn-restart-robot" data-id="${robot.id}"><i class="fas fa-undo"></i> Restart</button>` : 
+                        isActive ? 
+                        `<button class="btn-add-capital" data-id="${robot.id}"><i class="fas fa-plus-circle"></i> Add Capital</button>` :
+                        `<button class="btn-start-robot" data-id="${robot.id}"><i class="fas fa-play"></i> Start Robot</button>`
+                    }
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+    
+    container.querySelectorAll('.btn-start-robot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) startRobot(robot);
+        });
+    });
+    container.querySelectorAll('.btn-restart-robot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) restartRobot(robot);
+        });
+    });
+    container.querySelectorAll('.btn-add-capital').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) addCapital(robot);
+        });
+    });
+}
+
+function renderLogs() {
+    const container = document.getElementById('logsContainer');
+    if (!container) return;
+    if (tradeLogs.length === 0) {
+        container.innerHTML = '<div style="padding:15px; text-align:center; color:#888; font-size:10px;">📋 No trading activity yet. Start a robot to begin trading 24/7.</div>';
+        return;
+    }
+    let html = '';
+    tradeLogs.slice(0, 30).forEach(log => {
+        const type = log.type || 'info';
+        const iconMap = {
+            'win': '✅',
+            'loss': '❌',
+            'profit': '💰',
+            'warning': '⚠️',
+            'info': '📋'
+        };
+        const icon = iconMap[type] || '📋';
+        const time = log.time || new Date(log.timestamp).toLocaleTimeString() || '--:--:--';
+        const robotName = log.robot || 'Robot';
+        
+        html += `
+            <div class="log-item ${type}">
+                <span class="log-time">${time}</span>
+                <span class="log-icon">${icon}</span>
+                <span class="log-robot">${robotName}</span>
+                <span class="log-message">${log.message}</span>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+    document.getElementById('logCount').textContent = tradeLogs.length;
+    container.scrollTop = container.scrollHeight;
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function showModal(title, message, onConfirm) {
+    const existing = document.querySelector('.modal-overlay');
+    if (existing) existing.remove();
+    
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal-overlay';
+    modalDiv.innerHTML = `
+        <div class="modal-container">
+            <div class="modal-title">${title}</div>
+            <div class="modal-message">${message}</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+        modalDiv.remove();
+        if (onConfirm) onConfirm();
+    });
+    document.getElementById('modalCancelBtn').addEventListener('click', () => modalDiv.remove());
+    modalDiv.addEventListener('click', (e) => {
+        if (e.target === modalDiv) modalDiv.remove();
+    });
+}
+
+// ============================================================
+// TRADE FUNCTIONS
+// ============================================================
+async function startRobot(robot) {
+    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+    const minTrade = robotMinTrade[robot.robotId] || 3;
+    
+    if (userBalance < minTrade) {
+        showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to start this robot.`, null);
+        return;
+    }
+    
+    const lockAmount = userBalance;
+    const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+    const estimatedDaily = (lockAmount * dailyPercent) / 100;
+    const totalEstimated = estimatedDaily * DEFAULT_DURATION_DAYS;
+    
+    showModal(
+        `Start ${info.name}`,
+        `Lock ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)\n💰 Est. Total: ${formatPrice(totalEstimated)}`,
+        async () => {
+            try {
+                const uid = currentUser.uid;
+                const userRef = ref(db, `users/${uid}`);
+                const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                
+                await runTransaction(userRef, (current) => {
+                    if (current) {
+                        const balance = current.balance || 0;
+                        if (balance < lockAmount) return current;
+                        current.balance = balance - lockAmount;
+                    }
+                    return current;
+                });
+                
+                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                await update(robotRef, {
+                    status: 'active',
+                    startTime: Date.now(),
+                    endTime: endTime,
+                    lastProfitTime: Date.now(),
+                    profitDays: 0,
+                    investedAmount: lockAmount,
+                    originalAmount: lockAmount,
+                    minTrade: minTrade,
+                    durationDays: DEFAULT_DURATION_DAYS,
+                    dailyProfit: dailyPercent,
+                    completedAt: null
+                });
+                
+                await Promise.all([
+                    loadActiveRobotsDirect(),
+                    loadUserDataDirect(),
+                    loadRobotStatsDirect(),
+                    loadTradingLogsDirect()
+                ]);
+                
+                showModal('Success', `✅ Robot started successfully!\n\nLocked: ${formatPrice(lockAmount)}\nDaily: ${dailyPercent}%`, null);
+                
+            } catch (error) {
+                console.error('[BOT] Start error:', error);
+                showModal('Error', 'Failed to start robot. Please try again.', null);
+            }
+        }
+    );
+}
+
+async function restartRobot(robot) {
+    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+    const minTrade = robotMinTrade[robot.robotId] || 3;
+    
+    if (userBalance < minTrade) {
+        showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to restart this robot.`, null);
+        return;
+    }
+    
+    const lockAmount = userBalance;
+    const dailyPercent = info.dailyProfit * subscriptionMultiplier;
+    const estimatedDaily = (lockAmount * dailyPercent) / 100;
+    
+    showModal(
+        `Restart ${info.name}`,
+        `Restart with ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)`,
+        async () => {
+            try {
+                const uid = currentUser.uid;
+                const userRef = ref(db, `users/${uid}`);
+                const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                
+                await runTransaction(userRef, (current) => {
+                    if (current) {
+                        const balance = current.balance || 0;
+                        if (balance < lockAmount) return current;
+                        current.balance = balance - lockAmount;
+                    }
+                    return current;
+                });
+                
+                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                await update(robotRef, {
+                    status: 'active',
+                    startTime: Date.now(),
+                    endTime: endTime,
+                    lastProfitTime: Date.now(),
+                    profitDays: 0,
+                    investedAmount: lockAmount,
+                    originalAmount: lockAmount,
+                    minTrade: minTrade,
+                    durationDays: DEFAULT_DURATION_DAYS,
+                    dailyProfit: dailyPercent,
+                    completedAt: null
+                });
+                
+                await Promise.all([
+                    loadActiveRobotsDirect(),
+                    loadUserDataDirect(),
+                    loadRobotStatsDirect(),
+                    loadTradingLogsDirect()
+                ]);
+                
+                showModal('Success', `✅ Robot restarted successfully!\n\nLocked: ${formatPrice(lockAmount)}`, null);
+                
+            } catch (error) {
+                console.error('[BOT] Restart error:', error);
+                showModal('Error', 'Failed to restart robot. Please try again.', null);
+            }
+        }
+    );
+}
+
+async function addCapital(robot) {
+    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+    const minTrade = robotMinTrade[robot.robotId] || 3;
+    
+    if (userBalance < minTrade) {
+        showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to add capital.`, null);
+        return;
+    }
+    
+    const maxAdd = Math.min(userBalance, 10000);
+    const currentInvested = robot.investedAmount || robot.amount || 0;
+    
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal-overlay';
+    modalDiv.innerHTML = `
+        <div class="modal-container">
+            <div class="modal-title">Add Capital to ${info.name}</div>
+            <div class="modal-message" style="text-align:left;">
+                <p style="margin-bottom:8px;">Current: <strong style="color:#0ECB81;">${formatPrice(currentInvested)}</strong></p>
+                <p style="margin-bottom:8px;">Available: <strong style="color:#FFD700;">${formatPrice(userBalance)}</strong></p>
+                <p style="margin-bottom:8px;">Min Trade: <strong style="color:#FFD700;">${formatPrice(minTrade)}</strong></p>
+                <label style="color:#FFD700;">Amount to add:</label>
+                <input type="number" id="addCapitalAmount" min="${minTrade}" max="${maxAdd}" step="1" value="${Math.min(maxAdd, 100)}" style="width:100%; padding:8px; margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:white; font-size:14px;">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Add Capital</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    document.getElementById('modalConfirmBtn').addEventListener('click', async () => {
+        const amount = parseFloat(document.getElementById('addCapitalAmount').value);
+        if (!amount || amount < minTrade) {
+            showModal('Invalid Amount', `Minimum add is ${formatPrice(minTrade)}`, null);
+            return;
+        }
+        if (amount > userBalance) {
+            showModal('Insufficient Balance', 'You don\'t have enough balance.', null);
+            return;
+        }
+        modalDiv.remove();
+        
+        try {
+            const uid = currentUser.uid;
+            const userRef = ref(db, `users/${uid}`);
+            const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+            
+            await runTransaction(userRef, (current) => {
+                if (current) {
+                    const balance = current.balance || 0;
+                    if (balance < amount) return current;
+                    current.balance = balance - amount;
+                }
+                return current;
+            });
+            
+            const snap = await get(robotRef);
+            if (snap.exists()) {
+                const data = snap.val();
+                const newInvested = (data.investedAmount || data.amount || 0) + amount;
+                await update(robotRef, { investedAmount: newInvested, amount: newInvested });
+            }
+            
+            await Promise.all([
+                loadActiveRobotsDirect(),
+                loadUserDataDirect(),
+                loadRobotStatsDirect()
+            ]);
+            
+            showModal('Success', `✅ Added ${formatPrice(amount)} capital to robot.`, null);
+            
+        } catch (error) {
+            console.error('[BOT] Add capital error:', error);
+            showModal('Error', 'Failed to add capital. Please try again.', null);
+        }
+    });
+    document.getElementById('modalCancelBtn').addEventListener('click', () => modalDiv.remove());
+}
+
+// ============================================================
+// CLEAR LOGS
+// ============================================================
+document.getElementById('clearLogsBtn')?.addEventListener('click', () => {
+    showModal('Clear Logs', 'Clear all trading logs? This cannot be undone.', async () => {
+        if (currentUser) {
+            await set(ref(db, `tradingLogs/${currentUser.uid}`), null);
+            tradeLogs = [];
+            renderLogs();
+        }
+    });
+});
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        if (sunIcon) sunIcon.style.display = 'none';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+    if (sunIcon) {
+        sunIcon.style.display = document.body.classList.contains('light-theme') ? 'none' : 'inline-block';
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+    initTheme();
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        currentUser = user;
+        console.log('[BOT] User logged in:', user.uid);
+        
+        const userData = await loadUserDataDirect();
+        if (userData && userData.country) {
+            userCountry = userData.country;
+        }
+        const currencyInfo = getLocalCurrencyInfo(userCountry);
+        localRate = currencyInfo.rate;
+        localSymbol = currencyInfo.symbol;
+        updateCurrencyDisplay();
+        
+        document.getElementById('currencyToggleBtn').addEventListener('click', toggleCurrency);
+        
+        // Show skeletons
+        const container = document.getElementById('robotsList');
+        container.innerHTML = `
+            <div class="skeleton-grid">
+                <div class="skeleton-robot-card">
+                    <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                    <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                    <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                    <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+                </div>
+                <div class="skeleton-robot-card">
+                    <div class="skeleton-header"><div class="skeleton-name"></div><div class="skeleton-level"></div></div>
+                    <div class="skeleton-stats-row"><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div><div class="skeleton-stat-item"></div></div>
+                    <div class="skeleton-controls"><div class="skeleton-control"></div><div class="skeleton-control"></div></div>
+                    <div class="skeleton-buttons"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div>
+                </div>
+            </div>
+        `;
+        
+        await loadSubscriptionDirect();
+        await loadActiveRobotsDirect();
+        await loadRobotStatsDirect();
+        await loadTradingLogsDirect();
+        
+        // Process daily profits on init
+        await processDailyProfitsDirect();
+        
+        setupRTDBListeners();
+        
+        // Connect signal WebSocket
+        connectSignalWebSocket();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => { if (currentUser) loadUserDataDirect(); }, 30000);
+        // Check daily profits every 5 minutes
+        setInterval(() => { if (currentUser) processDailyProfitsDirect(); }, 5 * 60 * 1000);
+        
+        console.log('[BOT] ✅ Auto Bot initialized with 365 days');
+    });
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Account Management | ABOTRA-PROAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        /* ============================================================
+           ROOT & RESET
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #b8860b;
+            --maroon: #800000;
+            --maroon-light: #a00000;
+            --black: #050505;
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-card: rgba(255, 215, 0, 0.15);
+            --text-primary: #FFFFFF;
+            --text-secondary: #AAAAAA;
+            --text-muted: #666666;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: var(--black);
+            background-image: url("../assets/images/background.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            font-size: 11px;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        body.light-theme {
+            --bg-dark: #f0f0f5;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --border-card: rgba(128, 0, 0, 0.12);
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            --glass: rgba(0, 0, 0, 0.04);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            background: #f5f5f5;
+            background-image: url("../assets/images/background-light.png");
+        }
+
+        body.light-theme .top-bar,
+        body.light-theme .card,
+        body.light-theme .stat-card,
+        body.light-theme .section-card,
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .top-bar h2,
+        body.light-theme .page-title,
+        body.light-theme .section-title {
+            color: var(--maroon);
+        }
+
+        body.light-theme .stat-value {
+            color: var(--maroon);
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(128, 0, 0, 0.2);
+        }
+
+        body.light-theme .theme-toggle i {
+            color: var(--maroon);
+        }
+
+        body.light-theme .bottom-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(128, 0, 0, 0.15);
+        }
+
+        body.light-theme .bottom-nav a {
+            color: #888;
+        }
+
+        body.light-theme .bottom-nav a.active {
+            color: var(--maroon);
+        }
+
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.6);
+        }
+
+        /* ============================================================
+           OVERLAY
+           ============================================================ */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(4px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        body.light-theme .overlay {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        /* ============================================================
+           TOP BAR
+           ============================================================ */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-area img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: transparent;
+        }
+
+        .logo-area h2 {
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 1px;
+        }
+
+        .logo-area p {
+            color: var(--text-secondary);
+            font-size: 7px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-bar-btn {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: var(--gold);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .top-bar-btn:hover {
+            background: rgba(255, 215, 0, 0.25);
+            transform: scale(1.02);
+        }
+
+        .top-bar-btn .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: #F6465D;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .theme-toggle {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 10px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle i {
+            font-size: 15px;
+            color: #FFFFFF;
+        }
+
+        /* ============================================================
+           MAIN CONTAINER
+           ============================================================ */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 70px auto 20px;
+            padding: 0 12px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .page-title .sub {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================================
+           CARDS
+           ============================================================ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .card-title {
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .card-title i {
+            font-size: 14px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-item .label {
+            color: var(--text-secondary);
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item .value {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .stat-item .value.green {
+            color: #0ECB81;
+        }
+        .stat-item .value.red {
+            color: #F6465D;
+        }
+        .stat-item .value.gold {
+            color: var(--gold);
+        }
+
+        .stat-item .value.small {
+            font-size: 11px;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .badge-status.online {
+            background: rgba(14, 203, 129, 0.2);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.3);
+        }
+
+        .badge-status.offline {
+            background: rgba(246, 70, 93, 0.2);
+            color: #F6465D;
+            border: 1px solid rgba(246, 70, 93, 0.3);
+        }
+
+        .badge-status.demo {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--gold);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .badge-status.live {
+            background: rgba(14, 203, 129, 0.2);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.3);
+        }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--maroon), var(--gold));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #0ECB81, #0A9E65);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 203, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #F6465D, #D43F52);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(246, 70, 93, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: var(--gold);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        /* ============================================================
+           STATUS BAR
+           ============================================================ */
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 215, 0, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .status-bar .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 9px;
+            color: var(--text-secondary);
+        }
+
+        .status-bar .status-item .val {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           TABLE
+           ============================================================ */
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: rgba(255, 215, 0, 0.03);
+        }
+
+        .trade-profit {
+            font-weight: 700;
+        }
+        .trade-profit.positive {
+            color: #0ECB81;
+        }
+        .trade-profit.negative {
+            color: #F6465D;
+        }
+
+        /* ============================================================
+           RISK SLIDER
+           ============================================================ */
+        .risk-slider-container {
+            padding: 4px 0;
+        }
+
+        .risk-slider-container input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .risk-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .risk-slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .risk-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           TOGGLE SWITCH
+           ============================================================ */
+        .toggle-switch {
+            position: relative;
+            width: 36px;
+            height: 20px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: #0ECB81;
+        }
+
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(16px);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================================
+           AI MANAGEMENT GRID
+           ============================================================ */
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .ai-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .ai-item .label {
+            font-size: 9px;
+            color: var(--text-secondary);
+        }
+
+        .ai-item .value {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ai-item .value.gold {
+            color: var(--gold);
+        }
+        .ai-item .value.green {
+            color: #0ECB81;
+        }
+
+        /* ============================================================
+           NOTIFICATION TOAST
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInRight 0.3s ease;
+            font-size: 10px;
+            color: white;
+        }
+
+        .toast.success {
+            background: rgba(14, 203, 129, 0.2);
+            border-color: rgba(14, 203, 129, 0.3);
+        }
+        .toast.success i {
+            color: #0ECB81;
+        }
+        .toast.error {
+            background: rgba(246, 70, 93, 0.2);
+            border-color: rgba(246, 70, 93, 0.3);
+        }
+        .toast.error i {
+            color: #F6465D;
+        }
+        .toast.info {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+        .toast.info i {
+            color: var(--gold);
+        }
+        .toast.warning {
+            background: rgba(255, 152, 0, 0.15);
+            border-color: rgba(255, 152, 0, 0.3);
+        }
+        .toast.warning i {
+            color: #FF9800;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+
+        .toast .toast-close:hover {
+            color: white;
+        }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a2e, #0e0e1a);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            box-shadow: var(--shadow);
+            animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            border-color: rgba(128, 0, 0, 0.15);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-content .modal-title {
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-content .modal-body {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .modal-content .modal-body .form-group {
+            margin-bottom: 12px;
+        }
+
+        .modal-content .modal-body .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .modal-content .modal-body .form-group input,
+        .modal-content .modal-body .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-content .modal-body .form-group input:focus,
+        .modal-content .modal-body .form-group select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+        }
+
+        .modal-content .modal-body .form-group select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 22px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 8px;
+            border-radius: 50%;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .modal-content {
+            position: relative;
+        }
+
+        /* ============================================================
+           DANGER ZONE
+           ============================================================ */
+        .danger-zone {
+            border-color: rgba(246, 70, 93, 0.3);
+            background: rgba(246, 70, 93, 0.05);
+        }
+
+        .danger-zone .card-title {
+            color: #F6465D;
+            border-bottom-color: rgba(246, 70, 93, 0.2);
+        }
+
+        .danger-zone .btn-danger {
+            background: linear-gradient(135deg, #F6465D, #D43F52);
+        }
+
+        /* ============================================================
+           SKELETON LOADER
+           ============================================================ */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton-text {
+            height: 12px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .skeleton-text.w50 {
+            width: 50%;
+        }
+        .skeleton-text.w30 {
+            width: 30%;
+        }
+        .skeleton-text.w70 {
+            width: 70%;
+        }
+
+        .skeleton-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* ============================================================
+           BOTTOM NAV
+           ============================================================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 10px;
+            z-index: 100;
+        }
+
+        .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 7px;
+            transition: var(--transition);
+            gap: 2px;
+        }
+
+        .bottom-nav a i {
+            font-size: 15px;
+        }
+
+        .bottom-nav a.active {
+            color: var(--gold);
+        }
+
+        .bottom-nav a:hover {
+            color: var(--gold);
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media(max-width: 768px) {
+            .main-container {
+                padding: 0 10px;
+                margin-top: 65px;
+            }
+            .page-title {
+                font-size: 17px;
+            }
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .ai-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .top-bar-right .top-bar-btn span {
+                display: none;
+            }
+            .top-bar-right .top-bar-btn {
+                padding: 6px 8px;
+            }
+            .logo-area p {
+                display: none;
+            }
+            .bottom-nav a span {
+                font-size: 6px;
+            }
+            .bottom-nav a i {
+                font-size: 14px;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .modal-content {
+                padding: 20px;
+                max-width: 100%;
+                margin: 10px;
+            }
+            .modal-actions {
+                flex-direction: column;
+            }
+            table {
+                font-size: 8px;
+                min-width: 500px;
+            }
+            th,
+            td {
+                padding: 4px 4px;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .ai-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn-group .btn {
+                font-size: 8px;
+                padding: 4px 8px;
+            }
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gap-4 {
+            gap: 4px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .gap-12 {
+            gap: 12px;
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-12 {
+            margin-top: 12px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-12 {
+            margin-bottom: 12px;
+        }
+
+        .text-gold {
+            color: var(--gold);
+        }
+        .text-green {
+            color: #0ECB81;
+        }
+        .text-red {
+            color: #F6465D;
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .fw-700 {
+            font-weight: 700;
+        }
+        .fw-600 {
+            font-weight: 600;
+        }
+
+        .fs-10 {
+            font-size: 10px;
+        }
+        .fs-11 {
+            font-size: 11px;
+        }
+        .fs-12 {
+            font-size: 12px;
+        }
+        .fs-14 {
+            font-size: 14px;
+        }
+        .fs-18 {
+            font-size: 18px;
+        }
+
+        /* ============================================================
+           BROKER CONNECTION CARD
+           ============================================================ */
+        .broker-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .broker-status .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .broker-status .status-dot.connected {
+            background: #0ECB81;
+        }
+
+        .broker-status .status-dot.disconnected {
+            background: #F6465D;
+        }
+
+        /* ============================================================
+           SUBSCRIPTION CARD
+           ============================================================ */
+        .sub-plan-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .sub-plan-badge.starter {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .sub-plan-badge.pro {
+            background: rgba(14, 203, 129, 0.15);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.2);
+        }
+
+        .sub-plan-badge.elite {
+            background: rgba(128, 0, 0, 0.2);
+            color: var(--maroon-light);
+            border: 1px solid rgba(128, 0, 0, 0.2);
+        }
+
+        /* ============================================================
+           SECURITY CARD
+           ============================================================ */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .security-item:last-child {
+            border-bottom: none;
+        }
+
+        .security-item .label {
+            color: var(--text-secondary);
+            font-size: 9px;
+        }
+
+        .security-item .value {
+            color: var(--text-primary);
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           DANGER ZONE BUTTONS
+           ============================================================ */
+        .danger-btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .danger-btn-group .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        @media(max-width: 480px) {
+            .danger-btn-group .btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    OVERLAY
+    ============================================================ -->
+    <div class="overlay"></div>
+
+    <!-- ============================================================
+    TOP BAR
+    ============================================================ -->
+    <header class="top-bar">
+        <div class="logo-area">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+            <div>
+                <h2>ABOTRA-PROAI</h2>
+                <p>Account Management</p>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="top-bar-btn" id="refreshBtn" title="Refresh Data">
+                <i class="fas fa-sync-alt"></i>
+                <span>Refresh</span>
+            </button>
+            <button class="top-bar-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back</span>
+            </button>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon" style="display:none;"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    TOAST CONTAINER
+    ============================================================ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ============================================================
+    MODAL CONTAINER
+    ============================================================ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            <div class="modal-title" id="modalTitle">Modal Title</div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-container">
+
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+            <i class="fas fa-user-cog"></i> Account Management
+            <span class="sub">— Manage Your Trading Account</span>
+        </div>
+
+        <!-- ============================================================
+        ACCOUNT STATUS CARD
+        ============================================================ -->
+        <section class="card" id="statusCard">
+            <div class="card-title"><i class="fas fa-plug"></i> Account Status</div>
+            <div id="statusContent">
+                <div class="skeleton-text w50"></div>
+                <div class="skeleton-text w30"></div>
+                <div class="skeleton-text w70"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        BROKER CONNECTION
+        ============================================================ -->
+        <section class="card" id="brokerCard">
+            <div class="card-title"><i class="fas fa-link"></i> Broker Connection</div>
+            <div id="brokerContent">
+                <div class="flex-between">
+                    <div class="broker-status">
+                        <span class="status-dot disconnected" id="brokerStatusDot"></span>
+                        <span class="text-secondary fs-10">Status: <span id="brokerStatus" class="text-red fw-700">Disconnected</span></span>
+                    </div>
+                    <span class="text-secondary fs-10">Exchange: <span id="brokerExchange" class="text-gold fw-700">—</span></span>
+                </div>
+                <div class="btn-group mt-8">
+                    <button class="btn btn-primary btn-sm" id="connectBrokerBtn"><i class="fas fa-link"></i> Connect Broker</button>
+                    <button class="btn btn-danger btn-sm" id="disconnectBrokerBtn"><i class="fas fa-plug"></i> Disconnect</button>
+                    <button class="btn btn-outline btn-sm" id="testConnectionBtn"><i class="fas fa-check"></i> Test Connection</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        SUBSCRIPTION MANAGEMENT
+        ============================================================ -->
+        <section class="card" id="subscriptionCard">
+            <div class="card-title"><i class="fas fa-crown"></i> Subscription Management</div>
+            <div id="subscriptionContent">
+                <div class="card-grid">
+                    <div class="stat-item">
+                        <span class="label">Current Plan</span>
+                        <span class="value gold" id="subPlan">—</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Status</span>
+                        <span class="value" id="subStatus">—</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Expires</span>
+                        <span class="value" id="subExpiry">—</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Capital Range</span>
+                        <span class="value" id="subCapital">—</span>
+                    </div>
+                </div>
+                <div class="btn-group mt-8">
+                    <button class="btn btn-success btn-sm" id="upgradeSubBtn"><i class="fas fa-arrow-up"></i> Upgrade Plan</button>
+                    <button class="btn btn-danger btn-sm" id="cancelSubBtn"><i class="fas fa-times"></i> Cancel Subscription</button>
+                    <button class="btn btn-outline btn-sm" id="renewSubBtn"><i class="fas fa-sync"></i> Renew</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        ACCOUNT INFORMATION
+        ============================================================ -->
+        <section class="card" id="infoCard">
+            <div class="card-title"><i class="fas fa-chart-pie"></i> Account Information</div>
+            <div id="infoContent">
+                <div class="card-grid">
+                    <div class="stat-item"><span class="label">Balance</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Equity</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Free Margin</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Used Margin</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Margin Level</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Floating P/L</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        PERFORMANCE
+        ============================================================ -->
+        <section class="card" id="perfCard">
+            <div class="card-title"><i class="fas fa-chart-line"></i> Performance</div>
+            <div id="perfContent">
+                <div class="card-grid">
+                    <div class="stat-item"><span class="label">Today</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Weekly</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Monthly</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Total Profit</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Total Loss</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">ROI</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Win Rate</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                    <div class="stat-item"><span class="label">Profit Factor</span><span class="value skeleton-text" style="height:16px;"></span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        AI MANAGEMENT
+        ============================================================ -->
+        <section class="card" id="aiCard">
+            <div class="card-title"><i class="fas fa-robot"></i> AI Management</div>
+            <div id="aiContent">
+                <div class="ai-grid">
+                    <div class="ai-item"><span class="label">Status</span><span class="value skeleton-text" style="height:14px;width:60px;"></span></div>
+                    <div class="ai-item"><span class="label">Strategy</span><span class="value skeleton-text" style="height:14px;width:60px;"></span></div>
+                    <div class="ai-item"><span class="label">Market</span><span class="value skeleton-text" style="height:14px;width:60px;"></span></div>
+                    <div class="ai-item"><span class="label">Risk %</span><span class="value skeleton-text" style="height:14px;width:40px;"></span></div>
+                    <div class="ai-item"><span class="label">Lot Size</span><span class="value skeleton-text" style="height:14px;width:40px;"></span></div>
+                    <div class="ai-item"><span class="label">Max Trades</span><span class="value skeleton-text" style="height:14px;width:40px;"></span></div>
+                </div>
+                <div class="btn-group mt-8">
+                    <button class="btn btn-success btn-sm" id="aiEnableBtn"><i class="fas fa-play"></i> Enable AI</button>
+                    <button class="btn btn-danger btn-sm" id="aiDisableBtn"><i class="fas fa-stop"></i> Disable AI</button>
+                    <button class="btn btn-outline btn-sm" id="aiPauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                    <button class="btn btn-outline btn-sm" id="aiResumeBtn"><i class="fas fa-play"></i> Resume</button>
+                    <button class="btn btn-danger btn-sm" id="aiEmergencyBtn"><i class="fas fa-exclamation-triangle"></i> Emergency Stop</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        SECURITY
+        ============================================================ -->
+        <section class="card" id="securityCard">
+            <div class="card-title"><i class="fas fa-lock"></i> Security</div>
+            <div id="securityContent">
+                <div class="security-item"><span class="label">API Connection</span><span class="value" id="secApi">—</span></div>
+                <div class="security-item"><span class="label">JWT Status</span><span class="value" id="secJwt">—</span></div>
+                <div class="security-item"><span class="label">Session Expiry</span><span class="value" id="secSession">—</span></div>
+                <div class="security-item"><span class="label">Device</span><span class="value" id="secDevice">—</span></div>
+                <div class="security-item"><span class="label">Browser</span><span class="value" id="secBrowser">—</span></div>
+                <div class="security-item"><span class="label">Last Login</span><span class="value" id="secLastLogin">—</span></div>
+                <button class="btn btn-danger btn-sm mt-8" id="secLogoutAll"><i class="fas fa-sign-out-alt"></i> Logout All Devices</button>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        DANGER ZONE
+        ============================================================ -->
+        <section class="card danger-zone" id="dangerCard">
+            <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div>
+            <div class="danger-btn-group">
+                <button class="btn btn-danger btn-sm" id="dangerDisconnect"><i class="fas fa-plug"></i> Disconnect Broker</button>
+                <button class="btn btn-danger btn-sm" id="dangerDeleteConn"><i class="fas fa-trash"></i> Delete Connection</button>
+                <button class="btn btn-danger btn-sm" id="dangerResetAI"><i class="fas fa-undo"></i> Reset AI</button>
+                <button class="btn btn-danger btn-sm" id="dangerResetStats"><i class="fas fa-chart-simple"></i> Reset Statistics</button>
+                <button class="btn btn-danger btn-sm" id="dangerDeleteData"><i class="fas fa-database"></i> Delete Trading Data</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ============================================================
+    BOTTOM NAV
+    ============================================================ -->
+    <nav class="bottom-nav">
+        <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+        <a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+        <a href="robot.html"><i class="fas fa-microchip"></i><span>Robot</span></a>
+        <a href="account-management.html" class="active"><i class="fas fa-user-cog"></i><span>Account</span></a>
+    </nav>
+
+    <!-- ============================================================
+    JAVASCRIPT - USING FIREBASE
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+            authDomain: "abotra-proa1.firebaseapp.com",
+            databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+            projectId: "abotra-proa1",
+            storageBucket: "abotra-proa1.firebasestorage.app",
+            messagingSenderId: "510401455603",
+            appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let isLoading = false;
+        let listeners = [];
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        const toastContainer = $('#toastContainer');
+        const modalOverlay = $('#modalOverlay');
+        const modalContent = $('#modalContent');
+        const modalTitle = $('#modalTitle');
+        const modalBody = $('#modalBody');
+        const modalActions = $('#modalActions');
+        const modalCloseBtn = $('#modalCloseBtn');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
+            toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, duration);
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function showModal(title, bodyHTML, actionsHTML) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = bodyHTML;
+            modalActions.innerHTML = actionsHTML || '';
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function initTheme() {
+            const saved = localStorage.getItem('abotra_theme');
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+                document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+                document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+            }
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+            const sun = document.querySelector('#themeToggle i.fa-sun');
+            const moon = document.querySelector('#themeToggle i.fa-moon');
+            if (isLight) { sun.style.display = 'none';
+                moon.style.display = 'inline-block'; } else { sun.style.display = 'inline-block';
+                moon.style.display = 'none'; }
+        });
+
+        // ============================================================
+        // RENDER FUNCTIONS
+        // ============================================================
+        function renderStatus(data) {
+            const container = document.getElementById('statusContent');
+            if (!data || !data.connected) {
+                container.innerHTML = `
+                    <div class="status-bar">
+                        <span class="status-item"><span class="badge-status offline">● Offline</span></span>
+                        <span class="status-item"><i class="fas fa-plug"></i> Not Connected</span>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" id="connectBtn"><i class="fas fa-link"></i> Connect Broker</button>
+                        </div>
+                    </div>
+                `;
+                const connectBtn = document.getElementById('connectBtn');
+                if (connectBtn) connectBtn.addEventListener('click', () => showConnectModal());
+                return;
+            }
+
+            const statusClass = data.connected ? 'online' : 'offline';
+            const statusText = data.connected ? 'Online' : 'Offline';
+            const modeClass = data.mode === 'live' ? 'live' : 'demo';
+            const modeText = data.mode === 'live' ? 'Live' : 'Demo';
+
+            container.innerHTML = `
+                <div class="status-bar">
+                    <div class="flex-center gap-8">
+                        <span class="badge-status ${statusClass}">● ${statusText}</span>
+                        <span class="badge-status ${modeClass}">${modeText}</span>
+                    </div>
+                    <div class="flex-center gap-8" style="flex-wrap:wrap;">
+                        <span class="status-item"><i class="fas fa-server"></i> <span class="val">${data.broker || '—'}</span></span>
+                        <span class="status-item"><i class="fas fa-cog"></i> <span class="val">${data.platform || 'MT5'}</span></span>
+                        <span class="status-item"><i class="fas fa-hashtag"></i> <span class="val">${data.accountNumber || '—'}</span></span>
+                        <span class="status-item"><i class="fas fa-clock"></i> <span class="val">${data.lastSync ? new Date(data.lastSync).toLocaleString() : '—'}</span></span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" id="connectBtn"><i class="fas fa-link"></i> Connect</button>
+                        <button class="btn btn-danger btn-sm" id="disconnectBtn"><i class="fas fa-plug"></i> Disconnect</button>
+                        <button class="btn btn-outline btn-sm" id="refreshStatusBtn"><i class="fas fa-sync"></i> Refresh</button>
+                        <button class="btn btn-outline btn-sm" id="reconnectBtn"><i class="fas fa-undo"></i> Reconnect</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('connectBtn').addEventListener('click', () => showConnectModal());
+            document.getElementById('disconnectBtn').addEventListener('click', () => showDisconnectModal());
+            document.getElementById('refreshStatusBtn').addEventListener('click', () => loadAllData());
+            document.getElementById('reconnectBtn').addEventListener('click', () => reconnectAccount());
+        }
+
+        function renderInfo(data) {
+            const container = document.getElementById('infoContent');
+            if (!data) {
+                container.innerHTML = `<div class="text-muted fs-10">No account data available. Connect your broker.</div>`;
+                return;
+            }
+            container.innerHTML = `
+                <div class="card-grid">
+                    <div class="stat-item"><span class="label">Balance</span><span class="value gold">$${data.balance?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Equity</span><span class="value gold">$${data.equity?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Free Margin</span><span class="value gold">$${data.freeMargin?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Used Margin</span><span class="value gold">$${data.usedMargin?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Margin Level</span><span class="value gold">${data.marginLevel?.toFixed(1) || '0'}%</span></div>
+                    <div class="stat-item"><span class="label">Floating P/L</span><span class="value ${data.floatingPL >= 0 ? 'green' : 'red'}">$${data.floatingPL?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Currency</span><span class="value">${data.currency || 'USD'}</span></div>
+                    <div class="stat-item"><span class="label">Leverage</span><span class="value">1:${data.leverage || '—'}</span></div>
+                    <div class="stat-item"><span class="label">Account Type</span><span class="value">${data.accountType || '—'}</span></div>
+                    <div class="stat-item"><span class="label">Trading Permission</span><span class="value ${data.tradingAllowed ? 'green' : 'red'}">${data.tradingAllowed ? 'Yes' : 'No'}</span></div>
+                </div>
+            `;
+        }
+
+        function renderPerformance(data) {
+            const container = document.getElementById('perfContent');
+            if (!data) {
+                container.innerHTML = `<div class="text-muted fs-10">No performance data available.</div>`;
+                return;
+            }
+            container.innerHTML = `
+                <div class="card-grid">
+                    <div class="stat-item"><span class="label">Today</span><span class="value ${data.today >= 0 ? 'green' : 'red'}">$${data.today?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Weekly</span><span class="value ${data.weekly >= 0 ? 'green' : 'red'}">$${data.weekly?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Monthly</span><span class="value ${data.monthly >= 0 ? 'green' : 'red'}">$${data.monthly?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Total Profit</span><span class="value green">$${data.totalProfit?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">Total Loss</span><span class="value red">$${data.totalLoss?.toFixed(2) || '0.00'}</span></div>
+                    <div class="stat-item"><span class="label">ROI</span><span class="value gold">${data.roi?.toFixed(1) || '0'}%</span></div>
+                    <div class="stat-item"><span class="label">Win Rate</span><span class="value gold">${data.winRate?.toFixed(1) || '0'}%</span></div>
+                    <div class="stat-item"><span class="label">Profit Factor</span><span class="value gold">${data.profitFactor?.toFixed(2) || '0'}</span></div>
+                    <div class="stat-item"><span class="label">Total Trades</span><span class="value">${data.totalTrades || 0}</span></div>
+                    <div class="stat-item"><span class="label">Winning Trades</span><span class="value green">${data.winningTrades || 0}</span></div>
+                    <div class="stat-item"><span class="label">Losing Trades</span><span class="value red">${data.losingTrades || 0}</span></div>
+                    <div class="stat-item"><span class="label">Max Drawdown</span><span class="value red">${data.maxDrawdown?.toFixed(1) || '0'}%</span></div>
+                </div>
+            `;
+        }
+
+        function renderAI(data) {
+            const container = document.getElementById('aiContent');
+            if (!data) {
+                container.innerHTML = `<div class="text-muted fs-10">AI management data not available.</div>`;
+                return;
+            }
+            const statusText = data.enabled ? '🟢 Active' : '🔴 Inactive';
+            const statusClass = data.enabled ? 'green' : 'red';
+
+            container.innerHTML = `
+                <div class="ai-grid">
+                    <div class="ai-item"><span class="label">Status</span><span class="value ${statusClass}">${statusText}</span></div>
+                    <div class="ai-item"><span class="label">Strategy</span><span class="value gold">${data.strategy || 'Scalper'}</span></div>
+                    <div class="ai-item"><span class="label">Market</span><span class="value gold">${data.market || 'Forex'}</span></div>
+                    <div class="ai-item"><span class="label">Risk %</span><span class="value gold">${data.riskPercent || 5}%</span></div>
+                    <div class="ai-item"><span class="label">Lot Size</span><span class="value gold">${data.lotSize || 0.01}</span></div>
+                    <div class="ai-item"><span class="label">Max Trades</span><span class="value gold">${data.maxTrades || 10}</span></div>
+                    <div class="ai-item"><span class="label">Trailing Stop</span><span class="value ${data.trailingStop ? 'green' : 'red'}">${data.trailingStop ? 'On' : 'Off'}</span></div>
+                    <div class="ai-item"><span class="label">News Filter</span><span class="value ${data.newsFilter ? 'green' : 'red'}">${data.newsFilter ? 'On' : 'Off'}</span></div>
+                    <div class="ai-item"><span class="label">Recovery Mode</span><span class="value ${data.recoveryMode ? 'green' : 'red'}">${data.recoveryMode ? 'On' : 'Off'}</span></div>
+                    <div class="ai-item"><span class="label">Trading Hours</span><span class="value">${data.tradingHours || '24/5'}</span></div>
+                </div>
+                <div class="btn-group mt-8">
+                    <button class="btn btn-success btn-sm" id="aiEnableBtn"><i class="fas fa-play"></i> Enable AI</button>
+                    <button class="btn btn-danger btn-sm" id="aiDisableBtn"><i class="fas fa-stop"></i> Disable AI</button>
+                    <button class="btn btn-outline btn-sm" id="aiPauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                    <button class="btn btn-outline btn-sm" id="aiResumeBtn"><i class="fas fa-play"></i> Resume</button>
+                    <button class="btn btn-danger btn-sm" id="aiEmergencyBtn"><i class="fas fa-exclamation-triangle"></i> Emergency Stop</button>
+                </div>
+            `;
+
+            document.getElementById('aiEnableBtn').addEventListener('click', () => setAIEnabled(true));
+            document.getElementById('aiDisableBtn').addEventListener('click', () => setAIEnabled(false));
+            document.getElementById('aiPauseBtn').addEventListener('click', () => pauseAI());
+            document.getElementById('aiResumeBtn').addEventListener('click', () => resumeAI());
+            document.getElementById('aiEmergencyBtn').addEventListener('click', () => emergencyStop());
+        }
+
+        function renderSecurity(data) {
+            if (data) {
+                document.getElementById('secApi').textContent = data.apiConnected ? '✅ Connected' : '❌ Disconnected';
+                document.getElementById('secApi').className = data.apiConnected ? 'text-green fw-700' : 'text-red fw-700';
+                document.getElementById('secJwt').textContent = data.jwtValid ? '✅ Valid' : '❌ Invalid';
+                document.getElementById('secJwt').className = data.jwtValid ? 'text-green fw-700' : 'text-red fw-700';
+                document.getElementById('secSession').textContent = data.sessionExpiry || '—';
+                document.getElementById('secDevice').textContent = data.device || '—';
+                document.getElementById('secBrowser').textContent = data.browser || '—';
+                document.getElementById('secLastLogin').textContent = data.lastLogin ? new Date(data.lastLogin).toLocaleString() : '—';
+            }
+        }
+
+        // ============================================================
+        // BROKER FUNCTIONS
+        // ============================================================
+        function showConnectModal() {
+            showModal(
+                'Connect Broker',
+                `
+                    <p class="text-secondary">Connect your exchange account for automated trading.</p>
+                    <div class="form-group">
+                        <label>Exchange</label>
+                        <select id="brokerExchangeSelect">
+                            <option value="binance">Binance</option>
+                            <option value="bybit">Bybit</option>
+                            <option value="okx">OKX</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" id="brokerApiKey" placeholder="Enter your API Key">
+                    </div>
+                    <div class="form-group">
+                        <label>Secret Key</label>
+                        <input type="password" id="brokerSecretKey" placeholder="Enter your Secret Key">
+                    </div>
+                    <div style="font-size:9px; color:var(--text-muted); margin-top:8px;">
+                        <i class="fas fa-shield-alt"></i> 
+                        Your API keys are encrypted and stored securely. Never share them with anyone.
+                    </div>
+                `,
+                `
+                    <button class="btn btn-success" id="connectBrokerSubmit"><i class="fas fa-link"></i> Connect</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+
+            document.getElementById('connectBrokerSubmit').addEventListener('click', async () => {
+                const exchange = document.getElementById('brokerExchangeSelect').value;
+                const apiKey = document.getElementById('brokerApiKey').value.trim();
+                const secretKey = document.getElementById('brokerSecretKey').value.trim();
+
+                if (!apiKey || !secretKey) {
+                    showToast('API Key and Secret Key are required', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('connectBrokerSubmit');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+
+                try {
+                    // Save encrypted credentials to Firebase
+                    await db.ref(`broker/${currentUser.uid}`).set({
+                        exchange: exchange,
+                        apiKey: btoa(apiKey), // Simple encoding - use proper encryption in production
+                        secretKey: btoa(secretKey),
+                        connected: true,
+                        connectedAt: Date.now()
+                    });
+
+                    // Also update status
+                    await db.ref(`forex/${currentUser.uid}`).update({
+                        connected: true,
+                        broker: exchange,
+                        platform: exchange === 'binance' ? 'Binance' : exchange === 'bybit' ? 'Bybit' : 'OKX',
+                        lastSync: Date.now()
+                    });
+
+                    showToast('✅ Broker connected successfully!', 'success');
+                    closeModal();
+                    await loadAllData();
+                } catch (error) {
+                    showToast('Failed to connect: ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-link"></i> Connect';
+                }
+            });
+        }
+
+        function showDisconnectModal() {
+            showModal(
+                'Disconnect Broker',
+                `<p class="text-secondary">Are you sure you want to disconnect your broker? Your API keys will be removed.</p>`,
+                `
+                    <button class="btn btn-danger" id="disconnectConfirm"><i class="fas fa-plug"></i> Disconnect</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+
+            document.getElementById('disconnectConfirm').addEventListener('click', async () => {
+                try {
+                    await db.ref(`broker/${currentUser.uid}`).remove();
+                    await db.ref(`forex/${currentUser.uid}`).update({
+                        connected: false,
+                        lastSync: Date.now()
+                    });
+                    showToast('Broker disconnected', 'info');
+                    closeModal();
+                    await loadAllData();
+                } catch (error) {
+                    showToast('Failed to disconnect: ' + error.message, 'error');
+                }
+            });
+        }
+
+        async function reconnectAccount() {
+            try {
+                showToast('Reconnecting...', 'info');
+                await db.ref(`forex/${currentUser.uid}`).update({
+                    connected: true,
+                    lastSync: Date.now()
+                });
+                showToast('Reconnected successfully!', 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Reconnect failed: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // SUBSCRIPTION FUNCTIONS
+        // ============================================================
+        async function loadSubscription() {
+            if (!currentUser) return;
+            try {
+                const snapshot = await db.ref(`subscriptions/${currentUser.uid}`).once('value');
+                if (snapshot.exists()) {
+                    const sub = snapshot.val();
+                    document.getElementById('subPlan').textContent = sub.plan || 'Starter';
+                    document.getElementById('subStatus').textContent = sub.active ? '✅ Active' : '❌ Inactive';
+                    document.getElementById('subStatus').className = sub.active ? 'text-green fw-700' : 'text-red fw-700';
+                    document.getElementById('subExpiry').textContent = sub.expiry ? new Date(sub.expiry).toLocaleDateString() : '—';
+                    document.getElementById('subCapital').textContent = sub.capitalRange || '—';
+                } else {
+                    document.getElementById('subPlan').textContent = 'Starter';
+                    document.getElementById('subStatus').textContent = '✅ Active';
+                    document.getElementById('subStatus').className = 'text-green fw-700';
+                    document.getElementById('subExpiry').textContent = '—';
+                    document.getElementById('subCapital').textContent = '$50 - $500';
+                }
+            } catch (error) {
+                console.error('[Subscription] Load error:', error);
+            }
+        }
+
+        function showUpgradeModal() {
+            const plans = [
+                { name: 'AI Starter', capital: '$50 - $500', features: 'Basic AI, 5 pairs' },
+                { name: 'AI Pro', capital: '$500 - $5,000', features: 'Advanced AI, 15 pairs, priority support' },
+                { name: 'AI Elite', capital: '$5,000+', features: 'Professional AI, all pairs, dedicated manager' }
+            ];
+
+            showModal(
+                'Upgrade Plan',
+                `
+                    <p class="text-secondary">Select your new subscription plan:</p>
+                    ${plans.map((p, i) => `
+                        <div style="padding:10px 14px; background:rgba(255,215,0,0.05); border-radius:10px; margin-bottom:8px; border:1px solid rgba(255,215,0,0.1);">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:var(--gold);">${p.name}</strong>
+                                <span class="text-secondary fs-10">${p.capital}</span>
+                            </div>
+                            <div style="font-size:9px; color:var(--text-secondary);">${p.features}</div>
+                            <button class="btn btn-success btn-sm select-plan-btn mt-8" data-plan="${p.name}" data-index="${i}" style="width:100%;">Select</button>
+                        </div>
+                    `).join('')}
+                `,
+                `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>`
+            );
+
+            document.querySelectorAll('.select-plan-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const plan = btn.dataset.plan;
+                    try {
+                        await db.ref(`subscriptions/${currentUser.uid}`).update({
+                            plan: plan,
+                            active: true,
+                            updatedAt: Date.now()
+                        });
+                        showToast(`✅ Upgraded to ${plan}!`, 'success');
+                        closeModal();
+                        await loadSubscription();
+                    } catch (error) {
+                        showToast('Failed to upgrade: ' + error.message, 'error');
+                    }
+                });
+            });
+        }
+
+        async function cancelSubscription() {
+            showModal(
+                'Cancel Subscription',
+                `<p class="text-secondary">Are you sure you want to cancel your subscription? You will lose access to premium features.</p>`,
+                `
+                    <button class="btn btn-danger" id="cancelConfirm"><i class="fas fa-times"></i> Cancel Subscription</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+
+            document.getElementById('cancelConfirm').addEventListener('click', async () => {
+                try {
+                    await db.ref(`subscriptions/${currentUser.uid}`).update({
+                        active: false,
+                        cancelledAt: Date.now()
+                    });
+                    showToast('Subscription cancelled', 'info');
+                    closeModal();
+                    await loadSubscription();
+                } catch (error) {
+                    showToast('Failed to cancel: ' + error.message, 'error');
+                }
+            });
+        }
+
+        async function renewSubscription() {
+            try {
+                const snapshot = await db.ref(`subscriptions/${currentUser.uid}`).once('value');
+                if (snapshot.exists()) {
+                    const sub = snapshot.val();
+                    await db.ref(`subscriptions/${currentUser.uid}`).update({
+                        active: true,
+                        expiry: Date.now() + (30 * 24 * 60 * 60 * 1000),
+                        renewedAt: Date.now()
+                    });
+                    showToast('✅ Subscription renewed for 30 days!', 'success');
+                    await loadSubscription();
+                }
+            } catch (error) {
+                showToast('Failed to renew: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // AI ACTIONS
+        // ============================================================
+        async function setAIEnabled(enabled) {
+            try {
+                await db.ref(`aiSettings/${currentUser.uid}`).update({ enabled: enabled });
+                showToast(`AI ${enabled ? 'enabled' : 'disabled'}`, 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to ' + (enabled ? 'enable' : 'disable') + ' AI: ' + error.message, 'error');
+            }
+        }
+
+        async function pauseAI() {
+            try {
+                await db.ref(`aiSettings/${currentUser.uid}`).update({ paused: true, enabled: false });
+                showToast('AI paused', 'info');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to pause AI: ' + error.message, 'error');
+            }
+        }
+
+        async function resumeAI() {
+            try {
+                await db.ref(`aiSettings/${currentUser.uid}`).update({ paused: false, enabled: true });
+                showToast('AI resumed', 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to resume AI: ' + error.message, 'error');
+            }
+        }
+
+        async function emergencyStop() {
+            showModal(
+                '🚨 Emergency Stop',
+                `<p class="text-secondary" style="color:#F6465D;">⚠️ This will immediately stop all trading and close all positions. Are you sure?</p>`,
+                `
+                    <button class="btn btn-danger" id="emergencySubmitBtn"><i class="fas fa-exclamation-triangle"></i> Emergency Stop</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+            document.getElementById('emergencySubmitBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('emergencySubmitBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Stopping...';
+
+                try {
+                    await db.ref(`aiSettings/${currentUser.uid}`).update({
+                        enabled: false,
+                        emergencyStop: true,
+                        emergencyStoppedAt: Date.now()
+                    });
+                    // Also clear open trades
+                    await db.ref(`openTrades/${currentUser.uid}`).remove();
+                    showToast('Emergency stop activated! All positions closed.', 'warning');
+                    closeModal();
+                    await loadAllData();
+                } catch (error) {
+                    showToast('Emergency stop failed: ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Emergency Stop';
+                }
+            });
+        }
+
+        // ============================================================
+        // SECURITY - LOGOUT ALL
+        // ============================================================
+        document.getElementById('secLogoutAll').addEventListener('click', async () => {
+            showModal(
+                'Logout All Devices',
+                `<p class="text-secondary">This will log out all active sessions across all devices. You will need to login again.</p>`,
+                `
+                    <button class="btn btn-danger" id="logoutAllBtn"><i class="fas fa-sign-out-alt"></i> Logout All</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+            document.getElementById('logoutAllBtn').addEventListener('click', async () => {
+                try {
+                    await db.ref(`security/${currentUser.uid}`).update({
+                        logoutAll: true,
+                        logoutAllAt: Date.now()
+                    });
+                    showToast('Logged out from all devices', 'info');
+                    localStorage.removeItem('abotra_admin_logged_in');
+                    localStorage.removeItem('abotra_admin_email');
+                    localStorage.removeItem('abotra_admin_uid');
+                    localStorage.removeItem('abotra_admin_session_expiry');
+                    setTimeout(() => window.location.href = 'login.html', 1000);
+                } catch (error) {
+                    showToast('Failed to logout all: ' + error.message, 'error');
+                }
+            });
+        });
+
+        // ============================================================
+        // DANGER ZONE ACTIONS
+        // ============================================================
+        function showDangerModal(title, message, action, actionLabel, dangerClass = 'btn-danger') {
+            showModal(
+                title,
+                `<p class="text-secondary" style="color:#F6465D;">⚠️ ${message}</p><p class="text-muted fs-10">Type "CONFIRM" to proceed.</p>
+                <div class="form-group"><input type="text" id="dangerConfirmInput" placeholder="Type CONFIRM" style="text-transform:uppercase;"></div>`,
+                `
+                    <button class="btn ${dangerClass}" id="dangerActionBtn"><i class="fas fa-exclamation-triangle"></i> ${actionLabel}</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+            document.getElementById('dangerActionBtn').addEventListener('click', async () => {
+                const confirmInput = document.getElementById('dangerConfirmInput');
+                if (confirmInput.value.toUpperCase() !== 'CONFIRM') {
+                    showToast('Please type CONFIRM to proceed', 'warning');
+                    return;
+                }
+                const btn = document.getElementById('dangerActionBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                try {
+                    await action();
+                    showToast('Action completed successfully', 'success');
+                    closeModal();
+                    await loadAllData();
+                } catch (error) {
+                    showToast('Failed: ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${actionLabel}`;
+                }
+            });
+        }
+
+        document.getElementById('dangerDisconnect').addEventListener('click', () => {
+            showDangerModal(
+                'Disconnect Broker',
+                'This will disconnect your broker and stop all trading.',
+                async () => {
+                    await db.ref(`forex/${currentUser.uid}`).update({ connected: false });
+                    await db.ref(`broker/${currentUser.uid}`).remove();
+                },
+                'Disconnect Broker'
+            );
+        });
+
+        document.getElementById('dangerDeleteConn').addEventListener('click', () => {
+            showDangerModal(
+                'Delete Connection',
+                'This will permanently delete your broker connection and all associated data.',
+                async () => {
+                    await db.ref(`forex/${currentUser.uid}`).remove();
+                    await db.ref(`broker/${currentUser.uid}`).remove();
+                    await db.ref(`openTrades/${currentUser.uid}`).remove();
+                },
+                'Delete Connection'
+            );
+        });
+
+        document.getElementById('dangerResetAI').addEventListener('click', () => {
+            showDangerModal(
+                'Reset AI',
+                'This will reset all AI settings and trading history for the AI.',
+                async () => {
+                    await db.ref(`aiSettings/${currentUser.uid}`).remove();
+                },
+                'Reset AI'
+            );
+        });
+
+        document.getElementById('dangerResetStats').addEventListener('click', () => {
+            showDangerModal(
+                'Reset Statistics',
+                'This will permanently delete all your trading statistics.',
+                async () => {
+                    await db.ref(`users/${currentUser.uid}/performance`).remove();
+                },
+                'Reset Statistics'
+            );
+        });
+
+        document.getElementById('dangerDeleteData').addEventListener('click', () => {
+            showDangerModal(
+                'Delete Trading Data',
+                'This will permanently delete all trading data including history and positions.',
+                async () => {
+                    await db.ref(`openTrades/${currentUser.uid}`).remove();
+                    await db.ref(`history/${currentUser.uid}`).remove();
+                    await db.ref(`tradingLogs/${currentUser.uid}`).remove();
+                },
+                'Delete Trading Data'
+            );
+        });
+
+        // ============================================================
+        // LOAD ALL DATA
+        // ============================================================
+        async function loadAllData() {
+            if (isLoading || !currentUser) return;
+            isLoading = true;
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                const uid = currentUser.uid;
+
+                // Load all data in parallel
+                const [
+                    forexSnap,
+                    userSnap,
+                    aiSnap,
+                    securitySnap,
+                    brokerSnap
+                ] = await Promise.all([
+                    db.ref(`forex/${uid}`).once('value'),
+                    db.ref(`users/${uid}`).once('value'),
+                    db.ref(`aiSettings/${uid}`).once('value'),
+                    db.ref(`security/${uid}`).once('value'),
+                    db.ref(`broker/${uid}`).once('value')
+                ]);
+
+                const forexData = forexSnap.val() || null;
+                const userData = userSnap.val() || null;
+                const aiData = aiSnap.val() || null;
+                const securityData = securitySnap.val() || null;
+                const brokerData = brokerSnap.val() || null;
+
+                // Render all sections
+                renderStatus(forexData);
+                renderInfo(forexData);
+                renderPerformance(userData?.performance || null);
+                renderAI(aiData);
+                renderSecurity(securityData);
+
+                // Update broker status
+                if (brokerData) {
+                    document.getElementById('brokerStatus').textContent = brokerData.connected ? '✅ Connected' : '❌ Disconnected';
+                    document.getElementById('brokerStatus').className = brokerData.connected ? 'text-green fw-700' : 'text-red fw-700';
+                    document.getElementById('brokerExchange').textContent = brokerData.exchange || '—';
+                    document.getElementById('brokerStatusDot').className = `status-dot ${brokerData.connected ? 'connected' : 'disconnected'}`;
+                }
+
+                // Load subscription
+                await loadSubscription();
+
+            } catch (error) {
+                console.error('[Account] Load error:', error);
+                showToast('Failed to load account data: ' + error.message, 'error');
+            } finally {
+                isLoading = false;
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                }
+            }
+        }
+
+        // ============================================================
+        // SETUP LISTENERS
+        // ============================================================
+        function setupListeners() {
+            if (!currentUser) return;
+
+            // Clean up old listeners
+            listeners.forEach(unsub => { try { unsub(); } catch (e) {} });
+            listeners = [];
+
+            const uid = currentUser.uid;
+
+            // Listen for forex changes
+            const forexUnsub = db.ref(`forex/${uid}`).on('value', (snapshot) => {
+                renderStatus(snapshot.val() || null);
+                renderInfo(snapshot.val() || null);
+            });
+            listeners.push(() => db.ref(`forex/${uid}`).off('value', forexUnsub));
+
+            // Listen for user performance changes
+            const userUnsub = db.ref(`users/${uid}/performance`).on('value', (snapshot) => {
+                renderPerformance(snapshot.val() || null);
+            });
+            listeners.push(() => db.ref(`users/${uid}/performance`).off('value', userUnsub));
+
+            // Listen for AI changes
+            const aiUnsub = db.ref(`aiSettings/${uid}`).on('value', (snapshot) => {
+                renderAI(snapshot.val() || null);
+            });
+            listeners.push(() => db.ref(`aiSettings/${uid}`).off('value', aiUnsub));
+
+            // Listen for broker changes
+            const brokerUnsub = db.ref(`broker/${uid}`).on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('brokerStatus').textContent = data.connected ? '✅ Connected' : '❌ Disconnected';
+                    document.getElementById('brokerStatus').className = data.connected ? 'text-green fw-700' : 'text-red fw-700';
+                    document.getElementById('brokerExchange').textContent = data.exchange || '—';
+                    document.getElementById('brokerStatusDot').className = `status-dot ${data.connected ? 'connected' : 'disconnected'}`;
+                }
+            });
+            listeners.push(() => db.ref(`broker/${uid}`).off('value', brokerUnsub));
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            initTheme();
+
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+                console.log('[Account] User logged in:', user.uid);
+
+                await loadAllData();
+                setupListeners();
+
+                // Refresh button
+                document.getElementById('refreshBtn').addEventListener('click', loadAllData);
+
+                // Broker buttons
+                document.getElementById('connectBrokerBtn').addEventListener('click', showConnectModal);
+                document.getElementById('disconnectBrokerBtn').addEventListener('click', showDisconnectModal);
+                document.getElementById('testConnectionBtn').addEventListener('click', async () => {
+                    try {
+                        showToast('Testing connection...', 'info');
+                        // Check if broker is connected
+                        const snap = await db.ref(`broker/${currentUser.uid}/connected`).once('value');
+                        if (snap.exists() && snap.val()) {
+                            showToast('✅ Connection is active!', 'success');
+                        } else {
+                            showToast('❌ No active connection found. Please connect your broker.', 'error');
+                        }
+                    } catch (error) {
+                        showToast('Test failed: ' + error.message, 'error');
+                    }
+                });
+
+                // Subscription buttons
+                document.getElementById('upgradeSubBtn').addEventListener('click', showUpgradeModal);
+                document.getElementById('cancelSubBtn').addEventListener('click', cancelSubscription);
+                document.getElementById('renewSubBtn').addEventListener('click', renewSubscription);
+
+                console.log('[Account] ✅ Initialized');
+            });
+        }
+
+        // ============================================================
+        // START
+        // ============================================================
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Admin Dashboard | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<!-- ============================================================ -->
+<!-- ONESIGNAL CONFIG -->
+<!-- ============================================================ -->
+<script>
+const ONESIGNAL_APP_ID = 'e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc';
+</script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.OneSignalDeferred.push(async function(OneSignal) {
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await OneSignal.init({
+            appId: ONESIGNAL_APP_ID,
+            serviceWorkerPath: '/sw.js',
+            serviceWorkerParam: { scope: '/' },
+            allowLocalhostAsSecureOrigin: true,
+            notifyButton: { enable: false }
+        });
+        console.log('[ONESIGNAL] ✅ Admin initialized');
+    } catch(e) { console.warn('[ONESIGNAL] Init error:', e); }
+});
+</script>
+
+<!-- ============================================================ -->
+<!-- STYLES -->
+<!-- ============================================================ -->
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); }
+body.light-theme .admin-header, body.light-theme .sidebar, body.light-theme .section-card, body.light-theme .stat-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); }
+body.light-theme .admin-header h2, body.light-theme .page-title, body.light-theme .section-title, body.light-theme .stat-value { color: #800000; }
+body.light-theme .nav-item { color: #555; }
+body.light-theme .nav-item:hover, body.light-theme .nav-item.active { background: rgba(128,0,0,0.08); color: #800000; border-left-color: #800000; }
+body.light-theme .modal-content { background: linear-gradient(145deg, #ffffff, #f5f5f5); border-color: rgba(128,0,0,0.15); }
+body.light-theme .push-modal-input, body.light-theme .modal-edit-input { background: #f5f5f5; color: #333; border-color: #ddd; }
+body.light-theme .confirm-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); border: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .confirm-modal-title { color: #1a1a1a; }
+
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 0; pointer-events: none; }
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+
+.admin-header { position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.menu-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 8px 12px; color: #FFD700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.3s; font-size: 11px; }
+.menu-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-area img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.logo-area p { color: rgba(255,255,255,0.7); font-size: 8px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.notif-icon { position: relative; cursor: pointer; color: #FFD700; font-size: 18px; transition: 0.3s; background: rgba(255,215,0,0.15); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.notif-icon:hover { background: rgba(255,215,0,0.3); transform: scale(1.05); }
+.notif-badge { position: absolute; top: -5px; right: -5px; background: #F6465D; color: white; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 20px; display: none; animation: pulse 1s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.theme-toggle { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer; color: #FFD700; display: flex; align-items: center; gap: 6px; transition: 0.3s; font-weight: 500; font-size: 11px; }
+.theme-toggle:hover { background: rgba(255,215,0,0.3); transform: scale(1.02); }
+.logout-btn { background: rgba(246,70,93,0.15); border: none; border-radius: 10px; padding: 8px 14px; color: #F6465D; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; font-weight: 500; font-size: 11px; }
+.logout-btn:hover { background: rgba(246,70,93,0.3); transform: scale(1.02); }
+
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 199; display: none; }
+.sidebar-overlay.active { display: block; }
+.sidebar { position: fixed; top: -100%; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); z-index: 200; transition: top 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-radius: 0 0 20px 20px; max-height: 80vh; overflow-y: auto; border-bottom: 1px solid rgba(255,215,0,0.2); }
+.sidebar.open { top: 65px; }
+.nav-menu { padding: 12px 0; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #ccc; text-decoration: none; transition: 0.3s; font-size: 12px; font-weight: 500; border-left: 3px solid transparent; }
+.nav-item i { width: 20px; font-size: 14px; }
+.nav-item:hover { background: rgba(255,215,0,0.08); color: #FFD700; border-left-color: #FFD700; }
+.nav-item.active { background: rgba(255,215,0,0.12); color: #FFD700; border-left-color: #FFD700; }
+.nav-badge { background: #F6465D; color: white; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: auto; display: none; }
+
+.main-content { position: relative; z-index: 2; margin-top: 75px; padding: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+.page-title { font-size: 22px; font-weight: 800; color: #FFD700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 10px 8px; text-align: center; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
+.stat-card:hover { transform: translateY(-3px); border-color: #FFD700; background: rgba(255,215,0,0.08); }
+.stat-icon { width: 36px; height: 36px; background: rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-size: 16px; color: #FFD700; }
+.stat-value { font-size: 18px; font-weight: 800; color: #FFD700; margin-bottom: 2px; }
+.stat-label { color: #aaa; font-size: 9px; font-weight: 500; }
+
+.section-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.1); border-radius: 16px; padding: 16px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+.section-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,215,0,0.2); }
+.view-all-btn { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 4px 10px; color: #FFD700; font-size: 9px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; }
+.view-all-btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); }
+
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+th { color: #FFD700; font-weight: 600; font-size: 9px; text-transform: uppercase; }
+td { color: #ddd; font-size: 10px; }
+tr:hover td { background: rgba(255,215,0,0.04); }
+
+.status-pending, .status-approved, .status-rejected {
+    padding: 2px 8px; border-radius: 20px; font-size: 8px; font-weight: 700; display: inline-block;
+}
+.status-pending { background: rgba(255,215,0,0.2); color: #FFD700; border: 1px solid rgba(255,215,0,0.3); }
+.status-approved { background: rgba(14,203,129,0.2); color: #0ECB81; border: 1px solid rgba(14,203,129,0.3); }
+.status-rejected { background: rgba(246,70,93,0.2); color: #F6465D; border: 1px solid rgba(246,70,93,0.3); }
+
+.view-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 3px 8px; color: #FFD700; cursor: pointer; font-size: 9px; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 3px; }
+.view-btn:hover { background: rgba(255,215,0,0.4); transform: translateY(-2px); }
+
+.btn-push-all { background: rgba(33, 150, 243, 0.15); border: none; border-radius: 12px; padding: 8px 16px; color: #2196F3; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; transition: 0.3s; }
+.btn-push-all:hover { background: rgba(33, 150, 243, 0.3); transform: translateY(-2px); }
+.btn-push-all .push-dot { width: 6px; height: 6px; background: #0ECB81; border-radius: 50%; display: inline-block; animation: livePulse 1.5s infinite; }
+@keyframes livePulse { 0% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(14,203,129,0.7); } 70% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 5px rgba(14,203,129,0); } 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(14,203,129,0); } }
+
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal.active { display: flex; }
+.modal-content { background: linear-gradient(145deg, #1e1e2e, #161626); border-radius: 24px; padding: 28px; max-width: 500px; width: 100%; border: 1px solid rgba(255,215,0,0.3); position: relative; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+body.light-theme .modal-content { background: linear-gradient(145deg, #ffffff, #f5f5f5); border-color: rgba(128,0,0,0.15); }
+.modal-close { position: absolute; top: 14px; right: 18px; font-size: 22px; cursor: pointer; color: #FFD700; transition: 0.3s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.modal-close:hover { background: rgba(255,215,0,0.1); transform: rotate(90deg); }
+.modal-content h3 { color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 18px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 12px; }
+.modal-edit-input { width: 100%; height: 40px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px 12px; color: white; font-size: 12px; outline: none; transition: 0.3s; }
+.modal-edit-input:focus { border-color: #FFD700; box-shadow: 0 0 0 2px rgba(255,215,0,0.1); }
+.push-modal-input { width: 100%; min-height: 80px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 10px 12px; color: white; font-size: 12px; outline: none; resize: vertical; transition: 0.3s; margin-top: 8px; }
+.push-modal-input:focus { border-color: #FFD700; box-shadow: 0 0 0 2px rgba(255,215,0,0.1); }
+.input-group { margin-bottom: 12px; }
+.input-group label { color: #FFD700; font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px; }
+.input-group label i { margin-right: 4px; }
+.edit-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+.btn-send-push { background: linear-gradient(135deg, #2196F3, #1976D2); border: none; border-radius: 10px; padding: 10px 20px; color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+.btn-send-push:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(33,150,243,0.4); }
+.btn-send-push:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-cancel-edit { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 20px; color: #aaa; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; }
+.btn-cancel-edit:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+.confirm-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(16px); z-index: 20000; display: none; align-items: center; justify-content: center; }
+.confirm-modal.active { display: flex; }
+.confirm-modal-card { background: linear-gradient(145deg, #1e1e2e, #14141f); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 90%; border: 1px solid rgba(255,215,0,0.25); box-shadow: 0 30px 80px rgba(0,0,0,0.6); animation: modalSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1); text-align: center; }
+@keyframes modalSlideUp { from { transform: translateY(40px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+body.light-theme .confirm-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); border: 1px solid rgba(128,0,0,0.2); }
+.confirm-modal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 28px; }
+.confirm-modal-icon.warning { background: rgba(255,215,0,0.15); color: #FFD700; }
+.confirm-modal-icon.danger { background: rgba(246,70,93,0.15); color: #F6465D; }
+.confirm-modal-title { color: #FFFFFF; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+body.light-theme .confirm-modal-title { color: #1a1a1a; }
+.confirm-modal-subtitle { color: #aaa; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+.confirm-modal-details { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 12px 14px; margin: 12px 0; text-align: left; border: 1px solid rgba(255,255,255,0.06); }
+.confirm-modal-details .detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.confirm-modal-details .detail-label { color: #888; }
+.confirm-modal-details .detail-value { color: #FFD700; font-weight: 600; }
+.confirm-modal-warning { background: rgba(246,70,93,0.1); border-radius: 10px; padding: 8px 12px; margin: 10px 0; color: #F6465D; font-size: 12px; border: 1px solid rgba(246,70,93,0.2); display: flex; align-items: center; gap: 6px; }
+.confirm-modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.confirm-modal-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 30px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.confirm-modal-btn.cancel { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.08); }
+.confirm-modal-btn.cancel:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.confirm-modal-btn.confirm { background: linear-gradient(135deg, #F6465D, #D43F52); color: white; }
+.confirm-modal-btn.confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(246,70,93,0.4); }
+.confirm-modal-btn.confirm-success { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.confirm-modal-btn.confirm-success:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14,203,129,0.4); }
+
+.notification-panel { position: fixed; top: 65px; right: -380px; width: 380px; height: calc(100vh - 65px); background: rgba(10,10,10,0.98); backdrop-filter: blur(12px); z-index: 150; transition: right 0.3s cubic-bezier(0.68,-0.55,0.265,1.55); border-left: 1px solid rgba(255,215,0,0.2); overflow-y: auto; display: flex; flex-direction: column; }
+.notification-panel.open { right: 0; }
+body.light-theme .notification-panel { background: white; border-left: 1px solid rgba(128,0,0,0.1); }
+.notification-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,215,0,0.2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: inherit; z-index: 1; }
+.notification-header h3 { color: #FFD700; font-size: 15px; }
+.notification-actions { display: flex; gap: 6px; }
+.notif-action-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 16px; padding: 3px 8px; color: #FFD700; font-size: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 3px; }
+.notif-action-btn:hover { background: rgba(255,215,0,0.3); }
+.notif-action-btn.clear-all { background: rgba(246,70,93,0.15); color: #F6465D; }
+.notif-action-btn.clear-all:hover { background: rgba(246,70,93,0.3); }
+.close-notif { background: none; border: none; color: #FFD700; font-size: 20px; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.close-notif:hover { background: rgba(255,215,0,0.15); }
+.notification-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.notification-item { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: default; transition: 0.2s; display: flex; align-items: flex-start; gap: 10px; }
+.notification-item:hover { background: rgba(255,215,0,0.05); }
+.notification-item.unread { background: rgba(255,215,0,0.08); border-left: 3px solid #FFD700; }
+.notification-icon-small { width: 32px; height: 32px; background: rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.notification-icon-small i { font-size: 14px; color: #FFD700; }
+.notification-content { flex: 1; min-width: 0; }
+.notification-title { color: #FFD700; font-size: 11px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.notification-message { color: #ccc; font-size: 10px; line-height: 1.5; margin-bottom: 3px; word-break: break-word; }
+.notification-time { color: #666; font-size: 8px; }
+.notification-actions-item { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.notif-item-btn { background: rgba(255,215,0,0.15); border: none; border-radius: 10px; padding: 2px 8px; color: #FFD700; font-size: 8px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 3px; }
+.notif-item-btn:hover { background: rgba(255,215,0,0.3); }
+.notif-item-btn.nav-btn { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.notif-item-btn.nav-btn:hover { background: rgba(14,203,129,0.4); }
+.notif-item-btn.delete { background: rgba(246,70,93,0.15); color: #F6465D; }
+.notif-item-btn.delete:hover { background: rgba(246,70,93,0.3); }
+.empty-state { text-align: center; padding: 30px 16px; color: #888; }
+.empty-state i { font-size: 30px; color: rgba(255,215,0,0.3); margin-bottom: 8px; }
+.empty-state p { font-size: 10px; }
+.loading-spinner { width: 28px; height: 28px; border: 2px solid rgba(255,215,0,0.2); border-top: 2px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.toast-notification { position: fixed; bottom: 25px; right: 25px; padding: 10px 16px; border-radius: 10px; color: white; z-index: 9999; animation: slideInRight 0.3s ease; display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 11px; }
+.toast-notification.success { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.toast-notification.error { background: linear-gradient(135deg, #F6465D, #D43F52); }
+.toast-notification.info { background: linear-gradient(135deg, #FFD700, #b8860b); color: #1a1a1a; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@media(max-width:768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .stat-value { font-size: 16px; } .stat-icon { width: 32px; height: 32px; font-size: 14px; } .logo-area p { display: none; } .menu-btn span { display: none; } .menu-btn { padding: 8px 10px; } .main-content { padding: 12px; margin-top: 70px; } .page-title { font-size: 18px; } .notification-panel { width: 100%; right: -100%; } .modal-content { padding: 18px; max-width: 95%; } }
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+    <div class="header-left">
+        <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
+        <div class="logo-area">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
+            <div><h2>ABOTRA-PROAI</h2><p>Admin Dashboard</p></div>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="notif-icon" id="notifIcon"><i class="fas fa-bell"></i><span class="notif-badge" id="notifBadge">0</span></div>
+        <button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i> <span>Theme</span></button>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
+
+<div class="overlay"></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="nav-menu">
+        <a href="admin-dashboard.html" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="admin-users.html" class="nav-item"><i class="fas fa-users"></i> Users</a>
+        <a href="admin-kyc.html" class="nav-item"><i class="fas fa-id-card"></i> KYC Reviews <span class="nav-badge" id="kycBadge">0</span></a>
+        <a href="admin-deposits.html" class="nav-item"><i class="fas fa-arrow-down"></i> Deposits <span class="nav-badge" id="depositBadge">0</span></a>
+        <a href="admin-withdrawals.html" class="nav-item"><i class="fas fa-arrow-up"></i> Withdrawals <span class="nav-badge" id="withdrawBadge">0</span></a>
+        <a href="admin-merchants.html" class="nav-item"><i class="fas fa-store"></i> Merchants</a>
+        <a href="admin-admins.html" class="nav-item"><i class="fas fa-user-shield"></i> Admins</a>
+        <a href="admin-master-trade.html" class="nav-item"><i class="fas fa-crown"></i> Master Trade</a>
+        <a href="admin-broadcast.html" class="nav-item"><i class="fas fa-broadcast-tower"></i> Broadcast</a>
+        <a href="admin-risk.html" class="nav-item"><i class="fas fa-chart-line"></i> Risk Control</a>
+        <a href="admin-reports.html" class="nav-item"><i class="fas fa-flag"></i> Reported Posts</a>
+        <a href="admin-settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+</div>
+
+<div class="notification-panel" id="notificationPanel">
+    <div class="notification-header">
+        <h3><i class="fas fa-bell"></i> Notifications</h3>
+        <div class="notification-actions">
+            <button class="notif-action-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+            <button class="notif-action-btn clear-all" id="clearAllNotifBtn"><i class="fas fa-trash-alt"></i> Clear all</button>
+            <button class="close-notif" id="closeNotif">&times;</button>
+        </div>
+    </div>
+    <div class="notification-list" id="notificationList"><div class="empty-state"><div class="loading-spinner"></div><p>Loading notifications...</p></div></div>
+</div>
+
+<!-- Push Modal -->
+<div id="pushModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('pushModal')">&times;</span>
+        <h3><i class="fas fa-bell"></i> Send Push to All Users</h3>
+        <div class="modal-detail-row" style="border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:10px; margin-bottom:12px;">
+            <span class="modal-detail-label"><i class="fas fa-users"></i> Recipients:</span>
+            <span class="modal-detail-value" id="pushRecipientCount">All Users</span>
+        </div>
+        <div class="input-group">
+            <label><i class="fas fa-heading"></i> Notification Title</label>
+            <input type="text" id="pushTitle" class="modal-edit-input" placeholder="Enter title..." value="📢 Admin Announcement">
+        </div>
+        <div class="input-group">
+            <label><i class="fas fa-message"></i> Message</label>
+            <textarea id="pushMessage" class="push-modal-input" placeholder="Enter your message here..."></textarea>
+        </div>
+        <div class="edit-actions">
+            <button class="btn-cancel-edit" onclick="closeModal('pushModal')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn-send-push" id="sendPushBtn"><i class="fas fa-paper-plane"></i> Send to All</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-modal-card">
+        <div class="confirm-modal-icon" id="confirmIcon">⚠️</div>
+        <div class="confirm-modal-title" id="confirmTitle">Confirm Action</div>
+        <div class="confirm-modal-subtitle" id="confirmSubtitle">Are you sure?</div>
+        <div class="confirm-modal-details" id="confirmDetails"></div>
+        <div class="confirm-modal-warning" id="confirmWarning" style="display:none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>This action cannot be undone!</span>
+        </div>
+        <div class="confirm-modal-buttons">
+            <button class="confirm-modal-btn cancel" id="confirmCancel"><i class="fas fa-times"></i> Cancel</button>
+            <button class="confirm-modal-btn confirm" id="confirmAction"><i class="fas fa-check"></i> Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-title">
+        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+        <button class="btn-push-all" id="pushAllBtn" style="margin-left:auto;">
+            <span class="push-dot"></span> <i class="fas fa-bell"></i> Push to All Users
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card" onclick="window.location.href='admin-users.html'">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='admin-deposits.html'">
+            <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+            <div class="stat-value" id="totalDeposits">$0</div>
+            <div class="stat-label">Total Deposits</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='admin-withdrawals.html'">
+            <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+            <div class="stat-value" id="totalWithdrawals">$0</div>
+            <div class="stat-label">Total Withdrawals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+            <div class="stat-value" id="totalBalance">$0</div>
+            <div class="stat-label">Platform Balance</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='admin-deposits.html?tab=pending'">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value" id="pendingDeposits">0</div>
+            <div class="stat-label">Pending Deposits</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='admin-withdrawals.html?tab=pending'">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-value" id="pendingWithdrawals">0</div>
+            <div class="stat-label">Pending Withdrawals</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='admin-kyc.html'">
+            <div class="stat-icon"><i class="fas fa-id-card"></i></div>
+            <div class="stat-value" id="pendingKyc">0</div>
+            <div class="stat-label">Pending KYC</div>
+        </div>
+    </div>
+
+    <!-- KYC Section -->
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-id-card"></i> Pending KYC Requests
+            <button class="view-all-btn" onclick="window.location.href='admin-kyc.html'"><i class="fas fa-eye"></i> View All</button>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Date</th><th>User</th><th>Document</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="recentKycBody"><tr><td colspan="5" style="text-align:center;"><div class="loading-spinner"></div><p>Loading...</p></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-arrow-down"></i> Recent Deposits
+            <button class="view-all-btn" onclick="window.location.href='admin-deposits.html'"><i class="fas fa-eye"></i> View All</button>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="recentDepositsBody"><tr><td colspan="6" style="text-align:center;"><div class="loading-spinner"></div><p>Loading...</p></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-arrow-up"></i> Recent Withdrawals
+            <button class="view-all-btn" onclick="window.location.href='admin-withdrawals.html'"><i class="fas fa-eye"></i> View All</button>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Fee</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="recentWithdrawalsBody"><tr><td colspan="6" style="text-align:center;"><div class="loading-spinner"></div><p>Loading...</p></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+let currentAdminId = null;
+let currentAdminEmail = null;
+let notificationListener = null;
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(message, type) {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function getSafeNumber(val, def = 0) { const n = parseFloat(val); return isNaN(n) ? def : n; }
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+window.closeModal = closeModal;
+window.openModal = openModal;
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+function showConfirmModal(options) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const icon = document.getElementById('confirmIcon');
+        const title = document.getElementById('confirmTitle');
+        const subtitle = document.getElementById('confirmSubtitle');
+        const details = document.getElementById('confirmDetails');
+        const warning = document.getElementById('confirmWarning');
+        const confirmBtn = document.getElementById('confirmAction');
+        const cancelBtn = document.getElementById('confirmCancel');
+        
+        icon.className = 'confirm-modal-icon ' + (options.iconClass || 'warning');
+        icon.textContent = options.icon || '⚠️';
+        title.textContent = options.title || 'Confirm Action';
+        subtitle.textContent = options.subtitle || 'Are you sure?';
+        
+        if (options.details) {
+            let html = '';
+            for (const [key, value] of Object.entries(options.details)) {
+                html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-value">${value}</span></div>`;
+            }
+            details.innerHTML = html;
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+        }
+        
+        if (options.warning) {
+            warning.style.display = 'flex';
+            warning.querySelector('span').textContent = options.warning;
+        } else {
+            warning.style.display = 'none';
+        }
+        
+        confirmBtn.className = 'confirm-modal-btn confirm ' + (options.btnClass || '');
+        confirmBtn.innerHTML = `<i class="fas ${options.btnIcon || 'fa-check'}"></i> ${options.btnText || 'Confirm'}`;
+        
+        modal.classList.add('active');
+        
+        const cleanup = () => {
+            modal.classList.remove('active');
+            confirmBtn.removeEventListener('click', onConfirm);
+            cancelBtn.removeEventListener('click', onCancel);
+        };
+        
+        const onConfirm = () => {
+            cleanup();
+            resolve(true);
+        };
+        
+        const onCancel = () => {
+            cleanup();
+            resolve(false);
+        };
+        
+        confirmBtn.addEventListener('click', onConfirm);
+        cancelBtn.addEventListener('click', onCancel);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                cleanup();
+                resolve(false);
+            }
+        });
+    });
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+document.getElementById('menuBtn').addEventListener('click', () => {
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('active');
+});
+sidebarOverlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+});
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+    if (isLight) {
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+});
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function getNotificationType(type) {
+    const map = {
+        'deposit': { icon: 'fa-arrow-down', color: '#0ECB81', page: 'admin-deposits.html' },
+        'withdrawal': { icon: 'fa-arrow-up', color: '#F6465D', page: 'admin-withdrawals.html' },
+        'kyc': { icon: 'fa-id-card', color: '#FFD700', page: 'admin-kyc.html' },
+        'broadcast': { icon: 'fa-broadcast-tower', color: '#FF6B6B', page: 'admin-broadcast.html' },
+        'system': { icon: 'fa-bell', color: '#FFD700', page: '#' }
+    };
+    return map[type] || map['system'];
+}
+
+function loadAdminNotifications() {
+    const notifRef = db.ref('adminNotifications');
+    if (notificationListener) { notifRef.off('value', notificationListener); }
+    notificationListener = notifRef.on('value', (snapshot) => {
+        const list = document.getElementById('notificationList');
+        const notifications = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => { notifications.push({ id: child.key, ...child.val() }); });
+        }
+        notifications.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        const unreadCount = notifications.filter(n => !n.read).length;
+        const badge = document.getElementById('notifBadge');
+        if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+        if (notifications.length === 0) {
+            list.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No notifications</p></div>';
+            return;
+        }
+        list.innerHTML = '';
+        notifications.forEach(notif => {
+            const isUnread = !notif.read;
+            const typeInfo = getNotificationType(notif.type);
+            const item = document.createElement('div');
+            item.className = `notification-item ${isUnread ? 'unread' : ''}`;
+            item.innerHTML = `
+                <div class="notification-icon-small" style="background:${typeInfo.color}22;">
+                    <i class="fas ${typeInfo.icon}" style="color:${typeInfo.color};"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${notif.title || 'Notification'}</div>
+                    <div class="notification-message">${escapeHtml(notif.message || '')}</div>
+                    <div class="notification-time"><i class="far fa-clock"></i> ${notif.timestamp ? new Date(notif.timestamp).toLocaleString() : 'Just now'}</div>
+                    <div class="notification-actions-item">
+                        ${isUnread ? `<button class="notif-item-btn" data-id="${notif.id}" data-action="read"><i class="fas fa-check"></i> Mark Read</button>` : ''}
+                        ${typeInfo.page && typeInfo.page !== '#' ? `<button class="notif-item-btn nav-btn" data-page="${typeInfo.page}"><i class="fas fa-arrow-right"></i> Go</button>` : ''}
+                        <button class="notif-item-btn delete" data-id="${notif.id}" data-action="delete"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+        document.querySelectorAll('.notif-item-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const notifId = btn.dataset.id;
+                const action = btn.dataset.action;
+                const page = btn.dataset.page;
+                if (action === 'read') {
+                    await db.ref(`adminNotifications/${notifId}`).update({ read: true });
+                    loadAdminNotifications();
+                } else if (action === 'delete') {
+                    if (await showConfirmModal({ title: 'Delete Notification?', subtitle: 'This notification will be permanently removed.', icon: '🗑️', iconClass: 'danger', btnText: 'Delete', btnIcon: 'fa-trash-alt' })) {
+                        await db.ref(`adminNotifications/${notifId}`).remove();
+                        loadAdminNotifications();
+                    }
+                } else if (page) { window.location.href = page; }
+            });
+        });
+    });
+}
+
+// Notification panel toggle
+const notifIcon = document.getElementById('notifIcon');
+const notificationPanel = document.getElementById('notificationPanel');
+const closeNotif = document.getElementById('closeNotif');
+notifIcon.addEventListener('click', () => notificationPanel.classList.toggle('open'));
+closeNotif.addEventListener('click', () => notificationPanel.classList.remove('open'));
+
+document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+    const snapshot = await db.ref('adminNotifications').once('value');
+    if (snapshot.exists()) {
+        const updates = {};
+        snapshot.forEach(child => { if (!child.val().read) updates[`${child.key}/read`] = true; });
+        if (Object.keys(updates).length > 0) {
+            await db.ref('adminNotifications').update(updates);
+            showToast('All notifications marked as read', 'success');
+            loadAdminNotifications();
+        }
+    }
+});
+
+document.getElementById('clearAllNotifBtn').addEventListener('click', async () => {
+    if (await showConfirmModal({ title: 'Clear All Notifications?', subtitle: 'This will permanently delete all admin notifications.', icon: '🗑️', iconClass: 'danger', warning: 'This action cannot be undone!', btnText: 'Clear All', btnIcon: 'fa-trash-alt' })) {
+        await db.ref('adminNotifications').remove();
+        showToast('All notifications cleared', 'success');
+        loadAdminNotifications();
+    }
+});
+
+// ============================================================
+// LOAD STATS - WITH KYC
+// ============================================================
+async function loadStats() {
+    try {
+        // Total Users
+        const usersSnap = await db.ref('users').once('value');
+        let totalUsers = 0;
+        let totalBalance = 0;
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                totalUsers++;
+                totalBalance += getSafeNumber(child.val().balance);
+            });
+        }
+        document.getElementById('totalUsers').textContent = totalUsers;
+        document.getElementById('totalBalance').innerHTML = `$${totalBalance.toFixed(2)}`;
+
+        // Deposits
+        const depositsSnap = await db.ref('adminDeposits').once('value');
+        let totalDeposits = 0;
+        let pendingDeposits = 0;
+        if (depositsSnap.exists()) {
+            depositsSnap.forEach(child => {
+                const dep = child.val();
+                const amount = getSafeNumber(dep.amount);
+                if (dep.status === 'approved' || dep.status === 'completed' || dep.status === 'verified') {
+                    totalDeposits += amount;
+                } else if (dep.status === 'pending') {
+                    pendingDeposits++;
+                }
+            });
+        }
+        document.getElementById('totalDeposits').innerHTML = `$${totalDeposits.toFixed(2)}`;
+        document.getElementById('pendingDeposits').textContent = pendingDeposits;
+
+        // Withdrawals
+        const withdrawalsSnap = await db.ref('adminWithdrawals').once('value');
+        let totalWithdrawals = 0;
+        let pendingWithdrawals = 0;
+        if (withdrawalsSnap.exists()) {
+            withdrawalsSnap.forEach(child => {
+                const w = child.val();
+                const amount = getSafeNumber(w.amount);
+                if (w.status === 'approved' || w.status === 'completed') {
+                    totalWithdrawals += amount;
+                } else if (w.status === 'pending') {
+                    pendingWithdrawals++;
+                }
+            });
+        }
+        document.getElementById('totalWithdrawals').innerHTML = `$${totalWithdrawals.toFixed(2)}`;
+        document.getElementById('pendingWithdrawals').textContent = pendingWithdrawals;
+
+        // KYC - Read from pendingKyc node
+        const kycSnap = await db.ref('pendingKyc').once('value');
+        let pendingKyc = 0;
+        if (kycSnap.exists()) {
+            pendingKyc = Object.keys(kycSnap.val()).length;
+        }
+        document.getElementById('pendingKyc').textContent = pendingKyc;
+
+        // Update badges
+        const depositBadge = document.getElementById('depositBadge');
+        const withdrawBadge = document.getElementById('withdrawBadge');
+        const kycBadge = document.getElementById('kycBadge');
+        if (depositBadge) { depositBadge.textContent = pendingDeposits; depositBadge.style.display = pendingDeposits > 0 ? 'inline-block' : 'none'; }
+        if (withdrawBadge) { withdrawBadge.textContent = pendingWithdrawals; withdrawBadge.style.display = pendingWithdrawals > 0 ? 'inline-block' : 'none'; }
+        if (kycBadge) { kycBadge.textContent = pendingKyc; kycBadge.style.display = pendingKyc > 0 ? 'inline-block' : 'none'; }
+
+    } catch (error) { console.error("Stats error:", error); }
+}
+
+// ============================================================
+// LOAD RECENT KYC
+// ============================================================
+async function loadRecentKyc() {
+    try {
+        const snapshot = await db.ref('pendingKyc').once('value');
+        const kycList = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const data = child.val();
+                kycList.push({ id: child.key, ...data });
+            });
+        }
+        kycList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        const recent = kycList.slice(0, 5);
+        
+        const tbody = document.getElementById('recentKycBody');
+        if (recent.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">✅ No pending KYC requests</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        for (const kyc of recent) {
+            const displayName = kyc.fullName || kyc.username || (kyc.userId ? kyc.userId.substring(0,8) : 'Unknown');
+            const docType = kyc.documentType || 'ID Card';
+            const dateStr = kyc.timestamp ? new Date(kyc.timestamp).toLocaleDateString() : 'N/A';
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${dateStr}</td>
+                <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(kyc.email || '')}</small></td>
+                <td>${escapeHtml(docType)}</td>
+                <td><span class="status-pending">pending</span></td>
+                <td><button class="view-btn" onclick="window.location.href='admin-kyc.html'"><i class="fas fa-eye"></i> Review</button></td>
+            `;
+        }
+    } catch (error) { console.error("Recent KYC error:", error); }
+}
+
+// ============================================================
+// LOAD RECENT DEPOSITS
+// ============================================================
+async function loadRecentDeposits() {
+    try {
+        const snapshot = await db.ref('adminDeposits').once('value');
+        const deposits = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => { deposits.push({ id: child.key, ...child.val() }); });
+        }
+        deposits.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const recent = deposits.slice(0, 8);
+        
+        const tbody = document.getElementById('recentDepositsBody');
+        if (recent.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No deposits found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        for (const d of recent) {
+            let statusClass = 'pending';
+            let statusText = d.status || 'pending';
+            if (d.status === 'approved' || d.status === 'completed' || d.status === 'verified') {
+                statusClass = 'approved';
+                statusText = 'approved';
+            } else if (d.status === 'rejected') {
+                statusClass = 'rejected';
+                statusText = 'rejected';
+            }
+            const displayName = d.userEmail ? d.userEmail.split('@')[0] : (d.userName || (d.userId ? d.userId.substring(0,8) : 'Unknown'));
+            let methodName = 'Bank Transfer';
+            if (d.method === 'mobile_money') methodName = 'Mobile Money';
+            else if (d.method === 'crypto') methodName = 'Crypto';
+            else if (d.network) methodName = d.network;
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'N/A'}</td>
+                <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(d.userEmail || '')}</small></td>
+                <td><strong style="color:#0ECB81;">$${getSafeNumber(d.amount).toFixed(2)}</strong></td>
+                <td>${escapeHtml(methodName)}</td>
+                <td><span class="status-${statusClass}">${statusText}</span></td>
+                <td><button class="view-btn" onclick="window.location.href='admin-deposits.html'"><i class="fas fa-eye"></i> View</button></td>
+            `;
+        }
+    } catch (error) { console.error("Recent deposits error:", error); }
+}
+
+// ============================================================
+// LOAD RECENT WITHDRAWALS
+// ============================================================
+async function loadRecentWithdrawals() {
+    try {
+        const snapshot = await db.ref('adminWithdrawals').once('value');
+        const withdrawals = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => { withdrawals.push({ id: child.key, ...child.val() }); });
+        }
+        withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const recent = withdrawals.slice(0, 8);
+        
+        const tbody = document.getElementById('recentWithdrawalsBody');
+        if (recent.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No withdrawals found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        for (const w of recent) {
+            let statusClass = 'pending';
+            let statusText = w.status || 'pending';
+            if (w.status === 'approved' || w.status === 'completed') {
+                statusClass = 'approved';
+                statusText = 'approved';
+            } else if (w.status === 'rejected') {
+                statusClass = 'rejected';
+                statusText = 'rejected';
+            }
+            const displayName = w.userEmail ? w.userEmail.split('@')[0] : (w.userName || 'User');
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${w.createdAt ? new Date(w.createdAt).toLocaleDateString() : 'N/A'}</td>
+                <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(w.userEmail || '')}</small></td>
+                <td>$${getSafeNumber(w.amount).toFixed(2)}</td>
+                <td>$${getSafeNumber(w.fee).toFixed(2)}</td>
+                <td><span class="status-${statusClass}">${statusText}</span></td>
+                <td><button class="view-btn" onclick="window.location.href='admin-withdrawals.html'"><i class="fas fa-eye"></i> View</button></td>
+            `;
+        }
+    } catch (error) { console.error("Recent withdrawals error:", error); }
+}
+
+// ============================================================
+// PUSH NOTIFICATIONS
+// ============================================================
+async function sendPushToAllUsers(title, message, link = null) {
+    try {
+        const usersSnap = await db.ref('users').once('value');
+        const userIds = [];
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                const uid = child.val().uid || child.key;
+                userIds.push(uid);
+            });
+        }
+        if (userIds.length === 0) {
+            return { success: false, error: 'No users found' };
+        }
+        const promises = [];
+        for (const userId of userIds) {
+            const notifRef = db.ref(`notifications/${userId}`).push();
+            const notifData = {
+                id: notifRef.key,
+                title: title,
+                message: message,
+                type: 'broadcast',
+                read: false,
+                timestamp: Date.now(),
+                date: new Date().toISOString(),
+                link: link || 'dashboard.html'
+            };
+            promises.push(notifRef.set(notifData));
+        }
+        await Promise.all(promises);
+        
+        // Also send via OneSignal
+        try {
+            await fetch('https://onesignal.com/api/v1/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    app_id: ONESIGNAL_APP_ID,
+                    contents: { en: message },
+                    headings: { en: title },
+                    included_segments: ['Total Subscriptions'],
+                    data: { link: link || '/dashboard.html' },
+                    web_buttons: [
+                        { id: 'open', text: 'Open ABOTRA', icon: 'https://abotraproai.surge.sh/assets/images/logo.png', url: `https://abotraproai.surge.sh${link || '/dashboard.html'}` }
+                    ]
+                })
+            });
+        } catch(e) { console.warn('[PUSH] OneSignal error:', e); }
+        
+        return { success: true, totalUsers: userIds.length };
+    } catch (error) {
+        console.error('[PUSH] Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+document.getElementById('pushAllBtn').addEventListener('click', async () => {
+    const usersCount = document.getElementById('totalUsers').textContent || '0';
+    document.getElementById('pushRecipientCount').textContent = `${usersCount} Users`;
+    document.getElementById('pushTitle').value = '📢 Admin Announcement';
+    document.getElementById('pushMessage').value = 'Hello ABOTRA-PROAI users! Important announcement from the admin team.';
+    openModal('pushModal');
+});
+
+document.getElementById('sendPushBtn').addEventListener('click', async function() {
+    const title = document.getElementById('pushTitle').value.trim();
+    const message = document.getElementById('pushMessage').value.trim();
+    if (!title || !message) {
+        showToast('Please enter both title and message', 'error');
+        return;
+    }
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    try {
+        const result = await sendPushToAllUsers(title, message);
+        if (result.success) {
+            showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
+        } else {
+            showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
+        }
+        closeModal('pushModal');
+    } catch (error) {
+        showToast('❌ Error: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
+    }
+});
+
+// ============================================================
+// LOGOUT
+// ============================================================
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    if (await showConfirmModal({ title: 'Logout?', subtitle: 'Are you sure you want to logout?', icon: '🚪', iconClass: 'warning', btnText: 'Logout', btnIcon: 'fa-sign-out-alt' })) {
+        await auth.signOut();
+        localStorage.removeItem('abotra_admin_logged_in');
+        window.location.href = 'login.html';
+    }
+});
+
+// ============================================================
+// CHECK ADMIN SESSION
+// ============================================================
+async function checkAdminSession(user) {
+    if (!user) return false;
+    try {
+        const snapshot = await db.ref('admins').once('value');
+        if (snapshot.exists()) {
+            for (const key in snapshot.val()) {
+                const admin = snapshot.val()[key];
+                if (admin === true && key === user.uid) {
+                    currentAdminId = user.uid;
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+                if (typeof admin === 'object' && (admin.email === user.email || admin.uid === user.uid)) {
+                    currentAdminId = user.uid;
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+            }
+        }
+        return false;
+    } catch (error) { console.error("Admin check error:", error); return false; }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+    initTheme();
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = '../login.html'; return; }
+        const isAdmin = await checkAdminSession(user);
+        if (!isAdmin) {
+            showToast('Admin access only', 'error');
+            setTimeout(() => { window.location.href = '../login.html'; }, 1500);
+            return;
+        }
+        await loadStats();
+        await loadRecentKyc();
+        await loadRecentDeposits();
+        await loadRecentWithdrawals();
+        loadAdminNotifications();
+        
+        setInterval(async () => {
+            await loadStats();
+            await loadRecentKyc();
+            await loadRecentDeposits();
+            await loadRecentWithdrawals();
+        }, 30000);
+    });
+}
+init();
+</script>
+</body>
+</html>

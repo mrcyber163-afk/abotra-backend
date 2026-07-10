@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>My AI Robot | ABOTRA-PROAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --gold: #FFD700;
+            --maroon: #800000;
+            --black: #050505;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-card: rgba(255, 215, 0, 0.15);
+            --text-primary: #FFFFFF;
+            --text-secondary: #AAAAAA;
+            --text-muted: #666666;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: var(--black);
+            background-image: url("../assets/images/background.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            font-size: 11px;
+            padding-bottom: 75px;
+            position: relative;
+        }
+
+        body.light-theme {
+            background: #f5f5f5;
+            background-image: url("../assets/images/background-light.png");
+        }
+
+        body.light-theme .top-bar,
+        body.light-theme .card,
+        body.light-theme .robot-card,
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .top-bar h2,
+        body.light-theme .page-title,
+        body.light-theme .card-title {
+            color: var(--maroon);
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(128, 0, 0, 0.2);
+        }
+
+        body.light-theme .theme-toggle i {
+            color: var(--maroon);
+        }
+
+        body.light-theme .bottom-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(128, 0, 0, 0.15);
+        }
+
+        body.light-theme .bottom-nav a.active {
+            color: var(--maroon);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(4px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        body.light-theme .overlay {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-area img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .logo-area h2 {
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .logo-area p {
+            color: var(--text-secondary);
+            font-size: 7px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-bar-btn {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: var(--gold);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .top-bar-btn:hover {
+            background: rgba(255, 215, 0, 0.25);
+            transform: scale(1.02);
+        }
+
+        .theme-toggle {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 10px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle i {
+            font-size: 15px;
+            color: #FFFFFF;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 70px auto 20px;
+            padding: 0 12px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .page-title .sub {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .card-title {
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .card-title i {
+            font-size: 14px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-item .label {
+            color: var(--text-secondary);
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item .value {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .stat-item .value.green {
+            color: #0ECB81;
+        }
+        .stat-item .value.red {
+            color: #F6465D;
+        }
+        .stat-item .value.gold {
+            color: var(--gold);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--maroon), var(--gold));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #0ECB81, #0A9E65);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 203, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #F6465D, #D43F52);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(246, 70, 93, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: var(--gold);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .badge-status.online {
+            background: rgba(14, 203, 129, 0.2);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.3);
+        }
+
+        .badge-status.offline {
+            background: rgba(246, 70, 93, 0.2);
+            color: #F6465D;
+            border: 1px solid rgba(246, 70, 93, 0.3);
+        }
+
+        .badge-status.expired {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .badge-status.premium {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--gold);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .badge-status.trial {
+            background: rgba(14, 203, 129, 0.15);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.2);
+        }
+
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 215, 0, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInRight 0.3s ease;
+            font-size: 10px;
+            color: white;
+        }
+
+        .toast.success {
+            background: rgba(14, 203, 129, 0.2);
+            border-color: rgba(14, 203, 129, 0.3);
+        }
+        .toast.success i {
+            color: #0ECB81;
+        }
+        .toast.error {
+            background: rgba(246, 70, 93, 0.2);
+            border-color: rgba(246, 70, 93, 0.3);
+        }
+        .toast.error i {
+            color: #F6465D;
+        }
+        .toast.info {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+        .toast.info i {
+            color: var(--gold);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a2e, #0e0e1a);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            border-color: rgba(128, 0, 0, 0.15);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-content .modal-title {
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-content .modal-body {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .modal-content .modal-body .form-group {
+            margin-bottom: 12px;
+        }
+
+        .modal-content .modal-body .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .modal-content .modal-body .form-group input,
+        .modal-content .modal-body .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-content .modal-body .form-group input:focus,
+        .modal-content .modal-body .form-group select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 22px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 8px;
+            border-radius: 50%;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .modal-content {
+            position: relative;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 10px;
+            z-index: 100;
+        }
+
+        .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 7px;
+            transition: var(--transition);
+            gap: 2px;
+        }
+
+        .bottom-nav a i {
+            font-size: 15px;
+        }
+
+        .bottom-nav a.active {
+            color: var(--gold);
+        }
+
+        .bottom-nav a:hover {
+            color: var(--gold);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton-text {
+            height: 12px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .skeleton-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            height: 200px;
+        }
+
+        .countdown {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .countdown .days {
+            font-size: 28px;
+        }
+
+        .premium-plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .premium-plan-card {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .premium-plan-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        .premium-plan-card .plan-name {
+            color: var(--gold);
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .premium-plan-card .plan-duration {
+            color: var(--text-secondary);
+            font-size: 10px;
+            margin: 4px 0;
+        }
+
+        .premium-plan-card .plan-price {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .premium-plan-card .plan-price span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .premium-plan-card .plan-features {
+            color: var(--text-secondary);
+            font-size: 9px;
+            margin: 8px 0;
+            line-height: 1.8;
+        }
+
+        .plan-icon {
+            font-size: 32px;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .expired-message {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            color: #FF9800;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .expired-message i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        @media(max-width: 768px) {
+            .main-container {
+                padding: 0 10px;
+                margin-top: 65px;
+            }
+            .page-title {
+                font-size: 17px;
+            }
+            .premium-plans-grid {
+                grid-template-columns: 1fr;
+            }
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .top-bar-right .top-bar-btn span {
+                display: none;
+            }
+            .logo-area p {
+                display: none;
+            }
+            .bottom-nav a span {
+                font-size: 6px;
+            }
+            .bottom-nav a i {
+                font-size: 14px;
+            }
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-12 {
+            margin-top: 12px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-12 {
+            margin-bottom: 12px;
+        }
+
+        .text-gold {
+            color: var(--gold);
+        }
+        .text-green {
+            color: #0ECB81;
+        }
+        .text-red {
+            color: #F6465D;
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .fw-700 {
+            font-weight: 700;
+        }
+        .fw-600 {
+            font-weight: 600;
+        }
+
+        .fs-10 {
+            font-size: 10px;
+        }
+        .fs-12 {
+            font-size: 12px;
+        }
+        .fs-14 {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <header class="top-bar">
+        <div class="logo-area">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+            <div>
+                <h2>ABOTRA-PROAI</h2>
+                <p>My AI Robot</p>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="top-bar-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> <span>Refresh</span></button>
+            <button class="top-bar-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon" style="display:none;"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            <div class="modal-title" id="modalTitle">Modal Title</div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-title">
+            <i class="fas fa-robot"></i> My AI Robot
+            <span class="sub">— Personal AI Trading Assistant</span>
+        </div>
+
+        <!-- MY AI ROBOT - Main Section -->
+        <section class="card" id="robotCard">
+            <div class="card-title"><i class="fas fa-microchip"></i> My AI Robot</div>
+            <div id="robotContent">
+                <div class="skeleton-text w50"></div>
+                <div class="skeleton-text w30"></div>
+                <div class="skeleton-text w70"></div>
+                <div class="skeleton-text w40"></div>
+            </div>
+        </section>
+
+        <!-- Premium Robots Section -->
+        <section class="card" id="premiumCard">
+            <div class="card-title"><i class="fas fa-crown"></i> Premium AI Robots</div>
+            <div id="premiumContent">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </section>
+
+        <!-- Trading History -->
+        <section class="card" id="historyCard">
+            <div class="card-title"><i class="fas fa-history"></i> Trading History</div>
+            <div id="historyContent">
+                <div class="skeleton-text w50"></div>
+                <div class="skeleton-text w30"></div>
+            </div>
+        </section>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+        <a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+        <a href="robot.html" class="active"><i class="fas fa-microchip"></i><span>Robot</span></a>
+        <a href="account-management.html"><i class="fas fa-user-cog"></i><span>Account</span></a>
+    </nav>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+            authDomain: "abotra-proa1.firebaseapp.com",
+            databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+            projectId: "abotra-proa1",
+            storageBucket: "abotra-proa1.firebasestorage.app",
+            messagingSenderId: "510401455603",
+            appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let isLoading = false;
+        let userRobot = null;
+        let robotPlans = [];
+        let robotTrades = [];
+        let robotPerformance = null;
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const toastContainer = document.getElementById('toastContainer');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalActions = document.getElementById('modalActions');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
+            toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, duration);
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function showModal(title, bodyHTML, actionsHTML) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = bodyHTML;
+            modalActions.innerHTML = actionsHTML || '';
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function initTheme() {
+            const saved = localStorage.getItem('abotra_theme');
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+                document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+                document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+            }
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+            const sun = document.querySelector('#themeToggle i.fa-sun');
+            const moon = document.querySelector('#themeToggle i.fa-moon');
+            if (isLight) {
+                sun.style.display = 'none';
+                moon.style.display = 'inline-block';
+            } else {
+                sun.style.display = 'inline-block';
+                moon.style.display = 'none';
+            }
+        });
+
+        // ============================================================
+        // COUNTDOWN FUNCTION
+        // ============================================================
+        function calculateDaysRemaining(expiryDate) {
+            const now = Date.now();
+            const expiry = expiryDate || 0;
+            const diff = expiry - now;
+            if (diff <= 0) return 0;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDays(days) {
+            if (days <= 0) return 'Expired';
+            if (days === 1) return '1 Day';
+            return `${days} Days`;
+        }
+
+        // ============================================================
+        // CHECK EXPIRY
+        // ============================================================
+        async function checkRobotExpiry(uid) {
+            if (!uid) return;
+            try {
+                const snapshot = await db.ref(`users/${uid}/robots/currentRobot`).once('value');
+                if (snapshot.exists()) {
+                    const robot = snapshot.val();
+                    if (robot.expiryDate && Date.now() > robot.expiryDate && robot.status !== 'expired') {
+                        await db.ref(`users/${uid}/robots/currentRobot/status`).set('expired');
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('[Robot] Expiry check error:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // AUTO CREATE TRIAL ROBOT
+        // ============================================================
+        async function createTrialRobot(uid) {
+            try {
+                const startDate = Date.now();
+                const expiryDate = startDate + (15 * 24 * 60 * 60 * 1000); // 15 days
+
+                const trialRobot = {
+                    name: 'ABOTRA Starter AI',
+                    type: 'trial',
+                    premium: false,
+                    status: 'active',
+                    startDate: startDate,
+                    expiryDate: expiryDate,
+                    investment: 0,
+                    balance: 0,
+                    totalProfit: 0,
+                    tradesCount: 0,
+                    winRate: 0,
+                    createdAt: startDate
+                };
+
+                await db.ref(`users/${uid}/robots/currentRobot`).set(trialRobot);
+                return trialRobot;
+            } catch (error) {
+                console.error('[Robot] Create trial error:', error);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // LOAD DATA
+        // ============================================================
+        async function loadAllData() {
+            if (isLoading || !currentUser) return;
+            isLoading = true;
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                const uid = currentUser.uid;
+
+                // Check expiry first
+                const expired = await checkRobotExpiry(uid);
+
+                // Load user's robot
+                const robotSnap = await db.ref(`users/${uid}/robots/currentRobot`).once('value');
+                if (robotSnap.exists()) {
+                    userRobot = robotSnap.val();
+                    userRobot.uid = uid;
+
+                    // If expired, update status
+                    if (expired) {
+                        userRobot.status = 'expired';
+                    }
+                } else {
+                    // Auto-create trial robot
+                    userRobot = await createTrialRobot(uid);
+                    if (userRobot) {
+                        showToast('🎉 Free AI Robot Trial activated! 15 days remaining.', 'success');
+                    }
+                }
+
+                // Load robot plans
+                const plansSnap = await db.ref('robotPlans').once('value');
+                if (plansSnap.exists()) {
+                    robotPlans = [];
+                    plansSnap.forEach(child => {
+                        const plan = child.val();
+                        plan.id = child.key;
+                        robotPlans.push(plan);
+                    });
+                    // Sort by duration
+                    robotPlans.sort((a, b) => a.duration - b.duration);
+                }
+
+                // Load trades
+                const tradesSnap = await db.ref(`robotTrades/${uid}`).once('value');
+                robotTrades = [];
+                if (tradesSnap.exists()) {
+                    tradesSnap.forEach(child => {
+                        robotTrades.push(child.val());
+                    });
+                    robotTrades.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                }
+
+                // Load performance
+                const perfSnap = await db.ref(`robotPerformance/${uid}`).once('value');
+                robotPerformance = perfSnap.val() || null;
+
+                // Render everything
+                renderRobot(userRobot);
+                renderPremiumPlans(robotPlans, userRobot);
+                renderHistory(robotTrades);
+
+            } catch (error) {
+                console.error('[Robot] Load error:', error);
+                showToast('Failed to load robot data: ' + error.message, 'error');
+            } finally {
+                isLoading = false;
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                }
+            }
+        }
+
+        // ============================================================
+        // RENDER ROBOT
+        // ============================================================
+        function renderRobot(robot) {
+            const container = document.getElementById('robotContent');
+            if (!robot) {
+                container.innerHTML = `
+                    <div class="status-bar">
+                        <span class="status-item"><span class="badge-status offline">● No Robot</span></span>
+                        <span class="status-item"><i class="fas fa-robot"></i> No robot assigned</span>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" id="refreshRobotBtn"><i class="fas fa-sync"></i> Refresh</button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('refreshRobotBtn')?.addEventListener('click', () => loadAllData());
+                return;
+            }
+
+            const isExpired = robot.status === 'expired';
+            const isActive = robot.status === 'active';
+            const isTrial = robot.type === 'trial';
+            const isPremium = robot.premium === true;
+
+            let statusClass = 'online';
+            let statusText = 'Active';
+            if (isExpired) { statusClass = 'expired';
+                statusText = 'Expired'; } else if (!isActive) { statusClass = 'offline';
+                statusText = 'Paused'; }
+
+            let typeClass = 'trial';
+            let typeText = 'Trial';
+            if (isPremium) { typeClass = 'premium';
+                typeText = 'Premium'; }
+
+            const daysRemaining = calculateDaysRemaining(robot.expiryDate);
+            const daysDisplay = formatDays(daysRemaining);
+
+            // Build stats
+            const balance = robot.balance || 0;
+            const totalProfit = robot.totalProfit || 0;
+            const tradesCount = robot.tradesCount || 0;
+            const winRate = robot.winRate || 0;
+
+            container.innerHTML = `
+                <div class="status-bar" style="flex-direction:column;align-items:stretch;gap:10px;">
+                    <div class="flex-between">
+                        <div class="flex-center gap-8">
+                            <span class="badge-status ${statusClass}">● ${statusText}</span>
+                            <span class="badge-status ${typeClass}">${typeText}</span>
+                            <span style="font-size:10px;color:var(--text-secondary);">${robot.name || 'ABOTRA Starter AI'}</span>
+                        </div>
+                        <div class="btn-group">
+                            ${isExpired ? 
+                                `<button class="btn btn-danger btn-sm" disabled>Expired</button>` :
+                                isActive ?
+                                `<button class="btn btn-danger btn-sm" id="pauseRobotBtn"><i class="fas fa-pause"></i> Pause</button>` :
+                                `<button class="btn btn-success btn-sm" id="activateRobotBtn"><i class="fas fa-play"></i> Activate</button>`
+                            }
+                            <button class="btn btn-outline btn-sm" id="refreshRobotBtn"><i class="fas fa-sync"></i> Refresh</button>
+                        </div>
+                    </div>
+
+                    ${isExpired ? `
+                        <div class="expired-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Your free AI Robot trial has ended. Upgrade to Premium Robot to continue trading.
+                            <div style="margin-top:8px;">
+                                <button class="btn btn-primary btn-sm" id="upgradeFromExpiredBtn"><i class="fas fa-crown"></i> Upgrade To Premium</button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="countdown">
+                            <span class="days">${daysRemaining}</span> ${daysRemaining === 1 ? 'Day' : 'Days'} Remaining
+                            <div style="font-size:10px;color:var(--text-secondary);">
+                                ${robot.startDate ? `Started: ${new Date(robot.startDate).toLocaleDateString()}` : ''}
+                                ${robot.expiryDate ? ` | Expires: ${new Date(robot.expiryDate).toLocaleDateString()}` : ''}
+                            </div>
+                        </div>
+                    `}
+
+                    <div class="card-grid">
+                        <div class="stat-item">
+                            <span class="label">Investment</span>
+                            <span class="value gold">$${robot.investment?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Balance</span>
+                            <span class="value gold">$${balance.toFixed(2)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Total Profit</span>
+                            <span class="value ${totalProfit >= 0 ? 'green' : 'red'}">${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Trades</span>
+                            <span class="value">${tradesCount}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Win Rate</span>
+                            <span class="value gold">${winRate}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Status</span>
+                            <span class="value ${isActive ? 'green' : isExpired ? 'red' : 'gold'}">${isExpired ? 'Expired' : isActive ? 'Active' : 'Paused'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Event listeners
+            document.getElementById('pauseRobotBtn')?.addEventListener('click', () => pauseRobot());
+            document.getElementById('activateRobotBtn')?.addEventListener('click', () => activateRobot());
+            document.getElementById('refreshRobotBtn')?.addEventListener('click', () => loadAllData());
+            document.getElementById('upgradeFromExpiredBtn')?.addEventListener('click', () => scrollToPremium());
+        }
+
+        // ============================================================
+        // RENDER PREMIUM PLANS
+        // ============================================================
+        function renderPremiumPlans(plans, currentRobot) {
+            const container = document.getElementById('premiumContent');
+
+            if (!plans || plans.length === 0) {
+                container.innerHTML = '<div class="text-muted fs-10">No premium plans available.</div>';
+                return;
+            }
+
+            const isPremium = currentRobot?.premium === true;
+
+            let html = `
+                <div class="premium-plans-grid">
+            `;
+
+            plans.forEach(plan => {
+                const isCurrent = currentRobot?.premium === true && 
+                                 (plan.duration === currentRobot.duration || 
+                                  plan.name === currentRobot.name);
+
+                const iconMap = {
+                    'bronze': 'fa-medal',
+                    'silver': 'fa-star',
+                    'gold': 'fa-crown'
+                };
+
+                const icon = iconMap[plan.id?.toLowerCase()] || 'fa-robot';
+
+                html += `
+                    <div class="premium-plan-card">
+                        <div class="plan-icon"><i class="fas ${icon}"></i></div>
+                        <div class="plan-name">${plan.name || 'Premium Robot'}</div>
+                        <div class="plan-duration">${plan.duration || 30} Days</div>
+                        <div class="plan-price">$${plan.minInvestment || 50} <span>minimum</span></div>
+                        <div class="plan-features">
+                            ${plan.features || 'Full AI Trading • Priority Support • Advanced Analytics'}
+                        </div>
+                        ${isCurrent ? 
+                            `<button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Current Plan</button>` :
+                            `<button class="btn btn-primary btn-sm upgrade-plan-btn" data-id="${plan.id}"><i class="fas fa-arrow-up"></i> Upgrade Now</button>`
+                        }
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            document.querySelectorAll('.upgrade-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const planId = btn.dataset.id;
+                    const plan = robotPlans.find(p => p.id === planId);
+                    if (plan) showUpgradeModal(plan);
+                });
+            });
+        }
+
+        // ============================================================
+        // RENDER HISTORY
+        // ============================================================
+        function renderHistory(trades) {
+            const container = document.getElementById('historyContent');
+
+            if (!trades || trades.length === 0) {
+                container.innerHTML = `
+                    <div class="text-muted fs-10">No trading history yet. Start trading to see results.</div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>Profit</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            trades.slice(0, 20).forEach(trade => {
+                const profit = trade.profit || 0;
+                html += `
+                    <tr>
+                        <td>${trade.timestamp ? new Date(trade.timestamp).toLocaleString() : '—'}</td>
+                        <td>${trade.symbol || 'BTCUSDT'}</td>
+                        <td><span class="${trade.side === 'BUY' ? 'text-green' : 'text-red'}">${trade.side || '—'}</span></td>
+                        <td>$${trade.entry?.toFixed(2) || '—'}</td>
+                        <td>$${trade.exit?.toFixed(2) || '—'}</td>
+                        <td class="${profit >= 0 ? 'text-green' : 'text-red'}">${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}</td>
+                        <td><span class="${trade.status === 'closed' ? 'text-green' : 'text-gold'}">${trade.status || 'pending'}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // SCROLL TO PREMIUM
+        // ============================================================
+        function scrollToPremium() {
+            const premiumSection = document.getElementById('premiumCard');
+            if (premiumSection) {
+                premiumSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Highlight effect
+                premiumSection.style.borderColor = 'var(--gold)';
+                setTimeout(() => {
+                    premiumSection.style.borderColor = '';
+                }, 3000);
+            }
+        }
+
+        // ============================================================
+        // ROBOT ACTIONS
+        // ============================================================
+        async function activateRobot() {
+            if (!currentUser) return;
+            try {
+                await db.ref(`users/${currentUser.uid}/robots/currentRobot/status`).set('active');
+                showToast('Robot activated successfully!', 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to activate robot: ' + error.message, 'error');
+            }
+        }
+
+        async function pauseRobot() {
+            if (!currentUser) return;
+            try {
+                await db.ref(`users/${currentUser.uid}/robots/currentRobot/status`).set('paused');
+                showToast('Robot paused', 'info');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to pause robot: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // UPGRADE MODAL
+        // ============================================================
+        function showUpgradeModal(plan) {
+            showModal(
+                `Upgrade to ${plan.name}`,
+                `
+                    <p class="text-secondary">Upgrade your AI Robot to ${plan.name} for ${plan.duration} days.</p>
+                    <div class="form-group">
+                        <label>Investment Amount (USDT)</label>
+                        <input type="number" id="upgradeAmount" value="${plan.minInvestment || 50}" min="${plan.minInvestment || 50}" step="10">
+                        <div style="font-size:8px; color:var(--text-muted); margin-top:4px;">Minimum: $${plan.minInvestment || 50}</div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-secondary); margin-top:8px;">
+                        <i class="fas fa-info-circle"></i> 
+                        Premium features: ${plan.features || 'Full AI Trading • Priority Support • Advanced Analytics'}
+                    </div>
+                    <div style="font-size:9px; color:var(--text-muted); margin-top:8px;">
+                        Your current robot will be replaced with the premium version.
+                    </div>
+                `,
+                `
+                    <button class="btn btn-success" id="upgradeConfirmBtn"><i class="fas fa-crown"></i> Upgrade Now</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+
+            document.getElementById('upgradeConfirmBtn').addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('upgradeAmount').value);
+
+                if (!amount || amount < (plan.minInvestment || 50)) {
+                    showToast(`Minimum investment is $${plan.minInvestment || 50}`, 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('upgradeConfirmBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                try {
+                    const uid = currentUser.uid;
+
+                    // Check user balance
+                    const userSnap = await db.ref(`users/${uid}/balance`).once('value');
+                    const balance = userSnap.val() || 0;
+
+                    if (balance < amount) {
+                        showToast(`Insufficient balance. Need $${amount.toFixed(2)}`, 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-crown"></i> Upgrade Now';
+                        return;
+                    }
+
+                    // Deduct balance
+                    await db.ref(`users/${uid}/balance`).set(balance - amount);
+
+                    // Create premium robot
+                    const startDate = Date.now();
+                    const expiryDate = startDate + (plan.duration * 24 * 60 * 60 * 1000);
+
+                    const premiumRobot = {
+                        name: plan.name || 'Premium Robot',
+                        type: 'premium',
+                        premium: true,
+                        status: 'active',
+                        duration: plan.duration,
+                        startDate: startDate,
+                        expiryDate: expiryDate,
+                        investment: amount,
+                        balance: amount,
+                        totalProfit: 0,
+                        tradesCount: 0,
+                        winRate: 0,
+                        planId: plan.id,
+                        upgradedAt: Date.now()
+                    };
+
+                    await db.ref(`users/${uid}/robots/currentRobot`).set(premiumRobot);
+
+                    showToast(`✅ Upgraded to ${plan.name} successfully!`, 'success');
+                    closeModal();
+                    await loadAllData();
+
+                } catch (error) {
+                    showToast('Failed to upgrade: ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-crown"></i> Upgrade Now';
+                }
+            });
+        }
+
+        // ============================================================
+        // SETUP LISTENERS
+        // ============================================================
+        function setupListeners() {
+            if (!currentUser) return;
+            const uid = currentUser.uid;
+
+            // Listen for robot changes
+            db.ref(`users/${uid}/robots/currentRobot`).on('value', async (snapshot) => {
+                if (snapshot.exists()) {
+                    userRobot = snapshot.val();
+                    // Check expiry
+                    if (userRobot.expiryDate && Date.now() > userRobot.expiryDate) {
+                        userRobot.status = 'expired';
+                        await db.ref(`users/${uid}/robots/currentRobot/status`).set('expired');
+                    }
+                    renderRobot(userRobot);
+                    renderPremiumPlans(robotPlans, userRobot);
+                }
+            });
+
+            // Listen for trades
+            db.ref(`robotTrades/${uid}`).orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
+                robotTrades = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => robotTrades.push(child.val()));
+                }
+                robotTrades.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                renderHistory(robotTrades);
+            });
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            initTheme();
+
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+                console.log('[Robot] User logged in:', user.uid);
+
+                await loadAllData();
+                setupListeners();
+
+                document.getElementById('refreshBtn').addEventListener('click', loadAllData);
+
+                console.log('[Robot] ✅ Initialized');
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

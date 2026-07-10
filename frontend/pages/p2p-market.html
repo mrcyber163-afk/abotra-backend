@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>P2P Market | ABOTRA-PROAI - Peer to Peer Crypto Trading</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" />
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body {
+background: #0A0A0F;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 11px;
+color: #E0E0E0;
+}
+body.light-theme {
+background: #F5F5F5;
+background-image: url("../assets/images/background-light.png");
+color: #1A1A1A;
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar, body.light-theme .p2p-container, body.light-theme .offer-card {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2, body.light-theme .page-title, body.light-theme .section-title, body.light-theme .offer-price { color: #800000; }
+body.light-theme .offer-detail { color: #555; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body:not(.light-theme) .trade-tab { color: #AAAAAA; }
+body:not(.light-theme) .trade-tab.active { color: white; }
+body:not(.light-theme) .offer-value { color: #E0E0E0; }
+body:not(.light-theme) .merchant-username { color: #999; }
+body:not(.light-theme) .offer-label { color: #888; }
+body:not(.light-theme) .limit-info { color: #999; }
+body:not(.light-theme) .empty-state p { color: #999; }
+body:not(.light-theme) .price-label { color: #888; }
+body:not(.light-theme) .create-offer-content label { color: #aaa; }
+body:not(.light-theme) .create-offer-content input,
+body:not(.light-theme) .create-offer-content select { color: #E0E0E0; }
+body.light-theme .trade-tab { color: #555; }
+body.light-theme .trade-tab.active { color: white; }
+body.light-theme .offer-value { color: #1A1A1A; }
+body.light-theme .merchant-username { color: #666; }
+body.light-theme .offer-label { color: #777; }
+body.light-theme .limit-info { color: #666; }
+body.light-theme .empty-state p { color: #666; }
+body.light-theme .price-label { color: #777; }
+body.light-theme .create-offer-content label { color: #555; }
+body.light-theme .create-offer-content input,
+body.light-theme .create-offer-content select { color: #1A1A1A; }
+.trade-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 4px; }
+.trade-tab { flex: 1; padding: 10px 8px; border: none; border-radius: 10px; background: transparent; color: #AAAAAA; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.trade-tab:hover { color: #FFD700; }
+.trade-tab.active { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
+.trade-tab.buy-tab.active { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.trade-tab.sell-tab.active { background: linear-gradient(135deg, #F6465D, #D43F52); }
+.trade-tab i { font-size: 14px; }
+.trade-tab .tab-badge { background: rgba(255,255,255,0.15); padding: 1px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; }
+.trade-tab.active .tab-badge { background: rgba(255,255,255,0.25); }
+.offer-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 15px; transition: 0.3s; cursor: pointer; animation: fadeIn 0.3s ease; }
+.offer-card:hover { transform: translateY(-3px); border-color: #FFD700; box-shadow: 0 8px 25px rgba(255,215,0,0.1); }
+.offer-card.admin-offer { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.05); }
+.offer-card.admin-offer .offer-badge { background: rgba(255,215,0,0.3); color: #FFD700; }
+.offer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+.merchant-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+.merchant-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #800000, #FFD700); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; text-transform: uppercase; }
+.merchant-details { flex: 1; }
+.merchant-name { color: #FFD700; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.merchant-username { font-size: 9px; margin-top: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.offer-badge { padding: 2px 8px; border-radius: 16px; font-size: 9px; font-weight: 700; }
+.offer-badge.buy { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.offer-badge.sell { background: rgba(246,70,93,0.2); color: #F6465D; }
+.offer-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.offer-detail { text-align: center; }
+.offer-label { font-size: 8px; margin-bottom: 3px; }
+.offer-value { font-weight: 700; font-size: 11px; }
+.offer-price { color: #FFD700; font-size: 14px; font-weight: 800; }
+.offer-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
+.trade-btn { background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 10px; padding: 6px 14px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.trade-btn:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(255,215,0,0.3); }
+.trade-btn.buy-btn { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.trade-btn.sell-btn { background: linear-gradient(135deg, #F6465D, #D43F52); }
+.delete-offer-btn { background: rgba(246,70,93,0.2); border: none; border-radius: 10px; padding: 4px 10px; color: #F6465D; cursor: pointer; font-size: 9px; transition: 0.3s; display: flex; align-items: center; gap: 4px; }
+.delete-offer-btn:hover { background: rgba(246,70,93,0.4); }
+.create-offer-btn { width: 100%; padding: 12px; border: 2px dashed rgba(255,215,0,0.3); border-radius: 14px; background: transparent; color: #FFD700; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.create-offer-btn:hover { border-color: #FFD700; background: rgba(255,215,0,0.08); transform: translateY(-2px); }
+.create-offer-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 20px; }
+.create-offer-modal.active { display: flex; }
+.create-offer-content { background: linear-gradient(145deg, #1a1a2e, #0f0f1a); border-radius: 24px; padding: 24px; max-width: 500px; width: 100%; border: 1px solid rgba(255,215,0,0.3); max-height: 90vh; overflow-y: auto; }
+body.light-theme .create-offer-content { background: linear-gradient(145deg, #ffffff, #f0f0f5); }
+.create-offer-content h3 { color: #FFD700; font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.create-offer-content label { font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px; }
+.create-offer-content input, .create-offer-content select { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; font-size: 12px; margin-bottom: 12px; outline: none; }
+.create-offer-content input:focus, .create-offer-content select:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+.create-offer-content select option { background: #1a1a1a; }
+.create-offer-buttons { display: flex; gap: 8px; margin-top: 12px; }
+.create-offer-buttons button { flex: 1; padding: 10px; border: none; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.3s; }
+.create-offer-buttons .cancel-btn { background: rgba(255,255,255,0.08); color: #aaa; }
+.create-offer-buttons .cancel-btn:hover { background: rgba(255,255,255,0.15); }
+.create-offer-buttons .submit-btn { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.create-offer-buttons .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14,203,129,0.3); }
+.skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px; }
+.skeleton-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 16px; animation: skeletonPulse 0.8s ease-in-out infinite; }
+.skeleton-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(90deg, rgba(255,215,0,0.15) 25%, rgba(255,215,0,0.35) 50%, rgba(255,215,0,0.15) 75%); background-size: 200% 100%; animation: shimmer 0.8s infinite; }
+.skeleton-text { flex: 1; }
+.skeleton-line { height: 10px; background: linear-gradient(90deg, rgba(255,215,0,0.12) 25%, rgba(255,215,0,0.28) 50%, rgba(255,215,0,0.12) 75%); background-size: 200% 100%; border-radius: 6px; margin-bottom: 6px; animation: shimmer 0.8s infinite; }
+.skeleton-line:last-child { margin-bottom: 0; width: 60%; }
+.skeleton-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; padding: 10px 0; }
+.skeleton-detail { height: 40px; background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%); background-size: 200% 100%; border-radius: 10px; animation: shimmer 0.8s infinite; }
+.skeleton-footer { display: flex; justify-content: space-between; margin-top: 12px; }
+.skeleton-badge { width: 70px; height: 22px; background: linear-gradient(90deg, rgba(255,215,0,0.1) 25%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.1) 75%); background-size: 200% 100%; border-radius: 16px; animation: shimmer 0.8s infinite; }
+.skeleton-btn { width: 90px; height: 30px; background: linear-gradient(90deg, rgba(255,215,0,0.12) 25%, rgba(255,215,0,0.3) 50%, rgba(255,215,0,0.12) 75%); background-size: 200% 100%; border-radius: 10px; animation: shimmer 0.8s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+.verified-badge-blue { background: #1E90FF; color: white; font-size: 8px; width: 14px; height: 14px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; }
+.verified-badge-blue i { font-size: 7px; color: white; }
+.online-status-indicator { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; }
+.online-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #0ECB81; animation: pulse-green 1.5s ease-in-out infinite; }
+.offline-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #888; }
+@keyframes pulse-green { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.8); } }
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 12px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+.p2p-container { position: relative; z-index: 2; max-width: 1000px; margin: 70px auto 20px; padding: 0 12px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.market-price-bar { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.price-item { text-align: center; flex: 1; }
+.price-label { font-size: 9px; margin-bottom: 3px; }
+.price-value { color: #FFD700; font-size: 14px; font-weight: 700; }
+.section-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.offers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px; margin-top: 12px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.empty-state { text-align: center; padding: 50px; background: rgba(255,255,255,0.03); border-radius: 18px; }
+.empty-state i { font-size: 40px; color: rgba(255,215,0,0.3); margin-bottom: 12px; }
+.empty-state p { font-size: 11px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 16px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup { position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px; padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; z-index: 99999; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 12px 28px rgba(0,0,0,0.3); animation: slideInRight 0.3s ease; border-left: 3px solid; font-size: 10px; }
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+.trade-modal { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.trade-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; display: none; }
+.trade-modal-content { background: linear-gradient(145deg, #1a1a2e, #0f0f1a); border-radius: 24px 24px 0 0; padding: 18px; max-width: 500px; margin: 0 auto; border-top: 1px solid rgba(255,215,0,0.3); }
+body.light-theme .trade-modal-content { background: linear-gradient(145deg, #ffffff, #f0f0f5); border-top: 1px solid rgba(128,0,0,0.2); }
+.trade-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,215,0,0.2); }
+.trade-modal-header h3 { color: #FFD700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.trade-modal-close { background: rgba(255,215,0,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #FFD700; font-size: 14px; transition: 0.3s; }
+.trade-modal-close:hover { background: rgba(255,215,0,0.4); transform: rotate(90deg); }
+.merchant-info-modal { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(255,215,0,0.05); border-radius: 16px; margin-bottom: 16px; }
+.merchant-avatar-modal { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #800000, #FFD700); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; }
+.merchant-details-modal h4 { color: #FFD700; font-size: 13px; margin-bottom: 4px; }
+.merchant-details-modal p { color: #aaa; font-size: 10px; }
+.amount-input-group { margin-bottom: 16px; }
+.amount-input-group label { color: #FFD700; font-size: 11px; display: block; margin-bottom: 6px; font-weight: 600; }
+.amount-input-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 4px 12px; }
+.amount-input-wrapper input { flex: 1; background: transparent; border: none; padding: 10px 0; color: #E0E0E0; font-size: 15px; font-weight: 600; outline: none; }
+.amount-input-wrapper span { color: #FFD700; font-weight: 700; font-size: 12px; }
+.quick-amount-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.quick-amount-btn { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 25px; padding: 4px 8px; color: #FFD700; font-size: 9px; cursor: pointer; transition: 0.3s; }
+.quick-amount-btn:hover { background: rgba(255,215,0,0.3); }
+.limit-info-modal { display: flex; justify-content: space-between; padding: 8px 0; margin: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 8px; }
+.limit-info-modal span { color: #888; font-size: 10px; }
+.limit-info-modal strong { color: #FFD700; }
+.total-info { background: rgba(255,215,0,0.1); border-radius: 14px; padding: 10px; margin: 12px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.total-info span:first-child { color: #aaa; font-size: 11px; }
+.total-info .total-amount { color: #0ECB81; font-size: 18px; font-weight: 800; }
+.trade-error { color: #F6465D; font-size: 10px; margin-top: 6px; display: none; }
+.confirm-trade-btn { width: 100%; background: linear-gradient(135deg, #0ECB81, #0A9E65); border: none; border-radius: 14px; padding: 12px; color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.confirm-trade-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14,203,129,0.4); }
+.confirm-trade-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.confirm-trade-btn.buy-confirm { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.confirm-trade-btn.sell-confirm { background: linear-gradient(135deg, #F6465D, #D43F52); }
+body.light-theme .amount-input-wrapper input { color: #1A1A1A; }
+
+/* CHOICES.JS - DARK THEME */
+body:not(.light-theme) .choices__inner {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,215,0,0.2) !important;
+    color: #E0E0E0 !important;
+    border-radius: 12px !important;
+    min-height: 44px !important;
+    padding: 6px 12px !important;
+}
+body:not(.light-theme) .choices__list--dropdown {
+    background: #1a1a2e !important;
+    border-color: rgba(255,215,0,0.2) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__item {
+    color: #E0E0E0 !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background: rgba(255,215,0,0.15) !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__input {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,215,0,0.3) !important;
+    color: #E0E0E0 !important;
+}
+body:not(.light-theme) .choices__list--dropdown .choices__input:focus {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.15) !important;
+}
+body:not(.light-theme) .choices__placeholder { color: #888 !important; }
+
+body.light-theme .choices__inner {
+    background: rgba(0,0,0,0.04) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: #1A1A1A !important;
+    border-radius: 12px !important;
+    min-height: 44px !important;
+    padding: 6px 12px !important;
+}
+body.light-theme .choices__list--dropdown {
+    background: #ffffff !important;
+    border-color: rgba(0,0,0,0.1) !important;
+}
+body.light-theme .choices__list--dropdown .choices__item {
+    color: #1A1A1A !important;
+}
+body.light-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background: rgba(128,0,0,0.08) !important;
+}
+body.light-theme .choices__list--dropdown .choices__input {
+    background: rgba(0,0,0,0.04) !important;
+    border: 1px solid rgba(128,0,0,0.2) !important;
+    color: #1A1A1A !important;
+}
+body.light-theme .choices__list--dropdown .choices__input:focus {
+    border-color: #800000 !important;
+    box-shadow: 0 0 0 3px rgba(128,0,0,0.1) !important;
+}
+body.light-theme .choices__placeholder { color: #999 !important; }
+
+.country-flag-svg {
+    width: 22px;
+    height: 16px;
+    border-radius: 3px;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.choices__list--single .choices__item .country-flag-svg {
+    width: 20px;
+    height: 14px;
+}
+
+@media(max-width: 700px) {
+.p2p-container { padding: 0 12px; margin-top: 65px; }
+.page-title { font-size: 18px; }
+.offers-grid { grid-template-columns: 1fr; }
+.offer-details { grid-template-columns: 1fr; gap: 6px; }
+.offer-header { flex-direction: column; align-items: flex-start; }
+.bottom-nav a span { font-size: 6px; }
+.bottom-nav a i { font-size: 14px; }
+.trade-modal-content { padding: 15px; }
+.total-info .total-amount { font-size: 16px; }
+.amount-input-wrapper input { font-size: 14px; }
+.trade-tab { font-size: 10px; padding: 8px 4px; }
+.create-offer-content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>P2P Trading</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="p2p-container">
+<div class="page-title"><i class="fas fa-handshake"></i> P2P MARKET</div>
+
+<div class="market-price-bar" id="marketPriceBar">
+<div class="price-item"><div class="price-label">BTC/USDT</div><div class="price-value" id="btcPrice">$0.00</div></div>
+<div class="price-item"><div class="price-label">ETH/USDT</div><div class="price-value" id="ethPrice">$0.00</div></div>
+<div class="price-item"><div class="price-label">USDT Rate</div><div class="price-value" id="usdtRate">Loading...</div></div>
+</div>
+
+<div class="trade-tabs">
+    <button class="trade-tab buy-tab active" data-tab="buy">
+        <i class="fas fa-arrow-down"></i> BUY USDT
+        <span class="tab-badge" id="buyCount">0</span>
+    </button>
+    <button class="trade-tab sell-tab" data-tab="sell">
+        <i class="fas fa-arrow-up"></i> SELL USDT
+        <span class="tab-badge" id="sellCount">0</span>
+    </button>
+</div>
+
+<div id="createOfferBtnContainer" style="display:none;">
+    <button class="create-offer-btn" id="createOfferBtn">
+        <i class="fas fa-plus-circle"></i> Create Your Own Offer
+    </button>
+</div>
+
+<div class="section-title"><i class="fas fa-store"></i> <span id="offersTitle">Buy USDT</span></div>
+<div id="offersContainer" class="offers-grid">
+    <div class="skeleton-card">
+        <div class="skeleton-header"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 40%;"></div></div></div>
+        <div class="skeleton-details"><div class="skeleton-detail"></div><div class="skeleton-detail"></div><div class="skeleton-detail"></div></div>
+        <div class="skeleton-footer"><div class="skeleton-badge"></div><div class="skeleton-btn"></div></div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-header"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 40%;"></div></div></div>
+        <div class="skeleton-details"><div class="skeleton-detail"></div><div class="skeleton-detail"></div><div class="skeleton-detail"></div></div>
+        <div class="skeleton-footer"><div class="skeleton-badge"></div><div class="skeleton-btn"></div></div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-header"><div class="skeleton-avatar"></div><div class="skeleton-text"><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 40%;"></div></div></div>
+        <div class="skeleton-details"><div class="skeleton-detail"></div><div class="skeleton-detail"></div><div class="skeleton-detail"></div></div>
+        <div class="skeleton-footer"><div class="skeleton-badge"></div><div class="skeleton-btn"></div></div>
+    </div>
+</div>
+</div>
+
+<!-- CREATE OFFER MODAL -->
+<div class="create-offer-modal" id="createOfferModal">
+    <div class="create-offer-content">
+        <h3><i class="fas fa-plus-circle"></i> Create New Offer</h3>
+        <label>Offer Type</label>
+        <select id="offerType">
+            <option value="buy">🟢 BUY (Sell USDT to users)</option>
+            <option value="sell">🔴 SELL (Buy USDT from users)</option>
+            <option value="both">🔄 BOTH (Buy & Sell)</option>
+        </select>
+        <div style="font-size:9px;color:#888;margin-bottom:12px;">
+            <span id="typeExplanation">🟢 BUY: Merchant SELLS USDT to users (appears in BUY tab)</span>
+        </div>
+        <label>Your Country</label>
+        <select id="offerCountry"></select>
+        <label>Price per USDT (Local Currency)</label>
+        <input type="number" id="offerPrice" placeholder="Enter rate from admin" step="0.01">
+        <label>Minimum Limit (USDT)</label>
+        <input type="number" id="offerMinLimit" placeholder="e.g., 10" value="10" step="1">
+        <label>Maximum Limit (USDT)</label>
+        <input type="number" id="offerMaxLimit" placeholder="e.g., 1000" value="1000" step="1">
+        <label>Payment Method</label>
+        <input type="text" id="offerPayment" placeholder="e.g., M-Pesa, Bank Transfer">
+        <label>Phone Number</label>
+        <input type="text" id="offerPhone" placeholder="e.g., 0712345678">
+        <label>Merchant Name (Display Name)</label>
+        <input type="text" id="offerMerchantName" placeholder="Your display name for this offer">
+        <div class="create-offer-buttons">
+            <button class="cancel-btn" id="cancelOfferBtn">Cancel</button>
+            <button class="submit-btn" id="submitOfferBtn"><i class="fas fa-check"></i> Create Offer</button>
+        </div>
+    </div>
+</div>
+
+<!-- TRADE MODAL -->
+<div class="trade-modal-overlay" id="tradeModalOverlay"></div>
+<div class="trade-modal" id="tradeModal">
+<div class="trade-modal-content">
+<div class="trade-modal-header">
+<h3><i class="fas fa-handshake"></i> Complete Trade</h3>
+<button class="trade-modal-close" id="closeTradeModal"><i class="fas fa-times"></i></button>
+</div>
+<div id="merchantInfoModal" class="merchant-info-modal">
+<div class="merchant-avatar-modal" id="modalMerchantAvatar">M</div>
+<div class="merchant-details-modal">
+<h4 id="modalMerchantName">Merchant Name</h4>
+<p id="modalMerchantLimit">Min: 10 - Max: 1000 USDT</p>
+</div>
+</div>
+<div class="amount-input-group">
+<label><i class="fas fa-dollar-sign"></i> Amount (USDT)</label>
+<div class="amount-input-wrapper">
+<input type="number" id="tradeAmount" placeholder="0" value="10" step="1">
+<span>USDT</span>
+</div>
+<div class="quick-amount-btns">
+<button class="quick-amount-btn" data-amount="10">10 USDT</button>
+<button class="quick-amount-btn" data-amount="50">50 USDT</button>
+<button class="quick-amount-btn" data-amount="100">100 USDT</button>
+<button class="quick-amount-btn" data-amount="500">500 USDT</button>
+</div>
+</div>
+<div class="limit-info-modal">
+<span> Min Limit: <strong id="minLimitDisplay">10</strong> USDT</span>
+<span> Max Limit: <strong id="maxLimitDisplay">1000</strong> USDT</span>
+</div>
+<div class="total-info">
+<span><i class="fas fa-calculator"></i> <span id="totalLabel">You will pay</span> (Local Currency)</span>
+<span class="total-amount" id="totalLocalAmount">0 TZS</span>
+</div>
+<div class="trade-error" id="tradeError">Please enter a valid amount</div>
+<button class="confirm-trade-btn" id="confirmTradeBtn">
+<i class="fas fa-check-circle"></i> Confirm Trade
+</button>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="trade.html"><i class="fa-solid fa-chart-line"></i><span>Trade</span></a>
+<a href="p2p-order.html"><i class="fas fa-handshake"></i><span>P2P Orders</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="p2p-market.html" class="active"><i class="fas fa-handshake"></i><span>P2P</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+let currentUser = null;
+let currentUserData = null;
+let exchangeRates = {};
+let selectedMerchant = null;
+let allOffers = [];
+let currentTab = 'buy';
+let isMerchant = false;
+let offersUnsubscribe = null;
+
+// ============================================================
+// ALL COUNTRIES WITH SVG FLAGS - NO COUNTRY CODES
+// ============================================================
+const countriesData = [
+{ iso: "tz", name: "Tanzania" },{ iso: "mw", name: "Malawi" },{ iso: "zm", name: "Zambia" },
+{ iso: "ke", name: "Kenya" },{ iso: "ug", name: "Uganda" },{ iso: "ng", name: "Nigeria" },
+{ iso: "gh", name: "Ghana" },{ iso: "za", name: "South Africa" },{ iso: "cd", name: "Congo DRC" },
+{ iso: "bi", name: "Burundi" },{ iso: "bw", name: "Botswana" },{ iso: "na", name: "Namibia" },
+{ iso: "mz", name: "Mozambique" },{ iso: "rw", name: "Rwanda" },{ iso: "eg", name: "Egypt" },
+{ iso: "ma", name: "Morocco" },{ iso: "zw", name: "Zimbabwe" },{ iso: "ao", name: "Angola" },
+{ iso: "et", name: "Ethiopia" },{ iso: "so", name: "Somalia" },{ iso: "sd", name: "Sudan" },
+{ iso: "ly", name: "Libya" },{ iso: "tn", name: "Tunisia" },{ iso: "dz", name: "Algeria" },
+{ iso: "us", name: "United States" },{ iso: "gb", name: "United Kingdom" },{ iso: "de", name: "Germany" },
+{ iso: "fr", name: "France" },{ iso: "it", name: "Italy" },{ iso: "es", name: "Spain" },
+{ iso: "pt", name: "Portugal" },{ iso: "nl", name: "Netherlands" },{ iso: "be", name: "Belgium" },
+{ iso: "ch", name: "Switzerland" },{ iso: "at", name: "Austria" },{ iso: "se", name: "Sweden" },
+{ iso: "no", name: "Norway" },{ iso: "dk", name: "Denmark" },{ iso: "fi", name: "Finland" },
+{ iso: "ie", name: "Ireland" },{ iso: "pl", name: "Poland" },{ iso: "cz", name: "Czech Republic" },
+{ iso: "hu", name: "Hungary" },{ iso: "ro", name: "Romania" },{ iso: "bg", name: "Bulgaria" },
+{ iso: "gr", name: "Greece" },{ iso: "tr", name: "Turkey" },{ iso: "ru", name: "Russia" },
+{ iso: "ua", name: "Ukraine" },{ iso: "in", name: "India" },{ iso: "cn", name: "China" },
+{ iso: "jp", name: "Japan" },{ iso: "kr", name: "South Korea" },{ iso: "id", name: "Indonesia" },
+{ iso: "ph", name: "Philippines" },{ iso: "vn", name: "Vietnam" },{ iso: "th", name: "Thailand" },
+{ iso: "my", name: "Malaysia" },{ iso: "sg", name: "Singapore" },{ iso: "au", name: "Australia" },
+{ iso: "nz", name: "New Zealand" },{ iso: "br", name: "Brazil" },{ iso: "ar", name: "Argentina" },
+{ iso: "mx", name: "Mexico" },{ iso: "cl", name: "Chile" },{ iso: "pe", name: "Peru" },
+{ iso: "co", name: "Colombia" },{ iso: "ve", name: "Venezuela" },{ iso: "pk", name: "Pakistan" },
+{ iso: "bd", name: "Bangladesh" },{ iso: "lk", name: "Sri Lanka" },{ iso: "np", name: "Nepal" },
+{ iso: "af", name: "Afghanistan" },{ iso: "iq", name: "Iraq" },{ iso: "ir", name: "Iran" },
+{ iso: "sa", name: "Saudi Arabia" },{ iso: "ye", name: "Yemen" },{ iso: "om", name: "Oman" },
+{ iso: "ae", name: "UAE" },{ iso: "qa", name: "Qatar" },{ iso: "kw", name: "Kuwait" },
+{ iso: "il", name: "Israel" },{ iso: "jo", name: "Jordan" },{ iso: "lb", name: "Lebanon" },
+{ iso: "sy", name: "Syria" },{ iso: "ca", name: "Canada" },{ iso: "cu", name: "Cuba" },
+{ iso: "jm", name: "Jamaica" },{ iso: "tt", name: "Trinidad" },{ iso: "bs", name: "Bahamas" },
+{ iso: "bb", name: "Barbados" },{ iso: "dm", name: "Dominica" },{ iso: "gd", name: "Grenada" },
+{ iso: "kn", name: "St Kitts" },{ iso: "lc", name: "St Lucia" },{ iso: "vc", name: "St Vincent" },
+{ iso: "bz", name: "Belize" },{ iso: "gt", name: "Guatemala" },{ iso: "sv", name: "El Salvador" },
+{ iso: "hn", name: "Honduras" },{ iso: "ni", name: "Nicaragua" },{ iso: "cr", name: "Costa Rica" },
+{ iso: "pa", name: "Panama" },{ iso: "ht", name: "Haiti" },{ iso: "do", name: "Dominican Republic" },
+{ iso: "gp", name: "Guadeloupe" },{ iso: "mq", name: "Martinique" },{ iso: "gf", name: "French Guiana" },
+{ iso: "sr", name: "Suriname" },{ iso: "gy", name: "Guyana" },{ iso: "py", name: "Paraguay" },
+{ iso: "uy", name: "Uruguay" },{ iso: "bo", name: "Bolivia" },{ iso: "ec", name: "Ecuador" },
+{ iso: "sk", name: "Slovakia" },{ iso: "si", name: "Slovenia" },{ iso: "hr", name: "Croatia" },
+{ iso: "ba", name: "Bosnia" },{ iso: "rs", name: "Serbia" },{ iso: "me", name: "Montenegro" },
+{ iso: "mk", name: "North Macedonia" },{ iso: "al", name: "Albania" },{ iso: "md", name: "Moldova" },
+{ iso: "az", name: "Azerbaijan" },{ iso: "ge", name: "Georgia" },{ iso: "am", name: "Armenia" },
+{ iso: "by", name: "Belarus" },{ iso: "lt", name: "Lithuania" },{ iso: "lv", name: "Latvia" },
+{ iso: "ee", name: "Estonia" },{ iso: "lu", name: "Luxembourg" },{ iso: "is", name: "Iceland" },
+{ iso: "gl", name: "Greenland" },{ iso: "fo", name: "Faroe Islands" },{ iso: "gi", name: "Gibraltar" },
+{ iso: "mt", name: "Malta" },{ iso: "sm", name: "San Marino" },{ iso: "va", name: "Vatican" },
+{ iso: "ad", name: "Andorra" },{ iso: "mc", name: "Monaco" },{ iso: "li", name: "Liechtenstein" },
+{ iso: "hk", name: "Hong Kong" },{ iso: "mo", name: "Macau" },{ iso: "tw", name: "Taiwan" },
+{ iso: "kp", name: "North Korea" },{ iso: "mn", name: "Mongolia" },{ iso: "bt", name: "Bhutan" },
+{ iso: "bh", name: "Bahrain" },{ iso: "pg", name: "Papua New Guinea" },{ iso: "fm", name: "Micronesia" },
+{ iso: "mh", name: "Marshall Islands" },{ iso: "ws", name: "Samoa" },{ iso: "to", name: "Tonga" },
+{ iso: "fj", name: "Fiji" },{ iso: "nc", name: "New Caledonia" },{ iso: "ck", name: "Cook Islands" },
+{ iso: "nu", name: "Niue" },{ iso: "ki", name: "Kiribati" },{ iso: "tv", name: "Tuvalu" },
+{ iso: "pf", name: "French Polynesia" },{ iso: "wf", name: "Wallis & Futuna" },{ iso: "sb", name: "Solomon Islands" },
+{ iso: "vu", name: "Vanuatu" },{ iso: "pw", name: "Palau" },{ iso: "tl", name: "Timor-Leste" },
+{ iso: "kh", name: "Cambodia" },{ iso: "la", name: "Laos" },{ iso: "mm", name: "Myanmar" },
+{ iso: "bn", name: "Brunei" },{ iso: "cx", name: "Christmas Island" },{ iso: "cc", name: "Cocos Islands" },
+{ iso: "nf", name: "Norfolk Island" },{ iso: "nr", name: "Nauru" }
+];
+
+function getFlagSvg(isoCode) {
+    if (!isoCode) return '';
+    const code = isoCode.toLowerCase();
+    return `https://flagcdn.com/40x30/${code}.png`;
+}
+
+// Remove duplicates based on name
+const uniqueCountries = [];
+const seenNames = new Set();
+countriesData.forEach(c => {
+    if (!seenNames.has(c.name)) {
+        seenNames.add(c.name);
+        uniqueCountries.push(c);
+    }
+});
+
+// ============================================================
+// CHOICES.JS - COUNTRY DROPDOWN (NO COUNTRY CODE)
+// ============================================================
+let offerCountryChoices = null;
+
+function initOfferCountryDropdown() {
+    const select = document.getElementById('offerCountry');
+    if (!select) return;
+    
+    select.innerHTML = '';
+    const sorted = [...uniqueCountries].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sorted.forEach(c => {
+        const flagUrl = getFlagSvg(c.iso);
+        const option = document.createElement('option');
+        option.value = c.name;
+        option.innerHTML = `<img src="${flagUrl}" class="country-flag-svg" alt="${c.iso}" onerror="this.style.display='none'"> ${c.name}`;
+        select.appendChild(option);
+    });
+
+    if (typeof Choices === 'undefined') {
+        console.error('[CHOICES] Choices.js not loaded.');
+        return;
+    }
+
+    try {
+        if (offerCountryChoices) {
+            offerCountryChoices.destroy();
+        }
+        offerCountryChoices = new Choices(select, {
+            searchEnabled: true,
+            searchPlaceholderValue: '🔍 Search country...',
+            itemSelectText: '',
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: '🌍 Select Your Country',
+            allowHTML: true,
+            renderSelectedChoices: 'always'
+        });
+        
+        const defaultCountry = currentUserData?.country || 'Tanzania';
+        const found = sorted.find(c => c.name === defaultCountry);
+        if (found) {
+            offerCountryChoices.setChoiceByValue(found.name);
+        } else {
+            const tz = sorted.find(c => c.name === 'Tanzania');
+            if (tz) offerCountryChoices.setChoiceByValue(tz.name);
+        }
+        
+        console.log('[CHOICES] ✅ Offer country dropdown initialized with ' + sorted.length + ' countries');
+    } catch (error) {
+        console.error('[CHOICES] Error:', error);
+    }
+}
+
+// ============================================================
+// NOTIFICATION HELPER
+// ============================================================
+async function addNotification(userId, title, message, type = 'info', link = 'p2p-orders.html') {
+    if (!userId) return;
+    try {
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({ 
+            title, 
+            message, 
+            type, 
+            link: link,
+            read: false, 
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+    } catch(e) { console.error('Add notification error:', e); }
+}
+
+function getTypeExplanation(type) {
+    if (type === 'buy') return '🟢 BUY: Merchant SELLS USDT to users (appears in BUY tab)';
+    if (type === 'sell') return '🔴 SELL: Merchant BUYS USDT from users (appears in SELL tab)';
+    return '🔄 BOTH: Merchant does both buy and sell';
+}
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); } }, 4000);
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    } else {
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+    const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+    if (sunIcon && moonIcon) {
+        if (document.body.classList.contains('light-theme')) {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'inline-block';
+        } else {
+            sunIcon.style.display = 'inline-block';
+            moonIcon.style.display = 'none';
+        }
+    }
+});
+
+function formatNumber(num) {
+    if (num === undefined || num === null) return '0';
+    return num.toLocaleString('en-US');
+}
+
+async function fetchMarketPrices() {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const btcRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', { signal: controller.signal });
+        const btcData = await btcRes.json();
+        document.getElementById('btcPrice').innerHTML = `$${parseFloat(btcData.lastPrice).toFixed(2).toLocaleString()}`;
+        const ethRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT', { signal: controller.signal });
+        const ethData = await ethRes.json();
+        document.getElementById('ethPrice').innerHTML = `$${parseFloat(ethData.lastPrice).toFixed(2).toLocaleString()}`;
+        clearTimeout(timeoutId);
+    } catch (error) { console.log('Price fetch error:', error); }
+}
+
+async function loadExchangeRates() {
+    try {
+        const ratesRef = db.ref('exchangeRates');
+        const snapshot = await ratesRef.once('value');
+        if (snapshot.exists()) {
+            exchangeRates = snapshot.val();
+            console.log('[RATES] Loaded:', exchangeRates);
+        }
+    } catch(e) { console.log('Exchange rates error:', e); }
+}
+
+async function loadUserData() {
+    if (!currentUser) return;
+    try {
+        const userRef = db.ref(`users/${currentUser.uid}`);
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            currentUserData = snapshot.val();
+            isMerchant = currentUserData.isMerchant === true;
+            if (offerCountryChoices && currentUserData.country) {
+                const found = uniqueCountries.find(c => c.name === currentUserData.country);
+                if (found) {
+                    offerCountryChoices.setChoiceByValue(found.name);
+                }
+            }
+        } else {
+            currentUserData = { name: currentUser.email?.split('@')[0] || 'User', country: 'Tanzania', email: currentUser.email };
+            await db.ref(`users/${currentUser.uid}`).set(currentUserData);
+        }
+        const createBtn = document.getElementById('createOfferBtnContainer');
+        if (createBtn) createBtn.style.display = isMerchant ? 'block' : 'none';
+        return currentUserData;
+    } catch(e) { console.log('User data error:', e); }
+}
+
+function getInitials(name) {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getMerchantRate(merchant) {
+    if (merchant.rate && merchant.rate > 0) return merchant.rate;
+    if (merchant.country && exchangeRates[merchant.country]) {
+        return exchangeRates[merchant.country];
+    }
+    const countryRate = exchangeRates[merchant.country];
+    if (countryRate && countryRate > 0) return countryRate;
+    if (merchant.country === 'Tanzania') return 2800;
+    if (merchant.country === 'Malawi') return 5600;
+    if (merchant.country === 'Zambia') return 30;
+    return 2800;
+}
+
+function parsePaymentDetailsFromMerchant(merchant) {
+    let bankName = "", accountNumber = "", accountName = "";
+    if (merchant.paymentDetails && typeof merchant.paymentDetails === 'string') {
+        const lines = merchant.paymentDetails.split('\n');
+        for (const line of lines) {
+            if (line.toLowerCase().startsWith('bank:')) bankName = line.substring(5).trim();
+            else if (line.toLowerCase().startsWith('account:')) accountNumber = line.substring(8).trim();
+            else if (line.toLowerCase().startsWith('name:')) accountName = line.substring(5).trim();
+        }
+    }
+    if (!bankName && merchant.bankName) bankName = merchant.bankName;
+    if (!accountNumber && merchant.accountNumber) accountNumber = merchant.accountNumber;
+    if (!accountName && merchant.accountName) accountName = merchant.accountName;
+    return { bankName, accountNumber, accountName };
+}
+
+function getPaymentDisplayText(merchant) {
+    const { bankName, accountNumber } = parsePaymentDetailsFromMerchant(merchant);
+    if (bankName && accountNumber) return `${bankName} - ${accountNumber}`;
+    if (bankName) return bankName;
+    if (accountNumber) return accountNumber;
+    return "Bank Transfer";
+}
+
+async function getMerchantBalance(userId) {
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            return snapshot.val().balance || 0;
+        }
+        return 0;
+    } catch(e) {
+        console.error('Error getting merchant balance:', e);
+        return 0;
+    }
+}
+
+async function checkUserOnline(userId) {
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.isOnline === true) return true;
+            if (data.lastSeen) {
+                const lastSeen = data.lastSeen;
+                const now = Date.now();
+                const diff = now - lastSeen;
+                if (diff < 60000) return true;
+            }
+            return false;
+        }
+        return false;
+    } catch(e) {
+        return false;
+    }
+}
+
+function loadOffers() {
+    if (offersUnsubscribe) {
+        try { offersUnsubscribe(); } catch(e) {}
+        offersUnsubscribe = null;
+    }
+    
+    const userCountry = currentUserData?.country || 'Tanzania';
+    const offers = [];
+    
+    const merchantsRef = db.ref('merchants');
+    const merchantsUnsub = merchantsRef.on('value', (snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                const merchant = child.val();
+                if (merchant.status === 'inactive') return;
+                const merchantType = merchant.type || 'buy';
+                offers.push({
+                    id: child.key,
+                    ...merchant,
+                    type: merchantType,
+                    isAdminOffer: true
+                });
+            });
+        }
+        renderOffers(offers, currentTab);
+    });
+    
+    const offersRef = db.ref('p2p_offers');
+    const offersUnsub = offersRef.on('value', (snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                const offer = child.val();
+                if (offer.status === 'inactive' || offer.status === 'closed') return;
+                if (offer.country && offer.country !== userCountry) return;
+                const existing = offers.find(o => o.id === child.key);
+                if (!existing) {
+                    offers.push({
+                        id: child.key,
+                        ...offer,
+                        isAdminOffer: false
+                    });
+                }
+            });
+        }
+        renderOffers(offers, currentTab);
+    });
+    
+    offersUnsubscribe = () => {
+        try { merchantsRef.off('value', merchantsUnsub); } catch(e) {}
+        try { offersRef.off('value', offersUnsub); } catch(e) {}
+    };
+}
+
+function renderOffers(offers, tab) {
+    const container = document.getElementById('offersContainer');
+    if (!container) return;
+    
+    const userCountry = currentUserData?.country || 'Tanzania';
+    
+    const filteredOffers = offers.filter(o => {
+        if (o.country && o.country !== userCountry) return false;
+        if (o.status === 'inactive' || o.status === 'closed') return false;
+        if (tab === 'buy') {
+            return o.type === 'buy' || o.type === 'both';
+        } else {
+            return o.type === 'sell' || o.type === 'both';
+        }
+    });
+    
+    const buyCount = offers.filter(o => (o.type === 'buy' || o.type === 'both') && o.country === userCountry && o.status !== 'inactive').length;
+    const sellCount = offers.filter(o => (o.type === 'sell' || o.type === 'both') && o.country === userCountry && o.status !== 'inactive').length;
+    document.getElementById('buyCount').textContent = buyCount;
+    document.getElementById('sellCount').textContent = sellCount;
+    
+    const title = document.getElementById('offersTitle');
+    if (title) title.textContent = tab === 'buy' ? 'Buy USDT' : 'Sell USDT';
+    
+    const skeletonCards = container.querySelectorAll('.skeleton-card');
+    skeletonCards.forEach(el => el.remove());
+    
+    if (filteredOffers.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas ${tab === 'buy' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i><p>No ${tab === 'buy' ? 'sellers' : 'buyers'} in ${userCountry}.</p></div>`;
+        return;
+    }
+    
+    container.innerHTML = '';
+    filteredOffers.forEach((offer, index) => {
+        const isAdminOffer = offer.isAdminOffer === true;
+        const isOwnOffer = currentUser && offer.userId === currentUser.uid;
+        const rate = getMerchantRate(offer);
+        const currency = offer.country === 'Tanzania' ? 'TZS' : 
+                        offer.country === 'Malawi' ? 'MWK' : 
+                        offer.country === 'Zambia' ? 'ZMW' : 
+                        offer.country === 'Kenya' ? 'KES' :
+                        offer.country === 'Uganda' ? 'UGX' :
+                        offer.country === 'Nigeria' ? 'NGN' :
+                        offer.country === 'Ghana' ? 'GHS' :
+                        offer.country === 'South Africa' ? 'ZAR' : 'USD';
+        const minLimit = offer.minLimit || 10;
+        const maxLimit = offer.maxLimit || 1000;
+        
+        const avatarInitials = getInitials(offer.merchantName || offer.name || offer.email?.split('@')[0] || 'M');
+        const displayName = offer.merchantName || offer.name || offer.email?.split('@')[0] || 'Merchant';
+        const orderCount = offer.orders || 0;
+        const paymentText = getPaymentDisplayText(offer);
+        
+        const card = document.createElement('div');
+        card.className = `offer-card ${isAdminOffer ? 'admin-offer' : ''}`;
+        card.style.animationDelay = `${index * 0.05}s`;
+        
+        const badgeClass = tab === 'buy' ? 'buy' : 'sell';
+        const badgeText = tab === 'buy' ? 'SELL USDT' : 'BUY USDT';
+        const btnClass = tab === 'buy' ? 'buy-btn' : 'sell-btn';
+        const btnText = tab === 'buy' ? 'Buy USDT' : 'Sell USDT';
+        const btnIcon = tab === 'buy' ? 'fa-arrow-down' : 'fa-arrow-up';
+        
+        let deleteBtn = '';
+        if (isOwnOffer && !isAdminOffer) {
+            deleteBtn = `<button class="delete-offer-btn" data-offer-id="${offer.id}"><i class="fas fa-trash"></i> Delete</button>`;
+        }
+        
+        // Get flag for country
+        const countryObj = uniqueCountries.find(c => c.name === offer.country);
+        const flagHtml = countryObj ? `<img src="${getFlagSvg(countryObj.iso)}" style="width:16px;height:12px;border-radius:2px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">` : '';
+        
+        card.innerHTML = `
+            <div class="offer-header">
+                <div class="merchant-info">
+                    <div class="merchant-avatar">${escapeHtml(avatarInitials)}</div>
+                    <div class="merchant-details">
+                        <div class="merchant-name">${escapeHtml(displayName)}<span class="verified-badge-blue"><i class="fas fa-check"></i></span></div>
+                        <div class="merchant-username">
+                            <span class="online-status-indicator">
+                                <span class="offline-dot"></span> Checking...
+                            </span>
+                            ${offer.phone ? `<span style="margin-left:8px;">📱 ${escapeHtml(offer.phone)}</span>` : ''}
+                            ${offer.country ? `<span style="margin-left:8px;">${flagHtml} ${escapeHtml(offer.country)}</span>` : ''}
+                        </div>
+                        <div class="merchant-rating"><i class="fas fa-star" style="color:#FFD700;"></i> 5.0 (${formatNumber(orderCount)} trades)</div>
+                    </div>
+                </div>
+                <div class="offer-badge ${badgeClass}">${badgeText}</div>
+            </div>
+            <div class="offer-details">
+                <div class="offer-detail"><div class="offer-label">Price</div><div class="offer-price">${formatNumber(rate)} ${currency}</div></div>
+                <div class="offer-detail"><div class="offer-label">Available</div><div class="offer-value" id="balance-${offer.id}">${formatNumber(offer.balance || 0)} USDT</div></div>
+                <div class="offer-detail"><div class="offer-label">Payment</div><div class="offer-value">${escapeHtml(paymentText)}</div></div>
+            </div>
+            <div class="offer-footer">
+                <div class="limit-info"><i class="fas fa-chart-line"></i> Limit: ${formatNumber(minLimit)} - ${formatNumber(maxLimit)} USDT</div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    ${deleteBtn}
+                    <button class="trade-btn ${btnClass}" data-offer='${JSON.stringify(offer).replace(/'/g, "\\'")}'><i class="fas ${btnIcon}"></i> ${btnText}</button>
+                </div>
+            </div>
+        `;
+        
+        const statusEl = card.querySelector('.online-status-indicator');
+        if (offer.userId) {
+            checkUserOnline(offer.userId).then(online => {
+                if (statusEl) {
+                    statusEl.innerHTML = online ? 
+                        '<span class="online-dot"></span> Online' : 
+                        '<span class="offline-dot"></span> Offline';
+                }
+            });
+        }
+        
+        if (offer.userId) {
+            getMerchantBalance(offer.userId).then(balance => {
+                const balanceEl = document.getElementById(`balance-${offer.id}`);
+                if (balanceEl) balanceEl.textContent = `${formatNumber(balance)} USDT`;
+                offer.balance = balance;
+            });
+        }
+        
+        const tradeBtn = card.querySelector('.trade-btn');
+        tradeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const offerData = JSON.parse(tradeBtn.getAttribute('data-offer'));
+            getMerchantBalance(offerData.userId).then(balance => {
+                offerData.balance = balance;
+                openTradeModal(offerData);
+            });
+        });
+        
+        const deleteBtnEl = card.querySelector('.delete-offer-btn');
+        if (deleteBtnEl) {
+            deleteBtnEl.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const offerId = deleteBtnEl.getAttribute('data-offer-id');
+                if (confirm('Are you sure you want to delete this offer?')) {
+                    await deleteOffer(offerId);
+                }
+            });
+        }
+        
+        container.appendChild(card);
+    });
+    
+    const rate = exchangeRates[userCountry] || 2800;
+    const currency = userCountry === 'Tanzania' ? 'TZS' : 
+                    userCountry === 'Malawi' ? 'MWK' : 
+                    userCountry === 'Zambia' ? 'ZMW' : 
+                    userCountry === 'Kenya' ? 'KES' :
+                    userCountry === 'Uganda' ? 'UGX' :
+                    userCountry === 'Nigeria' ? 'NGN' : 'USD';
+    const usdtRateEl = document.getElementById('usdtRate');
+    if (usdtRateEl) usdtRateEl.innerHTML = `${formatNumber(rate)} ${currency}`;
+}
+
+async function deleteOffer(offerId) {
+    try {
+        const offerRef = db.ref(`p2p_offers/${offerId}`);
+        const snapshot = await offerRef.once('value');
+        if (!snapshot.exists()) {
+            showNotification('Offer not found', 'error');
+            return;
+        }
+        const offer = snapshot.val();
+        if (offer.userId !== currentUser.uid) {
+            showNotification('You can only delete your own offers', 'error');
+            return;
+        }
+        await offerRef.update({ status: 'closed', closedAt: Date.now() });
+        showNotification('Offer deleted successfully!', 'success');
+        loadOffers();
+    } catch (error) {
+        console.error('Delete offer error:', error);
+        showNotification('Error deleting offer', 'error');
+    }
+}
+
+document.querySelectorAll('.trade-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.trade-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentTab = this.dataset.tab;
+        loadOffers();
+    });
+});
+
+const createOfferBtn = document.getElementById('createOfferBtn');
+if (createOfferBtn) {
+    createOfferBtn.addEventListener('click', () => {
+        const modal = document.getElementById('createOfferModal');
+        if (modal) modal.classList.add('active');
+        setTimeout(initOfferCountryDropdown, 100);
+    });
+}
+
+const cancelOfferBtn = document.getElementById('cancelOfferBtn');
+if (cancelOfferBtn) {
+    cancelOfferBtn.addEventListener('click', () => {
+        const modal = document.getElementById('createOfferModal');
+        if (modal) modal.classList.remove('active');
+    });
+}
+
+const submitOfferBtn = document.getElementById('submitOfferBtn');
+if (submitOfferBtn) {
+    submitOfferBtn.addEventListener('click', async () => {
+        if (!currentUser) { showNotification('Please login', 'error'); return; }
+        
+        const typeEl = document.getElementById('offerType');
+        const countryEl = document.getElementById('offerCountry');
+        const priceEl = document.getElementById('offerPrice');
+        const minLimitEl = document.getElementById('offerMinLimit');
+        const maxLimitEl = document.getElementById('offerMaxLimit');
+        const paymentEl = document.getElementById('offerPayment');
+        const phoneEl = document.getElementById('offerPhone');
+        const merchantNameEl = document.getElementById('offerMerchantName');
+        
+        if (!typeEl || !countryEl || !priceEl || !minLimitEl || !maxLimitEl || !paymentEl || !phoneEl || !merchantNameEl) {
+            showNotification('Some form fields are missing', 'error');
+            return;
+        }
+        
+        const type = typeEl.value;
+        const country = countryEl.value;
+        const price = parseFloat(priceEl.value);
+        const minLimit = parseFloat(minLimitEl.value) || 10;
+        const maxLimit = parseFloat(maxLimitEl.value) || 1000;
+        const payment = paymentEl.value.trim();
+        const phone = phoneEl.value.trim();
+        const merchantName = merchantNameEl.value.trim() || currentUserData?.name || currentUser.email?.split('@')[0];
+        
+        if (!country) { showNotification('Please select your country', 'error'); return; }
+        if (!price || price <= 0) { showNotification('Please enter valid price rate', 'error'); return; }
+        if (minLimit > maxLimit) { showNotification('Min limit cannot exceed max limit', 'error'); return; }
+        if (!phone) { showNotification('Please enter your phone number', 'error'); return; }
+        
+        const userBalance = currentUserData?.balance || 0;
+        if (userBalance < minLimit) {
+            showNotification(`You need at least ${minLimit} USDT balance to create this offer`, 'error');
+            return;
+        }
+        
+        if (submitOfferBtn) {
+            submitOfferBtn.disabled = true;
+            submitOfferBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        }
+        
+        try {
+            const offerData = {
+                type: type,
+                country: country,
+                rate: price,
+                price: price,
+                balance: userBalance,
+                minLimit: minLimit,
+                maxLimit: maxLimit,
+                paymentMethod: payment,
+                phone: phone,
+                userId: currentUser.uid,
+                merchantName: merchantName,
+                name: merchantName,
+                email: currentUser.email,
+                createdAt: Date.now(),
+                status: 'active',
+                isAdminOffer: false,
+                orders: 0,
+                isOnline: true
+            };
+            
+            const offersRef = db.ref('p2p_offers');
+            await offersRef.push(offerData);
+            
+            showNotification('✅ Offer created successfully!', 'success');
+            const modal = document.getElementById('createOfferModal');
+            if (modal) modal.classList.remove('active');
+            loadOffers();
+            
+        } catch (error) {
+            console.error('Create offer error:', error);
+            showNotification('Error creating offer: ' + error.message, 'error');
+        } finally {
+            if (submitOfferBtn) {
+                submitOfferBtn.disabled = false;
+                submitOfferBtn.innerHTML = '<i class="fas fa-check"></i> Create Offer';
+            }
+        }
+    });
+}
+
+const offerType = document.getElementById('offerType');
+const typeExplanation = document.getElementById('typeExplanation');
+
+if (offerType && typeExplanation) {
+    offerType.addEventListener('change', function() {
+        typeExplanation.textContent = getTypeExplanation(this.value);
+    });
+    typeExplanation.textContent = getTypeExplanation(offerType.value);
+}
+
+const createOfferModal = document.getElementById('createOfferModal');
+if (createOfferModal) {
+    createOfferModal.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            createOfferModal.classList.remove('active');
+        }
+    });
+}
+
+function openTradeModal(offer) {
+    selectedMerchant = offer;
+    const displayName = offer.merchantName || offer.name || offer.email?.split('@')[0] || 'Merchant';
+    document.getElementById('modalMerchantAvatar').textContent = getInitials(displayName);
+    document.getElementById('modalMerchantName').textContent = displayName;
+    document.getElementById('modalMerchantLimit').textContent = `Min: ${formatNumber(offer.minLimit || 10)} - Max: ${formatNumber(offer.maxLimit || 1000)} USDT`;
+    document.getElementById('minLimitDisplay').textContent = formatNumber(offer.minLimit || 10);
+    document.getElementById('maxLimitDisplay').textContent = formatNumber(offer.maxLimit || 1000);
+    
+    const tradeAmount = document.getElementById('tradeAmount');
+    tradeAmount.value = offer.minLimit || 10;
+    tradeAmount.min = offer.minLimit || 10;
+    tradeAmount.max = offer.maxLimit || 1000;
+    
+    const confirmBtn = document.getElementById('confirmTradeBtn');
+    const totalLabel = document.getElementById('totalLabel');
+    
+    if (currentTab === 'buy') {
+        confirmBtn.className = 'confirm-trade-btn buy-confirm';
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Purchase';
+        totalLabel.textContent = 'You will pay';
+    } else {
+        confirmBtn.className = 'confirm-trade-btn sell-confirm';
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Sale';
+        totalLabel.textContent = 'You will receive';
+    }
+    
+    updateTotalAmount();
+    const overlay = document.getElementById('tradeModalOverlay');
+    const modal = document.getElementById('tradeModal');
+    if (overlay) overlay.style.display = 'block';
+    if (modal) modal.style.display = 'block';
+}
+
+function closeTradeModal() {
+    const overlay = document.getElementById('tradeModalOverlay');
+    const modal = document.getElementById('tradeModal');
+    const error = document.getElementById('tradeError');
+    if (overlay) overlay.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+    if (error) error.style.display = 'none';
+    selectedMerchant = null;
+}
+
+function updateTotalAmount() {
+    const amount = parseFloat(document.getElementById('tradeAmount').value) || 0;
+    if (!selectedMerchant) return;
+    const rate = getMerchantRate(selectedMerchant);
+    const currency = selectedMerchant.country === 'Tanzania' ? 'TZS' : 
+                    selectedMerchant.country === 'Malawi' ? 'MWK' : 
+                    selectedMerchant.country === 'Zambia' ? 'ZMW' : 
+                    selectedMerchant.country === 'Kenya' ? 'KES' :
+                    selectedMerchant.country === 'Uganda' ? 'UGX' :
+                    selectedMerchant.country === 'Nigeria' ? 'NGN' : 'USD';
+    const totalEl = document.getElementById('totalLocalAmount');
+    if (totalEl) totalEl.innerHTML = `${formatNumber(amount * rate)} ${currency}`;
+}
+
+function validateAmount() {
+    if (!selectedMerchant) return false;
+    const amount = parseFloat(document.getElementById('tradeAmount').value);
+    const minLimit = selectedMerchant.minLimit || 10;
+    const maxLimit = selectedMerchant.maxLimit || 1000;
+    const balance = selectedMerchant.balance || 0;
+    const errorDiv = document.getElementById('tradeError');
+    if (!errorDiv) return false;
+    if (isNaN(amount) || amount <= 0) { errorDiv.textContent = 'Enter valid amount'; errorDiv.style.display = 'block'; return false; }
+    if (amount < minLimit) { errorDiv.textContent = `Minimum ${formatNumber(minLimit)} USDT`; errorDiv.style.display = 'block'; return false; }
+    if (amount > maxLimit) { errorDiv.textContent = `Maximum ${formatNumber(maxLimit)} USDT`; errorDiv.style.display = 'block'; return false; }
+    if (amount > balance) { errorDiv.textContent = `Only ${formatNumber(balance)} USDT available`; errorDiv.style.display = 'block'; return false; }
+    errorDiv.style.display = 'none';
+    return true;
+}
+
+async function confirmTrade() {
+    if (!currentUser) { showNotification('Please login', 'error'); window.location.href = 'login.html'; return; }
+    if (!selectedMerchant || !validateAmount()) return;
+    const amountNum = parseFloat(document.getElementById('tradeAmount').value);
+    const confirmBtn = document.getElementById('confirmTradeBtn');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Order...';
+    }
+    
+    try {
+        const rate = getMerchantRate(selectedMerchant);
+        const currency = selectedMerchant.country === 'Tanzania' ? 'TZS' : 
+                        selectedMerchant.country === 'Malawi' ? 'MWK' : 
+                        selectedMerchant.country === 'Zambia' ? 'ZMW' : 
+                        selectedMerchant.country === 'Kenya' ? 'KES' :
+                        selectedMerchant.country === 'Uganda' ? 'UGX' :
+                        selectedMerchant.country === 'Nigeria' ? 'NGN' : 'USD';
+        const totalLocal = amountNum * rate;
+        const { bankName, accountNumber, accountName } = parsePaymentDetailsFromMerchant(selectedMerchant);
+        const paymentDetailsString = `Bank: ${bankName}\nAccount: ${accountNumber}\nName: ${accountName}`;
+        
+        const merchantDisplayName = selectedMerchant.merchantName || selectedMerchant.name || selectedMerchant.email?.split('@')[0] || 'Merchant';
+        
+        const orderData = {
+            merchantId: selectedMerchant.id,
+            merchantUserId: selectedMerchant.userId,
+            merchantName: merchantDisplayName,
+            merchantPhone: selectedMerchant.phone || '',
+            merchantPaymentDetails: paymentDetailsString,
+            merchantBankName: bankName,
+            merchantAccountNumber: accountNumber,
+            merchantAccountName: accountName,
+            merchantRate: rate,
+            buyerId: currentUser.uid,
+            buyerName: currentUserData?.name || currentUser.email?.split('@')[0] || 'User',
+            buyerEmail: currentUser.email,
+            amount: amountNum,
+            rate: rate,
+            currency: currency,
+            totalLocal: totalLocal,
+            type: currentTab === 'buy' ? 'buy' : 'sell',
+            status: 'pending',
+            createdAt: db.ServerValue.TIMESTAMP,
+            createdAtMillis: Date.now()
+        };
+        
+        const ordersRef = db.ref('p2p_orders');
+        const newOrderRef = await ordersRef.push(orderData);
+        const orderId = newOrderRef.key;
+        
+        await db.ref(`merchant_orders/${selectedMerchant.userId}/${orderId}`).set({ 
+            orderId, 
+            buyerId: currentUser.uid, 
+            amount: amountNum, 
+            status: 'pending', 
+            createdAt: Date.now() 
+        });
+        
+        await addNotification(selectedMerchant.userId, 
+            '🆕 New P2P Order', 
+            `${currentUser.email} wants to ${currentTab === 'buy' ? 'buy' : 'sell'} ${formatNumber(amountNum)} USDT.`, 
+            'p2p', 
+            `p2p-chat.html?orderId=${orderId}`);
+        
+        await addNotification(currentUser.uid, 
+            '📋 P2P Order Created', 
+            `Order for ${formatNumber(amountNum)} USDT created.`, 
+            'p2p', 
+            `p2p-chat.html?orderId=${orderId}`);
+        
+        showNotification('Order created! Redirecting...', 'success');
+        closeTradeModal();
+        setTimeout(() => { window.location.href = `p2p-chat.html?orderId=${orderId}`; }, 1500);
+    } catch (error) {
+        console.error(error);
+        showNotification('Error creating order.', 'error');
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Trade';
+        }
+    }
+}
+
+const closeTradeModalBtn = document.getElementById('closeTradeModal');
+if (closeTradeModalBtn) closeTradeModalBtn.addEventListener('click', closeTradeModal);
+
+const tradeModalOverlay = document.getElementById('tradeModalOverlay');
+if (tradeModalOverlay) tradeModalOverlay.addEventListener('click', closeTradeModal);
+
+const confirmTradeBtn = document.getElementById('confirmTradeBtn');
+if (confirmTradeBtn) confirmTradeBtn.addEventListener('click', confirmTrade);
+
+const tradeAmount = document.getElementById('tradeAmount');
+if (tradeAmount) {
+    tradeAmount.addEventListener('input', () => { updateTotalAmount(); validateAmount(); });
+}
+
+document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tradeAmountEl = document.getElementById('tradeAmount');
+        if (tradeAmountEl) {
+            tradeAmountEl.value = btn.getAttribute('data-amount');
+            updateTotalAmount();
+            validateAmount();
+        }
+    });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+    initTheme();
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'login.html'; return; }
+        currentUser = user;
+        await loadUserData();
+        await loadExchangeRates();
+        fetchMarketPrices();
+        setInterval(fetchMarketPrices, 30000);
+        
+        setTimeout(initOfferCountryDropdown, 500);
+        
+        loadOffers();
+        
+        const userStatusRef = db.ref(`users/${user.uid}`);
+        await userStatusRef.update({ isOnline: true, lastSeen: Date.now() });
+        userStatusRef.onDisconnect().update({ isOnline: false, lastSeen: Date.now() });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
