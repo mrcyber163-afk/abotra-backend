@@ -540,7 +540,7 @@
   }
 
   // ============================================================
-  // DEPOSIT FUNCTIONS - FIXED: PRIORITIZE adminDeposits
+  // LOAD DEPOSITS - SINGLE NODE ONLY (deposit_requests)
   // ============================================================
   async function loadDeposits() {
     try {
@@ -551,23 +551,9 @@
       let totalApproved = 0, pending = 0, waiting = 0, approved = 0, rejected = 0;
       const depositIds = new Set();
 
-      // ✅ STEP 1: READ FROM adminDeposits (PRIMARY SOURCE)
-      const adminSnapshot = await db.ref('adminDeposits').once('value');
-      const adminDepositsMap = {};
-      
-      if (adminSnapshot.exists()) {
-        adminSnapshot.forEach(child => {
-          const d = child.val();
-          d.id = child.key;
-          d.amount = getSafeNumber(d.amount);
-          d._source = 'adminDeposits';
-          adminDepositsMap[d.id] = d;
-          depositIds.add(d.id);
-        });
-      }
-
-      // ✅ STEP 2: READ FROM deposit_requests (BINANCE) - ADD TO adminDepositsMap
+      // ✅ READ FROM deposit_requests (PRIMARY SOURCE - SINGLE NODE)
       const requestsSnapshot = await db.ref('deposit_requests').once('value');
+      
       if (requestsSnapshot.exists()) {
         requestsSnapshot.forEach(userRequests => {
           const userId = userRequests.key;
@@ -575,75 +561,33 @@
             const d = requestChild.val();
             const id = requestChild.key;
             
-            // Check if already exists in adminDeposits
-            if (adminDepositsMap[id]) {
-              // Update adminDeposits entry with missing fields
-              if (!adminDepositsMap[id].method) {
-                adminDepositsMap[id].method = 'Binance USDT';
-              }
-              if (!adminDepositsMap[id]._source) {
-                adminDepositsMap[id]._source = 'adminDeposits';
-              }
-              return;
-            }
+            if (depositIds.has(id)) return;
+            depositIds.add(id);
             
-            // New deposit from deposit_requests
             d.id = id;
             d.userId = userId;
             d.amount = getSafeNumber(d.amount);
-            d.method = 'Binance USDT';
             d._source = 'deposit_requests';
-            adminDepositsMap[id] = d;
-            depositIds.add(id);
-          });
-        });
-      }
-
-      // ✅ STEP 3: READ FROM deposits/{userId}/ - ADD MISSING ONLY
-      const depositsSnapshot = await db.ref('deposits').once('value');
-      if (depositsSnapshot.exists()) {
-        depositsSnapshot.forEach(userDeposits => {
-          const userId = userDeposits.key;
-          userDeposits.forEach(depositChild => {
-            const d = depositChild.val();
-            const id = depositChild.key;
             
-            if (!depositIds.has(id)) {
-              d.id = id;
-              d.userId = userId;
-              d.amount = getSafeNumber(d.amount);
-              d._source = 'deposits';
-              adminDepositsMap[id] = d;
-              depositIds.add(id);
+            // Set method based on data
+            if (!d.method) {
+              if (d.depositId && d.depositId.startsWith('DEP-')) {
+                d.method = 'Binance USDT';
+              } else if (d.network && d.network === 'TRC20') {
+                d.method = 'Binance USDT';
+              } else if (d.walletAddress) {
+                d.method = 'Binance USDT';
+              } else {
+                d.method = 'Mobile Money';
+              }
             }
-          });
-        });
-      }
-
-      // ✅ STEP 4: READ FROM user_deposits/{userId}/ - ADD MISSING ONLY
-      const userDepositsSnapshot = await db.ref('user_deposits').once('value');
-      if (userDepositsSnapshot.exists()) {
-        userDepositsSnapshot.forEach(userDeposits => {
-          const userId = userDeposits.key;
-          userDeposits.forEach(depositChild => {
-            const d = depositChild.val();
-            const id = depositChild.key;
             
-            if (!depositIds.has(id)) {
-              d.id = id;
-              d.userId = userId;
-              d.amount = getSafeNumber(d.amount);
-              d._source = 'user_deposits';
-              adminDepositsMap[id] = d;
-              depositIds.add(id);
-            }
+            allDeposits.push(d);
           });
         });
       }
 
-      // ✅ Convert map to array and calculate stats
-      allDeposits = Object.values(adminDepositsMap);
-
+      // Calculate stats
       allDeposits.forEach(d => {
         const status = d.status || 'pending';
         const amount = getSafeNumber(d.amount);
@@ -684,26 +628,24 @@
   }
 
   function getDepositMethodLabel(d) {
-    // Check _source first - BINANCE
-    if (d._source === 'deposit_requests') return 'Binance USDT';
-    if (d._source === 'adminDeposits' && d.method === 'Binance USDT') return 'Binance USDT';
-    
-    // Check method field
-    if (d.method === 'binance_usdt' || d.method === 'binance' || d.type === 'binance_usdt') return 'Binance USDT';
-    if (d.method === 'mobile_money' || d.method === 'mobile') return 'Mobile Money';
-    if (d.method === 'p2p' || d.method === 'user_transfer') return 'User Transfer';
-    
-    // Check if it has depositId (Binance requests always have depositId)
-    if (d.depositId && (d.depositId.startsWith('DEP-') || d._source === 'deposit_requests')) return 'Binance USDT';
-    
+    if (d._source === 'deposit_requests') {
+      if (d.depositId && d.depositId.startsWith('DEP-')) return 'Binance USDT';
+      if (d.network === 'TRC20') return 'Binance USDT';
+      if (d.walletAddress) return 'Binance USDT';
+      if (d.method === 'mobile_money' || d.method === 'mobile') return 'Mobile Money';
+      if (d.method === 'Binance USDT' || d.method === 'binance_usdt') return 'Binance USDT';
+      return d.method || 'Unknown';
+    }
     return d.method || 'Unknown';
   }
 
   function isBinanceDeposit(d) {
-    if (d._source === 'deposit_requests') return true;
-    if (d.depositId && d.depositId.startsWith('DEP-')) return true;
-    if (d.method === 'Binance USDT' || d.method === 'binance_usdt') return true;
-    if (d.network === 'TRC20' && d.walletAddress) return true;
+    if (d._source === 'deposit_requests') {
+      if (d.depositId && d.depositId.startsWith('DEP-')) return true;
+      if (d.network === 'TRC20') return true;
+      if (d.walletAddress) return true;
+      if (d.method === 'Binance USDT' || d.method === 'binance_usdt') return true;
+    }
     return false;
   }
 
@@ -772,7 +714,6 @@
       const methodLabel = getDepositMethodLabel(d);
       const amount = getSafeNumber(d.amount);
       
-      // Check if this is a Binance deposit
       const isBinance = isBinanceDeposit(d);
       const methodDisplay = isBinance ? `<span class="binance-badge"><i class="fab fa-bitcoin"></i> Binance</span>` : methodLabel;
       
@@ -780,7 +721,6 @@
       const isWaiting = d.status === 'waiting_verification';
       const rowClass = isPending || isWaiting ? 'pending-highlight' : '';
 
-      // Show Deposit ID for Binance
       const idDisplay = d.depositId || d.id || 'N/A';
       const shortId = idDisplay.length > 12 ? idDisplay.substring(0, 10) + '...' : idDisplay;
 
@@ -844,7 +784,7 @@
   };
 
   // ============================================================
-  // APPROVE, REJECT, DELETE - FIXED
+  // APPROVE, REJECT, DELETE - SINGLE NODE
   // ============================================================
   window.showApproveConfirm = async function(id) {
     const deposit = allDeposits.find(d => d.id === id || d.orderId === id || d.depositId === id);
@@ -930,7 +870,7 @@
   };
 
   // ============================================================
-  // EXECUTE APPROVE - SUPPORTS ALL PATHS
+  // EXECUTE APPROVE - SINGLE NODE (deposit_requests)
   // ============================================================
   async function executeApproveDeposit() {
     if (!pendingDepositData) return;
@@ -939,41 +879,14 @@
     const userId = deposit.userId || deposit.uid;
 
     try {
-      // ✅ 1. Update adminDeposits
-      const adminSnap = await db.ref(`adminDeposits/${deposit.id}`).once('value');
-      if (adminSnap.exists()) {
-        await db.ref(`adminDeposits/${deposit.id}`).update({
-          status: 'approved',
-          approvedAt: Date.now(),
-          approvedBy: currentAdminId
-        });
-      }
+      // ✅ Update deposit_requests
+      await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({
+        status: 'approved',
+        approvedAt: Date.now(),
+        approvedBy: currentAdminId
+      });
 
-      // ✅ 2. Update deposit_requests (Binance)
-      if (deposit._source === 'deposit_requests' && userId) {
-        await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({
-          status: 'approved',
-          approvedAt: Date.now()
-        });
-      }
-
-      // ✅ 3. Update deposits/{userId}/
-      if (userId) {
-        let userDepositRef = db.ref(`deposits/${userId}/${deposit.id}`);
-        let userDepositSnap = await userDepositRef.once('value');
-        if (userDepositSnap.exists()) {
-          await userDepositRef.update({ status: 'approved', approvedAt: Date.now() });
-        } else {
-          // Try user_deposits
-          userDepositRef = db.ref(`user_deposits/${userId}/${deposit.id}`);
-          userDepositSnap = await userDepositRef.once('value');
-          if (userDepositSnap.exists()) {
-            await userDepositRef.update({ status: 'approved', approvedAt: Date.now() });
-          }
-        }
-      }
-
-      // ✅ 4. Credit user balance
+      // ✅ Credit user balance
       if (userId) {
         const userRef = db.ref(`users/${userId}`);
         await userRef.transaction((currentData) => {
@@ -986,7 +899,7 @@
         });
       }
 
-      // ✅ 5. Send notification
+      // ✅ Send notification
       if (userId) {
         const notifRef = db.ref(`notifications/${userId}`).push();
         await notifRef.set({
@@ -1010,7 +923,7 @@
   }
 
   // ============================================================
-  // EXECUTE REJECT
+  // EXECUTE REJECT - SINGLE NODE
   // ============================================================
   async function executeRejectDeposit() {
     if (!pendingDepositData) return;
@@ -1019,27 +932,11 @@
     const userId = deposit.userId || deposit.uid;
 
     try {
-      await db.ref(`adminDeposits/${deposit.id}`).update({
+      await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({
         status: 'rejected',
         rejectedAt: Date.now(),
         rejectedBy: currentAdminId
       });
-
-      if (deposit._source === 'deposit_requests' && userId) {
-        await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({ status: 'rejected' });
-      }
-
-      if (userId) {
-        let userDepositRef = db.ref(`deposits/${userId}/${deposit.id}`);
-        let userDepositSnap = await userDepositRef.once('value');
-        if (!userDepositSnap.exists()) {
-          userDepositRef = db.ref(`user_deposits/${userId}/${deposit.id}`);
-          userDepositSnap = await userDepositRef.once('value');
-        }
-        if (userDepositSnap.exists()) {
-          await userDepositRef.update({ status: 'rejected', rejectedAt: Date.now() });
-        }
-      }
 
       if (userId) {
         const notifRef = db.ref(`notifications/${userId}`).push();
@@ -1061,7 +958,7 @@
   }
 
   // ============================================================
-  // EXECUTE DELETE
+  // EXECUTE DELETE - SINGLE NODE
   // ============================================================
   async function executeDeleteDeposit() {
     if (!pendingDepositData) return;
@@ -1069,16 +966,7 @@
     const userId = deposit.userId || deposit.uid;
 
     try {
-      await db.ref(`adminDeposits/${deposit.id}`).remove();
-      
-      if (deposit._source === 'deposit_requests' && userId) {
-        await db.ref(`deposit_requests/${userId}/${deposit.id}`).remove().catch(() => {});
-      }
-      
-      if (userId) {
-        await db.ref(`deposits/${userId}/${deposit.id}`).remove().catch(() => {});
-        await db.ref(`user_deposits/${userId}/${deposit.id}`).remove().catch(() => {});
-      }
+      await db.ref(`deposit_requests/${userId}/${deposit.id}`).remove().catch(() => {});
       showToast('Deposit deleted', 'success');
       pendingDepositData = null;
       await loadDeposits();

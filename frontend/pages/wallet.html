@@ -201,7 +201,18 @@ display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100;
 .bottom-nav a i { font-size: 16px; }
 .bottom-nav a.active { color: #FFD700; }
 
-.notification-popup { display: none !important; }
+.notification-popup {
+position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px;
+padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px;
+z-index: 99999; backdrop-filter: blur(20px); box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+animation: slideInRight 0.3s ease; border-left: 3px solid; font-size: 10px;
+}
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 
 @media(max-width: 500px) {
 .wallet-container { padding: 0 12px; margin-top: 65px; }
@@ -298,6 +309,8 @@ const auth = getAuth(app);
 let currentUser = null;
 let allTransactions = [];
 let rtdbBalanceListener = null;
+let isLoading = false;
+let loadTimeout = null;
 
 function initTheme() {
     const savedTheme = localStorage.getItem('abotra_theme');
@@ -358,12 +371,18 @@ async function loadWalletBalance() {
             return balance;
         }
         return 0;
-    } catch (error) { console.error("Error loading balance:", error); return 0; }
+    } catch (error) { 
+        console.error("Error loading balance:", error); 
+        return 0; 
+    }
 }
 
 function setupRealtimeBalance() {
     if (!currentUser) return;
-    if (rtdbBalanceListener) off(rtdbBalanceListener);
+    if (rtdbBalanceListener) {
+        off(rtdbBalanceListener);
+        rtdbBalanceListener = null;
+    }
     const userRef = ref(db, `users/${currentUser.uid}`);
     rtdbBalanceListener = onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -374,183 +393,143 @@ function setupRealtimeBalance() {
 }
 
 // ============================================================
-// LOAD TRANSACTION HISTORY - FIXED (NO DUPLICATES)
+// LOAD TRANSACTION HISTORY - SIMPLIFIED & FIXED
 // ============================================================
 async function loadTransactionHistory() {
-    if (!currentUser) return;
+    if (!currentUser || isLoading) return;
+    
+    isLoading = true;
     allTransactions = [];
     const seenIds = new Set();
 
-    // ✅ 1. Load deposit_requests (Binance) - PRIMARY SOURCE
-    const requestsRef = ref(db, `deposit_requests/${currentUser.uid}`);
-    const requestsSnapshot = await get(requestsRef);
-    if (requestsSnapshot.exists()) {
-        requestsSnapshot.forEach(child => {
-            const request = child.val();
-            const depositId = request.depositId || child.key;
-            
-            if (seenIds.has(depositId)) return;
-            seenIds.add(depositId);
+    try {
+        // ✅ 1. Load deposit_requests (Binance & Mobile Money) - PRIMARY SOURCE
+        const requestsRef = ref(db, `deposit_requests/${currentUser.uid}`);
+        const requestsSnapshot = await get(requestsRef).catch(() => null);
+        
+        if (requestsSnapshot && requestsSnapshot.exists()) {
+            requestsSnapshot.forEach(child => {
+                const request = child.val();
+                const depositId = request.depositId || request.id || child.key;
+                
+                if (seenIds.has(depositId)) return;
+                seenIds.add(depositId);
 
-            let status = request.status || 'pending';
-            let displayStatus = status;
-            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
-            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
-            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
-            else if (status === 'rejected') displayStatus = 'rejected';
-            else if (status === 'cancelled') displayStatus = 'cancelled';
-            else if (status === 'expired') displayStatus = 'expired';
+                let status = request.status || 'pending';
+                let displayStatus = status;
+                if (status === 'pending_payment' || status === 'pending_verification') displayStatus = 'pending';
+                else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
+                else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
+                else if (status === 'rejected') displayStatus = 'rejected';
+                else if (status === 'cancelled') displayStatus = 'cancelled';
+                else if (status === 'expired') displayStatus = 'expired';
 
-            allTransactions.push({
-                id: child.key,
-                type: 'deposit',
-                amount: request.amount || 0,
-                status: displayStatus,
-                timestamp: request.approvedAt || request.submittedAt || request.createdAt || Date.now(),
-                method: 'Binance USDT',
-                depositId: depositId,
-                isBinance: true,
-                _source: 'deposit_requests'
+                const timestamp = request.approvedAt || request.submittedAt || request.createdAt || Date.now();
+
+                allTransactions.push({
+                    id: child.key,
+                    type: 'deposit',
+                    amount: request.amount || 0,
+                    status: displayStatus,
+                    timestamp: timestamp,
+                    method: request.method === 'binance_usdt' || request.method === 'Binance USDT' ? 'Binance USDT' : (request.network || 'Mobile Money'),
+                    depositId: depositId,
+                    _source: 'deposit_requests'
+                });
             });
-        });
-    }
+        }
 
-    // ✅ 2. Load deposits - SKIP BINANCE ONES
-    const depositsRef = ref(db, `deposits/${currentUser.uid}`);
-    const depositsSnapshot = await get(depositsRef);
-    if (depositsSnapshot.exists()) {
-        depositsSnapshot.forEach(child => {
-            const deposit = child.val();
-            const depositId = deposit.depositId || deposit.id || child.key;
-            
-            if (seenIds.has(depositId)) return;
-            
-            if (deposit.method === 'binance_usdt' || deposit.method === 'Binance USDT' || 
-                (deposit.depositId && deposit.depositId.startsWith('DEP-'))) {
-                return;
-            }
-            
-            seenIds.add(depositId);
+        // ✅ 2. Load withdrawals
+        const withdrawalsRef = ref(db, `withdrawals/${currentUser.uid}`);
+        const withdrawalsSnapshot = await get(withdrawalsRef).catch(() => null);
+        
+        if (withdrawalsSnapshot && withdrawalsSnapshot.exists()) {
+            withdrawalsSnapshot.forEach(child => {
+                const withdrawal = child.val();
+                const id = child.key;
+                
+                if (seenIds.has(id)) return;
+                seenIds.add(id);
 
-            let status = deposit.status || 'pending';
-            let displayStatus = status;
-            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
-            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
-            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
-            else if (status === 'rejected') displayStatus = 'rejected';
-            else if (status === 'cancelled') displayStatus = 'cancelled';
-            else if (status === 'expired') displayStatus = 'expired';
-
-            allTransactions.push({
-                id: child.key,
-                type: 'deposit',
-                amount: deposit.amount || 0,
-                status: displayStatus,
-                timestamp: deposit.approvedAt || deposit.createdAt || Date.now(),
-                method: deposit.method || 'Deposit',
-                depositId: depositId,
-                _source: 'deposits'
+                allTransactions.push({
+                    id: id,
+                    type: 'withdraw',
+                    amount: withdrawal.amount || 0,
+                    status: withdrawal.status || 'pending',
+                    timestamp: withdrawal.createdAt || Date.now(),
+                    method: withdrawal.method || 'Withdrawal',
+                    _source: 'withdrawals'
+                });
             });
-        });
-    }
+        }
 
-    // ✅ 3. Load user_deposits - SKIP BINANCE ONES
-    const userDepositsRef = ref(db, `user_deposits/${currentUser.uid}`);
-    const userDepositsSnapshot = await get(userDepositsRef);
-    if (userDepositsSnapshot.exists()) {
-        userDepositsSnapshot.forEach(child => {
-            const deposit = child.val();
-            const depositId = deposit.depositId || deposit.id || child.key;
-            
-            if (seenIds.has(depositId)) return;
-            if (deposit.method === 'binance_usdt' || deposit.method === 'Binance USDT') return;
-            
-            seenIds.add(depositId);
+        // ✅ 3. Load transfers received
+        const receivedRef = ref(db, `transfers/received/${currentUser.uid}`);
+        const receivedSnapshot = await get(receivedRef).catch(() => null);
+        
+        if (receivedSnapshot && receivedSnapshot.exists()) {
+            receivedSnapshot.forEach(child => {
+                const transfer = child.val();
+                const id = child.key;
+                
+                if (seenIds.has(id)) return;
+                seenIds.add(id);
 
-            let status = deposit.status || 'pending';
-            let displayStatus = status;
-            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
-            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
-            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
-            else if (status === 'rejected') displayStatus = 'rejected';
-            else if (status === 'cancelled') displayStatus = 'cancelled';
-            else if (status === 'expired') displayStatus = 'expired';
-
-            allTransactions.push({
-                id: child.key,
-                type: 'deposit',
-                amount: deposit.amount || 0,
-                status: displayStatus,
-                timestamp: deposit.approvedAt || deposit.createdAt || Date.now(),
-                method: deposit.method || 'Deposit',
-                depositId: depositId,
-                _source: 'user_deposits'
+                allTransactions.push({
+                    id: id,
+                    type: 'transfer_received',
+                    amount: transfer.amount || 0,
+                    sender: transfer.senderEmail,
+                    status: 'completed',
+                    timestamp: transfer.timestamp || Date.now(),
+                    _source: 'transfers/received'
+                });
             });
-        });
-    }
+        }
 
-    // ✅ 4. Load withdrawals
-    const withdrawalsRef = ref(db, `withdrawals/${currentUser.uid}`);
-    const withdrawalsSnapshot = await get(withdrawalsRef);
-    if (withdrawalsSnapshot.exists()) {
-        withdrawalsSnapshot.forEach(child => {
-            const withdrawal = child.val();
-            allTransactions.push({
-                id: child.key,
-                type: 'withdraw',
-                amount: withdrawal.amount || 0,
-                status: withdrawal.status || 'pending',
-                timestamp: withdrawal.createdAt || Date.now(),
-                method: withdrawal.method || 'Withdrawal'
+        // ✅ 4. Load transfers sent
+        const sentRef = ref(db, `transfers/sent/${currentUser.uid}`);
+        const sentSnapshot = await get(sentRef).catch(() => null);
+        
+        if (sentSnapshot && sentSnapshot.exists()) {
+            sentSnapshot.forEach(child => {
+                const transfer = child.val();
+                const id = child.key;
+                
+                if (seenIds.has(id)) return;
+                seenIds.add(id);
+
+                allTransactions.push({
+                    id: id,
+                    type: 'transfer_sent',
+                    amount: transfer.amount || 0,
+                    recipient: transfer.recipientEmail,
+                    status: transfer.status || 'completed',
+                    timestamp: transfer.timestamp || Date.now(),
+                    _source: 'transfers/sent'
+                });
             });
-        });
-    }
+        }
 
-    // ✅ 5. Load transfers received
-    const receivedRef = ref(db, `transfers/received/${currentUser.uid}`);
-    const receivedSnapshot = await get(receivedRef);
-    if (receivedSnapshot.exists()) {
-        receivedSnapshot.forEach(child => {
-            const transfer = child.val();
-            allTransactions.push({
-                id: child.key,
-                type: 'transfer_received',
-                amount: transfer.amount || 0,
-                sender: transfer.senderEmail,
-                status: 'completed',
-                timestamp: transfer.timestamp || Date.now()
-            });
-        });
+        // ✅ Sort by timestamp (newest first)
+        allTransactions.sort((a, b) => b.timestamp - a.timestamp);
+        
+        renderHistory();
+        
+    } catch (error) {
+        console.error('Error loading history:', error);
+    } finally {
+        isLoading = false;
     }
-
-    // ✅ 6. Load transfers sent
-    const sentRef = ref(db, `transfers/sent/${currentUser.uid}`);
-    const sentSnapshot = await get(sentRef);
-    if (sentSnapshot.exists()) {
-        sentSnapshot.forEach(child => {
-            const transfer = child.val();
-            allTransactions.push({
-                id: child.key,
-                type: 'transfer_sent',
-                amount: transfer.amount || 0,
-                recipient: transfer.recipientEmail,
-                status: transfer.status || 'completed',
-                timestamp: transfer.timestamp || Date.now()
-            });
-        });
-    }
-
-    // Sort by timestamp (newest first)
-    allTransactions.sort((a, b) => b.timestamp - a.timestamp);
-    renderHistory();
 }
 
 function getStatusDisplay(status) {
     const statusMap = {
         'pending': { label: 'Pending', class: 'status-pending' },
+        'pending_payment': { label: 'Pending Payment', class: 'status-pending' },
         'pending_verification': { label: 'Pending', class: 'status-pending' },
-        'pending_payment': { label: 'Pending', class: 'status-pending' },
         'waiting_verification': { label: 'Waiting Verification', class: 'status-waiting' },
+        'waiting': { label: 'Waiting Verification', class: 'status-waiting' },
         'approved': { label: 'Approved ✓', class: 'status-approved' },
         'completed': { label: 'Completed ✓', class: 'status-completed' },
         'verified': { label: 'Verified ✓', class: 'status-approved' },
@@ -568,8 +547,12 @@ function renderHistory() {
         container.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No transactions yet</p></div>`;
         return;
     }
+    
     container.innerHTML = '';
-    allTransactions.slice(0, 50).forEach(tx => {
+    const displayCount = Math.min(allTransactions.length, 50);
+    
+    for (let i = 0; i < displayCount; i++) {
+        const tx = allTransactions[i];
         const isPositive = tx.type === 'deposit' || tx.type === 'transfer_received';
         const amountClass = isPositive ? 'positive' : 'negative';
         const amountPrefix = isPositive ? '+' : '-';
@@ -582,15 +565,15 @@ function renderHistory() {
                 break;
             case 'withdraw': 
                 typeIcon = '<i class="fas fa-arrow-up" style="color:#F6465D;"></i>'; 
-                typeText = 'Withdrawal';
+                typeText = tx.method || 'Withdrawal';
                 break;
             case 'transfer_received': 
                 typeIcon = '<i class="fas fa-exchange-alt" style="color:#0ECB81;"></i>'; 
-                typeText = `Received from ${tx.sender ? tx.sender.split('@')[0] : 'User'}`;
+                typeText = tx.sender ? `Received from ${tx.sender.split('@')[0]}` : 'Transfer Received';
                 break;
             case 'transfer_sent': 
                 typeIcon = '<i class="fas fa-exchange-alt" style="color:#F6465D;"></i>'; 
-                typeText = `Sent to ${tx.recipient ? tx.recipient.split('@')[0] : 'User'}`;
+                typeText = tx.recipient ? `Sent to ${tx.recipient.split('@')[0]}` : 'Transfer Sent';
                 break;
             default: 
                 typeIcon = '<i class="fas fa-receipt"></i>'; 
@@ -615,7 +598,14 @@ function renderHistory() {
             </div>
         `;
         container.appendChild(txCard);
-    });
+    }
+    
+    if (allTransactions.length > 50) {
+        const more = document.createElement('div');
+        more.style.cssText = 'text-align:center;padding:12px 0;color:#888;font-size:10px;';
+        more.textContent = `Showing 50 of ${allTransactions.length} transactions`;
+        container.appendChild(more);
+    }
 }
 
 async function findUserByEmail(email) {
@@ -631,10 +621,13 @@ async function findUserByEmail(email) {
                     found = { uid: child.key, email: user.email, balance: user.balance || 0 };
                 }
             });
-            if (found) return found;
+            return found;
         }
         return null;
-    } catch (error) { console.error("Error finding user:", error); return null; }
+    } catch (error) { 
+        console.error("Error finding user:", error); 
+        return null; 
+    }
 }
 
 async function sendTransfer() {
@@ -656,7 +649,12 @@ async function sendTransfer() {
     
     try {
         const recipient = await findUserByEmail(recipientEmail);
-        if (!recipient) { showNotification(`User "${recipientEmail}" not found`, 'error'); transferBtn.disabled = false; transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; return; }
+        if (!recipient) { 
+            showNotification(`User "${recipientEmail}" not found`, 'error'); 
+            transferBtn.disabled = false; 
+            transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+            return; 
+        }
         
         const senderRef = ref(db, `users/${currentUser.uid}`);
         const recipientRef = ref(db, `users/${recipient.uid}`);
@@ -665,16 +663,27 @@ async function sendTransfer() {
         const senderBalance = senderSnap.exists() ? (senderSnap.val().balance || 0) : 0;
         const recipientBalance = recipientSnap.exists() ? (recipientSnap.val().balance || 0) : 0;
         
-        if (senderBalance < amount) { showNotification('Insufficient balance', 'error'); transferBtn.disabled = false; transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; return; }
+        if (senderBalance < amount) { 
+            showNotification('Insufficient balance', 'error'); 
+            transferBtn.disabled = false; 
+            transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+            return; 
+        }
         
         await update(senderRef, { balance: senderBalance - amount });
         await update(recipientRef, { balance: recipientBalance + amount });
         
         const transferId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
         const transferData = {
-            id: transferId, amount: amount, senderId: currentUser.uid, senderEmail: currentUser.email,
-            recipientId: recipient.uid, recipientEmail: recipient.email, note: note || '',
-            timestamp: Date.now(), status: 'completed'
+            id: transferId, 
+            amount: amount, 
+            senderId: currentUser.uid, 
+            senderEmail: currentUser.email,
+            recipientId: recipient.uid, 
+            recipientEmail: recipient.email, 
+            note: note || '',
+            timestamp: Date.now(), 
+            status: 'completed'
         };
         
         await set(ref(db, `transfers/sent/${currentUser.uid}/${transferId}`), transferData);
@@ -696,32 +705,54 @@ async function sendTransfer() {
         document.getElementById('transferEmail').value = '';
         document.getElementById('transferAmount').value = '';
         document.getElementById('transferNote').value = '';
+        
+        // Reload history
         await loadTransactionHistory();
         
-    } catch (error) { console.error("Transfer error:", error); showNotification('Error processing transfer', 'error'); } 
-    finally { transferBtn.disabled = false; transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; }
+    } catch (error) { 
+        console.error("Transfer error:", error); 
+        showNotification('Error processing transfer', 'error'); 
+    } finally { 
+        transferBtn.disabled = false; 
+        transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Transfer'; 
+    }
 }
 
 document.getElementById('transferBtn').addEventListener('click', sendTransfer);
 
+// ============================================================
+// INIT
+// ============================================================
 async function init() {
     initTheme();
+    
     onAuthStateChanged(auth, async (user) => {
-        if (!user) { window.location.href = 'login.html'; return; }
+        if (!user) { 
+            window.location.href = 'login.html'; 
+            return; 
+        }
         currentUser = user;
+        
+        // Show skeleton
         document.getElementById('skeletonContainer').style.display = 'block';
         document.getElementById('realContent').style.display = 'none';
+        
+        // Load data
         await loadWalletBalance();
         setupRealtimeBalance();
         await loadTransactionHistory();
+        
+        // Show content
         setTimeout(() => {
             document.getElementById('skeletonContainer').style.display = 'none';
             document.getElementById('realContent').style.display = 'block';
-        }, 1500);
-        setInterval(loadTransactionHistory, 30000);
+        }, 800);
     });
 }
+
 init();
+
+console.log('[WALLET] ✅ Page loaded - Optimized history loading');
 </script>
 </body>
 </html>

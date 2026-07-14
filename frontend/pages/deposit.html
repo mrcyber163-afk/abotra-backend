@@ -201,7 +201,6 @@ body.light-theme .country-selector-trigger .selected-display .code { color: #999
 
 .auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
 
-/* KYC Button - Small and styled like a button */
 .kyc-action-btn {
     display: inline-flex;
     align-items: center;
@@ -246,7 +245,6 @@ body.light-theme .country-selector-trigger .selected-display .code { color: #999
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Payment Request Card */
 .payment-request-card {
     background: rgba(255,255,255,0.03);
     border: 2px solid rgba(255,215,0,0.2);
@@ -723,9 +721,6 @@ color: #0ECB81;
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 @media(max-width: 700px) { .main-content { padding: 0 12px; margin-top: 65px; } .page-title { font-size: 18px; } .tab-btn span { display: none; } .tab-btn { padding: 8px; min-width: 60px; font-size: 9px; } .bottom-nav a span { font-size: 6px; } .bottom-nav a i { font-size: 14px; } .networks-grid { grid-template-columns: 1fr; } .buy-usdt-btn { padding: 12px; font-size: 12px; } .wallet-address-box { flex-direction: column; align-items: stretch; } .wallet-address-box .copy-btn { align-self: flex-end; } .tab-btn .tab-label { display: none; } .deposit-steps { flex-wrap: wrap; gap: 8px; } .deposit-steps::before { display: none; } .deposit-step { flex: 0 0 45%; } .binance-account-info { flex-direction: column; align-items: stretch; } .payment-request-card .action-buttons .btn { min-width: 80px; font-size: 9px; padding: 8px 12px; } }
-/* ============================================================
-   CUSTOM CANCEL MODAL - BEAUTIFUL DESIGN
-   ============================================================ */
 .cancel-modal-overlay {
     position: fixed;
     top: 0;
@@ -784,7 +779,6 @@ body.light-theme .cancel-modal-card::before {
     background: radial-gradient(ellipse at 30% 20%, rgba(128, 0, 0, 0.03) 0%, transparent 60%);
 }
 
-/* Close button */
 .cancel-modal-close {
     position: absolute;
     top: 12px;
@@ -817,7 +811,6 @@ body.light-theme .cancel-modal-close:hover {
     color: #F6465D;
 }
 
-/* Icon */
 .cancel-modal-icon {
     width: 72px;
     height: 72px;
@@ -841,7 +834,6 @@ body.light-theme .cancel-modal-close:hover {
     filter: drop-shadow(0 0 10px rgba(246, 70, 93, 0.2));
 }
 
-/* Title */
 .cancel-modal-title {
     text-align: center;
     color: #FFFFFF;
@@ -854,7 +846,6 @@ body.light-theme .cancel-modal-title {
     color: #1a1a1a;
 }
 
-/* Subtitle */
 .cancel-modal-subtitle {
     text-align: center;
     color: #aaa;
@@ -867,7 +858,6 @@ body.light-theme .cancel-modal-subtitle {
     color: #666;
 }
 
-/* Warning box */
 .cancel-modal-warning {
     background: rgba(246, 70, 93, 0.08);
     border: 1px solid rgba(246, 70, 93, 0.15);
@@ -892,7 +882,6 @@ body.light-theme .cancel-modal-warning {
     background: rgba(246, 70, 93, 0.06);
 }
 
-/* Deposit details box */
 .cancel-modal-details {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 14px;
@@ -926,7 +915,6 @@ body.light-theme .cancel-modal-details .detail-value {
     color: #800000;
 }
 
-/* Buttons */
 .cancel-modal-buttons {
     display: flex;
     gap: 10px;
@@ -948,7 +936,6 @@ body.light-theme .cancel-modal-details .detail-value {
     overflow: hidden;
 }
 
-/* Keep button (cancel action) */
 .cancel-modal-btn.keep {
     background: rgba(255, 255, 255, 0.06);
     color: #ccc;
@@ -968,7 +955,6 @@ body.light-theme .cancel-modal-btn.keep:hover {
     background: rgba(0, 0, 0, 0.08);
 }
 
-/* Cancel button (confirm delete) */
 .cancel-modal-btn.confirm-cancel {
     background: linear-gradient(135deg, #F6465D, #D43F52);
     color: white;
@@ -982,7 +968,6 @@ body.light-theme .cancel-modal-btn.keep:hover {
     transform: scale(0.97);
 }
 
-/* Loading state for buttons */
 .cancel-modal-btn.loading {
     pointer-events: none;
     opacity: 0.7;
@@ -1000,7 +985,6 @@ body.light-theme .cancel-modal-btn.keep:hover {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
 @media(max-width: 480px) {
     .cancel-modal-card {
         padding: 24px 18px 20px;
@@ -1089,7 +1073,6 @@ body.light-theme .cancel-modal-btn.keep:hover {
     <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
 </button>
 <div class="auto-payment-note"><i class="fas fa-info-circle"></i> Select your country and payment network below.</div>
-<!-- KYC Button for Mobile Tab -->
 <div style="margin-top: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
     <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
     <button class="kyc-action-btn" id="mobileKycBtn" onclick="window.location.href='kyc.html'">
@@ -1126,7 +1109,7 @@ body.light-theme .cancel-modal-btn.keep:hover {
 </div>
 
 <!-- ============================================================ -->
-<!-- BINANCE USDT TAB - FIXED (NO DUPLICATE) -->
+<!-- BINANCE USDT TAB - FIXED (SINGLE NODE ONLY) -->
 <!-- ============================================================ -->
 <div id="binanceTab" class="deposit-container" style="display:none;">
 <div class="wallet-card" style="position:relative;">
@@ -1275,7 +1258,6 @@ body.light-theme .cancel-modal-btn.keep:hover {
 <div id="p2pTab" class="deposit-container" style="display:none;">
 <div class="wallet-card">
 <div class="wallet-title"><i class="fas fa-users"></i> Transfer USDT from Another User</div>
-<!-- KYC Button for P2P Tab -->
 <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
     <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
     <button class="kyc-action-btn" id="p2pKycBtn" onclick="window.location.href='kyc.html'">
@@ -1332,7 +1314,7 @@ const auth = getAuth(app);
 // ============================================================
 const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
 const MIN_DEPOSIT_USDT = 10;
-const ORDER_EXPIRY_MINUTES = 120; // 2 hours
+const ORDER_EXPIRY_MINUTES = 120;
 
 // ============================================================
 // STATE
@@ -1379,10 +1361,7 @@ const DEFAULT_EXCHANGE_RATES = {
 // ============================================================
 function generateDepositId() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `${year}${month}${day}`;
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
     const random = String(Math.floor(1000 + Math.random() * 9000));
     return `DEP-${dateStr}-${random}`;
 }
@@ -1521,7 +1500,6 @@ function updateKYCUI() {
     const fullName = getKycFullName(currentKycData);
     const email = currentUser?.email || 'No email';
     
-    // Update Binance KYC
     document.getElementById('userDisplayName').textContent = fullName;
     document.getElementById('userDisplayEmail').textContent = email;
     const badge = document.getElementById('kycStatusBadge');
@@ -1533,7 +1511,6 @@ function updateKYCUI() {
     document.getElementById('usdtAmount').disabled = !isVerified;
     document.getElementById('generatePaymentRequestBtn').disabled = !isVerified;
     
-    // Update KYC buttons in ALL tabs
     const kycBtns = document.querySelectorAll('.kyc-action-btn');
     kycBtns.forEach(btn => {
         btn.className = `kyc-action-btn ${kycStatus.class}`;
@@ -1779,7 +1756,7 @@ function updateRateDisplay() {
 }
 
 // ============================================================
-// MOBILE MONEY DEPOSIT
+// MOBILE MONEY DEPOSIT - FIXED (SINGLE NODE)
 // ============================================================
 async function processMobileDeposit() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
@@ -1828,22 +1805,15 @@ async function processMobileDeposit() {
             transactionId: transactionId || 'N/A',
             status: 'pending',
             createdAt: Date.now(),
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            _source: 'deposit_request'
         };
 
-        const depositRef = ref(db, `deposits/${currentUser.uid}/${depositId}`);
-        await set(depositRef, depositData);
-
-        const userDepositRef = ref(db, `user_deposits/${currentUser.uid}/${depositId}`);
-        await set(userDepositRef, depositData);
-
-        const adminDepositRef = ref(db, `adminDeposits/${depositId}`);
-        await set(adminDepositRef, {
-            ...depositData,
-            adminRead: false,
-            adminCreatedAt: Date.now()
-        });
-
+        // ✅ SINGLE NODE ONLY - deposit_requests
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${depositId}`);
+        await set(requestRef, depositData);
+        
+        // Send notifications
         await addNotification(currentUser.uid, 
             '📱 Mobile Deposit Submitted', 
             `Your mobile deposit of $${amount.toFixed(2)} has been submitted. Admin will verify within 24 hours.`, 
@@ -1854,6 +1824,7 @@ async function processMobileDeposit() {
         
         showNotification('✅ Mobile deposit submitted successfully! Please wait for admin verification.', 'success');
         
+        // Reset form
         document.getElementById('mobileAmount').value = '';
         document.getElementById('senderPhone').value = '';
         document.getElementById('senderName').value = '';
@@ -1874,32 +1845,26 @@ async function processMobileDeposit() {
 }
 
 // ============================================================
-// BINANCE PAYMENT REQUEST SYSTEM - FIXED (NO DUPLICATE)
+// BINANCE PAYMENT REQUEST - FIXED (SINGLE NODE ONLY)
 // ============================================================
 
-// Generate unique Deposit ID
 function generateUniqueDepositId() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `${year}${month}${day}`;
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
     const random = String(Math.floor(1000 + Math.random() * 9000));
     return `DEP-${dateStr}-${random}`;
 }
 
-// Generate QR Code URL (using API)
 function generateQRCode(data, size = 200) {
     return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
 }
 
-// Create Binance Pay payment link
 function createBinancePayLink(address, amount, memo) {
     return `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
 }
 
 // ============================================================
-// STEP 1: Generate Payment Request - FIXED (NO DUPLICATE)
+// STEP 1: Generate Payment Request - FIXED (SINGLE NODE)
 // ============================================================
 async function generatePaymentRequest() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
@@ -1944,32 +1909,18 @@ async function generatePaymentRequest() {
             txHash: null,
             submittedAt: null,
             approvedAt: null,
-            _source: 'deposit_requests'
+            _source: 'deposit_request'
         };
         
-        // ✅ 1. Save to deposit_requests (PRIMARY SOURCE)
+        // ✅ SINGLE NODE ONLY - deposit_requests
         const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${depositId}`);
         await set(requestRef, paymentData);
-        
-        // ✅ 2. Save to adminDeposits for admin panel
-        const adminRef = ref(db, `adminDeposits/${depositId}`);
-        await set(adminRef, {
-            ...paymentData,
-            adminRead: false,
-            adminCreatedAt: Date.now()
-        });
-        
-        // ❌ REMOVED: Saving to deposits/{userId}/ to avoid duplicates
-        // const depositRef = ref(db, `deposits/${currentUser.uid}/${depositId}`);
-        // await set(depositRef, { ... });
         
         currentDepositId = depositId;
         currentPaymentRequest = paymentData;
         
         // Display payment request
         displayPaymentRequest(paymentData);
-        
-        // Update steps
         updateStep(2);
         
         showNotification('✅ Payment request generated successfully!', 'success');
@@ -1988,31 +1939,23 @@ async function generatePaymentRequest() {
 // STEP 2: Display Payment Request
 // ============================================================
 function displayPaymentRequest(data) {
-    // Hide step 1, show payment request
     document.getElementById('binanceStep1').style.display = 'none';
     document.getElementById('paymentRequestDisplay').style.display = 'block';
     document.getElementById('waitingVerificationDisplay').style.display = 'none';
     document.getElementById('approvedDisplay').style.display = 'none';
     
-    // Fill data
     document.getElementById('displayDepositId').textContent = data.depositId;
     document.getElementById('displayAmount').textContent = `$${data.amount.toFixed(2)}`;
     document.getElementById('displayWalletAddress').textContent = data.walletAddress;
     
-    // Show QR Code
     const qrImg = document.getElementById('qrCodeImage');
     const qrPlaceholder = document.getElementById('qrPlaceholder');
     qrImg.src = data.qrCode;
     qrImg.style.display = 'block';
     qrPlaceholder.style.display = 'none';
     
-    // Start expiry countdown
     startExpiryCountdown(data.expiresAt);
-    
-    // Update status badge
     updateStatusBadge('pending');
-    
-    // Update steps
     updateStep(2);
 }
 
@@ -2036,13 +1979,6 @@ async function submitForVerification() {
             status: 'waiting_verification',
             submittedAt: Date.now(),
             submittedAtISO: new Date().toISOString()
-        });
-        
-        // Update admin deposits
-        const adminRef = ref(db, `adminDeposits/${currentDepositId}`);
-        await update(adminRef, {
-            status: 'waiting_verification',
-            submittedAt: Date.now()
         });
         
         // Send notifications
@@ -2074,7 +2010,7 @@ async function submitForVerification() {
 }
 
 // ============================================================
-// CANCEL PAYMENT REQUEST - WITH BEAUTIFUL POPUP
+// CANCEL PAYMENT REQUEST
 // ============================================================
 function showCancelModal() {
     return new Promise((resolve) => {
@@ -2083,15 +2019,12 @@ function showCancelModal() {
         const keepBtn = document.getElementById('cancelKeepBtn');
         const confirmBtn = document.getElementById('cancelConfirmBtn');
         
-        // Fill details
         document.getElementById('cancelDepositId').textContent = currentDepositId || '---';
         document.getElementById('cancelAmount').textContent = `$${currentPaymentRequest?.amount?.toFixed(2) || '0.00'}`;
         
-        // Show modal
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // Cleanup function
         const cleanup = (result) => {
             overlay.classList.remove('active');
             document.body.style.overflow = '';
@@ -2102,30 +2035,22 @@ function showCancelModal() {
             resolve(result);
         };
         
-        // Event handlers
         const onClose = () => cleanup(false);
         const onKeep = () => cleanup(false);
         const onConfirm = () => {
-            // Add loading state
             confirmBtn.classList.add('loading');
             confirmBtn.innerHTML = '<span class="spinner"></span> Cancelling...';
-            
-            // Execute cancellation after short delay for UX
-            setTimeout(() => {
-                cleanup(true);
-            }, 800);
+            setTimeout(() => { cleanup(true); }, 800);
         };
         const onOverlayClick = (e) => {
             if (e.target === overlay) cleanup(false);
         };
         
-        // Add event listeners
         closeBtn.addEventListener('click', onClose);
         keepBtn.addEventListener('click', onKeep);
         confirmBtn.addEventListener('click', onConfirm);
         overlay.addEventListener('click', onOverlayClick);
         
-        // Keyboard support (Escape to close)
         const onKeydown = (e) => {
             if (e.key === 'Escape') {
                 cleanup(false);
@@ -2142,7 +2067,6 @@ async function cancelPaymentRequest() {
         return;
     }
     
-    // Show beautiful cancel modal
     const confirmed = await showCancelModal();
     
     if (confirmed) {
@@ -2150,17 +2074,11 @@ async function cancelPaymentRequest() {
             const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
             await update(requestRef, { status: 'cancelled' });
             
-            // Update admin deposits
-            const adminRef = ref(db, `adminDeposits/${currentDepositId}`);
-            await update(adminRef, { status: 'cancelled' });
-            
-            // Send notification
             await addNotification(currentUser.uid, 
                 '❌ Payment Request Cancelled', 
                 `Your payment request of $${currentPaymentRequest?.amount?.toFixed(2) || '0.00'} has been cancelled.`, 
                 'info');
             
-            // Reset UI
             resetPaymentFlow();
             showNotification('✅ Payment request cancelled successfully', 'info');
             
@@ -2251,11 +2169,9 @@ function resetPaymentFlow() {
     document.getElementById('waitingVerificationDisplay').style.display = 'none';
     document.getElementById('approvedDisplay').style.display = 'none';
     
-    // Reset QR
     document.getElementById('qrCodeImage').style.display = 'none';
     document.getElementById('qrPlaceholder').style.display = 'block';
     
-    // Reset button
     const genBtn = document.getElementById('generatePaymentRequestBtn');
     genBtn.disabled = false;
     genBtn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Payment Request';
@@ -2264,7 +2180,6 @@ function resetPaymentFlow() {
     paidBtn.disabled = false;
     paidBtn.innerHTML = '<i class="fas fa-check-circle"></i> I Have Paid';
     
-    // Reset amount
     document.getElementById('usdtAmount').value = '';
     
     updateStep(1);
@@ -2281,10 +2196,8 @@ function listenForApproval(userId, depositId) {
         
         const data = snapshot.val();
         
-        // If approved, update balance and show success
         if (data.status === 'approved' && !data._balanceUpdated) {
             await processApproval(userId, data);
-            // Mark as processed to avoid double processing
             await update(requestRef, { _balanceUpdated: true });
         }
     });
@@ -2292,7 +2205,6 @@ function listenForApproval(userId, depositId) {
 
 async function processApproval(userId, data) {
     try {
-        // Update user balance using transaction
         const userRef = ref(db, `users/${userId}`);
         await runTransaction(userRef, (current) => {
             if (current) {
@@ -2303,7 +2215,6 @@ async function processApproval(userId, data) {
             return current;
         });
         
-        // Add transaction record
         const txRef = push(ref(db, `transactions/${userId}`));
         await set(txRef, {
             type: 'deposit',
@@ -2315,7 +2226,6 @@ async function processApproval(userId, data) {
             timestamp: Date.now()
         });
         
-        // Show approved UI
         document.getElementById('waitingVerificationDisplay').style.display = 'none';
         document.getElementById('approvedDisplay').style.display = 'block';
         document.getElementById('approvedAmount').textContent = `$${data.amount.toFixed(2)}`;
@@ -2330,33 +2240,28 @@ async function processApproval(userId, data) {
 }
 
 // ============================================================
-// OPEN BINANCE - FIXED FOR MOBILE & DESKTOP
+// OPEN BINANCE
 // ============================================================
 function openBinanceApp() {
     const amount = currentPaymentRequest?.amount || 0;
     const memo = currentDepositId || '';
     const address = BINANCE_WALLET_ADDRESS;
     
-    // Check if on mobile
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
     
-    // Copy address as backup
     navigator.clipboard.writeText(address).catch(() => {});
     
     if (isMobile) {
-        // Try to open Binance App
         const appLink = `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
         window.location.href = appLink;
         
         showNotification('📱 Opening Binance App... If not installed, download from Play Store/App Store.', 'info');
         
-        // Fallback to web after 3 seconds if app doesn't open
         setTimeout(() => {
             const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
             window.open(webLink, '_blank');
         }, 3000);
     } else {
-        // Desktop - open web version
         const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
         window.open(webLink, '_blank');
         showNotification('📋 Address copied! Visit Binance Pay to complete payment.', 'info');
@@ -2415,7 +2320,6 @@ document.getElementById('countryModal').addEventListener('click', (e) => {
 document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
 document.getElementById('mobileAmount').addEventListener('input', updateRateDisplay);
 
-// Binance Payment Request Events
 document.getElementById('generatePaymentRequestBtn').addEventListener('click', generatePaymentRequest);
 document.getElementById('iHavePaidBtn').addEventListener('click', submitForVerification);
 document.getElementById('cancelPaymentBtn').addEventListener('click', cancelPaymentRequest);
@@ -2426,7 +2330,6 @@ document.getElementById('copyAddressBtn').addEventListener('click', () => {
 });
 document.getElementById('openBinanceBtn').addEventListener('click', openBinanceApp);
 
-// Dashboard navigation
 document.getElementById('backToDashboardBtn')?.addEventListener('click', () => {
     window.location.href = 'dashboard.html';
 });
@@ -2505,12 +2408,10 @@ onAuthStateChanged(auth, async (user) => {
 
 initTheme();
 
-console.log('[DEPOSIT] ✅ Page loaded - NO DUPLICATE Binance entries');
+console.log('[DEPOSIT] ✅ Page loaded - SINGLE NODE ONLY');
 </script>
 
-<!-- ============================================================
-     CANCEL MODAL - BEAUTIFUL POPUP
-     ============================================================ -->
+<!-- CANCEL MODAL -->
 <div class="cancel-modal-overlay" id="cancelModalOverlay">
     <div class="cancel-modal-card">
         <button class="cancel-modal-close" id="cancelModalClose">

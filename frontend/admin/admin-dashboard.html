@@ -211,8 +211,8 @@ function setupAdminNotificationListener() {
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background: #050505; background-image: url("../../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
-body.light-theme { background: #f5f5f5; background-image: url("../../assets/images/background-light.png"); }
+body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); }
 body.light-theme .admin-header, body.light-theme .sidebar, body.light-theme .section-card, body.light-theme .stat-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); }
 body.light-theme .admin-header h2, body.light-theme .page-title, body.light-theme .section-title, body.light-theme .stat-value { color: #800000; }
 body.light-theme .nav-item { color: #555; }
@@ -406,7 +406,7 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
     <div class="header-left">
         <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
         <div class="logo-area">
-            <img src="../../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
             <div><h2>ABOTRA-PROAI</h2><p>Admin Dashboard</p></div>
         </div>
     </div>
@@ -815,7 +815,6 @@ function loadAdminNotifications() {
             const typeInfo = getNotificationType(notif.type);
             const item = document.createElement('div');
             item.className = `notification-item ${isUnread ? 'unread' : ''}`;
-            // Fix: Use correct path for navigation
             const pageLink = typeInfo.page ? `admin-${typeInfo.page}` : 'admin-dashboard.html';
             item.innerHTML = `
                 <div class="notification-icon-small" style="background:${typeInfo.color}22;">
@@ -1057,25 +1056,27 @@ async function loadStats() {
         document.getElementById('totalUsers').textContent = totalUsers;
         document.getElementById('totalBalance').innerHTML = `$${totalBalance.toFixed(2)}`;
 
-        // Deposits
-        const depositsSnap = await db.ref('adminDeposits').once('value');
+        // Deposits - Read from deposit_requests (primary source)
+        const depositRequestsSnap = await db.ref('deposit_requests').once('value');
         let totalDeposits = 0;
         let pendingDeposits = 0;
-        if (depositsSnap.exists()) {
-            depositsSnap.forEach(child => {
-                const dep = child.val();
-                const amount = getSafeNumber(dep.amount);
-                if (dep.status === 'approved' || dep.status === 'completed' || dep.status === 'verified') {
-                    totalDeposits += amount;
-                } else if (dep.status === 'pending') {
-                    pendingDeposits++;
-                }
+        if (depositRequestsSnap.exists()) {
+            depositRequestsSnap.forEach(userRequests => {
+                userRequests.forEach(requestChild => {
+                    const dep = requestChild.val();
+                    const amount = getSafeNumber(dep.amount);
+                    if (dep.status === 'approved' || dep.status === 'completed' || dep.status === 'verified') {
+                        totalDeposits += amount;
+                    } else if (dep.status === 'pending' || dep.status === 'pending_verification' || dep.status === 'waiting_verification') {
+                        pendingDeposits++;
+                    }
+                });
             });
         }
         document.getElementById('totalDeposits').innerHTML = `$${totalDeposits.toFixed(2)}`;
         document.getElementById('pendingDeposits').textContent = pendingDeposits;
 
-        // Withdrawals
+        // Withdrawals - Read from adminWithdrawals
         const withdrawalsSnap = await db.ref('adminWithdrawals').once('value');
         let totalWithdrawals = 0;
         let pendingWithdrawals = 0;
@@ -1117,22 +1118,20 @@ async function loadStats() {
 // ============================================================
 async function loadRecentKyc() {
     try {
-        // Read from pendingKyc node (where new KYC submissions go)
-        const snapshot = await db.ref('pendingKyc').once('value');
+        const kycSnap = await db.ref('pendingKyc').once('value');
         const kycList = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
+        if (kycSnap.exists()) {
+            kycSnap.forEach(child => {
                 const data = child.val();
                 kycList.push({ id: child.key, ...data });
             });
         }
-        // Also check kyc node for pending status
-        const kycSnap = await db.ref('kyc').once('value');
-        if (kycSnap.exists()) {
-            kycSnap.forEach(child => {
+        // Also check kyc node for pending
+        const kycMainSnap = await db.ref('kyc').once('value');
+        if (kycMainSnap.exists()) {
+            kycMainSnap.forEach(child => {
                 const data = child.val();
                 if (data.status === 'pending' || !data.status) {
-                    // Check if not already in list
                     if (!kycList.find(k => k.id === child.key)) {
                         kycList.push({ id: child.key, ...data });
                     }
@@ -1169,10 +1168,15 @@ async function loadRecentKyc() {
 // ============================================================
 async function loadRecentDeposits() {
     try {
-        const snapshot = await db.ref('adminDeposits').once('value');
+        const snapshot = await db.ref('deposit_requests').once('value');
         const deposits = [];
         if (snapshot.exists()) {
-            snapshot.forEach(child => { deposits.push({ id: child.key, ...child.val() }); });
+            snapshot.forEach(userRequests => {
+                userRequests.forEach(requestChild => {
+                    const d = requestChild.val();
+                    deposits.push({ id: requestChild.key, userId: userRequests.key, ...d });
+                });
+            });
         }
         deposits.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         const recent = deposits.slice(0, 8);
@@ -1193,9 +1197,9 @@ async function loadRecentDeposits() {
                 statusClass = 'rejected';
                 statusText = 'rejected';
             }
-            const displayName = d.userEmail ? d.userEmail.split('@')[0] : (d.userName || (d.userId ? d.userId.substring(0,8) : 'Unknown'));
-            let methodName = 'Bank Transfer';
-            if (d.method === 'mobile_money') methodName = 'Mobile Money';
+            const displayName = d.userEmail ? d.userEmail.split('@')[0] : (d.kycName || (d.userId ? d.userId.substring(0,8) : 'Unknown'));
+            let methodName = 'Mobile Money';
+            if (d.method === 'binance_usdt' || d.method === 'Binance USDT' || d.network === 'TRC20') methodName = 'Binance USDT';
             else if (d.method === 'crypto') methodName = 'Crypto';
             else if (d.network) methodName = d.network;
             const row = tbody.insertRow();
@@ -1255,13 +1259,13 @@ async function loadRecentWithdrawals() {
 }
 
 // ============================================================
-// LOGOUT
+// LOGOUT - Fixed redirect to admin login.html
 // ============================================================
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     if (await showConfirmModal({ title: 'Logout?', subtitle: 'Are you sure you want to logout?', icon: '🚪', iconClass: 'warning', btnText: 'Logout', btnIcon: 'fa-sign-out-alt' })) {
         await auth.signOut();
         localStorage.removeItem('abotra_admin_logged_in');
-        window.location.href = '../login.html';
+        window.location.href = 'login.html';
     }
 });
 
@@ -1318,11 +1322,14 @@ async function init() {
     }
     
     auth.onAuthStateChanged(async (user) => {
-        if (!user) { window.location.href = '../login.html'; return; }
+        if (!user) { 
+            window.location.href = 'login.html'; 
+            return; 
+        }
         const isAdmin = await checkAdminSession(user);
         if (!isAdmin) {
             showToast('Admin access only', 'error');
-            setTimeout(() => { window.location.href = '../login.html'; }, 1500);
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
             return;
         }
         
