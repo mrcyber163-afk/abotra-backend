@@ -458,7 +458,8 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     updateProfile,
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
     getDatabase,
@@ -466,11 +467,12 @@ import {
     set,
     get,
     runTransaction,
-    push
+    push,
+    update
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // ============================================================
-// FIREBASE CONFIG
+// FIREBASE CONFIG - USING LATEST VERSION
 // ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
@@ -869,37 +871,57 @@ async function hashString(str) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE - WITH CORRECT FIELDS
+// CHECK IF USER EXISTS - SIMPLIFIED
+// ============================================================
+async function checkUserExists(email, username, phone) {
+    try {
+        // Check username
+        if (username) {
+            const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
+            const snap = await get(usernameRef);
+            if (snap.exists()) {
+                return { exists: true, field: 'username', message: 'Username already taken' };
+            }
+        }
+        
+        // Check email
+        if (email) {
+            const emailHash = await hashString(email.toLowerCase());
+            const emailRef = ref(rtdb, `emails/${emailHash}`);
+            const snap = await get(emailRef);
+            if (snap.exists()) {
+                return { exists: true, field: 'email', message: 'Email already registered' };
+            }
+        }
+        
+        // Check phone
+        if (phone) {
+            const phoneHash = await hashString(phone);
+            const phoneRef = ref(rtdb, `phones/${phoneHash}`);
+            const snap = await get(phoneRef);
+            if (snap.exists()) {
+                return { exists: true, field: 'phone', message: 'Phone number already registered' };
+            }
+        }
+        
+        return { exists: false };
+    } catch (error) {
+        console.error('[CHECK] Error checking user:', error);
+        return { exists: false };
+    }
+}
+
+// ============================================================
+// SAVE USER TO FIREBASE - SIMPLIFIED WITH DEBUG LOGGING
 // ============================================================
 async function saveUserToFirebase(user, userData) {
-    console.log('[SAVE] Saving user data for:', user.uid);
+    console.log('[SAVE] Starting save for user:', user.uid);
+    console.log('[SAVE] UserData:', userData);
     
-    // Wait for auth to sync
-    await new Promise((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, (u) => {
-            if (u && u.uid === user.uid) {
-                console.log('[SAVE] ✅ Auth synced');
-                unsubscribe();
-                resolve();
-            }
-        });
-        setTimeout(() => {
-            console.log('[SAVE] Auth sync timeout, continuing...');
-            resolve();
-        }, 5000);
-    });
-    
-    // Refresh token
-    try {
-        if (auth.currentUser) {
-            await auth.currentUser.getIdToken(true);
-            console.log('[SAVE] ✅ Token refreshed');
-        }
-    } catch (e) {
-        console.log('[SAVE] Token refresh error:', e.message);
-    }
-    
-    await new Promise(r => setTimeout(r, 1000));
+    const timestamp = Date.now();
+    const usernameLower = userData.username.toLowerCase();
+    const emailLower = userData.email ? userData.email.toLowerCase() : null;
+    const fullPhone = userData.phone || null;
     
     // Generate referral code
     let referralCode = generateStaticReferralCode(user.uid);
@@ -908,11 +930,6 @@ async function saveUserToFirebase(user, userData) {
         referralCode = generateStaticReferralCode(user.uid + '_' + attempts);
         attempts++;
     }
-    
-    const timestamp = Date.now();
-    const usernameLower = userData.username.toLowerCase();
-    const emailLower = userData.email ? userData.email.toLowerCase() : null;
-    const fullPhone = userData.phone || null;
     
     // Prepare user data
     const dataToSave = {
@@ -934,37 +951,36 @@ async function saveUserToFirebase(user, userData) {
         updatedAt: timestamp
     };
     
-    console.log('[SAVE] Data to save:', dataToSave);
+    console.log('[SAVE] Data to save:', JSON.stringify(dataToSave, null, 2));
     
-    // 1. Save user data
-    let retries = 5;
+    // 1. Save user data - try with different approaches
+    let saved = false;
     let lastError = null;
     
-    while (retries > 0) {
+    // Approach 1: Direct set
+    try {
+        console.log('[SAVE] Attempt 1: Direct set on users/');
+        await set(ref(rtdb, `users/${user.uid}`), dataToSave);
+        console.log('[SAVE] ✅ User saved with direct set');
+        saved = true;
+    } catch (err) {
+        console.error('[SAVE] Direct set failed:', err);
+        lastError = err;
+        
+        // Approach 2: Try update
         try {
-            await set(ref(rtdb, `users/${user.uid}`), dataToSave);
-            console.log('[SAVE] ✅ User saved successfully');
-            break;
-        } catch (err) {
-            lastError = err;
-            retries--;
-            console.log(`[SAVE] Retry ${6 - retries}/5: ${err.message}`);
-            
-            if (retries > 0) {
-                await new Promise(r => setTimeout(r, 2000 + (5 - retries) * 1000));
-                try {
-                    if (auth.currentUser) {
-                        await auth.currentUser.getIdToken(true);
-                    }
-                } catch (e) {
-                    console.log('[SAVE] Token refresh failed on retry');
-                }
-            }
+            console.log('[SAVE] Attempt 2: Update on users/');
+            await update(ref(rtdb, `users/${user.uid}`), dataToSave);
+            console.log('[SAVE] ✅ User saved with update');
+            saved = true;
+        } catch (err2) {
+            console.error('[SAVE] Update failed:', err2);
+            lastError = err2;
         }
     }
     
-    if (retries === 0) {
-        console.error('[SAVE] ❌ Failed after 5 retries:', lastError);
+    if (!saved) {
+        console.error('[SAVE] ❌ All save attempts failed:', lastError);
         throw lastError;
     }
     
@@ -978,10 +994,10 @@ async function saveUserToFirebase(user, userData) {
         });
         console.log('[SAVE] ✅ Referral saved');
     } catch (error) {
-        console.error('[SAVE] ❌ Referral error:', error);
+        console.error('[SAVE] Referral save error (non-critical):', error);
     }
     
-    // 3. Save username for uniqueness check
+    // 3. Save username
     try {
         await set(ref(rtdb, `usernames/${usernameLower}`), {
             uid: user.uid,
@@ -990,10 +1006,10 @@ async function saveUserToFirebase(user, userData) {
         });
         console.log('[SAVE] ✅ Username saved');
     } catch (error) {
-        console.error('[SAVE] ❌ Username error:', error);
+        console.error('[SAVE] Username save error (non-critical):', error);
     }
     
-    // 4. Save email for uniqueness check
+    // 4. Save email
     if (emailLower) {
         try {
             const emailHash = await hashString(emailLower);
@@ -1004,11 +1020,11 @@ async function saveUserToFirebase(user, userData) {
             });
             console.log('[SAVE] ✅ Email saved');
         } catch (error) {
-            console.error('[SAVE] ❌ Email error:', error);
+            console.error('[SAVE] Email save error (non-critical):', error);
         }
     }
     
-    // 5. Save phone for uniqueness check
+    // 5. Save phone
     if (fullPhone) {
         try {
             const phoneHash = await hashString(fullPhone);
@@ -1019,7 +1035,7 @@ async function saveUserToFirebase(user, userData) {
             });
             console.log('[SAVE] ✅ Phone saved');
         } catch (error) {
-            console.error('[SAVE] ❌ Phone error:', error);
+            console.error('[SAVE] Phone save error (non-critical):', error);
         }
     }
     
@@ -1034,7 +1050,10 @@ async function handleReferral(newUserId) {
     try {
         const referralRef = ref(rtdb, `referrals/${referredByCode}`);
         const snap = await get(referralRef);
-        if (!snap.exists()) return;
+        if (!snap.exists()) {
+            console.log('[REFERRAL] Referral code not found:', referredByCode);
+            return;
+        }
         const referrerData = snap.val();
         const referrerUid = referrerData.uid;
         
@@ -1107,54 +1126,38 @@ async function registerWithEmail() {
     btn.innerHTML = '<span class="spinner"></span> Creating Account...';
 
     try {
-        console.log('[REGISTER] Creating user with email:', email);
+        console.log('[REGISTER] Starting email registration...');
+        console.log('[REGISTER] Email:', email);
+        console.log('[REGISTER] Username:', username);
+        console.log('[REGISTER] Full Name:', fullName);
         
-        // Check username first
-        const usernameRef = ref(rtdb, `usernames/${username}`);
-        const usernameSnap = await get(usernameRef);
-        if (usernameSnap.exists()) {
-            throw new Error('Username already taken');
-        }
-
-        // Check email
-        const emailHash = await hashString(email);
-        const emailRef = ref(rtdb, `emails/${emailHash}`);
-        const emailSnap = await get(emailRef);
-        if (emailSnap.exists()) {
-            throw new Error('Email already registered');
+        // Check if user exists
+        const checkResult = await checkUserExists(email, username, null);
+        if (checkResult.exists) {
+            throw new Error(checkResult.message);
         }
 
         // Create user
+        console.log('[REGISTER] Creating Firebase Auth user...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log('[REGISTER] ✅ User created:', user.uid);
+        console.log('[REGISTER] ✅ User created successfully:', user.uid);
         
+        // Update profile
         await updateProfile(user, { displayName: fullName });
         console.log('[REGISTER] ✅ Profile updated');
         
-        // Wait for auth sync
-        await new Promise((resolve) => {
-            const unsubscribe = onAuthStateChanged(auth, (u) => {
-                if (u && u.uid === user.uid) {
-                    console.log('[REGISTER] ✅ Auth synced');
-                    unsubscribe();
-                    resolve();
-                }
-            });
-            setTimeout(() => {
-                console.log('[REGISTER] Auth sync timeout');
-                resolve();
-            }, 5000);
-        });
+        // Wait a moment for auth to sync
+        await new Promise(r => setTimeout(r, 1500));
         
-        try {
-            await user.getIdToken(true);
+        // Force token refresh
+        if (auth.currentUser) {
+            await auth.currentUser.getIdToken(true);
             console.log('[REGISTER] ✅ Token refreshed');
-        } catch (e) {}
+        }
         
-        await new Promise(r => setTimeout(r, 1000));
-        
-        // Save user data with correct fields
+        // Save user data
+        console.log('[REGISTER] Saving user data to database...');
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
@@ -1164,8 +1167,9 @@ async function registerWithEmail() {
             referredBy: referredByCode || null,
             phone: null
         });
-        console.log('[REGISTER] ✅ User saved, referral:', referralCode);
+        console.log('[REGISTER] ✅ User data saved, referral:', referralCode);
         
+        // Handle referral
         await handleReferral(user.uid);
         
         // Welcome notification
@@ -1173,18 +1177,18 @@ async function registerWithEmail() {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
             await set(notifRef, {
                 title: '🎉 Welcome to ABOTRA-PROAI!',
-                message: `Welcome ${fullName}! Your trading journey starts now. Complete your KYC to unlock all features.`,
+                message: `Welcome ${fullName}! Your trading journey starts now.`,
                 type: 'system',
                 link: 'dashboard.html',
                 read: false,
-                timestamp: Date.now(),
-                date: new Date().toISOString()
+                timestamp: Date.now()
             });
+            console.log('[REGISTER] ✅ Welcome notification sent');
         } catch (e) {
-            console.log('[NOTIF] Skip:', e.message);
+            console.log('[REGISTER] Notification skip:', e.message);
         }
         
-        showNotification(`✅ Registration successful! Welcome ${fullName}!`, 'success');
+        showNotification(`✅ Welcome ${fullName}! Registration successful!`, 'success');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Register with Email';
         
@@ -1194,6 +1198,8 @@ async function registerWithEmail() {
 
     } catch (error) {
         console.error('[REGISTER] ❌ Error:', error);
+        console.error('[REGISTER] Error details:', JSON.stringify(error, null, 2));
+        
         let message = 'Registration failed. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
             message = 'Email already registered';
@@ -1207,6 +1213,8 @@ async function registerWithEmail() {
             message = 'Invalid email address';
         } else if (error.code === 'auth/too-many-requests') {
             message = 'Too many requests. Please try again later.';
+        } else if (error.message && error.message.includes('permission_denied')) {
+            message = 'Permission denied. Please check your database rules.';
         } else if (error.message) {
             message = error.message;
         }
@@ -1254,33 +1262,25 @@ async function registerWithPhone() {
     }
 
     const fullPhone = countryCode + phoneNumber;
-    
-    // Check if phone already registered
-    const phoneHash = await hashString(fullPhone);
-    const phoneRef = ref(rtdb, `phones/${phoneHash}`);
-    const phoneSnap = await get(phoneRef);
-    if (phoneSnap.exists()) {
-        showNotification('Phone number already registered', 'error');
-        return;
-    }
-
     const btn = registerBtn;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Creating Account...';
 
     try {
-        console.log('[PHONE] Registering with phone:', fullPhone);
+        console.log('[PHONE] Starting phone registration...');
+        console.log('[PHONE] Phone:', fullPhone);
+        console.log('[PHONE] Username:', username);
         
-        // Check username
-        const usernameRef = ref(rtdb, `usernames/${username}`);
-        const usernameSnap = await get(usernameRef);
-        if (usernameSnap.exists()) {
-            throw new Error('Username already taken');
+        // Check if user exists
+        const checkResult = await checkUserExists(null, username, fullPhone);
+        if (checkResult.exists) {
+            throw new Error(checkResult.message);
         }
 
         // Create temporary email
         const tempEmail = `user_${Date.now()}_${Math.random().toString(36).substring(2,6)}@temp.abotra.com`;
         
+        console.log('[PHONE] Creating Firebase Auth user with temp email:', tempEmail);
         const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, password);
         const user = userCredential.user;
         console.log('[PHONE] ✅ User created:', user.uid);
@@ -1288,29 +1288,13 @@ async function registerWithPhone() {
         await updateProfile(user, { displayName: fullName });
         console.log('[PHONE] ✅ Profile updated');
         
-        // Wait for auth sync
-        await new Promise((resolve) => {
-            const unsubscribe = onAuthStateChanged(auth, (u) => {
-                if (u && u.uid === user.uid) {
-                    console.log('[PHONE] ✅ Auth synced');
-                    unsubscribe();
-                    resolve();
-                }
-            });
-            setTimeout(() => {
-                console.log('[PHONE] Auth sync timeout');
-                resolve();
-            }, 5000);
-        });
+        await new Promise(r => setTimeout(r, 1500));
         
-        try {
-            await user.getIdToken(true);
+        if (auth.currentUser) {
+            await auth.currentUser.getIdToken(true);
             console.log('[PHONE] ✅ Token refreshed');
-        } catch (e) {}
+        }
         
-        await new Promise(r => setTimeout(r, 1000));
-        
-        // Save user data with correct fields
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
@@ -1320,27 +1304,26 @@ async function registerWithPhone() {
             referredBy: referredByCode || null,
             phone: fullPhone
         });
-        console.log('[PHONE] ✅ User saved, referral:', referralCode);
+        console.log('[PHONE] ✅ User data saved, referral:', referralCode);
         
         await handleReferral(user.uid);
         
-        // Welcome notification
         try {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
             await set(notifRef, {
                 title: '🎉 Welcome to ABOTRA-PROAI!',
-                message: `Welcome ${fullName}! Your trading journey starts now. Complete your KYC to unlock all features.`,
+                message: `Welcome ${fullName}! Your trading journey starts now.`,
                 type: 'system',
                 link: 'dashboard.html',
                 read: false,
-                timestamp: Date.now(),
-                date: new Date().toISOString()
+                timestamp: Date.now()
             });
+            console.log('[PHONE] ✅ Welcome notification sent');
         } catch (e) {
-            console.log('[NOTIF] Skip:', e.message);
+            console.log('[PHONE] Notification skip:', e.message);
         }
         
-        showNotification(`✅ Registration successful! Welcome ${fullName}!`, 'success');
+        showNotification(`✅ Welcome ${fullName}! Registration successful!`, 'success');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-phone"></i> Register with Phone';
         
@@ -1354,9 +1337,9 @@ async function registerWithPhone() {
         if (error.code === 'auth/email-already-in-use') {
             message = 'Phone number already registered';
         } else if (error.code === 'auth/weak-password') {
-            message = 'Password too weak. Use at least 8 characters with uppercase, lowercase, number and special character.';
+            message = 'Password too weak.';
         } else if (error.code === 'auth/operation-not-allowed') {
-            message = 'Phone registration is not enabled. Please contact support.';
+            message = 'Phone registration is not enabled.';
         } else if (error.code === 'auth/network-request-failed') {
             message = 'Network error. Please check your connection.';
         } else if (error.message) {
@@ -1424,11 +1407,14 @@ setTimeout(() => {
 // Check if already logged in
 onAuthStateChanged(auth, (user) => {
     if (user && window.location.pathname.includes('register.html')) {
+        console.log('[AUTH] User already logged in, redirecting to dashboard');
         window.location.href = 'dashboard.html';
     }
 });
 
 console.log('[REGISTER] ✅ Page loaded');
+console.log('[REGISTER] Firebase Auth:', auth);
+console.log('[REGISTER] Firebase RTDB:', rtdb);
 </script>
 </body>
 </html>
