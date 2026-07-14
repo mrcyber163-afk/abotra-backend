@@ -33,6 +33,10 @@
     --font: 'Inter', sans-serif;
     --referral-bg: rgba(255,215,0,0.05);
     --referral-border: rgba(255,215,0,0.15);
+    --referral-error-bg: rgba(246,70,93,0.08);
+    --referral-error-border: rgba(246,70,93,0.25);
+    --referral-success-bg: rgba(14,203,129,0.08);
+    --referral-success-border: rgba(14,203,129,0.25);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
@@ -222,7 +226,7 @@ h1 {
 }
 .sub-text { text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 22px; font-weight: 400; }
 
-/* Referral Box - NEW */
+/* Referral Box */
 .referral-box {
     background: var(--referral-bg);
     border: 1px solid var(--referral-border);
@@ -237,6 +241,14 @@ h1 {
 .referral-box.visible {
     display: flex;
 }
+.referral-box.error {
+    border-color: var(--referral-error-border);
+    background: var(--referral-error-bg);
+}
+.referral-box.success {
+    border-color: var(--referral-success-border);
+    background: var(--referral-success-bg);
+}
 .referral-box .referral-icon {
     width: 40px;
     height: 40px;
@@ -249,6 +261,14 @@ h1 {
     font-size: 18px;
     color: #0A0A0A;
 }
+.referral-box.error .referral-icon {
+    background: #F6465D;
+    color: white;
+}
+.referral-box.success .referral-icon {
+    background: #0ECB81;
+    color: white;
+}
 .referral-box .referral-info {
     flex: 1;
 }
@@ -258,6 +278,12 @@ h1 {
     letter-spacing: 0.5px;
     color: var(--gold);
     font-weight: 600;
+}
+.referral-box.error .referral-label {
+    color: #F6465D;
+}
+.referral-box.success .referral-label {
+    color: #0ECB81;
 }
 .referral-box .referral-name {
     font-size: 13px;
@@ -276,6 +302,14 @@ h1 {
     display: inline-block;
     margin-top: 2px;
 }
+.referral-box.error .referral-code {
+    color: #F6465D;
+    background: rgba(246,70,93,0.1);
+}
+.referral-box.success .referral-code {
+    color: #0ECB81;
+    background: rgba(14,203,129,0.1);
+}
 .referral-box .referral-badge {
     background: var(--gold-gradient);
     color: #0A0A0A;
@@ -285,6 +319,14 @@ h1 {
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+}
+.referral-box.error .referral-badge {
+    background: #F6465D;
+    color: white;
+}
+.referral-box.success .referral-badge {
+    background: #0ECB81;
+    color: white;
 }
 
 .register-options {
@@ -469,17 +511,17 @@ h1 {
             <h1>Create Account</h1>
             <p class="sub-text">Join ABOTRA-PROAI &amp; start earning with AI Robots</p>
 
-            <!-- REFERRAL BOX - Shows who invited you -->
+            <!-- REFERRAL BOX -->
             <div class="referral-box" id="referralBox">
-                <div class="referral-icon">
+                <div class="referral-icon" id="referralIcon">
                     <i class="fas fa-user-plus"></i>
                 </div>
                 <div class="referral-info">
-                    <div class="referral-label">🎯 Invited By</div>
+                    <div class="referral-label" id="referralLabel">🎯 Invited By</div>
                     <div class="referral-name" id="referralName">Loading...</div>
                     <div class="referral-code" id="referralCodeDisplay">Code: ---</div>
                 </div>
-                <div class="referral-badge">REFERRAL</div>
+                <div class="referral-badge" id="referralBadge">REFERRAL</div>
             </div>
 
             <div class="register-options">
@@ -582,9 +624,10 @@ const rtdb = getDatabase(app);
 console.log('[FIREBASE] ✅ Firebase initialized');
 
 // ============================================================
-// COUNTRIES DATA
+// COUNTRIES DATA - ALL COUNTRIES IN THE WORLD
 // ============================================================
 const countriesData = [
+    // Africa
     { code: "+255", iso: "tz", name: "Tanzania", digits: 9 },
     { code: "+265", iso: "mw", name: "Malawi", digits: 9 },
     { code: "+260", iso: "zm", name: "Zambia", digits: 9 },
@@ -609,7 +652,71 @@ const countriesData = [
     { code: "+218", iso: "ly", name: "Libya", digits: 9 },
     { code: "+216", iso: "tn", name: "Tunisia", digits: 8 },
     { code: "+213", iso: "dz", name: "Algeria", digits: 9 },
+    { code: "+222", iso: "mr", name: "Mauritania", digits: 8 },
+    { code: "+221", iso: "sn", name: "Senegal", digits: 9 },
+    { code: "+225", iso: "ci", name: "Ivory Coast", digits: 8 },
+    { code: "+226", iso: "bf", name: "Burkina Faso", digits: 8 },
+    { code: "+227", iso: "ne", name: "Niger", digits: 8 },
+    { code: "+228", iso: "tg", name: "Togo", digits: 8 },
+    { code: "+229", iso: "bj", name: "Benin", digits: 8 },
+    { code: "+230", iso: "mu", name: "Mauritius", digits: 7 },
+    { code: "+231", iso: "lr", name: "Liberia", digits: 7 },
+    { code: "+232", iso: "sl", name: "Sierra Leone", digits: 8 },
+    { code: "+235", iso: "td", name: "Chad", digits: 8 },
+    { code: "+236", iso: "cf", name: "Central African Republic", digits: 8 },
+    { code: "+237", iso: "cm", name: "Cameroon", digits: 9 },
+    { code: "+238", iso: "cv", name: "Cape Verde", digits: 7 },
+    { code: "+239", iso: "st", name: "Sao Tome", digits: 7 },
+    { code: "+240", iso: "gq", name: "Equatorial Guinea", digits: 9 },
+    { code: "+241", iso: "ga", name: "Gabon", digits: 8 },
+    { code: "+242", iso: "cg", name: "Congo Republic", digits: 9 },
+    { code: "+245", iso: "gw", name: "Guinea-Bissau", digits: 7 },
+    { code: "+246", iso: "io", name: "Diego Garcia", digits: 7 },
+    { code: "+247", iso: "ac", name: "Ascension Island", digits: 6 },
+    { code: "+248", iso: "sc", name: "Seychelles", digits: 7 },
+    { code: "+253", iso: "dj", name: "Djibouti", digits: 8 },
+    { code: "+261", iso: "mg", name: "Madagascar", digits: 9 },
+    { code: "+262", iso: "re", name: "Reunion", digits: 9 },
+    { code: "+266", iso: "ls", name: "Lesotho", digits: 8 },
+    { code: "+268", iso: "sz", name: "Eswatini", digits: 7 },
+    { code: "+269", iso: "km", name: "Comoros", digits: 7 },
+    { code: "+291", iso: "er", name: "Eritrea", digits: 7 },
+    { code: "+297", iso: "aw", name: "Aruba", digits: 7 },
+    { code: "+298", iso: "fo", name: "Faroe Islands", digits: 6 },
+    { code: "+299", iso: "gl", name: "Greenland", digits: 6 },
+    
+    // North America
     { code: "+1", iso: "us", name: "United States", digits: 10 },
+    { code: "+1", iso: "ca", name: "Canada", digits: 10 },
+    { code: "+52", iso: "mx", name: "Mexico", digits: 10 },
+    { code: "+53", iso: "cu", name: "Cuba", digits: 8 },
+    { code: "+54", iso: "ar", name: "Argentina", digits: 10 },
+    { code: "+55", iso: "br", name: "Brazil", digits: 11 },
+    { code: "+56", iso: "cl", name: "Chile", digits: 9 },
+    { code: "+57", iso: "co", name: "Colombia", digits: 10 },
+    { code: "+58", iso: "ve", name: "Venezuela", digits: 10 },
+    { code: "+591", iso: "bo", name: "Bolivia", digits: 8 },
+    { code: "+592", iso: "gy", name: "Guyana", digits: 7 },
+    { code: "+593", iso: "ec", name: "Ecuador", digits: 9 },
+    { code: "+594", iso: "gf", name: "French Guiana", digits: 9 },
+    { code: "+595", iso: "py", name: "Paraguay", digits: 9 },
+    { code: "+596", iso: "mq", name: "Martinique", digits: 9 },
+    { code: "+597", iso: "sr", name: "Suriname", digits: 7 },
+    { code: "+598", iso: "uy", name: "Uruguay", digits: 8 },
+    { code: "+51", iso: "pe", name: "Peru", digits: 9 },
+    { code: "+501", iso: "bz", name: "Belize", digits: 7 },
+    { code: "+502", iso: "gt", name: "Guatemala", digits: 8 },
+    { code: "+503", iso: "sv", name: "El Salvador", digits: 8 },
+    { code: "+504", iso: "hn", name: "Honduras", digits: 8 },
+    { code: "+505", iso: "ni", name: "Nicaragua", digits: 8 },
+    { code: "+506", iso: "cr", name: "Costa Rica", digits: 8 },
+    { code: "+507", iso: "pa", name: "Panama", digits: 8 },
+    { code: "+508", iso: "pm", name: "Saint Pierre", digits: 6 },
+    { code: "+509", iso: "ht", name: "Haiti", digits: 8 },
+    { code: "+590", iso: "gp", name: "Guadeloupe", digits: 9 },
+    { code: "+670", iso: "tl", name: "Timor-Leste", digits: 7 },
+    
+    // Europe
     { code: "+44", iso: "gb", name: "United Kingdom", digits: 10 },
     { code: "+49", iso: "de", name: "Germany", digits: 10 },
     { code: "+33", iso: "fr", name: "France", digits: 9 },
@@ -634,6 +741,31 @@ const countriesData = [
     { code: "+90", iso: "tr", name: "Turkey", digits: 10 },
     { code: "+7", iso: "ru", name: "Russia", digits: 10 },
     { code: "+380", iso: "ua", name: "Ukraine", digits: 9 },
+    { code: "+370", iso: "lt", name: "Lithuania", digits: 8 },
+    { code: "+371", iso: "lv", name: "Latvia", digits: 8 },
+    { code: "+372", iso: "ee", name: "Estonia", digits: 8 },
+    { code: "+373", iso: "md", name: "Moldova", digits: 8 },
+    { code: "+374", iso: "am", name: "Armenia", digits: 8 },
+    { code: "+375", iso: "by", name: "Belarus", digits: 9 },
+    { code: "+376", iso: "ad", name: "Andorra", digits: 6 },
+    { code: "+377", iso: "mc", name: "Monaco", digits: 8 },
+    { code: "+378", iso: "sm", name: "San Marino", digits: 6 },
+    { code: "+379", iso: "va", name: "Vatican City", digits: 6 },
+    { code: "+381", iso: "rs", name: "Serbia", digits: 8 },
+    { code: "+382", iso: "me", name: "Montenegro", digits: 8 },
+    { code: "+383", iso: "xk", name: "Kosovo", digits: 8 },
+    { code: "+385", iso: "hr", name: "Croatia", digits: 8 },
+    { code: "+386", iso: "si", name: "Slovenia", digits: 8 },
+    { code: "+387", iso: "ba", name: "Bosnia", digits: 8 },
+    { code: "+389", iso: "mk", name: "North Macedonia", digits: 8 },
+    { code: "+350", iso: "gi", name: "Gibraltar", digits: 8 },
+    { code: "+352", iso: "lu", name: "Luxembourg", digits: 9 },
+    { code: "+354", iso: "is", name: "Iceland", digits: 7 },
+    { code: "+355", iso: "al", name: "Albania", digits: 8 },
+    { code: "+356", iso: "mt", name: "Malta", digits: 8 },
+    { code: "+357", iso: "cy", name: "Cyprus", digits: 8 },
+    
+    // Asia
     { code: "+91", iso: "in", name: "India", digits: 10 },
     { code: "+86", iso: "cn", name: "China", digits: 11 },
     { code: "+81", iso: "jp", name: "Japan", digits: 10 },
@@ -646,13 +778,6 @@ const countriesData = [
     { code: "+65", iso: "sg", name: "Singapore", digits: 8 },
     { code: "+61", iso: "au", name: "Australia", digits: 9 },
     { code: "+64", iso: "nz", name: "New Zealand", digits: 9 },
-    { code: "+55", iso: "br", name: "Brazil", digits: 11 },
-    { code: "+54", iso: "ar", name: "Argentina", digits: 10 },
-    { code: "+52", iso: "mx", name: "Mexico", digits: 10 },
-    { code: "+56", iso: "cl", name: "Chile", digits: 9 },
-    { code: "+51", iso: "pe", name: "Peru", digits: 9 },
-    { code: "+57", iso: "co", name: "Colombia", digits: 10 },
-    { code: "+58", iso: "ve", name: "Venezuela", digits: 10 },
     { code: "+92", iso: "pk", name: "Pakistan", digits: 10 },
     { code: "+880", iso: "bd", name: "Bangladesh", digits: 10 },
     { code: "+94", iso: "lk", name: "Sri Lanka", digits: 9 },
@@ -670,7 +795,71 @@ const countriesData = [
     { code: "+962", iso: "jo", name: "Jordan", digits: 9 },
     { code: "+961", iso: "lb", name: "Lebanon", digits: 8 },
     { code: "+963", iso: "sy", name: "Syria", digits: 9 },
-    { code: "+1", iso: "ca", name: "Canada", digits: 10 }
+    { code: "+95", iso: "mm", name: "Myanmar", digits: 9 },
+    { code: "+856", iso: "la", name: "Laos", digits: 9 },
+    { code: "+855", iso: "kh", name: "Cambodia", digits: 9 },
+    { code: "+670", iso: "tl", name: "Timor-Leste", digits: 7 },
+    { code: "+673", iso: "bn", name: "Brunei", digits: 7 },
+    { code: "+675", iso: "pg", name: "Papua New Guinea", digits: 7 },
+    { code: "+676", iso: "to", name: "Tonga", digits: 5 },
+    { code: "+677", iso: "sb", name: "Solomon Islands", digits: 7 },
+    { code: "+678", iso: "vu", name: "Vanuatu", digits: 7 },
+    { code: "+679", iso: "fj", name: "Fiji", digits: 7 },
+    { code: "+680", iso: "pw", name: "Palau", digits: 7 },
+    { code: "+681", iso: "wf", name: "Wallis", digits: 6 },
+    { code: "+682", iso: "ck", name: "Cook Islands", digits: 5 },
+    { code: "+683", iso: "nu", name: "Niue", digits: 4 },
+    { code: "+685", iso: "ws", name: "Samoa", digits: 7 },
+    { code: "+686", iso: "ki", name: "Kiribati", digits: 5 },
+    { code: "+687", iso: "nc", name: "New Caledonia", digits: 6 },
+    { code: "+688", iso: "tv", name: "Tuvalu", digits: 5 },
+    { code: "+689", iso: "pf", name: "French Polynesia", digits: 6 },
+    { code: "+690", iso: "tk", name: "Tokelau", digits: 4 },
+    { code: "+691", iso: "fm", name: "Micronesia", digits: 7 },
+    { code: "+692", iso: "mh", name: "Marshall Islands", digits: 7 },
+    
+    // Middle East
+    { code: "+970", iso: "ps", name: "Palestine", digits: 9 },
+    { code: "+973", iso: "bh", name: "Bahrain", digits: 8 },
+    { code: "+960", iso: "mv", name: "Maldives", digits: 7 },
+    { code: "+961", iso: "lb", name: "Lebanon", digits: 8 },
+    { code: "+962", iso: "jo", name: "Jordan", digits: 9 },
+    { code: "+963", iso: "sy", name: "Syria", digits: 9 },
+    { code: "+964", iso: "iq", name: "Iraq", digits: 10 },
+    { code: "+965", iso: "kw", name: "Kuwait", digits: 8 },
+    { code: "+966", iso: "sa", name: "Saudi Arabia", digits: 9 },
+    { code: "+967", iso: "ye", name: "Yemen", digits: 9 },
+    { code: "+968", iso: "om", name: "Oman", digits: 8 },
+    { code: "+969", iso: "ye", name: "Yemen", digits: 9 },
+    { code: "+970", iso: "ps", name: "Palestine", digits: 9 },
+    { code: "+971", iso: "ae", name: "UAE", digits: 9 },
+    { code: "+972", iso: "il", name: "Israel", digits: 9 },
+    { code: "+973", iso: "bh", name: "Bahrain", digits: 8 },
+    { code: "+974", iso: "qa", name: "Qatar", digits: 8 },
+    { code: "+975", iso: "bt", name: "Bhutan", digits: 8 },
+    { code: "+976", iso: "mn", name: "Mongolia", digits: 8 },
+    { code: "+977", iso: "np", name: "Nepal", digits: 10 },
+    { code: "+978", iso: "np", name: "Nepal", digits: 10 },
+    { code: "+979", iso: "np", name: "Nepal", digits: 10 },
+    { code: "+981", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+982", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+983", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+984", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+985", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+986", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+987", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+988", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+989", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+990", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+991", iso: "ir", name: "Iran", digits: 10 },
+    { code: "+992", iso: "tj", name: "Tajikistan", digits: 9 },
+    { code: "+993", iso: "tm", name: "Turkmenistan", digits: 8 },
+    { code: "+994", iso: "az", name: "Azerbaijan", digits: 9 },
+    { code: "+995", iso: "ge", name: "Georgia", digits: 9 },
+    { code: "+996", iso: "kg", name: "Kyrgyzstan", digits: 9 },
+    { code: "+997", iso: "kg", name: "Kyrgyzstan", digits: 9 },
+    { code: "+998", iso: "uz", name: "Uzbekistan", digits: 9 },
+    { code: "+999", iso: "uz", name: "Uzbekistan", digits: 9 }
 ];
 
 function getFlagSvg(country) {
@@ -704,6 +893,9 @@ const termsCheckbox = document.getElementById('termsCheckbox');
 const referralBox = document.getElementById('referralBox');
 const referralName = document.getElementById('referralName');
 const referralCodeDisplay = document.getElementById('referralCodeDisplay');
+const referralLabel = document.getElementById('referralLabel');
+const referralBadge = document.getElementById('referralBadge');
+const referralIcon = document.getElementById('referralIcon');
 
 // ============================================================
 // THEME
@@ -772,57 +964,6 @@ function showNotification(msg, type) {
             setTimeout(() => notif.remove(), 300);
         }
     }, 5000);
-}
-
-// ============================================================
-// LOAD REFERRER DATA
-// ============================================================
-async function loadReferrerData() {
-    if (!referredByCode) {
-        referralBox.classList.remove('visible');
-        return;
-    }
-    
-    try {
-        console.log('[REFERRAL] Loading referrer data for:', referredByCode);
-        const refSnap = await get(ref(rtdb, `referrals/${referredByCode}`));
-        
-        if (refSnap.exists()) {
-            const data = refSnap.val();
-            referrerData = data;
-            
-            // Try to get full name from users node
-            try {
-                const userSnap = await get(ref(rtdb, `users/${data.uid}`));
-                if (userSnap.exists()) {
-                    const userData = userSnap.val();
-                    referrerData.fullName = userData.fullName || userData.username || 'User';
-                    referrerData.username = userData.username;
-                }
-            } catch (e) {
-                console.log('[REFERRAL] Could not fetch user details:', e.message);
-            }
-            
-            // Display referrer info
-            const displayName = referrerData.fullName || referrerData.username || 'User';
-            referralName.textContent = displayName;
-            referralCodeDisplay.textContent = `Code: ${referredByCode}`;
-            referralBox.classList.add('visible');
-            
-            console.log('[REFERRAL] ✅ Referrer loaded:', displayName);
-        } else {
-            console.log('[REFERRAL] Referral code not found:', referredByCode);
-            referralName.textContent = 'Invalid referral code';
-            referralCodeDisplay.textContent = 'Please check the code';
-            referralBox.classList.add('visible');
-            // Style it as warning
-            referralBox.style.borderColor = '#F6465D';
-        }
-    } catch (error) {
-        console.error('[REFERRAL] Error loading referrer:', error);
-        referralName.textContent = 'Error loading referral';
-        referralBox.classList.add('visible');
-    }
 }
 
 // ============================================================
@@ -983,6 +1124,88 @@ function setSelectedCountry(country) {
 }
 
 // ============================================================
+// LOAD REFERRER DATA - FIXED
+// ============================================================
+async function loadReferrerData() {
+    if (!referredByCode) {
+        referralBox.classList.remove('visible');
+        return;
+    }
+    
+    console.log('[REFERRAL] Loading referrer data for code:', referredByCode);
+    
+    try {
+        // Check if user is authenticated first
+        if (!auth.currentUser) {
+            console.log('[REFERRAL] User not authenticated, waiting...');
+            // Still try to read, rules might allow public read
+        }
+        
+        const refPath = ref(rtdb, `referrals/${referredByCode}`);
+        console.log('[REFERRAL] Reading from path:', refPath.toString());
+        
+        const refSnap = await get(refPath);
+        console.log('[REFERRAL] Snapshot exists:', refSnap.exists());
+        
+        if (refSnap.exists()) {
+            const data = refSnap.val();
+            console.log('[REFERRAL] Referral data:', data);
+            referrerData = data;
+            
+            let displayName = 'User';
+            
+            // Try to get user details from users node
+            try {
+                if (data.uid) {
+                    const userSnap = await get(ref(rtdb, `users/${data.uid}`));
+                    if (userSnap.exists()) {
+                        const userData = userSnap.val();
+                        console.log('[REFERRAL] User data found:', userData);
+                        displayName = userData.fullName || userData.username || data.username || 'User';
+                    } else {
+                        // Fallback to data from referrals
+                        displayName = data.fullName || data.username || 'User';
+                    }
+                } else {
+                    displayName = data.fullName || data.username || 'User';
+                }
+            } catch (userError) {
+                console.error('[REFERRAL] Error fetching user details:', userError);
+                displayName = data.fullName || data.username || 'User';
+            }
+            
+            // Update UI
+            referralName.textContent = displayName;
+            referralCodeDisplay.textContent = `Code: ${referredByCode}`;
+            referralBox.className = 'referral-box visible success';
+            referralLabel.textContent = '🎯 Invited By';
+            referralBadge.textContent = 'REFERRAL';
+            referralIcon.innerHTML = '<i class="fas fa-user-check"></i>';
+            
+            console.log('[REFERRAL] ✅ Referrer loaded successfully:', displayName);
+        } else {
+            console.log('[REFERRAL] ❌ Referral code not found:', referredByCode);
+            referralName.textContent = 'Invalid referral code';
+            referralCodeDisplay.textContent = `Code: ${referredByCode} (not found)`;
+            referralBox.className = 'referral-box visible error';
+            referralLabel.textContent = '⚠️ Invalid Referral';
+            referralBadge.textContent = 'ERROR';
+            referralIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        }
+    } catch (error) {
+        console.error('[REFERRAL] ❌ Error loading referrer:', error);
+        console.error('[REFERRAL] Error details:', error.message);
+        
+        referralName.textContent = 'Error loading referral';
+        referralCodeDisplay.textContent = `Code: ${referredByCode}`;
+        referralBox.className = 'referral-box visible error';
+        referralLabel.textContent = '❌ Error';
+        referralBadge.textContent = 'ERROR';
+        referralIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+    }
+}
+
+// ============================================================
 // STATIC REFERRAL CODE GENERATION
 // ============================================================
 function generateStaticReferralCode(uid) {
@@ -1102,7 +1325,7 @@ async function saveUserToFirebase(user, userData) {
         throw err;
     }
     
-    // Save referral - NON-CRITICAL
+    // Save referral
     try {
         await set(ref(rtdb, `referrals/${referralCode}`), {
             uid: user.uid,
@@ -1174,7 +1397,6 @@ async function handleReferral(newUserId) {
     try {
         const referrerUid = referrerData.uid;
         
-        // Try to update referrer's referrals
         try {
             await runTransaction(ref(rtdb, `users/${referrerUid}`), (current) => {
                 if (current === null) {
@@ -1313,14 +1535,12 @@ async function registerWithEmail() {
         });
         console.log('[REGISTER] ✅ User data saved, referral:', referralCode);
         
-        // Handle referral - NON-BLOCKING
         try {
             await handleReferral(user.uid);
         } catch (refError) {
             console.error('[REGISTER] Referral handling error (non-critical):', refError);
         }
         
-        // Welcome notification
         try {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
             await set(notifRef, {
@@ -1552,10 +1772,10 @@ setTimeout(() => {
     initCountryDropdowns();
 }, 100);
 
-// Load referrer data
+// Load referrer data - with delay to ensure Firebase is ready
 setTimeout(() => {
     loadReferrerData();
-}, 500);
+}, 800);
 
 // Check if already logged in
 onAuthStateChanged(auth, (user) => {
@@ -1566,6 +1786,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 console.log('[REGISTER] ✅ Page loaded');
+console.log('[REGISTER] Referral code detected:', referredByCode);
 </script>
 </body>
 </html>
