@@ -458,8 +458,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     updateProfile,
-    onAuthStateChanged,
-    signOut
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
     getDatabase,
@@ -467,8 +466,7 @@ import {
     set,
     get,
     runTransaction,
-    push,
-    update
+    push
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // ============================================================
@@ -601,8 +599,7 @@ if (refParam) {
 let selectedCountry = null;
 let selectedCountryEmail = null;
 let selectedCountryPhone = null;
-let phoneConfirmation = null;
-let recaptchaVerifier = null;
+let emailCountryChoices, phoneCountryChoices;
 
 // ============================================================
 // DOM REFS
@@ -683,8 +680,6 @@ function showNotification(msg, type) {
 // ============================================================
 // CHOICES.JS WITH SVG FLAGS
 // ============================================================
-let emailCountryChoices, phoneCountryChoices;
-
 function initCountryDropdowns() {
     const emailSelect = document.getElementById('emailCountry');
     const phoneSelect = document.getElementById('phoneCountryCode');
@@ -729,7 +724,6 @@ function initCountryDropdowns() {
 
         emailCountryChoices = new Choices(emailSelect, { ...commonConfig });
 
-        // Auto-detect country
         setTimeout(autoDetectCountry, 300);
 
         phoneSelect.addEventListener('change', () => {
@@ -767,13 +761,12 @@ function updatePhoneHint(country) {
 }
 
 // ============================================================
-// AUTO-DETECT COUNTRY - NO DEFAULT
+// AUTO-DETECT COUNTRY
 // ============================================================
 async function autoDetectCountry() {
     let detectedCountry = null;
     
     try {
-        // Try IP detection first
         const res = await fetch('https://ipapi.co/json/');
         if (res.ok) {
             const data = await res.json();
@@ -790,7 +783,6 @@ async function autoDetectCountry() {
         console.log('[DETECT] IP detection failed:', e.message);
     }
 
-    // If IP detection failed, try browser locale
     if (!detectedCountry) {
         try {
             const locale = navigator.language || navigator.languages?.[0] || 'en-US';
@@ -808,19 +800,16 @@ async function autoDetectCountry() {
         }
     }
 
-    // If detected, set it. Otherwise, leave as "Select Country" (no default)
     if (detectedCountry) {
         setSelectedCountry(detectedCountry);
     } else {
         console.log('[DETECT] ⚠️ No country detected, user must select manually');
-        // Show a hint to select country
         const hint = document.getElementById('phoneHint');
         if (hint) {
             hint.textContent = '🌍 Please select your country from the dropdown';
             hint.className = 'phone-hint active';
             hint.style.color = '#FFD700';
         }
-        // Leave dropdowns empty
         if (emailCountryChoices) {
             emailCountryChoices.setChoiceByValue('');
         }
@@ -869,7 +858,18 @@ async function checkReferralCodeExists(code) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE - WITH CORRECT PATHS
+// HASH FUNCTION
+// ============================================================
+async function hashString(str) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ============================================================
+// SAVE USER TO FIREBASE - WITH CORRECT FIELDS
 // ============================================================
 async function saveUserToFirebase(user, userData) {
     console.log('[SAVE] Saving user data for:', user.uid);
@@ -909,18 +909,20 @@ async function saveUserToFirebase(user, userData) {
         attempts++;
     }
     
-    // Prepare user data - CORRECT FIELDS
-    const countryName = userData.country || 'Unknown';
-    const countryCode = userData.countryCode || '';
+    const timestamp = Date.now();
+    const usernameLower = userData.username.toLowerCase();
+    const emailLower = userData.email ? userData.email.toLowerCase() : null;
+    const fullPhone = userData.phone || null;
     
+    // Prepare user data
     const dataToSave = {
         uid: user.uid,
-        username: userData.username.toLowerCase(),
+        username: usernameLower,
         fullName: userData.fullName,
-        email: user.email || null,
-        phone: userData.phone || null,
-        country: countryName,
-        countryCode: countryCode,
+        email: emailLower,
+        phone: fullPhone,
+        country: userData.country || 'Unknown',
+        countryCode: userData.countryCode || '',
         referralCode: referralCode,
         referredBy: userData.referredBy || null,
         balance: 0,
@@ -928,19 +930,18 @@ async function saveUserToFirebase(user, userData) {
         totalWithdrawn: 0,
         isVerified: false,
         isActive: true,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        createdAt: timestamp,
+        updatedAt: timestamp
     };
     
     console.log('[SAVE] Data to save:', dataToSave);
     
-    // Save with retries
+    // 1. Save user data
     let retries = 5;
     let lastError = null;
     
     while (retries > 0) {
         try {
-            // Save to users/{uid}
             await set(ref(rtdb, `users/${user.uid}`), dataToSave);
             console.log('[SAVE] ✅ User saved successfully');
             break;
@@ -967,37 +968,39 @@ async function saveUserToFirebase(user, userData) {
         throw lastError;
     }
     
-    // Save referral
+    // 2. Save referral
     try {
         await set(ref(rtdb, `referrals/${referralCode}`), {
             uid: user.uid,
-            username: userData.username.toLowerCase(),
+            username: usernameLower,
             fullName: userData.fullName,
-            createdAt: Date.now()
+            createdAt: timestamp
         });
         console.log('[SAVE] ✅ Referral saved');
     } catch (error) {
         console.error('[SAVE] ❌ Referral error:', error);
     }
     
-    // Save username for uniqueness check
+    // 3. Save username for uniqueness check
     try {
-        await set(ref(rtdb, `usernames/${userData.username.toLowerCase()}`), {
+        await set(ref(rtdb, `usernames/${usernameLower}`), {
             uid: user.uid,
-            username: userData.username.toLowerCase()
+            username: usernameLower,
+            timestamp: timestamp
         });
         console.log('[SAVE] ✅ Username saved');
     } catch (error) {
         console.error('[SAVE] ❌ Username error:', error);
     }
     
-    // Save email for uniqueness check
-    if (user.email) {
+    // 4. Save email for uniqueness check
+    if (emailLower) {
         try {
-            const emailHash = await hashString(user.email.toLowerCase());
+            const emailHash = await hashString(emailLower);
             await set(ref(rtdb, `emails/${emailHash}`), {
                 uid: user.uid,
-                email: user.email.toLowerCase()
+                email: emailLower,
+                timestamp: timestamp
             });
             console.log('[SAVE] ✅ Email saved');
         } catch (error) {
@@ -1005,13 +1008,14 @@ async function saveUserToFirebase(user, userData) {
         }
     }
     
-    // Save phone for uniqueness check
-    if (userData.phone) {
+    // 5. Save phone for uniqueness check
+    if (fullPhone) {
         try {
-            const phoneHash = await hashString(userData.phone);
+            const phoneHash = await hashString(fullPhone);
             await set(ref(rtdb, `phones/${phoneHash}`), {
                 uid: user.uid,
-                phone: userData.phone
+                phone: fullPhone,
+                timestamp: timestamp
             });
             console.log('[SAVE] ✅ Phone saved');
         } catch (error) {
@@ -1022,14 +1026,9 @@ async function saveUserToFirebase(user, userData) {
     return referralCode;
 }
 
-async function hashString(str) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
+// ============================================================
+// HANDLE REFERRAL
+// ============================================================
 async function handleReferral(newUserId) {
     if (!referredByCode) return;
     try {
@@ -1159,6 +1158,7 @@ async function registerWithEmail() {
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
+            email: email,
             country: country.name,
             countryCode: country.code,
             referredBy: referredByCode || null,
@@ -1314,6 +1314,7 @@ async function registerWithPhone() {
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
+            email: null,
             country: country.name,
             countryCode: country.code,
             referredBy: referredByCode || null,
