@@ -31,6 +31,8 @@
     --radius-xs: 8px;
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --font: 'Inter', sans-serif;
+    --referral-bg: rgba(255,215,0,0.05);
+    --referral-border: rgba(255,215,0,0.15);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
@@ -66,6 +68,8 @@ body.light-theme {
     --border-color: rgba(0,0,0,0.08);
     --border-focus: rgba(128,0,0,0.4);
     --shadow-card: 0 15px 40px rgba(0,0,0,0.12);
+    --referral-bg: rgba(128,0,0,0.05);
+    --referral-border: rgba(128,0,0,0.12);
 }
 body.light-theme .overlay { background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); }
 body.light-theme .register-box {
@@ -83,6 +87,13 @@ body.light-theme .register-option { background: var(--bg-input); border: 1px sol
 body.light-theme .register-option:hover { background: rgba(128,0,0,0.08); border-color: #800000; }
 body.light-theme .register-option.active { background: var(--gold-gradient); color: #0A0A0A; }
 body.light-theme .register-option.disabled { opacity: 0.4; cursor: not-allowed; }
+body.light-theme .referral-box {
+    background: var(--referral-bg);
+    border: 1px solid var(--referral-border);
+}
+body.light-theme .referral-box .referral-label { color: #800000; }
+body.light-theme .referral-box .referral-name { color: var(--text-primary); }
+body.light-theme .referral-box .referral-code { color: #800000; }
 
 /* Choices.js Dark Theme */
 body:not(.light-theme) .choices__inner {
@@ -210,6 +221,71 @@ h1 {
     margin-bottom: 4px; letter-spacing: -0.5px;
 }
 .sub-text { text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 22px; font-weight: 400; }
+
+/* Referral Box - NEW */
+.referral-box {
+    background: var(--referral-bg);
+    border: 1px solid var(--referral-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    animation: fadeInUp 0.4s ease;
+}
+.referral-box.visible {
+    display: flex;
+}
+.referral-box .referral-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gold-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    color: #0A0A0A;
+}
+.referral-box .referral-info {
+    flex: 1;
+}
+.referral-box .referral-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    font-weight: 600;
+}
+.referral-box .referral-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 1px;
+}
+.referral-box .referral-code {
+    font-size: 10px;
+    color: var(--gold);
+    font-weight: 600;
+    font-family: monospace;
+    background: rgba(255,215,0,0.1);
+    padding: 2px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 2px;
+}
+.referral-box .referral-badge {
+    background: var(--gold-gradient);
+    color: #0A0A0A;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
 
 .register-options {
     display: flex; gap: 6px; margin-bottom: 22px;
@@ -364,6 +440,9 @@ h1 {
     .theme-toggle .theme-label { display: none; }
     .register-option { padding: 6px 4px; font-size: 9px; }
     .register-option i { font-size: 14px; }
+    .referral-box { padding: 10px 12px; flex-wrap: wrap; }
+    .referral-box .referral-icon { width: 32px; height: 32px; font-size: 14px; }
+    .referral-box .referral-name { font-size: 11px; }
 }
 @media(max-width: 360px) {
     .content { padding: 14px 12px 16px; }
@@ -389,6 +468,19 @@ h1 {
         <div class="content">
             <h1>Create Account</h1>
             <p class="sub-text">Join ABOTRA-PROAI &amp; start earning with AI Robots</p>
+
+            <!-- REFERRAL BOX - Shows who invited you -->
+            <div class="referral-box" id="referralBox">
+                <div class="referral-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="referral-info">
+                    <div class="referral-label">🎯 Invited By</div>
+                    <div class="referral-name" id="referralName">Loading...</div>
+                    <div class="referral-code" id="referralCodeDisplay">Code: ---</div>
+                </div>
+                <div class="referral-badge">REFERRAL</div>
+            </div>
 
             <div class="register-options">
                 <div class="register-option active" data-method="email"><i class="fas fa-envelope"></i><span class="opt-label">Email</span></div>
@@ -490,7 +582,7 @@ const rtdb = getDatabase(app);
 console.log('[FIREBASE] ✅ Firebase initialized');
 
 // ============================================================
-// COUNTRIES DATA WITH SVG FLAGS
+// COUNTRIES DATA
 // ============================================================
 const countriesData = [
     { code: "+255", iso: "tz", name: "Tanzania", digits: 9 },
@@ -590,6 +682,7 @@ function getFlagSvg(country) {
 // STATE
 // ============================================================
 let referredByCode = null;
+let referrerData = null;
 const urlParams = new URLSearchParams(window.location.search);
 const refParam = urlParams.get('ref');
 if (refParam) {
@@ -608,6 +701,9 @@ let emailCountryChoices, phoneCountryChoices;
 const themeToggle = document.getElementById('themeToggle');
 const registerBtn = document.getElementById('registerBtn');
 const termsCheckbox = document.getElementById('termsCheckbox');
+const referralBox = document.getElementById('referralBox');
+const referralName = document.getElementById('referralName');
+const referralCodeDisplay = document.getElementById('referralCodeDisplay');
 
 // ============================================================
 // THEME
@@ -676,6 +772,57 @@ function showNotification(msg, type) {
             setTimeout(() => notif.remove(), 300);
         }
     }, 5000);
+}
+
+// ============================================================
+// LOAD REFERRER DATA
+// ============================================================
+async function loadReferrerData() {
+    if (!referredByCode) {
+        referralBox.classList.remove('visible');
+        return;
+    }
+    
+    try {
+        console.log('[REFERRAL] Loading referrer data for:', referredByCode);
+        const refSnap = await get(ref(rtdb, `referrals/${referredByCode}`));
+        
+        if (refSnap.exists()) {
+            const data = refSnap.val();
+            referrerData = data;
+            
+            // Try to get full name from users node
+            try {
+                const userSnap = await get(ref(rtdb, `users/${data.uid}`));
+                if (userSnap.exists()) {
+                    const userData = userSnap.val();
+                    referrerData.fullName = userData.fullName || userData.username || 'User';
+                    referrerData.username = userData.username;
+                }
+            } catch (e) {
+                console.log('[REFERRAL] Could not fetch user details:', e.message);
+            }
+            
+            // Display referrer info
+            const displayName = referrerData.fullName || referrerData.username || 'User';
+            referralName.textContent = displayName;
+            referralCodeDisplay.textContent = `Code: ${referredByCode}`;
+            referralBox.classList.add('visible');
+            
+            console.log('[REFERRAL] ✅ Referrer loaded:', displayName);
+        } else {
+            console.log('[REFERRAL] Referral code not found:', referredByCode);
+            referralName.textContent = 'Invalid referral code';
+            referralCodeDisplay.textContent = 'Please check the code';
+            referralBox.classList.add('visible');
+            // Style it as warning
+            referralBox.style.borderColor = '#F6465D';
+        }
+    } catch (error) {
+        console.error('[REFERRAL] Error loading referrer:', error);
+        referralName.textContent = 'Error loading referral';
+        referralBox.classList.add('visible');
+    }
 }
 
 // ============================================================
@@ -908,7 +1055,7 @@ async function checkUserExists(email, username, phone) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE - FIXED VERSION
+// SAVE USER TO FIREBASE
 // ============================================================
 async function saveUserToFirebase(user, userData) {
     console.log('[SAVE] Starting save for user:', user.uid);
@@ -918,7 +1065,6 @@ async function saveUserToFirebase(user, userData) {
     const emailLower = userData.email ? userData.email.toLowerCase() : null;
     const fullPhone = userData.phone || null;
     
-    // Generate referral code
     let referralCode = generateStaticReferralCode(user.uid);
     let attempts = 0;
     while (await checkReferralCodeExists(referralCode) && attempts < 10) {
@@ -926,7 +1072,6 @@ async function saveUserToFirebase(user, userData) {
         attempts++;
     }
     
-    // Prepare user data
     const dataToSave = {
         uid: user.uid,
         username: usernameLower,
@@ -948,7 +1093,7 @@ async function saveUserToFirebase(user, userData) {
     
     console.log('[SAVE] Data to save:', JSON.stringify(dataToSave, null, 2));
     
-    // 1. Save user data
+    // Save user data
     try {
         await set(ref(rtdb, `users/${user.uid}`), dataToSave);
         console.log('[SAVE] ✅ User saved');
@@ -957,7 +1102,7 @@ async function saveUserToFirebase(user, userData) {
         throw err;
     }
     
-    // 2. Save referral - NON-CRITICAL, continue if fails
+    // Save referral - NON-CRITICAL
     try {
         await set(ref(rtdb, `referrals/${referralCode}`), {
             uid: user.uid,
@@ -970,7 +1115,7 @@ async function saveUserToFirebase(user, userData) {
         console.error('[SAVE] Referral save error (non-critical):', error);
     }
     
-    // 3. Save username - NON-CRITICAL
+    // Save username
     try {
         await set(ref(rtdb, `usernames/${usernameLower}`), {
             uid: user.uid,
@@ -982,7 +1127,7 @@ async function saveUserToFirebase(user, userData) {
         console.error('[SAVE] Username save error (non-critical):', error);
     }
     
-    // 4. Save email - NON-CRITICAL
+    // Save email
     if (emailLower) {
         try {
             const emailHash = await hashString(emailLower);
@@ -997,7 +1142,7 @@ async function saveUserToFirebase(user, userData) {
         }
     }
     
-    // 5. Save phone - NON-CRITICAL
+    // Save phone
     if (fullPhone) {
         try {
             const phoneHash = await hashString(fullPhone);
@@ -1016,31 +1161,20 @@ async function saveUserToFirebase(user, userData) {
 }
 
 // ============================================================
-// HANDLE REFERRAL - FIXED WITH BETTER ERROR HANDLING
+// HANDLE REFERRAL
 // ============================================================
 async function handleReferral(newUserId) {
-    if (!referredByCode) {
-        console.log('[REFERRAL] No referral code to process');
+    if (!referredByCode || !referrerData) {
+        console.log('[REFERRAL] No referral to process');
         return;
     }
     
-    console.log('[REFERRAL] Processing referral code:', referredByCode);
+    console.log('[REFERRAL] Processing referral for:', referredByCode);
     
     try {
-        const referralRef = ref(rtdb, `referrals/${referredByCode}`);
-        const snap = await get(referralRef);
-        
-        if (!snap.exists()) {
-            console.log('[REFERRAL] Referral code not found:', referredByCode);
-            return;
-        }
-        
-        const referrerData = snap.val();
         const referrerUid = referrerData.uid;
         
-        console.log('[REFERRAL] Found referrer:', referrerUid);
-        
-        // Try to update referrer's referrals list using runTransaction
+        // Try to update referrer's referrals
         try {
             await runTransaction(ref(rtdb, `users/${referrerUid}`), (current) => {
                 if (current === null) {
@@ -1071,7 +1205,6 @@ async function handleReferral(newUserId) {
         } catch (txError) {
             console.error('[REFERRAL] Transaction failed:', txError);
             
-            // Try direct update as fallback
             try {
                 const userRef = ref(rtdb, `users/${referrerUid}`);
                 const userSnap = await get(userRef);
@@ -1089,14 +1222,11 @@ async function handleReferral(newUserId) {
                     console.log('[REFERRAL] ✅ Referrer updated via direct update');
                 }
             } catch (updateError) {
-                console.error('[REFERRAL] Direct update also failed:', updateError);
-                // Non-critical - user already registered
+                console.error('[REFERRAL] Direct update failed:', updateError);
             }
         }
-        
     } catch (error) {
         console.error('[REFERRAL] Error processing referral:', error);
-        // Don't throw - user already registered, referral is bonus
     }
 }
 
@@ -1112,7 +1242,7 @@ function validatePassword(password) {
 }
 
 // ============================================================
-// EMAIL REGISTRATION - FIXED
+// EMAIL REGISTRATION
 // ============================================================
 async function registerWithEmail() {
     if (!termsCheckbox.checked) {
@@ -1151,32 +1281,26 @@ async function registerWithEmail() {
     try {
         console.log('[REGISTER] Starting email registration...');
         
-        // Check if user exists
         const checkResult = await checkUserExists(email, username, null);
         if (checkResult.exists) {
             throw new Error(checkResult.message);
         }
 
-        // Create user
         console.log('[REGISTER] Creating Firebase Auth user...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log('[REGISTER] ✅ User created:', user.uid);
         
-        // Update profile
         await updateProfile(user, { displayName: fullName });
         console.log('[REGISTER] ✅ Profile updated');
         
-        // Wait for auth to sync
         await new Promise(r => setTimeout(r, 1500));
         
-        // Force token refresh
         if (auth.currentUser) {
             await auth.currentUser.getIdToken(true);
             console.log('[REGISTER] ✅ Token refreshed');
         }
         
-        // Save user data
         console.log('[REGISTER] Saving user data...');
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
@@ -1248,7 +1372,7 @@ async function registerWithEmail() {
 }
 
 // ============================================================
-// PHONE REGISTRATION - FIXED
+// PHONE REGISTRATION
 // ============================================================
 async function registerWithPhone() {
     if (!termsCheckbox.checked) {
@@ -1292,13 +1416,11 @@ async function registerWithPhone() {
     try {
         console.log('[PHONE] Starting phone registration...');
         
-        // Check if user exists
         const checkResult = await checkUserExists(null, username, fullPhone);
         if (checkResult.exists) {
             throw new Error(checkResult.message);
         }
 
-        // Create temporary email
         const tempEmail = `user_${Date.now()}_${Math.random().toString(36).substring(2,6)}@temp.abotra.com`;
         
         console.log('[PHONE] Creating Firebase Auth user...');
@@ -1328,7 +1450,6 @@ async function registerWithPhone() {
         });
         console.log('[PHONE] ✅ User data saved, referral:', referralCode);
         
-        // Handle referral - NON-BLOCKING
         try {
             await handleReferral(user.uid);
         } catch (refError) {
@@ -1430,6 +1551,11 @@ initTheme();
 setTimeout(() => {
     initCountryDropdowns();
 }, 100);
+
+// Load referrer data
+setTimeout(() => {
+    loadReferrerData();
+}, 500);
 
 // Check if already logged in
 onAuthStateChanged(auth, (user) => {
