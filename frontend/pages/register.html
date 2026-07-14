@@ -458,8 +458,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     updateProfile,
-    onAuthStateChanged,
-    signOut
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
     getDatabase,
@@ -472,7 +471,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // ============================================================
-// FIREBASE CONFIG - USING LATEST VERSION
+// FIREBASE CONFIG
 // ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
@@ -595,7 +594,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const refParam = urlParams.get('ref');
 if (refParam) {
     referredByCode = refParam.toUpperCase().trim();
-    console.log('[REFERRAL] Detected:', referredByCode);
+    console.log('[REFERRAL] Detected referral code:', referredByCode);
 }
 
 let selectedCountry = null;
@@ -871,11 +870,10 @@ async function hashString(str) {
 }
 
 // ============================================================
-// CHECK IF USER EXISTS - SIMPLIFIED
+// CHECK IF USER EXISTS
 // ============================================================
 async function checkUserExists(email, username, phone) {
     try {
-        // Check username
         if (username) {
             const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
             const snap = await get(usernameRef);
@@ -884,7 +882,6 @@ async function checkUserExists(email, username, phone) {
             }
         }
         
-        // Check email
         if (email) {
             const emailHash = await hashString(email.toLowerCase());
             const emailRef = ref(rtdb, `emails/${emailHash}`);
@@ -894,7 +891,6 @@ async function checkUserExists(email, username, phone) {
             }
         }
         
-        // Check phone
         if (phone) {
             const phoneHash = await hashString(phone);
             const phoneRef = ref(rtdb, `phones/${phoneHash}`);
@@ -912,11 +908,10 @@ async function checkUserExists(email, username, phone) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE - SIMPLIFIED WITH DEBUG LOGGING
+// SAVE USER TO FIREBASE - FIXED VERSION
 // ============================================================
 async function saveUserToFirebase(user, userData) {
     console.log('[SAVE] Starting save for user:', user.uid);
-    console.log('[SAVE] UserData:', userData);
     
     const timestamp = Date.now();
     const usernameLower = userData.username.toLowerCase();
@@ -953,38 +948,16 @@ async function saveUserToFirebase(user, userData) {
     
     console.log('[SAVE] Data to save:', JSON.stringify(dataToSave, null, 2));
     
-    // 1. Save user data - try with different approaches
-    let saved = false;
-    let lastError = null;
-    
-    // Approach 1: Direct set
+    // 1. Save user data
     try {
-        console.log('[SAVE] Attempt 1: Direct set on users/');
         await set(ref(rtdb, `users/${user.uid}`), dataToSave);
-        console.log('[SAVE] ✅ User saved with direct set');
-        saved = true;
+        console.log('[SAVE] ✅ User saved');
     } catch (err) {
-        console.error('[SAVE] Direct set failed:', err);
-        lastError = err;
-        
-        // Approach 2: Try update
-        try {
-            console.log('[SAVE] Attempt 2: Update on users/');
-            await update(ref(rtdb, `users/${user.uid}`), dataToSave);
-            console.log('[SAVE] ✅ User saved with update');
-            saved = true;
-        } catch (err2) {
-            console.error('[SAVE] Update failed:', err2);
-            lastError = err2;
-        }
+        console.error('[SAVE] ❌ Failed to save user:', err);
+        throw err;
     }
     
-    if (!saved) {
-        console.error('[SAVE] ❌ All save attempts failed:', lastError);
-        throw lastError;
-    }
-    
-    // 2. Save referral
+    // 2. Save referral - NON-CRITICAL, continue if fails
     try {
         await set(ref(rtdb, `referrals/${referralCode}`), {
             uid: user.uid,
@@ -997,7 +970,7 @@ async function saveUserToFirebase(user, userData) {
         console.error('[SAVE] Referral save error (non-critical):', error);
     }
     
-    // 3. Save username
+    // 3. Save username - NON-CRITICAL
     try {
         await set(ref(rtdb, `usernames/${usernameLower}`), {
             uid: user.uid,
@@ -1009,7 +982,7 @@ async function saveUserToFirebase(user, userData) {
         console.error('[SAVE] Username save error (non-critical):', error);
     }
     
-    // 4. Save email
+    // 4. Save email - NON-CRITICAL
     if (emailLower) {
         try {
             const emailHash = await hashString(emailLower);
@@ -1024,7 +997,7 @@ async function saveUserToFirebase(user, userData) {
         }
     }
     
-    // 5. Save phone
+    // 5. Save phone - NON-CRITICAL
     if (fullPhone) {
         try {
             const phoneHash = await hashString(fullPhone);
@@ -1043,22 +1016,46 @@ async function saveUserToFirebase(user, userData) {
 }
 
 // ============================================================
-// HANDLE REFERRAL
+// HANDLE REFERRAL - FIXED WITH BETTER ERROR HANDLING
 // ============================================================
 async function handleReferral(newUserId) {
-    if (!referredByCode) return;
+    if (!referredByCode) {
+        console.log('[REFERRAL] No referral code to process');
+        return;
+    }
+    
+    console.log('[REFERRAL] Processing referral code:', referredByCode);
+    
     try {
         const referralRef = ref(rtdb, `referrals/${referredByCode}`);
         const snap = await get(referralRef);
+        
         if (!snap.exists()) {
             console.log('[REFERRAL] Referral code not found:', referredByCode);
             return;
         }
+        
         const referrerData = snap.val();
         const referrerUid = referrerData.uid;
         
-        await runTransaction(ref(rtdb, `users/${referrerUid}`), (current) => {
-            if (current) {
+        console.log('[REFERRAL] Found referrer:', referrerUid);
+        
+        // Try to update referrer's referrals list using runTransaction
+        try {
+            await runTransaction(ref(rtdb, `users/${referrerUid}`), (current) => {
+                if (current === null) {
+                    return { 
+                        referrals: { 
+                            count: 1, 
+                            list: [{ 
+                                userId: newUserId, 
+                                joinedAt: Date.now(), 
+                                referralCode: referredByCode 
+                            }] 
+                        } 
+                    };
+                }
+                
                 const referrals = current.referrals || { count: 0, list: [] };
                 referrals.count = (referrals.count || 0) + 1;
                 if (!referrals.list) referrals.list = [];
@@ -1068,12 +1065,38 @@ async function handleReferral(newUserId) {
                     referralCode: referredByCode
                 });
                 current.referrals = referrals;
+                return current;
+            });
+            console.log('[REFERRAL] ✅ Referrer updated via transaction');
+        } catch (txError) {
+            console.error('[REFERRAL] Transaction failed:', txError);
+            
+            // Try direct update as fallback
+            try {
+                const userRef = ref(rtdb, `users/${referrerUid}`);
+                const userSnap = await get(userRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.val();
+                    const referrals = userData.referrals || { count: 0, list: [] };
+                    referrals.count = (referrals.count || 0) + 1;
+                    if (!referrals.list) referrals.list = [];
+                    referrals.list.push({
+                        userId: newUserId,
+                        joinedAt: Date.now(),
+                        referralCode: referredByCode
+                    });
+                    await update(ref(rtdb, `users/${referrerUid}`), { referrals: referrals });
+                    console.log('[REFERRAL] ✅ Referrer updated via direct update');
+                }
+            } catch (updateError) {
+                console.error('[REFERRAL] Direct update also failed:', updateError);
+                // Non-critical - user already registered
             }
-            return current;
-        });
-        console.log('[REFERRAL] ✅ Processed for:', referredByCode);
-    } catch (e) {
-        console.error('[REFERRAL] Error:', e);
+        }
+        
+    } catch (error) {
+        console.error('[REFERRAL] Error processing referral:', error);
+        // Don't throw - user already registered, referral is bonus
     }
 }
 
@@ -1089,7 +1112,7 @@ function validatePassword(password) {
 }
 
 // ============================================================
-// EMAIL REGISTRATION
+// EMAIL REGISTRATION - FIXED
 // ============================================================
 async function registerWithEmail() {
     if (!termsCheckbox.checked) {
@@ -1127,9 +1150,6 @@ async function registerWithEmail() {
 
     try {
         console.log('[REGISTER] Starting email registration...');
-        console.log('[REGISTER] Email:', email);
-        console.log('[REGISTER] Username:', username);
-        console.log('[REGISTER] Full Name:', fullName);
         
         // Check if user exists
         const checkResult = await checkUserExists(email, username, null);
@@ -1141,13 +1161,13 @@ async function registerWithEmail() {
         console.log('[REGISTER] Creating Firebase Auth user...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log('[REGISTER] ✅ User created successfully:', user.uid);
+        console.log('[REGISTER] ✅ User created:', user.uid);
         
         // Update profile
         await updateProfile(user, { displayName: fullName });
         console.log('[REGISTER] ✅ Profile updated');
         
-        // Wait a moment for auth to sync
+        // Wait for auth to sync
         await new Promise(r => setTimeout(r, 1500));
         
         // Force token refresh
@@ -1157,7 +1177,7 @@ async function registerWithEmail() {
         }
         
         // Save user data
-        console.log('[REGISTER] Saving user data to database...');
+        console.log('[REGISTER] Saving user data...');
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
@@ -1169,8 +1189,12 @@ async function registerWithEmail() {
         });
         console.log('[REGISTER] ✅ User data saved, referral:', referralCode);
         
-        // Handle referral
-        await handleReferral(user.uid);
+        // Handle referral - NON-BLOCKING
+        try {
+            await handleReferral(user.uid);
+        } catch (refError) {
+            console.error('[REGISTER] Referral handling error (non-critical):', refError);
+        }
         
         // Welcome notification
         try {
@@ -1198,7 +1222,6 @@ async function registerWithEmail() {
 
     } catch (error) {
         console.error('[REGISTER] ❌ Error:', error);
-        console.error('[REGISTER] Error details:', JSON.stringify(error, null, 2));
         
         let message = 'Registration failed. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
@@ -1214,7 +1237,7 @@ async function registerWithEmail() {
         } else if (error.code === 'auth/too-many-requests') {
             message = 'Too many requests. Please try again later.';
         } else if (error.message && error.message.includes('permission_denied')) {
-            message = 'Permission denied. Please check your database rules.';
+            message = 'Permission denied. Please contact support.';
         } else if (error.message) {
             message = error.message;
         }
@@ -1225,7 +1248,7 @@ async function registerWithEmail() {
 }
 
 // ============================================================
-// PHONE REGISTRATION
+// PHONE REGISTRATION - FIXED
 // ============================================================
 async function registerWithPhone() {
     if (!termsCheckbox.checked) {
@@ -1268,8 +1291,6 @@ async function registerWithPhone() {
 
     try {
         console.log('[PHONE] Starting phone registration...');
-        console.log('[PHONE] Phone:', fullPhone);
-        console.log('[PHONE] Username:', username);
         
         // Check if user exists
         const checkResult = await checkUserExists(null, username, fullPhone);
@@ -1280,7 +1301,7 @@ async function registerWithPhone() {
         // Create temporary email
         const tempEmail = `user_${Date.now()}_${Math.random().toString(36).substring(2,6)}@temp.abotra.com`;
         
-        console.log('[PHONE] Creating Firebase Auth user with temp email:', tempEmail);
+        console.log('[PHONE] Creating Firebase Auth user...');
         const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, password);
         const user = userCredential.user;
         console.log('[PHONE] ✅ User created:', user.uid);
@@ -1295,6 +1316,7 @@ async function registerWithPhone() {
             console.log('[PHONE] ✅ Token refreshed');
         }
         
+        console.log('[PHONE] Saving user data...');
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
@@ -1306,7 +1328,12 @@ async function registerWithPhone() {
         });
         console.log('[PHONE] ✅ User data saved, referral:', referralCode);
         
-        await handleReferral(user.uid);
+        // Handle referral - NON-BLOCKING
+        try {
+            await handleReferral(user.uid);
+        } catch (refError) {
+            console.error('[PHONE] Referral handling error (non-critical):', refError);
+        }
         
         try {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
@@ -1413,8 +1440,6 @@ onAuthStateChanged(auth, (user) => {
 });
 
 console.log('[REGISTER] ✅ Page loaded');
-console.log('[REGISTER] Firebase Auth:', auth);
-console.log('[REGISTER] Firebase RTDB:', rtdb);
 </script>
 </body>
 </html>
