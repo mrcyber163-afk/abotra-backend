@@ -1,4 +1,7 @@
-// backend/functions/services/robot-service.js
+// ============================================================
+// ROBOT SERVICE
+// ============================================================
+
 const { restGet, restPut, restPatch } = require('../firebase');
 
 class RobotService {
@@ -34,18 +37,15 @@ class RobotService {
         const plan = await restGet(`robotPlans/${planId}`);
         if (!plan) throw new Error('Plan not found');
         
-        // Check balance
         const user = await restGet(`users/${uid}`);
         if (!user || user.balance < amount) {
             throw new Error('Insufficient balance');
         }
         
-        // Deduct balance
         await restPatch(`users/${uid}`, {
             balance: user.balance - amount
         });
         
-        // Create premium robot
         const startDate = Date.now();
         const expiryDate = startDate + (plan.duration * 24 * 60 * 60 * 1000);
         
@@ -83,13 +83,6 @@ class RobotService {
         }
         
         return { expired: false, robot };
-    }
-    
-    async calculateDaysRemaining(expiryDate) {
-        const now = Date.now();
-        const diff = expiryDate - now;
-        if (diff <= 0) return 0;
-        return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
     
     async pauseRobot(uid) {

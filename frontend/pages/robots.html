@@ -58,10 +58,16 @@ border: 1px solid rgba(0,0,0,0.08);
 }
 body.light-theme .instructions-box h3 { color: #800000; }
 body.light-theme .instructions-box li { color: #333; }
+body.light-theme .price-box { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); }
+body.light-theme .price-box .price-label { color: #666; }
+body.light-theme .price-box .price-amount { color: #800000; }
+body.light-theme .invest-box { background: rgba(14,203,129,0.08); border: 1px solid rgba(14,203,129,0.2); }
+body.light-theme .invest-box .invest-label { color: #0A7A4A; }
+body.light-theme .invest-box .invest-amount { color: #0A9E65; }
 
 .skeleton-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 20px;
 }
 .skeleton-card {
@@ -73,7 +79,7 @@ body.light-theme .instructions-box li { color: #333; }
 }
 .skeleton-image {
     width: 100%;
-    height: 180px;
+    height: 160px;
     background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -237,7 +243,7 @@ gap: 8px;
 }
 .robots-grid {
 display: grid;
-grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 gap: 20px;
 }
 .robot-card {
@@ -257,7 +263,7 @@ box-shadow: 0 15px 35px rgba(255,215,0,0.15);
 .robot-image-container {
 position: relative;
 width: 100%;
-height: 180px;
+height: 160px;
 overflow: hidden;
 }
 .robot-image {
@@ -410,32 +416,70 @@ gap: 3px;
 }
 .stat-value { color: #FFD700; font-size: 14px; font-weight: 700; }
 .stat-value.positive { color: #0ECB81; }
-.price-section {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 12px;
+
+/* Price & Invest Boxes */
+.price-box {
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.price-label {
-color: #888;
-font-size: 10px;
-display: flex;
-align-items: center;
-gap: 4px;
+.price-box .price-label {
+    color: #aaa;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
-.price-value { 
-color: #FFD700; 
-font-size: 22px; 
-font-weight: 800; 
-transition: all 0.3s ease;
+.price-box .price-amount {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: 800;
+    transition: all 0.3s ease;
 }
-.price-value.currency-updated {
-animation: priceUpdate 0.3s ease;
+.price-box .price-amount.currency-updated {
+    animation: priceUpdate 0.3s ease;
 }
+
+.invest-box {
+    background: rgba(14,203,129,0.08);
+    border: 1px solid rgba(14,203,129,0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.invest-box .invest-label {
+    color: #aaa;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.invest-box .invest-amount {
+    color: #0ECB81;
+    font-size: 16px;
+    font-weight: 700;
+}
+.invest-box .invest-range {
+    color: #888;
+    font-size: 9px;
+    font-weight: 400;
+    margin-left: 4px;
+}
+
 @keyframes priceUpdate {
-0% { transform: scale(1); color: #FFD700; }
-50% { transform: scale(1.05); color: #0ECB81; }
-100% { transform: scale(1); color: #FFD700; }
+    0% { transform: scale(1); color: #FFD700; }
+    50% { transform: scale(1.05); color: #0ECB81; }
+    100% { transform: scale(1); color: #FFD700; }
 }
 
 .buy-btn {
@@ -468,6 +512,9 @@ background: linear-gradient(135deg, #0ECB81, #0A9E65);
 }
 .buy-btn.active-robot:hover {
 box-shadow: 0 5px 12px rgba(14,203,129,0.3);
+}
+.buy-btn.requires-more {
+background: linear-gradient(135deg, #F6465D, #D43F52);
 }
 .bottom-nav {
 position: fixed;
@@ -570,7 +617,7 @@ font-weight: 600;
 .main-content { padding: 0 15px; }
 .page-title { font-size: 24px; }
 .robots-grid { grid-template-columns: 1fr; gap: 15px; }
-.robot-image-container { height: 160px; }
+.robot-image-container { height: 140px; }
 .theme-toggle { padding: 6px; }
 .logo-area h2 { font-size: 14px; }
 .logo-area p { display: none; }
@@ -580,6 +627,8 @@ font-weight: 600;
 .instructions-box { padding: 15px 16px; }
 .currency-toggle-btn { padding: 4px 10px; font-size: 9px; }
 .currency-toggle-btn i { font-size: 10px; }
+.price-box .price-amount { font-size: 16px; }
+.invest-box .invest-amount { font-size: 14px; }
 }
 
 .modal-overlay {
@@ -607,7 +656,7 @@ font-weight: 600;
     background: linear-gradient(145deg, #181828, #0E0E18);
     border-radius: 28px;
     padding: 24px 20px 20px;
-    max-width: 380px;
+    max-width: 420px;
     width: 100%;
     border: 1px solid rgba(194,122,14,0.4);
     box-shadow: 0 20px 60px rgba(0,0,0,0.8);
@@ -625,19 +674,31 @@ font-weight: 600;
     justify-content: center;
     gap: 10px;
 }
-.modal-card p {
-    color: #aaa;
-    font-size: 12px;
-    text-align: center;
-    margin-bottom: 12px;
-}
 .modal-card .modal-message {
     color: #ccc;
     font-size: 12px;
     text-align: center;
     margin-bottom: 16px;
-    line-height: 1.6;
+    line-height: 1.8;
 }
+.modal-card .modal-detail {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 10px 0;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.modal-card .modal-detail .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.modal-card .modal-detail .row:last-child { border-bottom: none; }
+.modal-card .modal-detail .row .label { color: #888; }
+.modal-card .modal-detail .row .value { color: #FFD700; font-weight: 600; }
+.modal-card .modal-detail .row .value.green { color: #0ECB81; }
 .modal-buttons {
     display: flex;
     gap: 10px;
@@ -668,6 +729,27 @@ font-weight: 600;
 .modal-btn-cancel:hover {
     background: rgba(255,255,255,0.15);
 }
+.modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+    margin: 8px 0;
+}
+.modal-input:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+}
+.modal-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .success-popup {
     position: fixed;
     top: 50%;
@@ -810,13 +892,13 @@ font-weight: 600;
 <div class="instructions-box">
     <h3><i class="fas fa-info-circle"></i> How AI Robots Work</h3>
     <ul>
-        <li><i class="fas fa-shopping-cart"></i> <span><strong>Purchase Once, Own Forever</strong> — Each robot is a <span class="highlight">permanent purchase</span>. No subscription fees, no hidden costs. Buy it once, and it's yours forever.</span></li>
-        <li><i class="fas fa-play-circle"></i> <span><strong class="highlight">Auto-Start on Purchase</strong> — Your robot starts trading <span class="highlight">immediately</span> after purchase! Half of your payment goes to the robot (invested), and half is platform profit.</span></li>
-        <li><i class="fas fa-rocket"></i> <span>Each robot purchase includes <span class="highlight">automatic trading capital</span> — half of your payment is invested in trading automatically, and the robot starts working for you <strong>instantly</strong>.</span></li>
-        <li><i class="fas fa-calendar-alt"></i> <span>We <span class="highlight">recommend setting your robot to 30 days</span> when activating it. This allows the AI to optimize trading strategies over time and reduces the need to manually restart your bot every day.</span></li>
-        <li><i class="fas fa-chart-line"></i> <span>Each robot generates daily returns based on its level. Higher-level robots offer higher daily profits but require a larger initial investment.</span></li>
-        <li><i class="fas fa-shield-alt"></i> <span>You can <span class="highlight">own multiple robots</span> and run them simultaneously to diversify your trading portfolio and maximize your daily earnings.</span></li>
-        <li><i class="fas fa-robot"></i> <span>After purchase, visit the <strong>"AI Bot"</strong> page to monitor your active robots and see your daily earnings.</span></li>
+        <li><i class="fas fa-shopping-cart"></i> <span><strong>Purchase Once, Own Forever</strong> — Each robot is a <span class="highlight">permanent purchase</span>. No subscription fees.</span></li>
+        <li><i class="fas fa-coins"></i> <span><strong>Two Costs:</strong> <span class="highlight">Bot Price</span> (to buy the robot) + <span class="highlight">Investment Amount</span> (trading capital). You need <strong>BOTH</strong> to start trading.</span></li>
+        <li><i class="fas fa-play-circle"></i> <span><strong class="highlight">Auto-Start on Purchase</strong> — After buying the robot, you <strong>must invest</strong> to activate trading. The robot starts immediately after investment.</span></li>
+        <li><i class="fas fa-arrow-up"></i> <span>After <strong class="highlight">120 days (4 months)</strong>, your robot <span class="highlight">upgrades automatically</span> to the next level. Your invested capital moves to the new robot.</span></li>
+        <li><i class="fas fa-chart-line"></i> <span>Each robot generates daily returns based on its level. Higher-level robots offer higher daily profits but require larger investment.</span></li>
+        <li><i class="fas fa-shield-alt"></i> <span>You can <span class="highlight">own multiple robots</span> and run them simultaneously to diversify your portfolio.</span></li>
+        <li><i class="fas fa-robot"></i> <span>After purchase, visit the <strong>"AI Bot"</strong> page to monitor your active robots and see daily earnings.</span></li>
     </ul>
 </div>
 </div>
@@ -891,26 +973,79 @@ const countryCurrencies = {
 };
 
 // ============================================================
-// ROBOTS DATA - Default
+// ROBOTS DATA - With NEW Pricing Structure
 // ============================================================
+// Bot Price = Half of original price (to buy robot)
+// Min Investment = Minimum amount to invest in trading
+// Max Investment = Maximum amount that can be invested
 const defaultRobots = [
-    { id: 0, name: "Starter Bot", level: 0, dailyProfit: 3, price: 20, description: "✨ Start your AI trading journey! Perfect for beginners. Low-cost entry with steady 3% daily returns.", hot: false, image: "../assets/images/robot0.png", winRate: 80, isStarter: true, minTrade: 3 },
-    { id: 1, name: "Bronze Bot", level: 1, dailyProfit: 4, price: 60, description: "Entry-level AI bot perfect for beginners learning automated trading. Low risk, steady returns. +4% daily!", hot: false, image: "../assets/images/robot1.png", winRate: 86, isStarter: false, minTrade: 10 },
-    { id: 2, name: "Silver Bot", level: 2, dailyProfit: 5, price: 144, description: "Enhanced AI algorithms for more consistent daily returns. Medium-low risk profile. +5% daily!", hot: false, image: "../assets/images/robot2.png", winRate: 87, isStarter: false, minTrade: 30 },
-    { id: 3, name: "Gold Bot", level: 3, dailyProfit: 7, price: 240, description: "Premium trading with advanced market analysis and higher accuracy. Best seller! +7% daily!", hot: true, image: "../assets/images/robot3.png", winRate: 88, isStarter: false, minTrade: 50 },
-    { id: 4, name: "Platinum Bot", level: 4, dailyProfit: 9, price: 360, description: "Multi-strategy trading bot with real-time market adaptation. Medium-high returns. +9% daily!", hot: false, image: "../assets/images/robot4.png", winRate: 89, isStarter: false, minTrade: 90 },
-    { id: 5, name: "Diamond Bot", level: 5, dailyProfit: 11, price: 480, description: "High-frequency trading with superior risk management. For serious traders. +11% daily!", hot: false, image: "../assets/images/robot5.png", winRate: 90, isStarter: false, minTrade: 120 },
-    { id: 6, name: "Emerald Bot", level: 6, dailyProfit: 15, price: 600, description: "Green energy trading focused on sustainable profit growth. Eco-friendly AI. +15% daily!", hot: false, image: "../assets/images/robot6.png", winRate: 91, isStarter: false, minTrade: 150 },
-    { id: 7, name: "Ruby Bot", level: 7, dailyProfit: 19, price: 900, description: "Aggressive trading bot with high return potential. For experienced investors. +19% daily!", hot: true, image: "../assets/images/robot7.png", winRate: 92, isStarter: false, minTrade: 200 },
-    { id: 8, name: "Sapphire Bot", level: 8, dailyProfit: 23, price: 1120, description: "Institutional-grade AI with deep market insights. Professional trading. +23% daily!", hot: false, image: "../assets/images/robot8.png", winRate: 93, isStarter: false, minTrade: 250 },
-    { id: 9, name: "Onyx Bot", level: 9, dailyProfit: 28, price: 1440, description: "Black box trading with proprietary AI algorithms. Elite performance. +28% daily!", hot: false, image: "../assets/images/robot9.png", winRate: 94, isStarter: false, minTrade: 300 },
-    { id: 10, name: "Legendary Bot", level: 10, dailyProfit: 38, price: 2000, description: "Ultimate AI trading bot - maximum profit potential! The final level. +38% daily!", hot: true, image: "../assets/images/robot10.png", winRate: 95, isStarter: false, minTrade: 500 }
+    { 
+        id: 0, name: "Starter Bot", level: 0, dailyProfit: 3, 
+        botPrice: 10, minInvest: 10, maxInvest: 10000,
+        description: "✨ Start your AI trading journey! Perfect for beginners. Low-cost entry with steady 3% daily returns.", 
+        hot: false, image: "../assets/images/robot0.png", winRate: 80, isStarter: true 
+    },
+    { 
+        id: 1, name: "Bronze Bot", level: 1, dailyProfit: 4, 
+        botPrice: 30, minInvest: 30, maxInvest: 20000,
+        description: "Entry-level AI bot perfect for beginners learning automated trading. Low risk, steady returns. +4% daily!", 
+        hot: false, image: "../assets/images/robot1.png", winRate: 86, isStarter: false 
+    },
+    { 
+        id: 2, name: "Silver Bot", level: 2, dailyProfit: 5, 
+        botPrice: 72, minInvest: 72, maxInvest: 50000,
+        description: "Enhanced AI algorithms for more consistent daily returns. Medium-low risk profile. +5% daily!", 
+        hot: false, image: "../assets/images/robot2.png", winRate: 87, isStarter: false 
+    },
+    { 
+        id: 3, name: "Gold Bot", level: 3, dailyProfit: 7, 
+        botPrice: 120, minInvest: 120, maxInvest: 100000,
+        description: "Premium trading with advanced market analysis and higher accuracy. Best seller! +7% daily!", 
+        hot: true, image: "../assets/images/robot3.png", winRate: 88, isStarter: false 
+    },
+    { 
+        id: 4, name: "Platinum Bot", level: 4, dailyProfit: 9, 
+        botPrice: 180, minInvest: 180, maxInvest: 150000,
+        description: "Multi-strategy trading bot with real-time market adaptation. Medium-high returns. +9% daily!", 
+        hot: false, image: "../assets/images/robot4.png", winRate: 89, isStarter: false 
+    },
+    { 
+        id: 5, name: "Diamond Bot", level: 5, dailyProfit: 11, 
+        botPrice: 240, minInvest: 240, maxInvest: 200000,
+        description: "High-frequency trading with superior risk management. For serious traders. +11% daily!", 
+        hot: false, image: "../assets/images/robot5.png", winRate: 90, isStarter: false 
+    },
+    { 
+        id: 6, name: "Emerald Bot", level: 6, dailyProfit: 15, 
+        botPrice: 300, minInvest: 300, maxInvest: 300000,
+        description: "Green energy trading focused on sustainable profit growth. Eco-friendly AI. +15% daily!", 
+        hot: false, image: "../assets/images/robot6.png", winRate: 91, isStarter: false 
+    },
+    { 
+        id: 7, name: "Ruby Bot", level: 7, dailyProfit: 19, 
+        botPrice: 450, minInvest: 450, maxInvest: 500000,
+        description: "Aggressive trading bot with high return potential. For experienced investors. +19% daily!", 
+        hot: true, image: "../assets/images/robot7.png", winRate: 92, isStarter: false 
+    },
+    { 
+        id: 8, name: "Sapphire Bot", level: 8, dailyProfit: 23, 
+        botPrice: 560, minInvest: 560, maxInvest: 750000,
+        description: "Institutional-grade AI with deep market insights. Professional trading. +23% daily!", 
+        hot: false, image: "../assets/images/robot8.png", winRate: 93, isStarter: false 
+    },
+    { 
+        id: 9, name: "Onyx Bot", level: 9, dailyProfit: 28, 
+        botPrice: 720, minInvest: 720, maxInvest: 1000000,
+        description: "Black box trading with proprietary AI algorithms. Elite performance. +28% daily!", 
+        hot: false, image: "../assets/images/robot9.png", winRate: 94, isStarter: false 
+    },
+    { 
+        id: 10, name: "Legendary Bot", level: 10, dailyProfit: 38, 
+        botPrice: 1000, minInvest: 1000, maxInvest: 2000000,
+        description: "Ultimate AI trading bot - maximum profit potential! The final level. +38% daily!", 
+        hot: true, image: "../assets/images/robot10.png", winRate: 95, isStarter: false 
+    }
 ];
-
-const INVESTED_AMOUNT = {
-    0: 10, 1: 30, 2: 72, 3: 120, 4: 180,
-    5: 240, 6: 300, 7: 450, 8: 560, 9: 720, 10: 1000
-};
 
 // ============================================================
 // CURRENCY FUNCTIONS
@@ -926,6 +1061,16 @@ function formatPriceInCurrency(usdPrice) {
     const converted = usdPrice * localRate;
     const decimals = (localSymbol === 'TZS' || localSymbol === 'MWK' || localSymbol === 'UGX' || localSymbol === 'CDF' || localSymbol === 'BIF') ? 0 : 2;
     return `${localSymbol} ${converted.toFixed(decimals)}`;
+}
+
+function formatPriceRange(min, max) {
+    if (currentCurrency === 'USD') {
+        return `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+    }
+    const minConv = min * localRate;
+    const maxConv = max * localRate;
+    const decimals = (localSymbol === 'TZS' || localSymbol === 'MWK' || localSymbol === 'UGX' || localSymbol === 'CDF' || localSymbol === 'BIF') ? 0 : 2;
+    return `${localSymbol} ${minConv.toFixed(decimals)} - ${localSymbol} ${maxConv.toFixed(decimals)}`;
 }
 
 function updateCurrencyDisplay() {
@@ -945,8 +1090,9 @@ function updateAllPrices() {
     const container = document.getElementById('robotsContainer');
     if (!container) return;
     
-    const priceElements = container.querySelectorAll('.price-value');
-    const investedElements = container.querySelectorAll('.invested-value-display');
+    const priceElements = container.querySelectorAll('.price-amount');
+    const investElements = container.querySelectorAll('.invest-amount');
+    const rangeElements = container.querySelectorAll('.invest-range');
     
     priceElements.forEach(el => {
         const usdPrice = parseFloat(el.getAttribute('data-usd-price'));
@@ -958,13 +1104,18 @@ function updateAllPrices() {
         }
     });
     
-    investedElements.forEach(el => {
+    investElements.forEach(el => {
         const usdAmount = parseFloat(el.getAttribute('data-usd-amount'));
         if (usdAmount) {
             el.textContent = formatPriceInCurrency(usdAmount);
-            el.classList.remove('currency-updated');
-            void el.offsetWidth;
-            el.classList.add('currency-updated');
+        }
+    });
+    
+    rangeElements.forEach(el => {
+        const min = parseFloat(el.getAttribute('data-min'));
+        const max = parseFloat(el.getAttribute('data-max'));
+        if (min && max) {
+            el.textContent = formatPriceRange(min, max);
         }
     });
 }
@@ -987,54 +1138,119 @@ function showNotification(message, type) {
 }
 
 // ============================================================
-// CONFIRM MODAL
+// CONFIRM MODAL WITH INVESTMENT INPUT
 // ============================================================
-function showConfirmModal(title, message, onConfirm) {
+function showInvestModal(robot, onConfirm) {
     const existing = document.querySelector('.modal-overlay');
     if (existing) existing.remove();
+    
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
+    const botPrice = robot.botPrice || (robot.price / 2);
+    const minInvest = robot.minInvest || (robot.price / 2);
+    const maxInvest = robot.maxInvest || 10000;
+    const formattedBotPrice = formatPriceInCurrency(botPrice);
+    const formattedMinInvest = formatPriceInCurrency(minInvest);
+    const formattedMaxInvest = formatPriceInCurrency(maxInvest);
+    
     overlay.innerHTML = `
         <div class="modal-card">
-            <h3>${title}</h3>
-            <div class="modal-message">${message}</div>
+            <h3><i class="fas fa-shopping-cart"></i> Purchase ${robot.name}</h3>
+            <div class="modal-message">
+                <p style="margin-bottom:6px;">To start trading with <strong>${robot.name}</strong>, you need:</p>
+                <div class="modal-detail">
+                    <div class="row"><span class="label">🤖 Bot Price (One-time)</span><span class="value">${formattedBotPrice}</span></div>
+                    <div class="row"><span class="label">💰 Investment (Trading Capital)</span><span class="value green">${formattedMinInvest} - ${formattedMaxInvest}</span></div>
+                    <div class="row"><span class="label">📈 Daily Profit</span><span class="value green">${robot.dailyProfit}%</span></div>
+                </div>
+                <p style="margin-top:8px;color:#888;font-size:10px;">Select your investment amount (minimum ${formattedMinInvest})</p>
+                <input type="number" id="investAmountInput" class="modal-input" min="${minInvest}" max="${maxInvest}" step="1" value="${minInvest}">
+                <p style="color:#888;font-size:9px;margin-top:4px;">Available balance: <span id="modalBalanceDisplay" style="color:#FFD700;">${formatPriceInCurrency(userBalance)}</span></p>
+            </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Confirm</button>
+                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Purchase & Invest</button>
             </div>
         </div>
     `;
     document.body.appendChild(overlay);
     setTimeout(() => overlay.classList.add('active'), 10);
-    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+    
+    const input = document.getElementById('investAmountInput');
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    const cancelBtn = document.getElementById('modalCancelBtn');
+    
+    // Update balance display dynamically
+    const balanceDisplay = document.getElementById('modalBalanceDisplay');
+    if (balanceDisplay) {
+        balanceDisplay.textContent = formatPriceInCurrency(userBalance);
+    }
+    
+    const cleanup = () => {
         overlay.remove();
-        if (onConfirm) onConfirm();
+        confirmBtn.removeEventListener('click', onConfirmClick);
+        cancelBtn.removeEventListener('click', onCancel);
+    };
+    
+    const onCancel = () => cleanup();
+    const onConfirmClick = () => {
+        const investAmount = parseFloat(input.value);
+        if (!investAmount || investAmount < minInvest) {
+            showNotification(`Minimum investment is ${formatPriceInCurrency(minInvest)}`, 'error');
+            return;
+        }
+        if (investAmount > maxInvest) {
+            showNotification(`Maximum investment is ${formatPriceInCurrency(maxInvest)}`, 'error');
+            return;
+        }
+        const totalNeeded = botPrice + investAmount;
+        if (userBalance < totalNeeded) {
+            showNotification(`Insufficient balance! Need ${formatPriceInCurrency(totalNeeded)} (Bot + Investment)`, 'error');
+            return;
+        }
+        cleanup();
+        if (onConfirm) onConfirm(botPrice, investAmount);
+    };
+    
+    confirmBtn.addEventListener('click', onConfirmClick);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) onCancel();
     });
-    document.getElementById('modalCancelBtn').addEventListener('click', () => overlay.remove());
+    
+    // Enter key support
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') onConfirmClick();
+        if (e.key === 'Escape') onCancel();
+    });
 }
 
 // ============================================================
-// SUCCESS POPUP WITH AUTO-START INFO
+// SUCCESS POPUP
 // ============================================================
-function showSuccessPopupWithAutoStart(robotName, investedAmount, price, dailyProfit, callback) {
+function showSuccessPopup(robotName, botPrice, investAmount, dailyProfit) {
     const existing = document.querySelector('.success-popup');
     if (existing) existing.remove();
     const popup = document.createElement('div');
     popup.className = 'success-popup';
-    const formattedPrice = formatPriceInCurrency(price);
-    const formattedInvested = formatPriceInCurrency(investedAmount);
+    const formattedBotPrice = formatPriceInCurrency(botPrice);
+    const formattedInvest = formatPriceInCurrency(investAmount);
+    const total = botPrice + investAmount;
+    const formattedTotal = formatPriceInCurrency(total);
     popup.innerHTML = `
-        <i class="fas fa-check-circle" style="font-size:48px; color:#0ECB81;"></i>
-        <h3 style="color:#0ECB81; font-size:18px; font-weight:700; margin-bottom:6px;">Purchase Successful!</h3>
-        <p style="color:#FFD700; font-size:12px;">${robotName} purchased for ${formattedPrice}</p>
+        <i class="fas fa-check-circle"></i>
+        <h3>Purchase Successful!</h3>
+        <p style="color:#FFD700; font-size:12px;">${robotName} purchased &amp; started trading</p>
         <div style="background:rgba(14,203,129,0.15); border-radius:12px; padding:12px; margin:10px 0;">
-            <p style="color:#0ECB81; font-size:11px; margin-bottom:4px;">🚀 Robot AUTO-STARTED</p>
-            <p style="color:#FFFFFF; font-size:11px;">💰 ${formattedInvested} invested for trading</p>
-            <p style="color:#FFD700; font-size:10px;">📈 Daily profit: ${dailyProfit}%</p>
-            <p style="color:#888; font-size:9px;">⏳ Trading for 30 days automatically</p>
+            <p style="color:#0ECB81; font-size:11px;">🚀 Robot AUTO-STARTED</p>
+            <p style="color:#FFFFFF; font-size:11px;">🤖 Bot: ${formattedBotPrice}</p>
+            <p style="color:#FFD700; font-size:11px;">💰 Investment: ${formattedInvest}</p>
+            <p style="color:#FFFFFF; font-size:11px;">📊 Total: ${formattedTotal}</p>
+            <p style="color:#0ECB81; font-size:10px;">📈 Daily profit: ${dailyProfit}%</p>
+            <p style="color:#888; font-size:9px;">⏳ Trading for 120 days before upgrade</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
-            <button class="btn-ok" id="successGoBtn" style="background:linear-gradient(135deg,#0ECB81,#0A9E65); border:none; border-radius:40px; padding:10px 25px; color:white; font-weight:700; cursor:pointer; flex:1;">Go to Auto Bot</button>
+            <button class="btn-ok" id="successGoBtn">Go to Auto Bot</button>
             <button class="btn-stay" id="successStayBtn">Stay Here</button>
         </div>
     `;
@@ -1046,7 +1262,6 @@ function showSuccessPopupWithAutoStart(robotName, investedAmount, price, dailyPr
     });
     document.getElementById('successStayBtn').addEventListener('click', () => {
         popup.remove();
-        if (callback) callback();
     });
     
     setTimeout(() => {
@@ -1058,7 +1273,6 @@ function showSuccessPopupWithAutoStart(robotName, investedAmount, price, dailyPr
 // DIRECT RTDB FUNCTIONS
 // ============================================================
 
-// 1. LOAD USER DATA
 async function loadUserData(uid) {
     try {
         const snapshot = await get(ref(db, `users/${uid}`));
@@ -1075,7 +1289,6 @@ async function loadUserData(uid) {
     }
 }
 
-// 2. LOAD PURCHASED ROBOTS
 async function loadPurchasedRobots(uid) {
     try {
         const snapshot = await get(ref(db, `userRobots/${uid}`));
@@ -1086,7 +1299,7 @@ async function loadPurchasedRobots(uid) {
                 const robot = child.val();
                 if (robot.robotId !== undefined) {
                     purchasedRobots.push(robot.robotId);
-                    if (robot.status === 'active') {
+                    if (robot.status === 'active' || robot.status === 'trading') {
                         activeRobots.push({ id: child.key, ...robot });
                     }
                 }
@@ -1099,7 +1312,6 @@ async function loadPurchasedRobots(uid) {
     }
 }
 
-// 3. LOAD ROBOTS FROM RTDB
 async function loadRobotsFromRTDB() {
     try {
         const snapshot = await get(ref(db, 'robots'));
@@ -1111,15 +1323,14 @@ async function loadRobotsFromRTDB() {
     } catch (error) {
         console.error('[RTDB] Load robots error:', error);
     }
-    // Fallback to default
     robotsData = [...defaultRobots];
     return robotsData;
 }
 
 // ============================================================
-// 4. PURCHASE ROBOT - WITH AUTO-START
+// PURCHASE ROBOT - NEW STRUCTURE
 // ============================================================
-async function purchaseRobotDirect(robot) {
+async function purchaseRobotWithInvestment(robot, botPrice, investAmount) {
     if (!currentUser) {
         showNotification("Please login first", "error");
         window.location.href = 'login.html';
@@ -1129,8 +1340,10 @@ async function purchaseRobotDirect(robot) {
         showNotification(`You already own ${robot.name}!`, "error");
         return;
     }
-    if (userBalance < robot.price) {
-        showNotification(`Insufficient balance! Need ${formatPriceInCurrency(robot.price)}. Please deposit funds.`, "error");
+    
+    const totalNeeded = botPrice + investAmount;
+    if (userBalance < totalNeeded) {
+        showNotification(`Insufficient balance! Need ${formatPriceInCurrency(totalNeeded)}`, "error");
         return;
     }
     
@@ -1144,22 +1357,15 @@ async function purchaseRobotDirect(robot) {
         const uid = currentUser.uid;
         const userRef = ref(db, `users/${uid}`);
         const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
-        
-        // Get invested amount (half of price)
-        const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
-        // Get min trade
-        const minTrade = robot.minTrade || 3;
-        // Get daily profit
         const dailyProfit = robot.dailyProfit || 3;
-        // Duration days
-        const durationDays = 30;
+        const durationDays = 120; // 4 months
         
         // Run transaction to deduct balance
         const result = await runTransaction(userRef, (currentData) => {
             if (currentData === null) return currentData;
             const balance = currentData.balance || 0;
-            if (balance < robot.price) return currentData;
-            currentData.balance = balance - robot.price;
+            if (balance < totalNeeded) return currentData;
+            currentData.balance = balance - totalNeeded;
             return currentData;
         });
         
@@ -1169,7 +1375,7 @@ async function purchaseRobotDirect(robot) {
             return;
         }
         
-        // ✅ AUTO-START ROBOT IMMEDIATELY
+        // Save robot data with new structure
         const now = Date.now();
         const endTime = now + (durationDays * 24 * 60 * 60 * 1000);
         
@@ -1178,20 +1384,20 @@ async function purchaseRobotDirect(robot) {
             name: robot.name,
             level: robot.level,
             dailyProfit: dailyProfit,
-            price: robot.price,
-            purchasedAt: now,
-            // Auto-start fields
-            status: 'active',
+            botPrice: botPrice,
+            investedAmount: investAmount,
+            totalCost: totalNeeded,
+            status: 'trading', // 'trading' = active
             startTime: now,
             endTime: endTime,
             lastProfitTime: now,
             profitDays: 0,
-            investedAmount: investedAmount,
-            originalAmount: investedAmount,
-            amount: investedAmount,
-            minTrade: minTrade,
             durationDays: durationDays,
-            completedAt: null
+            createdAt: now,
+            minInvest: robot.minInvest || (robot.price / 2),
+            maxInvest: robot.maxInvest || 10000,
+            completedAt: null,
+            nextLevel: robot.id + 1
         };
         
         await set(robotRef, robotData);
@@ -1199,36 +1405,32 @@ async function purchaseRobotDirect(robot) {
         // Update local state
         purchasedRobots.push(robot.id);
         activeRobots.push({ id: robot.id, ...robotData });
-        userBalance -= robot.price;
+        userBalance -= totalNeeded;
         
-        // ✅ Add initial profit log
-        const logRef = push(ref(db, `tradingLogs/${uid}`));
-        await set(logRef, {
-            id: logRef.key,
-            robot: robot.name,
-            message: `🚀 Robot started automatically! Invested ${formatPriceInCurrency(investedAmount)}. Daily profit: ${dailyProfit}%`,
-            type: 'profit',
-            time: new Date().toLocaleTimeString(),
-            timestamp: Date.now()
-        });
-        
-        // ✅ Add notification
+        // Add notification
         const notifRef = push(ref(db, `notifications/${uid}`));
         await set(notifRef, {
             title: '🤖 Robot Purchased & Started!',
-            message: `${robot.name} purchased for ${formatPriceInCurrency(robot.price)}. ${formatPriceInCurrency(investedAmount)} auto-invested. Trading started automatically!`,
+            message: `${robot.name} purchased for ${formatPriceInCurrency(botPrice)}. ${formatPriceInCurrency(investAmount)} invested. Trading started for 120 days!`,
             type: 'success',
             read: false,
             timestamp: Date.now(),
             link: 'auto-bot.html'
         });
         
-        // Show success with auto-start info
-        showSuccessPopupWithAutoStart(robot.name, investedAmount, robot.price, dailyProfit, () => {
-            renderRobots();
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Active & Trading'; btn.className = 'buy-btn active-robot'; }
+        // Add initial log
+        const logRef = push(ref(db, `tradingLogs/${uid}`));
+        await set(logRef, {
+            id: logRef.key,
+            robot: robot.name,
+            message: `🚀 ${robot.name} purchased! ${formatPriceInCurrency(investAmount)} invested. Trading for 120 days. Daily profit: ${dailyProfit}%`,
+            type: 'profit',
+            time: new Date().toLocaleTimeString(),
+            timestamp: Date.now()
         });
         
+        // Show success
+        showSuccessPopup(robot.name, botPrice, investAmount, dailyProfit);
         renderRobots();
         
     } catch (error) {
@@ -1239,25 +1441,21 @@ async function purchaseRobotDirect(robot) {
 }
 
 // ============================================================
-// SETUP RTDB LISTENERS - Realtime Updates
+// SETUP RTDB LISTENERS
 // ============================================================
 function setupRTDBListeners(uid) {
-    // Clean up existing listeners
     rtdbListeners.forEach(unsub => { try { unsub(); } catch(e) {} });
     rtdbListeners = [];
     
-    // Listen to user balance changes
     const userRef = ref(db, `users/${uid}`);
     const userUnsub = onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
             userBalance = data.balance || 0;
-            updateBalanceUI();
         }
     });
     rtdbListeners.push(userUnsub);
     
-    // Listen to purchased robots changes
     const robotsRef = ref(db, `userRobots/${uid}`);
     const robotsUnsub = onValue(robotsRef, (snapshot) => {
         purchasedRobots = [];
@@ -1267,7 +1465,7 @@ function setupRTDBListeners(uid) {
                 const robot = child.val();
                 if (robot.robotId !== undefined) {
                     purchasedRobots.push(robot.robotId);
-                    if (robot.status === 'active') {
+                    if (robot.status === 'trading' || robot.status === 'active') {
                         activeRobots.push({ id: child.key, ...robot });
                     }
                 }
@@ -1278,19 +1476,8 @@ function setupRTDBListeners(uid) {
     rtdbListeners.push(robotsUnsub);
 }
 
-function updateBalanceUI() {
-    const summaryDiv = document.querySelector('.robots-grid .summary-div');
-    if (summaryDiv) {
-        const formattedBalance = formatPriceInCurrency(userBalance);
-        const balanceSpan = summaryDiv.querySelector('.balance-value');
-        if (balanceSpan) {
-            balanceSpan.textContent = formattedBalance;
-        }
-    }
-}
-
 // ============================================================
-// RENDER ROBOTS
+// RENDER ROBOTS - NEW PRICE DISPLAY
 // ============================================================
 function renderRobots() {
     const container = document.getElementById('robotsContainer');
@@ -1306,14 +1493,17 @@ function renderRobots() {
     
     robotsData.forEach(robot => {
         const isOwned = purchasedRobots.includes(robot.id);
-        const isActive = activeRobots.some(r => r.robotId === robot.id && r.status === 'active');
+        const isActive = activeRobots.some(r => r.robotId === robot.id && (r.status === 'trading' || r.status === 'active'));
         const profitClass = robot.dailyProfit >= 0 ? 'positive' : 'negative';
         const winRate = robot.winRate || (85 + robot.level);
         const isStarter = robot.isStarter === true || robot.id === 0;
-        const minTrade = robot.minTrade || 3;
-        const investedAmount = INVESTED_AMOUNT[robot.id] || (robot.price / 2);
-        const formattedPrice = formatPriceInCurrency(robot.price);
-        const formattedInvested = formatPriceInCurrency(investedAmount);
+        const botPrice = robot.botPrice || (robot.price / 2);
+        const minInvest = robot.minInvest || (robot.price / 2);
+        const maxInvest = robot.maxInvest || 10000;
+        
+        const formattedBotPrice = formatPriceInCurrency(botPrice);
+        const formattedMinInvest = formatPriceInCurrency(minInvest);
+        const formattedMaxInvest = formatPriceInCurrency(maxInvest);
         
         const card = document.createElement('div');
         card.className = 'robot-card';
@@ -1326,7 +1516,7 @@ function renderRobots() {
         }
         card.innerHTML = `
             <div class="robot-image-container">
-                <img src="${robot.image}" alt="${robot.name}" class="robot-image" onerror="this.src='https://placehold.co/400x180/800000/FFD700?text=${robot.name.replace(' ', '+')}'">
+                <img src="${robot.image}" alt="${robot.name}" class="robot-image" onerror="this.src='https://placehold.co/400x160/800000/FFD700?text=${robot.name.replace(' ', '+')}'">
                 <div class="image-overlay"></div>
                 <div class="level-badge"><i class="fas fa-chart-line"></i> Level ${robot.level}</div>
                 ${robot.hot ? '<div class="hot-badge"><i class="fas fa-fire"></i> HOT</div>' : ''}
@@ -1342,42 +1532,45 @@ function renderRobots() {
                     <div class="stat"><div class="stat-label"><i class="fas fa-trophy"></i> Win Rate</div><div class="stat-value">${winRate}%</div></div>
                     <div class="stat"><div class="stat-label"><i class="fas fa-calendar"></i> ROI/Month</div><div class="stat-value">${(robot.dailyProfit * 30)}%</div></div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span class="price-label"><i class="fas fa-tag"></i> Price</span>
-                    <span class="price-value" data-usd-price="${robot.price}">${formattedPrice}</span>
+                
+                <!-- BOT PRICE -->
+                <div class="price-box">
+                    <span class="price-label"><i class="fas fa-microchip"></i> Bot's Price</span>
+                    <span class="price-amount" data-usd-price="${botPrice}">${formattedBotPrice}</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:rgba(14,203,129,0.08); padding:4px 10px; border-radius:8px;">
-                    <span style="color:#888; font-size:9px;"><i class="fas fa-coins" style="color:#0ECB81;"></i> Auto Invested</span>
-                    <span class="price-value invested-value-display" data-usd-amount="${investedAmount}" style="color:#0ECB81; font-size:14px;">${formattedInvested}</span>
+                
+                <!-- INVESTMENT RANGE -->
+                <div class="invest-box">
+                    <span class="invest-label"><i class="fas fa-coins" style="color:#0ECB81;"></i> Invest in Bot</span>
+                    <div>
+                        <span class="invest-amount" data-usd-amount="${minInvest}">${formattedMinInvest}</span>
+                        <span class="invest-range" data-min="${minInvest}" data-max="${maxInvest}"> - ${formattedMaxInvest}</span>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px;">
-                    <span style="color:#888; font-size:9px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
-                    <span style="color:#FFD700; font-weight:700; font-size:14px;">${formatPriceInCurrency(minTrade)}</span>
-                </div>
+                
+                ${isStarter && !isOwned ? `<div style="background:rgba(14,203,129,0.1); border-radius:10px; padding:6px 10px; margin-bottom:12px; text-align:center; color:#0ECB81; font-size:10px;"><i class="fas fa-gift"></i> Starter offer! Low entry with high potential</div>` : ''}
                 ${isActive ? '<div style="background:rgba(14,203,129,0.1); border-radius:10px; padding:6px 10px; margin-bottom:12px; text-align:center; color:#0ECB81; font-size:10px;"><i class="fas fa-play-circle"></i> Robot is ACTIVE & Trading 24/7</div>' : ''}
-                ${isStarter && !isOwned ? `<div style="background:rgba(14,203,129,0.1); border-radius:10px; padding:6px 10px; margin-bottom:12px; text-align:center; color:#0ECB81; font-size:10px;"><i class="fas fa-gift"></i> Only ${formattedPrice} - Starts Trading Immediately!</div>` : ''}
+                
                 <button class="buy-btn ${isActive ? 'active-robot' : ''}" data-robot-id="${robot.id}" ${isOwned ? 'disabled' : ''}>
                     ${isActive ? '<i class="fas fa-play-circle"></i> Active & Trading' : 
                       isOwned ? '<i class="fas fa-check"></i> Already Owned' : 
-                      '<i class="fas fa-shopping-cart"></i> Purchase Robot'}
+                      '<i class="fas fa-shopping-cart"></i> Purchase & Invest'}
                 </button>
             </div>
         `;
         const buyBtn = card.querySelector('.buy-btn');
-        if (!isOwned) { 
+        if (!isOwned && !isActive) { 
             buyBtn.addEventListener('click', (e) => { 
                 e.stopPropagation(); 
-                const investedDisplay = formatPriceInCurrency(investedAmount);
-                showConfirmModal(
-                    'Confirm Purchase',
-                    `Are you sure you want to purchase ${robot.name} for ${formattedPrice}?<br><br>💰 <strong>${investedDisplay}</strong> will be auto-invested for trading.<br>🚀 Robot will <strong style="color:#0ECB81;">START TRADING IMMEDIATELY</strong>!`,
-                    () => purchaseRobotDirect(robot)
-                );
+                showInvestModal(robot, (botPrice, investAmount) => {
+                    purchaseRobotWithInvestment(robot, botPrice, investAmount);
+                });
             }); 
         }
         container.appendChild(card);
     });
     
+    // Summary
     const summaryDiv = document.createElement('div');
     summaryDiv.className = 'summary-div';
     summaryDiv.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 15px; background: rgba(255,215,0,0.08); border-radius: 18px; margin-top: 10px;';
@@ -1385,7 +1578,7 @@ function renderRobots() {
     const activeCount = activeRobots.length;
     summaryDiv.innerHTML = `<div style="display: flex; justify-content: center; gap: 25px; flex-wrap: wrap;">
         <div><i class="fas fa-robot" style="color: #FFD700;"></i> <span style="color: #FFD700;">${robotsData.length}</span> <span style="color: #888;">AI Robots</span></div>
-        <div><i class="fas fa-wallet" style="color: #0ECB81;"></i> <span class="balance-value" style="color: #0ECB81;">${formattedBalance}</span> <span style="color: #888;">Balance</span></div>
+        <div><i class="fas fa-wallet" style="color: #0ECB81;"></i> <span style="color: #0ECB81;">${formattedBalance}</span> <span style="color: #888;">Balance</span></div>
         <div><i class="fas fa-shopping-cart" style="color: #FFD700;"></i> <span style="color: #FFD700;">${purchasedRobots.length}</span> <span style="color: #888;">/${robotsData.length} Owned</span></div>
         <div><i class="fas fa-play-circle" style="color: #0ECB81;"></i> <span style="color: #0ECB81;">${activeCount}</span> <span style="color: #888;">Active</span></div>
     </div>`;
@@ -1466,7 +1659,7 @@ async function init() {
         // Setup RTDB listeners for realtime updates
         setupRTDBListeners(user.uid);
         
-        console.log('[Robots] ✅ Page initialized with RTDB - Auto-start enabled');
+        console.log('[Robots] ✅ Page initialized - New pricing structure with 120 days upgrade');
     });
 }
 

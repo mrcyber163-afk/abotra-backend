@@ -1,5 +1,8 @@
-// backend/functions/middleware/auth.js
-const admin = require('firebase-admin');
+// ============================================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================================
+
+const { verifyIdToken } = require('../firebase');
 
 async function verifyToken(req, res, next) {
     try {
@@ -12,45 +15,16 @@ async function verifyToken(req, res, next) {
         }
         
         const token = authHeader.split('Bearer ')[1];
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        
-        req.user = {
-            uid: decodedToken.uid,
-            email: decodedToken.email,
-            ...decodedToken
-        };
-        
+        const user = await verifyIdToken(token);
+        req.user = user;
         next();
     } catch (error) {
-        console.error('[Auth] Error:', error);
+        console.error('[Auth] Token verification error:', error.message);
         return res.status(401).json({
             success: false,
-            error: 'Invalid token'
+            error: 'Invalid or expired token'
         });
     }
 }
 
-async function verifyAdmin(req, res, next) {
-    try {
-        const { uid } = req.user;
-        const snapshot = await admin.database()
-            .ref(`admins/${uid}`)
-            .once('value');
-        
-        if (!snapshot.exists()) {
-            return res.status(403).json({
-                success: false,
-                error: 'Admin access required'
-            });
-        }
-        
-        next();
-    } catch (error) {
-        return res.status(403).json({
-            success: false,
-            error: 'Admin verification failed'
-        });
-    }
-}
-
-module.exports = { verifyToken, verifyAdmin };
+module.exports = { verifyToken };

@@ -19,6 +19,32 @@ window.CONFIG = CONFIG;
 console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
 </script>
 
+<!-- ============================================================ -->
+<!-- ONESIGNAL SDK -->
+<!-- ============================================================ -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+const ONESIGNAL_APP_ID = 'e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc';
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.OneSignalDeferred.push(async function(OneSignal) {
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await OneSignal.init({
+            appId: ONESIGNAL_APP_ID,
+            serviceWorkerPath: '/sw.js',
+            serviceWorkerParam: { scope: '/' },
+            allowLocalhostAsSecureOrigin: true,
+            notifyButton: { enable: false }
+        });
+        console.log('[ONESIGNAL] ✅ Notifications page initialized');
+        
+        // Auto register for push
+        await OneSignal.registerForPushNotifications();
+        console.log('[ONESIGNAL] ✅ Registered for push notifications');
+    } catch(e) { console.warn('[ONESIGNAL] Init error:', e); }
+});
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -115,7 +141,7 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     cursor: pointer;
 }
 
-/* ===== MODAL STYLES - ABOTRA DESIGN ===== */
+/* ===== MODAL STYLES ===== */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -131,10 +157,7 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     padding: 20px;
     animation: modalFadeIn 0.3s ease;
 }
-
-.modal-overlay.active {
-    display: flex;
-}
+.modal-overlay.active { display: flex; }
 
 .modal-content {
     background: rgba(20,20,20,0.98);
@@ -149,7 +172,6 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     position: relative;
     overflow: hidden;
 }
-
 .modal-content::before {
     content: '';
     position: absolute;
@@ -161,7 +183,6 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
 }
-
 .modal-icon-wrapper {
     width: 70px;
     height: 70px;
@@ -174,12 +195,7 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     border: 2px solid rgba(246,70,93,0.3);
     position: relative;
 }
-
-.modal-icon-wrapper i {
-    font-size: 30px;
-    color: #F6465D;
-}
-
+.modal-icon-wrapper i { font-size: 30px; color: #F6465D; }
 .modal-icon-wrapper .pulse-ring {
     position: absolute;
     inset: -4px;
@@ -187,53 +203,28 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     border: 2px solid rgba(246,70,93,0.2);
     animation: pulseRing 2s ease-out infinite;
 }
-
 @keyframes pulseRing {
     0% { transform: scale(1); opacity: 1; }
     100% { transform: scale(1.4); opacity: 0; }
 }
-
-.modal-content h3 {
-    color: #FFFFFF;
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 6px;
-}
-
-.modal-content .modal-subtitle {
-    color: #888;
-    font-size: 12px;
-    line-height: 1.6;
-    margin-bottom: 4px;
-}
-
-.modal-content .modal-highlight {
-    color: #FFD700;
-    font-weight: 600;
-}
-
+.modal-content h3 { color: #FFFFFF; font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+.modal-content .modal-subtitle { color: #888; font-size: 12px; line-height: 1.6; margin-bottom: 4px; }
+.modal-content .modal-highlight { color: #FFD700; font-weight: 600; }
 .modal-content .modal-warning-text {
-    color: #F6465D;
-    font-size: 11px;
-    margin-top: 6px;
-    padding: 8px 12px;
-    background: rgba(246,70,93,0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(246,70,93,0.15);
+    color: #F6465D; font-size: 11px; margin-top: 6px;
+    padding: 8px 12px; background: rgba(246,70,93,0.1);
+    border-radius: 8px; border: 1px solid rgba(246,70,93,0.15);
 }
-
 .modal-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent);
     margin: 14px 0 16px;
 }
-
 .modal-actions {
     display: flex;
     gap: 10px;
     margin-top: 6px;
 }
-
 .modal-actions button {
     flex: 1;
     padding: 11px 16px;
@@ -248,48 +239,24 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     justify-content: center;
     gap: 6px;
 }
-
 .modal-cancel-btn {
     background: rgba(255,255,255,0.08);
     color: #AAAAAA;
     border: 1px solid rgba(255,255,255,0.1);
 }
-.modal-cancel-btn:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateY(-1px);
-}
-
+.modal-cancel-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
 .modal-danger-btn {
     background: linear-gradient(135deg, #F6465D, #c0392b);
     color: white;
     box-shadow: 0 4px 20px rgba(246,70,93,0.3);
 }
-.modal-danger-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(246,70,93,0.4);
-}
-.modal-danger-btn:active { transform: translateY(0); }
+.modal-danger-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(246,70,93,0.4); }
 
-@keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-@keyframes modalSlideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-/* ===== END MODAL ===== */
-
-.skeleton {
-    animation: skeletonPulse 1s ease-in-out infinite;
-}
+.skeleton { animation: skeletonPulse 1s ease-in-out infinite; }
 .skeleton-text {
     height: 10px;
     background: linear-gradient(90deg, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.2) 50%, rgba(255,215,0,0.08) 75%);
@@ -332,10 +299,7 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
 }
-@keyframes skeletonPulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-}
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
 .theme-toggle {
     background: rgba(0,0,0,0.7);
@@ -349,10 +313,7 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
     justify-content: center;
     transition: 0.3s;
 }
-.theme-toggle:hover {
-    background: rgba(255,215,0,0.2);
-    transform: scale(1.02);
-}
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.02); }
 .theme-toggle i { font-size: 15px; color: #FFFFFF; }
 
 .overlay {
@@ -509,24 +470,20 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
 .notification-icon.error { background: rgba(246,70,93,0.2); color: #F6465D; }
 .notification-icon.warning { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.info { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.master-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
 .notification-icon.deposit { background: rgba(14,203,129,0.2); color: #0ECB81; }
 .notification-icon.withdrawal { background: rgba(246,70,93,0.2); color: #F6465D; }
 .notification-icon.transfer { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.p2p { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.kyc { background: rgba(14,203,129,0.2); color: #0ECB81; }
 .notification-icon.trade { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.copy-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
-.notification-icon.security { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.system { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.affiliate { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.robot { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.affiliate { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.subscription { background: rgba(255,215,0,0.2); color: #FFD700; }
 .notification-icon.leaderboard { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.candle { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.system { background: rgba(255,215,0,0.2); color: #FFD700; }
+.notification-icon.master-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
+.notification-icon.copy-trade { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
 .notification-icon.ai-signal { background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(255,215,0,0.2)); color: #FFD700; }
-.notification-icon.privacy { background: rgba(255,215,0,0.2); color: #FFD700; }
-.notification-icon.terms { background: rgba(255,215,0,0.2); color: #FFD700; }
 
 .notification-content { flex: 1; min-width: 0; }
 .notification-title { font-weight: 700; color: #FFD700; font-size: 11px; margin-bottom: 3px; }
@@ -592,14 +549,8 @@ body.light-theme .modal-cancel-btn:hover { background: rgba(0,0,0,0.15); }
 .notification-popup .popup-message { flex: 1; font-size: 10px; line-height: 1.4; color: #FFFFFF; font-weight: 500; }
 .notification-popup .close-notif { cursor: pointer; opacity: 0.7; transition: 0.3s; font-size: 11px; }
 
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(100%); }
-    to { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeOut {
-    from { opacity: 1; transform: translateX(0); }
-    to { opacity: 0; transform: translateX(100%); }
-}
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 
 @media(max-width: 700px) {
     .notifications-container { padding: 0 12px; margin-top: 65px; }
@@ -706,89 +657,31 @@ const auth = getAuth(app);
 let currentUser = null;
 let notificationsListener = null;
 let unreadCount = 0;
-let swRegistration = null;
-let pushSubscription = null;
-
-// ===== MODAL STATE =====
-let modalResolve = null;
-let modalReject = null;
 
 // ============================================================
-// SAFE NOTIFICATION API WRAPPER
-// ============================================================
-const NotificationsAPI = {
-    isSupported: function() {
-        return typeof window !== 'undefined' && 
-               typeof Notification !== 'undefined' && 
-               Notification !== null;
-    },
-    
-    getPermission: function() {
-        if (!this.isSupported()) return 'denied';
-        return Notification.permission;
-    },
-    
-    requestPermission: async function() {
-        if (!this.isSupported()) {
-            console.warn('[NOTIF] Notification not supported');
-            return 'denied';
-        }
-        try {
-            return await Notification.requestPermission();
-        } catch (e) {
-            console.warn('[NOTIF] Permission request failed:', e);
-            return 'denied';
-        }
-    },
-    
-    send: function(title, body, link = '/dashboard.html', type = 'info') {
-        if (!this.isSupported()) {
-            console.warn('[NOTIF] Notification not supported');
-            return;
-        }
-        if (Notification.permission !== 'granted') {
-            console.warn('[NOTIF] Permission not granted');
-            return;
-        }
-        try {
-            const notif = new Notification(title, {
-                body: body,
-                icon: '../assets/images/logo.png',
-                badge: '../assets/images/logo.png',
-                vibrate: [200, 100, 200],
-                requireInteraction: true,
-                tag: Date.now().toString(),
-                data: { url: link }
-            });
-            notif.onclick = (event) => {
-                event.preventDefault();
-                window.focus();
-                if (link) window.location.href = link;
-            };
-        } catch (e) {
-            console.warn('[NOTIF] Error sending notification:', e);
-        }
-    }
-};
-
-// ============================================================
-// PAGE ROUTES - Complete mapping for all notification types
+// COMPLETE PAGE ROUTES - DETECTS WORDS IN MESSAGE & TITLE
 // ============================================================
 const PAGE_ROUTES = {
-    'deposit': 'wallet.html',
-    'deposit-approved': 'wallet.html',
-    'deposit-pending': 'wallet.html',
-    'deposit-rejected': 'wallet.html',
-    'withdrawal': 'wallet.html',
-    'withdraw': 'wallet.html',
-    'withdraw-approved': 'wallet.html',
-    'withdraw-pending': 'wallet.html',
-    'withdraw-rejected': 'wallet.html',
-    'transfer': 'wallet.html',
-    'wallet': 'wallet.html',
-    'transaction': 'wallet.html',
-    'transactions': 'wallet.html',
+    // Deposit related
+    'deposit': 'deposit.html',
+    'deposit-approved': 'deposit.html',
+    'deposit-pending': 'deposit.html',
+    'deposit-rejected': 'deposit.html',
+    'deposit-verified': 'deposit.html',
+    
+    // Withdrawal related
+    'withdrawal': 'withdraw.html',
+    'withdraw': 'withdraw.html',
+    'withdraw-approved': 'withdraw.html',
+    'withdraw-pending': 'withdraw.html',
+    'withdraw-rejected': 'withdraw.html',
+    'withdrawal-approved': 'withdraw.html',
+    'withdrawal-pending': 'withdraw.html',
+    'withdrawal-rejected': 'withdraw.html',
+    
+    // Trade related
     'trade': 'trade.html',
+    'trading': 'trade.html',
     'trade-open': 'trade.html',
     'trade-opened': 'trade.html',
     'trade-close': 'trade-history.html',
@@ -797,56 +690,123 @@ const PAGE_ROUTES = {
     'trade-loss': 'trade-history.html',
     'trade-liquidated': 'trade-history.html',
     'trade-history': 'trade-history.html',
-    'history': 'trade-history.html',
     'trades': 'trade-history.html',
+    'history': 'trade-history.html',
+    'trade-signal': 'ai-signal.html',
+    'market': 'market.html',
+    'candle': 'candles.html',
+    'candles': 'candles.html',
+    'chart': 'candles.html',
+    
+    // Copy Trade
     'copy-trade': 'copy-trading.html',
     'copy-trading': 'copy-trading.html',
     'master': 'copy-trading.html',
     'master-trade': 'copy-trading.html',
+    
+    // P2P
     'p2p': 'p2p-market.html',
     'p2p-market': 'p2p-market.html',
     'p2p-order': 'p2p-order.html',
     'p2p-chat': 'p2p-chat.html',
     'p2p-message': 'p2p-chat.html',
     'peer-to-peer': 'p2p-market.html',
+    'peer': 'p2p-market.html',
+    
+    // KYC
     'kyc': 'kyc.html',
     'verification': 'kyc.html',
     'verification-approved': 'kyc.html',
     'verification-pending': 'kyc.html',
     'verification-rejected': 'kyc.html',
+    'verify': 'kyc.html',
+    'id': 'kyc.html',
+    'identity': 'kyc.html',
+    'document': 'kyc.html',
+    
+    // Robot/AI
     'robot': 'robots.html',
     'robots': 'robots.html',
     'auto-bot': 'auto-bot.html',
     'bot': 'auto-bot.html',
     'automation': 'auto-bot.html',
+    'trading-bot': 'robots.html',
+    'ai-robot': 'robots.html',
+    'purchase': 'robots.html',
+    
+    // Wallet
+    'wallet': 'wallet.html',
+    'balance': 'wallet.html',
+    'funds': 'wallet.html',
+    'transaction': 'wallet.html',
+    'transactions': 'wallet.html',
+    'transfer': 'wallet.html',
+    'sent': 'wallet.html',
+    'received': 'wallet.html',
+    'payment': 'wallet.html',
+    'pay': 'wallet.html',
+    
+    // Affiliate
     'affiliate': 'affiliate.html',
     'referral': 'affiliate.html',
     'referral-bonus': 'affiliate.html',
     'commission': 'affiliate.html',
     'invite': 'affiliate.html',
+    'refer': 'affiliate.html',
+    'bonus': 'affiliate.html',
+    
+    // Subscription
     'subscription': 'subscriptions.html',
     'subscriptions': 'subscriptions.html',
     'premium': 'subscriptions.html',
     'plan': 'subscriptions.html',
     'renewal': 'subscriptions.html',
     'expired': 'subscriptions.html',
+    'subscribe': 'subscriptions.html',
+    'membership': 'subscriptions.html',
+    
+    // Leaderboard
     'leaderboard': 'leaderboard.html',
     'ranking': 'leaderboard.html',
+    'rank': 'leaderboard.html',
     'reward': 'leaderboard.html',
+    'win': 'leaderboard.html',
+    'winner': 'leaderboard.html',
+    
+    // AI Signal
     'ai-signal': 'ai-signal.html',
     'signal': 'ai-signal.html',
     'analysis': 'ai-signal.html',
-    'candle': 'candles.html',
-    'candles': 'candles.html',
-    'chart': 'candles.html',
-    'market': 'market.html',
-    'markets': 'market.html',
+    'prediction': 'ai-signal.html',
+    'forecast': 'ai-signal.html',
+    'indicator': 'ai-signal.html',
+    
+    // Account
     'account': 'account.html',
     'profile': 'account.html',
     'settings': 'account.html',
+    'security': 'account.html',
+    'password': 'account.html',
+    'email': 'account.html',
+    'phone': 'account.html',
+    
+    // Privacy & Terms
     'privacy': 'privacy.html',
     'policy': 'privacy.html',
     'terms': 'terms.html',
+    'legal': 'terms.html',
+    'conditions': 'terms.html',
+    
+    // Social
+    'social': 'social.html',
+    'feed': 'social.html',
+    'post': 'social.html',
+    'community': 'social.html',
+    'comment': 'social.html',
+    'like': 'social.html',
+    'share': 'social.html',
+    
+    // System
     'system': 'dashboard.html',
     'info': 'dashboard.html',
     'warning': 'dashboard.html',
@@ -857,30 +817,90 @@ const PAGE_ROUTES = {
     'home': 'dashboard.html',
     'index': 'dashboard.html',
     'main': 'dashboard.html',
-    'social': 'social.html',
-    'feed': 'social.html',
-    'post': 'social.html',
-    'community': 'social.html',
-    'security': 'account.html',
+    'update': 'dashboard.html',
+    'maintenance': 'dashboard.html',
+    'announcement': 'dashboard.html',
+    'notice': 'dashboard.html',
+    'alert': 'dashboard.html',
+    
+    // Default
     'notifications': 'notifications.html'
 };
 
 // ============================================================
-// GET PAGE LINK - FIXED
+// DETECT PAGE FROM TEXT - SMART KEYWORD MATCHING
+// ============================================================
+function detectPageFromText(title, message, type) {
+    const text = (title + ' ' + message).toLowerCase();
+    
+    // Check type first (fastest)
+    if (type) {
+        const typeLower = type.toLowerCase();
+        if (PAGE_ROUTES[typeLower]) return PAGE_ROUTES[typeLower];
+        // Check if type contains keywords
+        for (const [key, value] of Object.entries(PAGE_ROUTES)) {
+            if (typeLower.includes(key) || key.includes(typeLower)) {
+                return value;
+            }
+        }
+    }
+    
+    // Check title and message for keywords
+    const words = text.split(/[\s,.;:!?()\-_]+/);
+    
+    // Priority keywords (exact matches first)
+    const priorityKeywords = [
+        'deposit', 'withdraw', 'withdrawal', 'trade', 'trading', 'kyc', 'verify',
+        'wallet', 'balance', 'p2p', 'robot', 'bot', 'affiliate', 'referral',
+        'subscription', 'premium', 'leaderboard', 'signal', 'analysis',
+        'copy-trade', 'copy-trading', 'master', 'transfer', 'payment',
+        'market', 'candle', 'chart', 'profile', 'account', 'security'
+    ];
+    
+    for (const keyword of priorityKeywords) {
+        if (text.includes(keyword)) {
+            // Find best matching route
+            for (const [key, value] of Object.entries(PAGE_ROUTES)) {
+                if (key === keyword || key.includes(keyword) || keyword.includes(key)) {
+                    return value;
+                }
+            }
+        }
+    }
+    
+    // Check each word
+    for (const word of words) {
+        if (word.length > 2) {
+            for (const [key, value] of Object.entries(PAGE_ROUTES)) {
+                if (key.includes(word) || word.includes(key)) {
+                    return value;
+                }
+            }
+        }
+    }
+    
+    // Default to dashboard
+    return 'dashboard.html';
+}
+
+// ============================================================
+// GET PAGE LINK - SMART DETECTION
 // ============================================================
 function getPageLink(notification) {
-    const type = (notification.type || '').toLowerCase();
+    const title = notification.title || '';
+    const message = notification.message || '';
+    const type = notification.type || '';
     const link = notification.link || '';
     
-    // If link already has .html, use it as is
+    // If link already has .html, use it
     if (link && link.includes('.html')) {
         if (link.includes('?')) return link;
         if (notification.id) return `${link}?notification=${encodeURIComponent(notification.id)}`;
         return link;
     }
     
-    // Map type to page
-    let page = PAGE_ROUTES[type] || PAGE_ROUTES[type.split('-')[0]] || 'dashboard.html';
+    // Detect page from text
+    let page = detectPageFromText(title, message, type);
     
     // Add notification param if exists
     if (notification.id && page) {
@@ -891,169 +911,225 @@ function getPageLink(notification) {
 }
 
 // ============================================================
-// GET BUTTON INFO
+// GET BUTTON INFO - DETECTS FROM TEXT
 // ============================================================
 function getButtonInfo(notification) {
-    const type = (notification.type || '').toLowerCase();
-    const buttonMap = {
-        'deposit': { text: '💰 Deposit', icon: 'fa-wallet' },
-        'deposit-approved': { text: '✅ Approved', icon: 'fa-check-circle' },
-        'deposit-pending': { text: '⏳ Pending', icon: 'fa-clock' },
-        'deposit-rejected': { text: '❌ Rejected', icon: 'fa-times-circle' },
-        'withdrawal': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
-        'withdraw': { text: '💰 Withdraw', icon: 'fa-arrow-up' },
-        'withdraw-approved': { text: '✅ Approved', icon: 'fa-check-circle' },
-        'withdraw-pending': { text: '⏳ Pending', icon: 'fa-clock' },
-        'withdraw-rejected': { text: '❌ Rejected', icon: 'fa-times-circle' },
-        'transfer': { text: '🔄 Transfer', icon: 'fa-exchange-alt' },
-        'wallet': { text: '💰 Wallet', icon: 'fa-wallet' },
-        'transaction': { text: '💰 Transactions', icon: 'fa-receipt' },
-        'trade': { text: '📊 Trade', icon: 'fa-chart-line' },
-        'trade-open': { text: '📈 Open', icon: 'fa-arrow-up' },
-        'trade-opened': { text: '📈 Open', icon: 'fa-arrow-up' },
-        'trade-close': { text: '📉 Close', icon: 'fa-arrow-down' },
-        'trade-closed': { text: '📉 History', icon: 'fa-arrow-down' },
-        'trade-profit': { text: '📈 Profit', icon: 'fa-arrow-up' },
-        'trade-loss': { text: '📉 Loss', icon: 'fa-arrow-down' },
-        'trade-liquidated': { text: '⚠️ Liquidated', icon: 'fa-exclamation-triangle' },
-        'copy-trade': { text: '📋 Copy', icon: 'fa-copy' },
-        'master': { text: '👑 Master', icon: 'fa-crown' },
-        'p2p': { text: '🤝 P2P', icon: 'fa-handshake' },
-        'kyc': { text: '📋 Verify', icon: 'fa-id-card' },
-        'robot': { text: '🤖 Robot', icon: 'fa-robot' },
-        'affiliate': { text: '👥 Refer', icon: 'fa-user-plus' },
-        'subscription': { text: '👑 Subscribe', icon: 'fa-crown' },
-        'leaderboard': { text: '🏆 Leaderboard', icon: 'fa-trophy' },
-        'ai-signal': { text: '📡 Signal', icon: 'fa-brain' },
-        'candle': { text: '🕯️ Charts', icon: 'fa-chart-bar' },
-        'account': { text: '👤 Account', icon: 'fa-user' },
-        'privacy': { text: '🔐 Privacy', icon: 'fa-lock' },
-        'terms': { text: '📜 Terms', icon: 'fa-file-contract' }
+    const title = notification.title || '';
+    const message = notification.message || '';
+    const type = notification.type || '';
+    const text = (title + ' ' + message + ' ' + type).toLowerCase();
+    
+    // Deposit
+    if (text.includes('deposit')) {
+        if (text.includes('approved') || text.includes('verified')) {
+            return { text: '✅ Deposit Approved', icon: 'fa-check-circle' };
+        }
+        if (text.includes('pending') || text.includes('waiting')) {
+            return { text: '⏳ Deposit Pending', icon: 'fa-clock' };
+        }
+        if (text.includes('rejected') || text.includes('failed')) {
+            return { text: '❌ Deposit Rejected', icon: 'fa-times-circle' };
+        }
+        return { text: '💰 Deposit', icon: 'fa-wallet' };
+    }
+    
+    // Withdrawal
+    if (text.includes('withdraw') || text.includes('withdrawal')) {
+        if (text.includes('approved') || text.includes('confirmed')) {
+            return { text: '✅ Withdrawal Approved', icon: 'fa-check-circle' };
+        }
+        if (text.includes('pending')) {
+            return { text: '⏳ Withdrawal Pending', icon: 'fa-clock' };
+        }
+        if (text.includes('rejected') || text.includes('failed')) {
+            return { text: '❌ Withdrawal Rejected', icon: 'fa-times-circle' };
+        }
+        return { text: '💰 Withdraw', icon: 'fa-arrow-up' };
+    }
+    
+    // Trade
+    if (text.includes('trade') || text.includes('trading')) {
+        if (text.includes('profit') || text.includes('win')) {
+            return { text: '📈 Profit', icon: 'fa-arrow-up' };
+        }
+        if (text.includes('loss') || text.includes('lose')) {
+            return { text: '📉 Loss', icon: 'fa-arrow-down' };
+        }
+        if (text.includes('liquidated')) {
+            return { text: '⚠️ Liquidated', icon: 'fa-exclamation-triangle' };
+        }
+        if (text.includes('open') || text.includes('opened')) {
+            return { text: '📈 Open Trade', icon: 'fa-arrow-up' };
+        }
+        if (text.includes('close') || text.includes('closed')) {
+            return { text: '📉 Close Trade', icon: 'fa-arrow-down' };
+        }
+        return { text: '📊 Trade', icon: 'fa-chart-line' };
+    }
+    
+    // KYC
+    if (text.includes('kyc') || text.includes('verify') || text.includes('verification')) {
+        if (text.includes('approved') || text.includes('verified')) {
+            return { text: '✅ KYC Verified', icon: 'fa-check-circle' };
+        }
+        if (text.includes('pending') || text.includes('waiting')) {
+            return { text: '⏳ KYC Pending', icon: 'fa-clock' };
+        }
+        if (text.includes('rejected') || text.includes('failed')) {
+            return { text: '❌ KYC Rejected', icon: 'fa-times-circle' };
+        }
+        return { text: '📋 KYC', icon: 'fa-id-card' };
+    }
+    
+    // Wallet
+    if (text.includes('wallet') || text.includes('balance') || text.includes('transaction') || text.includes('transfer')) {
+        if (text.includes('received') || text.includes('credit')) {
+            return { text: '📥 Received', icon: 'fa-arrow-down' };
+        }
+        if (text.includes('sent') || text.includes('debit')) {
+            return { text: '📤 Sent', icon: 'fa-arrow-up' };
+        }
+        return { text: '💰 Wallet', icon: 'fa-wallet' };
+    }
+    
+    // P2P
+    if (text.includes('p2p') || text.includes('peer')) {
+        if (text.includes('completed') || text.includes('success')) {
+            return { text: '✅ P2P Completed', icon: 'fa-check-circle' };
+        }
+        if (text.includes('pending')) {
+            return { text: '⏳ P2P Pending', icon: 'fa-clock' };
+        }
+        return { text: '🤝 P2P', icon: 'fa-handshake' };
+    }
+    
+    // Robot/AI Bot
+    if (text.includes('robot') || text.includes('bot') || text.includes('auto-bot')) {
+        if (text.includes('started') || text.includes('activated')) {
+            return { text: '🤖 Bot Started', icon: 'fa-play-circle' };
+        }
+        if (text.includes('stopped') || text.includes('expired')) {
+            return { text: '🤖 Bot Stopped', icon: 'fa-stop-circle' };
+        }
+        return { text: '🤖 AI Bot', icon: 'fa-robot' };
+    }
+    
+    // Affiliate/Referral
+    if (text.includes('affiliate') || text.includes('referral') || text.includes('refer') || text.includes('commission')) {
+        if (text.includes('bonus') || text.includes('earned')) {
+            return { text: '💰 Bonus Earned', icon: 'fa-gift' };
+        }
+        return { text: '👥 Affiliate', icon: 'fa-user-plus' };
+    }
+    
+    // Subscription
+    if (text.includes('subscription') || text.includes('premium') || text.includes('plan') || text.includes('subscribe')) {
+        if (text.includes('expired')) {
+            return { text: '❌ Expired', icon: 'fa-times-circle' };
+        }
+        if (text.includes('renew') || text.includes('renewal')) {
+            return { text: '🔄 Renew', icon: 'fa-sync' };
+        }
+        return { text: '👑 Subscribe', icon: 'fa-crown' };
+    }
+    
+    // Leaderboard
+    if (text.includes('leaderboard') || text.includes('rank') || text.includes('win')) {
+        return { text: '🏆 Leaderboard', icon: 'fa-trophy' };
+    }
+    
+    // AI Signal
+    if (text.includes('signal') || text.includes('analysis') || text.includes('prediction')) {
+        return { text: '📡 Signal', icon: 'fa-brain' };
+    }
+    
+    // Account
+    if (text.includes('account') || text.includes('profile') || text.includes('security')) {
+        return { text: '👤 Account', icon: 'fa-user' };
+    }
+    
+    // System / Info
+    if (text.includes('info') || text.includes('system') || text.includes('update') || text.includes('announcement')) {
+        return { text: '📢 View', icon: 'fa-bullhorn' };
+    }
+    
+    // Default
+    return { text: '📱 View', icon: 'fa-arrow-right' };
+}
+
+// ============================================================
+// GET ICON
+// ============================================================
+function getNotificationIcon(type) {
+    const typeMap = {
+        'deposit': { icon: 'fas fa-arrow-down', class: 'deposit' },
+        'deposit-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'deposit-pending': { icon: 'fas fa-clock', class: 'info' },
+        'deposit-rejected': { icon: 'fas fa-times-circle', class: 'error' },
+        'withdrawal': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
+        'withdraw': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
+        'withdraw-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'withdraw-pending': { icon: 'fas fa-clock', class: 'info' },
+        'withdraw-rejected': { icon: 'fas fa-times-circle', class: 'error' },
+        'transfer': { icon: 'fas fa-exchange-alt', class: 'transfer' },
+        'wallet': { icon: 'fas fa-wallet', class: 'info' },
+        'transaction': { icon: 'fas fa-receipt', class: 'info' },
+        'trade': { icon: 'fas fa-chart-line', class: 'trade' },
+        'trade-open': { icon: 'fas fa-arrow-up', class: 'trade' },
+        'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
+        'trade-close': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
+        'trade-profit': { icon: 'fas fa-arrow-up', class: 'success' },
+        'trade-loss': { icon: 'fas fa-arrow-down', class: 'error' },
+        'trade-liquidated': { icon: 'fas fa-exclamation-triangle', class: 'error' },
+        'copy-trade': { icon: 'fas fa-copy', class: 'copy-trade' },
+        'master': { icon: 'fas fa-crown', class: 'master-trade' },
+        'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
+        'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
+        'verification-approved': { icon: 'fas fa-check-circle', class: 'success' },
+        'verification-pending': { icon: 'fas fa-clock', class: 'info' },
+        'verification-rejected': { icon: 'fas fa-times-circle', class: 'error' },
+        'robot': { icon: 'fas fa-robot', class: 'robot' },
+        'affiliate': { icon: 'fas fa-user-plus', class: 'affiliate' },
+        'referral-bonus': { icon: 'fas fa-gift', class: 'success' },
+        'commission': { icon: 'fas fa-hand-holding-usd', class: 'success' },
+        'subscription': { icon: 'fas fa-crown', class: 'subscription' },
+        'leaderboard': { icon: 'fas fa-trophy', class: 'leaderboard' },
+        'ai-signal': { icon: 'fas fa-brain', class: 'ai-signal' },
+        'candle': { icon: 'fas fa-chart-bar', class: 'candle' },
+        'account': { icon: 'fas fa-user', class: 'info' },
+        'privacy': { icon: 'fas fa-lock', class: 'security' },
+        'terms': { icon: 'fas fa-file-contract', class: 'info' },
+        'system': { icon: 'fas fa-bell', class: 'system' },
+        'info': { icon: 'fas fa-info-circle', class: 'info' },
+        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
+        'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
+        'success': { icon: 'fas fa-check-circle', class: 'success' },
+        'welcome': { icon: 'fas fa-star', class: 'success' }
     };
-    const defaultBtn = { text: '📱 View', icon: 'fa-arrow-right' };
-    return buttonMap[type] || buttonMap[type.split('-')[0]] || defaultBtn;
+    return typeMap[type] || typeMap[type?.split('-')[0]] || { icon: 'fas fa-bell', class: 'info' };
 }
 
-// ============================================================
-// SERVICE WORKER & PUSH
-// ============================================================
-async function registerServiceWorker() {
-    try {
-        if ('serviceWorker' in navigator) {
-            const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-            console.log('[SW] Registered:', registration);
-            swRegistration = registration;
-            return registration;
-        }
-    } catch (error) {
-        console.warn('[SW] Registration failed:', error);
-    }
-    return null;
+function timeAgo(timestamp) {
+    if (!timestamp) return 'just now';
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    return `${weeks}w ago`;
 }
 
-async function subscribeToPush() {
-    try {
-        if (!swRegistration) return null;
-        if (!('PushManager' in window)) {
-            console.warn('[PUSH] PushManager not supported');
-            return null;
-        }
-        const applicationServerKey = CONFIG.VAPID_PUBLIC_KEY;
-        if (!applicationServerKey) return null;
-        const subscription = await swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: applicationServerKey
-        });
-        console.log('[PUSH] Subscribed:', subscription.endpoint);
-        pushSubscription = subscription;
-        try {
-            const token = await getFirebaseToken();
-            await fetch(`${CONFIG.API_URL}/api/notifications/subscribe`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ subscription, userId: currentUser?.uid })
-            });
-        } catch (e) { console.warn('[PUSH] Save failed:', e); }
-        return subscription;
-    } catch (error) {
-        console.warn('[PUSH] Subscription failed:', error);
-        return null;
-    }
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
-
-async function getFirebaseToken() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            unsubscribe();
-            if (!user) { reject(new Error('No user')); return; }
-            try { resolve(await user.getIdToken(true)); }
-            catch (error) { reject(error); }
-        });
-    });
-}
-
-function sendDevicePushNotification(title, body, link = '/dashboard.html', type = 'info') {
-    NotificationsAPI.send(title, body, link, type);
-}
-
-async function initPushNotifications() {
-    if (!currentUser) return;
-    try {
-        await registerServiceWorker();
-        if (NotificationsAPI.isSupported()) {
-            const permission = NotificationsAPI.getPermission();
-            if (permission === 'granted') {
-                await subscribeToPush();
-            } else if (permission === 'default' && !localStorage.getItem('onesignal_banner_dismissed')) {
-                document.getElementById('permissionBanner').style.display = 'flex';
-            }
-        }
-    } catch (e) {
-        console.warn('[PUSH] Init failed:', e);
-    }
-}
-
-// ============================================================
-// TOAST NOTIFICATION
-// ============================================================
-function showToast(message, type = 'info') {
-    const existing = document.querySelector('.notification-popup');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = `notification-popup ${type}`;
-    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
-    document.body.appendChild(toast);
-    toast.querySelector('.close-notif').addEventListener('click', () => {
-        toast.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    });
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }
-    }, 4000);
-}
-
-// ============================================================
-// THEME
-// ============================================================
-function initTheme() {
-    const saved = localStorage.getItem('abotra_theme');
-    if (saved === 'light') {
-        document.body.classList.add('light-theme');
-        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
-        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
-    }
-}
-
-document.getElementById('themeToggle').addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-theme');
-    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
-    document.querySelector('#themeToggle i.fa-sun').style.display = isLight ? 'none' : 'inline-block';
-    document.querySelector('#themeToggle i.fa-moon').style.display = isLight ? 'inline-block' : 'none';
-});
 
 // ============================================================
 // MODAL SYSTEM
@@ -1103,8 +1179,7 @@ function showConfirmModal(options) {
 // ============================================================
 // NOTIFICATION FUNCTIONS
 // ============================================================
-async function markAsRead(notificationId, event) {
-    if (event) event.stopPropagation();
+async function markAsRead(notificationId) {
     if (!currentUser) return;
     await update(ref(db, `notifications/${currentUser.uid}/${notificationId}`), { read: true });
     await updateUnreadCountAndBadge();
@@ -1194,81 +1269,7 @@ async function updateUnreadCountAndBadge() {
 }
 
 // ============================================================
-// GET ICON
-// ============================================================
-function getNotificationIcon(type) {
-    const typeMap = {
-        'deposit': { icon: 'fas fa-arrow-down', class: 'deposit' },
-        'deposit-approved': { icon: 'fas fa-check-circle', class: 'success' },
-        'deposit-pending': { icon: 'fas fa-clock', class: 'info' },
-        'deposit-rejected': { icon: 'fas fa-times-circle', class: 'error' },
-        'withdrawal': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
-        'withdraw': { icon: 'fas fa-arrow-up', class: 'withdrawal' },
-        'withdraw-approved': { icon: 'fas fa-check-circle', class: 'success' },
-        'withdraw-pending': { icon: 'fas fa-clock', class: 'info' },
-        'withdraw-rejected': { icon: 'fas fa-times-circle', class: 'error' },
-        'transfer': { icon: 'fas fa-exchange-alt', class: 'transfer' },
-        'wallet': { icon: 'fas fa-wallet', class: 'info' },
-        'transaction': { icon: 'fas fa-receipt', class: 'info' },
-        'trade': { icon: 'fas fa-chart-line', class: 'trade' },
-        'trade-open': { icon: 'fas fa-arrow-up', class: 'trade' },
-        'trade-opened': { icon: 'fas fa-arrow-up', class: 'trade' },
-        'trade-close': { icon: 'fas fa-arrow-down', class: 'trade' },
-        'trade-closed': { icon: 'fas fa-arrow-down', class: 'trade' },
-        'trade-profit': { icon: 'fas fa-arrow-up', class: 'success' },
-        'trade-loss': { icon: 'fas fa-arrow-down', class: 'error' },
-        'trade-liquidated': { icon: 'fas fa-exclamation-triangle', class: 'error' },
-        'copy-trade': { icon: 'fas fa-copy', class: 'copy-trade' },
-        'master': { icon: 'fas fa-crown', class: 'master-trade' },
-        'p2p': { icon: 'fas fa-handshake', class: 'p2p' },
-        'kyc': { icon: 'fas fa-id-card', class: 'kyc' },
-        'verification-approved': { icon: 'fas fa-check-circle', class: 'success' },
-        'verification-pending': { icon: 'fas fa-clock', class: 'info' },
-        'verification-rejected': { icon: 'fas fa-times-circle', class: 'error' },
-        'robot': { icon: 'fas fa-robot', class: 'robot' },
-        'affiliate': { icon: 'fas fa-user-plus', class: 'affiliate' },
-        'referral-bonus': { icon: 'fas fa-gift', class: 'success' },
-        'commission': { icon: 'fas fa-hand-holding-usd', class: 'success' },
-        'subscription': { icon: 'fas fa-crown', class: 'subscription' },
-        'leaderboard': { icon: 'fas fa-trophy', class: 'leaderboard' },
-        'ai-signal': { icon: 'fas fa-brain', class: 'ai-signal' },
-        'candle': { icon: 'fas fa-chart-bar', class: 'candle' },
-        'account': { icon: 'fas fa-user', class: 'info' },
-        'privacy': { icon: 'fas fa-lock', class: 'security' },
-        'terms': { icon: 'fas fa-file-contract', class: 'info' },
-        'system': { icon: 'fas fa-bell', class: 'system' },
-        'info': { icon: 'fas fa-info-circle', class: 'info' },
-        'warning': { icon: 'fas fa-exclamation-triangle', class: 'warning' },
-        'error': { icon: 'fas fa-exclamation-circle', class: 'error' },
-        'success': { icon: 'fas fa-check-circle', class: 'success' },
-        'welcome': { icon: 'fas fa-star', class: 'success' }
-    };
-    return typeMap[type] || typeMap[type?.split('-')[0]] || { icon: 'fas fa-bell', class: 'info' };
-}
-
-function timeAgo(timestamp) {
-    if (!timestamp) return 'just now';
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 60) return 'just now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    const weeks = Math.floor(days / 7);
-    return `${weeks}w ago`;
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ============================================================
-// RENDER NOTIFICATIONS - FIXED
+// RENDER NOTIFICATIONS
 // ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
@@ -1285,8 +1286,7 @@ function renderNotifications(notifications) {
         const type = notif.type || 'info';
         const timestamp = notif.timestamp || notif.createdAt || Date.now();
         const read = notif.read === true;
-        const link = notif.link || getPageLink(notif);
-
+        const link = getPageLink(notif);
         const icon = getNotificationIcon(type);
         const btnInfo = getButtonInfo(notif);
 
@@ -1313,7 +1313,6 @@ function renderNotifications(notifications) {
             <button class="delete-notif-btn" onclick="event.stopPropagation(); window.deleteNotification('${id}')"><i class="fas fa-trash-alt"></i></button>
         `;
 
-        // Click on card navigates directly
         card.addEventListener('click', (e) => {
             if (e.target.closest('.action-btn') || e.target.closest('.delete-notif-btn')) return;
             if (!read) markAsRead(id);
@@ -1325,13 +1324,12 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// WINDOW FUNCTIONS - FIXED FOR GLOBAL ACCESS
+// WINDOW FUNCTIONS
 // ============================================================
 window.markAndNavigate = async function(notificationId, destination) {
     try {
-        const user = auth.currentUser;
-        if (user && notificationId) {
-            await update(ref(db, `notifications/${user.uid}/${notificationId}`), { read: true });
+        if (currentUser && notificationId) {
+            await update(ref(db, `notifications/${currentUser.uid}/${notificationId}`), { read: true });
             await updateUnreadCountAndBadge();
         }
     } catch (e) {
@@ -1342,30 +1340,7 @@ window.markAndNavigate = async function(notificationId, destination) {
 };
 
 window.deleteNotification = async function(notificationId) {
-    try {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        const snapshot = await get(ref(db, `notifications/${user.uid}/${notificationId}`));
-        const notifData = snapshot.exists() ? snapshot.val() : null;
-        const title = notifData?.title || 'Notification';
-
-        await showConfirmModal({
-            title: `Delete "${title}"?`,
-            subtitle: `Are you sure you want to delete this notification? This action <span class="modal-highlight">cannot be undone</span>.`,
-            warning: '<i class="fas fa-exclamation-triangle"></i> This will remove the notification permanently.',
-            confirmText: '<i class="fas fa-trash-alt"></i> Delete'
-        });
-        await remove(ref(db, `notifications/${user.uid}/${notificationId}`));
-        showToast('Notification deleted', 'success');
-        await updateUnreadCountAndBadge();
-        loadNotifications(user.uid);
-    } catch (error) {
-        if (error.message !== 'Cancelled') {
-            console.error("Delete error:", error);
-            showToast('Failed to delete', 'error');
-        }
-    }
+    await deleteSingleNotification(notificationId);
 };
 
 // ============================================================
@@ -1405,7 +1380,7 @@ function loadNotifications(userId) {
 }
 
 // ============================================================
-// DEVICE DETECTION & USER CHECK
+// DEVICE DETECTION
 // ============================================================
 function detectDevice() {
     const ua = navigator.userAgent;
@@ -1423,59 +1398,86 @@ function detectDevice() {
     return device;
 }
 
-async function checkRegistrationAndDevice() {
-    if (!currentUser) return;
-
-    const currentDevice = detectDevice();
-    const userRef = ref(db, `users/${currentUser.uid}`);
-    const userSnapshot = await get(userRef);
-    const userData = userSnapshot.exists() ? userSnapshot.val() : {};
-
-    document.getElementById('userEmailDisplay').textContent = currentUser.email || 'User';
-    document.getElementById('deviceInfo').textContent = currentDevice;
-
-    const deviceStorageKey = `abotra_device_notified_${currentUser.uid}`;
-    const lastDevice = localStorage.getItem(deviceStorageKey);
-
-    if (!userData.createdAt) {
-        await update(ref(db, `users/${currentUser.uid}`), {
-            createdAt: Date.now(),
-            name: currentUser.email?.split('@')[0] || 'User',
-            email: currentUser.email
-        });
-        await addNotificationWithPush(currentUser.uid, '🎉 Welcome!', 'Welcome to ABOTRA-PROAI! Start your trading journey.', 'success', 'dashboard.html');
-        localStorage.setItem(deviceStorageKey, currentDevice);
-    } else if (lastDevice && lastDevice !== currentDevice) {
-        await addNotificationWithPush(currentUser.uid, '🔐 New Device Login',
-            `Login from: ${currentDevice}. If not you, secure your account.`, 'warning', 'kyc.html');
-        localStorage.setItem(deviceStorageKey, currentDevice);
-    } else if (!lastDevice) {
-        localStorage.setItem(deviceStorageKey, currentDevice);
-    }
-}
-
 // ============================================================
-// ADD NOTIFICATION
+// SHOW TOAST
 // ============================================================
-async function addNotificationWithPush(userId, title, message, type = 'info', link = null) {
-    if (!userId) return;
-    try {
-        const notifRef = push(ref(db, `notifications/${userId}`));
-        await set(notifRef, {
-            title, message, type, read: false,
-            timestamp: Date.now(),
-            date: new Date().toISOString(),
-            link: link || null
-        });
-        if (userId === currentUser?.uid) {
-            const pageLink = link || getPageLink({ type, link });
-            sendDevicePushNotification(title, message, pageLink, type);
+function showToast(message, type = 'info') {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div><div class="close-notif"><i class="fas fa-times"></i></div>`;
+    document.body.appendChild(toast);
+    toast.querySelector('.close-notif').addEventListener('click', () => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    });
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
         }
-        return notifRef.key;
-    } catch (e) {
-        console.warn('[NOTIF] Add failed:', e);
+    }, 4000);
+}
+
+// ============================================================
+// SEND DEVICE PUSH NOTIFICATION
+// ============================================================
+function sendDevicePushNotification(title, body, link = '/dashboard.html') {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        console.log('[PUSH] Notifications not available');
+        return;
+    }
+    try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(registration => {
+                if (registration && registration.showNotification) {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: '/assets/images/logo-192.png',
+                        badge: '/assets/images/logo-192.png',
+                        vibrate: [200, 100, 200],
+                        data: { url: link },
+                        tag: 'notif_' + Date.now(),
+                        requireInteraction: true
+                    });
+                    return;
+                }
+            }).catch(() => {});
+        }
+        const notif = new Notification(title, {
+            body: body,
+            icon: '/assets/images/logo-192.png',
+            badge: '/assets/images/logo-192.png',
+            vibrate: [200, 100, 200]
+        });
+        notif.onclick = function() {
+            window.focus();
+            if (link) window.location.href = link;
+            notif.close();
+        };
+    } catch(e) { console.error('[PUSH] Error:', e); }
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
     }
 }
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+    document.querySelector('#themeToggle i.fa-sun').style.display = isLight ? 'none' : 'inline-block';
+    document.querySelector('#themeToggle i.fa-moon').style.display = isLight ? 'inline-block' : 'none';
+});
 
 // ============================================================
 // EVENT LISTENERS
@@ -1484,13 +1486,15 @@ document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRea
 document.getElementById('clearNotificationsBtn').addEventListener('click', clearAllNotifications);
 
 document.getElementById('allowNotificationsBtn')?.addEventListener('click', async () => {
-    if (NotificationsAPI.isSupported() && NotificationsAPI.getPermission() === 'default') {
-        const permission = await NotificationsAPI.requestPermission();
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
         if (permission === 'granted') {
             document.getElementById('permissionBanner').style.display = 'none';
             localStorage.setItem('onesignal_banner_dismissed', 'true');
-            showToast('Notifications enabled!', 'success');
-            await subscribeToPush();
+            showToast('Notifications enabled! You will receive alerts.', 'success');
+            try {
+                await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            } catch(e) {}
         }
     }
 });
@@ -1503,21 +1507,48 @@ document.getElementById('laterBtn')?.addEventListener('click', () => {
 // ============================================================
 // INIT
 // ============================================================
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
-    currentUser = user;
+async function init() {
+    initTheme();
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        currentUser = user;
 
-    await checkRegistrationAndDevice();
-    loadNotifications(user.uid);
-    await initPushNotifications();
-});
+        // Show device info
+        const currentDevice = detectDevice();
+        document.getElementById('userEmailDisplay').textContent = user.email || 'User';
+        document.getElementById('deviceInfo').textContent = currentDevice;
 
-initTheme();
+        // Check notification permission
+        if (typeof Notification !== 'undefined') {
+            if (Notification.permission === 'granted') {
+                document.getElementById('permissionBanner').style.display = 'none';
+            } else if (Notification.permission === 'default' && !localStorage.getItem('onesignal_banner_dismissed')) {
+                document.getElementById('permissionBanner').style.display = 'flex';
+            } else {
+                document.getElementById('permissionBanner').style.display = 'none';
+            }
+        }
 
-console.log('[ABOTRA] ✅ Notifications page loaded - Fixed redirects');
+        // Register service worker
+        try {
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                console.log('[SW] Registered successfully');
+            }
+        } catch(e) {
+            console.warn('[SW] Registration failed:', e);
+        }
+
+        loadNotifications(user.uid);
+    });
+}
+
+init();
+console.log('[ABOTRA] ✅ Notifications page loaded - Smart page detection');
 </script>
 </body>
 </html>

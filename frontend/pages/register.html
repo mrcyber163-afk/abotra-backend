@@ -10,9 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
 <style>
-/* ============================================================
-   CSS VARIABLES & BASE
-   ============================================================ */
 :root {
     --bg-primary: #0A0A0A;
     --bg-card: rgba(18,18,18,0.95);
@@ -87,9 +84,7 @@ body.light-theme .register-option:hover { background: rgba(128,0,0,0.08); border
 body.light-theme .register-option.active { background: var(--gold-gradient); color: #0A0A0A; }
 body.light-theme .register-option.disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ============================================================
-   CHOICES.JS - DARK THEME
-   ============================================================ */
+/* Choices.js Dark Theme */
 body:not(.light-theme) .choices__inner {
     background: rgba(255,255,255,0.06) !important;
     border-color: var(--border-color) !important;
@@ -142,9 +137,6 @@ body.light-theme .choices__list--dropdown .choices__input:focus {
 }
 body.light-theme .choices__placeholder { color: #999999 !important; }
 
-/* ============================================================
-   SVG FLAG STYLES
-   ============================================================ */
 .choices__item .country-flag-svg {
     width: 22px;
     height: 16px;
@@ -165,9 +157,7 @@ body.light-theme .choices__placeholder { color: #999999 !important; }
     vertical-align: middle;
 }
 
-/* ============================================================
-   COMMON STYLES
-   ============================================================ */
+/* Theme Toggle */
 .theme-toggle {
     position: fixed; top: 20px; right: 20px; z-index: 10000;
     background: rgba(255,255,255,0.08);
@@ -221,9 +211,6 @@ h1 {
 }
 .sub-text { text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 22px; font-weight: 400; }
 
-/* ============================================================
-   REGISTER OPTIONS
-   ============================================================ */
 .register-options {
     display: flex; gap: 6px; margin-bottom: 22px;
     background: rgba(255,255,255,0.04);
@@ -250,9 +237,6 @@ h1 {
     pointer-events: none;
 }
 
-/* ============================================================
-   INPUT FIELDS
-   ============================================================ */
 .input-box { width: 100%; margin-bottom: 16px; position: relative; }
 .input-box input {
     width: 100%; height: 50px; border: none; outline: none; padding: 0 14px;
@@ -277,9 +261,6 @@ h1 {
 }
 .password-box .toggle-password:hover { color: var(--gold); }
 
-/* ============================================================
-   PHONE CONTAINER
-   ============================================================ */
 .phone-container { display: flex; gap: 10px; margin-bottom: 12px; }
 .country-code-select { width: 150px; flex-shrink: 0; }
 .country-code-select .choices__inner { height: 50px; border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; }
@@ -300,9 +281,6 @@ h1 {
 .phone-hint { font-size: 9px; color: var(--text-muted); margin-top: 4px; padding-left: 4px; transition: var(--transition); }
 .phone-hint.active { color: var(--gold); }
 
-/* ============================================================
-   TERMS
-   ============================================================ */
 .terms-area { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0 20px; }
 .checkbox-container { position: relative; width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
 .checkbox-container input {
@@ -324,9 +302,6 @@ h1 {
 .terms-text a { color: var(--gold); text-decoration: none; font-weight: 600; transition: var(--transition); }
 .terms-text a:hover { color: var(--gold-dark); text-decoration: underline; }
 
-/* ============================================================
-   REGISTER BUTTON
-   ============================================================ */
 .register-btn {
     width: 100%; height: 52px; border: none; outline: none; border-radius: var(--radius-sm);
     background: var(--gold-gradient); color: #0A0A0A;
@@ -350,9 +325,6 @@ h1 {
 .bottom-text a { color: var(--gold); text-decoration: none; font-weight: 700; transition: var(--transition); }
 .bottom-text a:hover { text-decoration: underline; }
 
-/* ============================================================
-   NOTIFICATION
-   ============================================================ */
 .notification {
     position: fixed; top: 80px; right: 25px; min-width: 280px; max-width: 380px;
     padding: 14px 18px; border-radius: var(--radius-sm);
@@ -376,9 +348,6 @@ h1 {
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
 @keyframes fadeOut { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(100%) scale(0.95); } }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media(max-width: 480px) {
     body { padding: 10px; }
     .content { padding: 18px 16px 20px; }
@@ -630,6 +599,8 @@ if (refParam) {
 }
 
 let selectedCountry = null;
+let selectedCountryEmail = null;
+let selectedCountryPhone = null;
 let phoneConfirmation = null;
 let recaptchaVerifier = null;
 
@@ -758,25 +729,24 @@ function initCountryDropdowns() {
 
         emailCountryChoices = new Choices(emailSelect, { ...commonConfig });
 
-        const defaultCountry = countriesData.find(c => c.code === '+255' || c.name === 'Tanzania');
-        if (defaultCountry) {
-            const code = defaultCountry.code;
-            emailCountryChoices.setChoiceByValue(code);
-            phoneCountryChoices.setChoiceByValue(code);
-            selectedCountry = defaultCountry;
-            updatePhoneHint(defaultCountry);
-        }
+        // Auto-detect country
+        setTimeout(autoDetectCountry, 300);
 
         phoneSelect.addEventListener('change', () => {
             const code = phoneSelect.value;
             const country = countriesData.find(c => c.code === code);
-            if (country) { selectedCountry = country; updatePhoneHint(country); }
+            if (country) { 
+                selectedCountryPhone = country;
+                updatePhoneHint(country);
+            }
         });
 
         emailSelect.addEventListener('change', () => {
             const code = emailSelect.value;
             const country = countriesData.find(c => c.code === code);
-            if (country) { selectedCountry = country; }
+            if (country) { 
+                selectedCountryEmail = country;
+            }
         });
 
         console.log('[CHOICES] ✅ Initialized with SVG flags');
@@ -797,10 +767,13 @@ function updatePhoneHint(country) {
 }
 
 // ============================================================
-// AUTO-DETECT COUNTRY
+// AUTO-DETECT COUNTRY - NO DEFAULT
 // ============================================================
 async function autoDetectCountry() {
+    let detectedCountry = null;
+    
     try {
+        // Try IP detection first
         const res = await fetch('https://ipapi.co/json/');
         if (res.ok) {
             const data = await res.json();
@@ -808,29 +781,67 @@ async function autoDetectCountry() {
                 c.name.toLowerCase() === data.country_name?.toLowerCase() ||
                 c.iso === data.country_code?.toLowerCase()
             );
-            if (matched) { setSelectedCountry(matched); return; }
+            if (matched) {
+                detectedCountry = matched;
+                console.log('[DETECT] ✅ IP detected:', detectedCountry.name);
+            }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.log('[DETECT] IP detection failed:', e.message);
+    }
 
-    try {
-        const locale = navigator.language || navigator.languages?.[0] || 'en-US';
-        const parts = locale.split('-');
-        if (parts.length > 1) {
-            const code = parts[1].toLowerCase();
-            const matched = countriesData.find(c => c.iso === code);
-            if (matched) { setSelectedCountry(matched); return; }
+    // If IP detection failed, try browser locale
+    if (!detectedCountry) {
+        try {
+            const locale = navigator.language || navigator.languages?.[0] || 'en-US';
+            const parts = locale.split('-');
+            if (parts.length > 1) {
+                const code = parts[1].toLowerCase();
+                const matched = countriesData.find(c => c.iso === code);
+                if (matched) {
+                    detectedCountry = matched;
+                    console.log('[DETECT] ✅ Locale detected:', detectedCountry.name);
+                }
+            }
+        } catch (e) {
+            console.log('[DETECT] Locale detection failed:', e.message);
         }
-    } catch (e) {}
+    }
 
-    const defaultCountry = countriesData.find(c => c.code === '+255');
-    if (defaultCountry) setSelectedCountry(defaultCountry);
+    // If detected, set it. Otherwise, leave as "Select Country" (no default)
+    if (detectedCountry) {
+        setSelectedCountry(detectedCountry);
+    } else {
+        console.log('[DETECT] ⚠️ No country detected, user must select manually');
+        // Show a hint to select country
+        const hint = document.getElementById('phoneHint');
+        if (hint) {
+            hint.textContent = '🌍 Please select your country from the dropdown';
+            hint.className = 'phone-hint active';
+            hint.style.color = '#FFD700';
+        }
+        // Leave dropdowns empty
+        if (emailCountryChoices) {
+            emailCountryChoices.setChoiceByValue('');
+        }
+        if (phoneCountryChoices) {
+            phoneCountryChoices.setChoiceByValue('');
+        }
+    }
 }
 
 function setSelectedCountry(country) {
     if (!country) return;
     selectedCountry = country;
-    if (emailCountryChoices) emailCountryChoices.setChoiceByValue(country.code);
-    if (phoneCountryChoices) phoneCountryChoices.setChoiceByValue(country.code);
+    selectedCountryEmail = country;
+    selectedCountryPhone = country;
+    
+    if (emailCountryChoices) {
+        emailCountryChoices.setChoiceByValue(country.code);
+    }
+    if (phoneCountryChoices) {
+        phoneCountryChoices.setChoiceByValue(country.code);
+    }
     updatePhoneHint(country);
 }
 
@@ -843,7 +854,8 @@ function generateStaticReferralCode(uid) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let suffix = '';
     for (let i = 0; i < 3; i++) {
-        suffix += chars.charAt(parseInt(uidPart[i] || '0', 36) % chars.length);
+        const idx = parseInt(uidPart[i] || '0', 36) % chars.length;
+        suffix += chars.charAt(idx);
     }
     return prefix + uidPart + suffix;
 }
@@ -857,15 +869,16 @@ async function checkReferralCodeExists(code) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE - FIXED WITH PROPER AUTH WAIT
+// SAVE USER TO FIREBASE - WITH CORRECT PATHS
 // ============================================================
 async function saveUserToFirebase(user, userData) {
-    // ✅ Wait for auth to sync
-    console.log('[SAVE] Waiting for auth to sync...');
+    console.log('[SAVE] Saving user data for:', user.uid);
+    
+    // Wait for auth to sync
     await new Promise((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             if (u && u.uid === user.uid) {
-                console.log('[SAVE] ✅ Auth synced!');
+                console.log('[SAVE] ✅ Auth synced');
                 unsubscribe();
                 resolve();
             }
@@ -876,7 +889,7 @@ async function saveUserToFirebase(user, userData) {
         }, 5000);
     });
     
-    // ✅ Refresh token
+    // Refresh token
     try {
         if (auth.currentUser) {
             await auth.currentUser.getIdToken(true);
@@ -886,25 +899,9 @@ async function saveUserToFirebase(user, userData) {
         console.log('[SAVE] Token refresh error:', e.message);
     }
     
-    // ✅ Wait a bit more
     await new Promise(r => setTimeout(r, 1000));
     
-    // ✅ DOUBLE CHECK - if no current user, try to wait more
-    if (!auth.currentUser) {
-        console.log('[SAVE] ⚠️ No current user, waiting more...');
-        await new Promise((resolve) => {
-            const unsubscribe = onAuthStateChanged(auth, (u) => {
-                if (u) {
-                    console.log('[SAVE] ✅ User appeared!');
-                    unsubscribe();
-                    resolve();
-                }
-            });
-            setTimeout(resolve, 3000);
-        });
-    }
-    
-    // ✅ Generate referral code
+    // Generate referral code
     let referralCode = generateStaticReferralCode(user.uid);
     let attempts = 0;
     while (await checkReferralCodeExists(referralCode) && attempts < 10) {
@@ -912,14 +909,18 @@ async function saveUserToFirebase(user, userData) {
         attempts++;
     }
     
+    // Prepare user data - CORRECT FIELDS
+    const countryName = userData.country || 'Unknown';
+    const countryCode = userData.countryCode || '';
+    
     const dataToSave = {
         uid: user.uid,
         username: userData.username.toLowerCase(),
         fullName: userData.fullName,
         email: user.email || null,
         phone: userData.phone || null,
-        country: userData.country || selectedCountry?.name || 'Tanzania',
-        countryCode: userData.countryCode || selectedCountry?.code || '+255',
+        country: countryName,
+        countryCode: countryCode,
         referralCode: referralCode,
         referredBy: userData.referredBy || null,
         balance: 0,
@@ -931,15 +932,15 @@ async function saveUserToFirebase(user, userData) {
         updatedAt: Date.now()
     };
     
-    console.log('[SAVE] Saving user data with auth:', !!auth.currentUser);
+    console.log('[SAVE] Data to save:', dataToSave);
     
-    // ✅ Retry logic - 5 attempts
+    // Save with retries
     let retries = 5;
     let lastError = null;
     
     while (retries > 0) {
         try {
-            // Try to save all data in one transaction or with proper auth
+            // Save to users/{uid}
             await set(ref(rtdb, `users/${user.uid}`), dataToSave);
             console.log('[SAVE] ✅ User saved successfully');
             break;
@@ -949,29 +950,13 @@ async function saveUserToFirebase(user, userData) {
             console.log(`[SAVE] Retry ${6 - retries}/5: ${err.message}`);
             
             if (retries > 0) {
-                // ✅ Wait longer between retries
                 await new Promise(r => setTimeout(r, 2000 + (5 - retries) * 1000));
-                
-                // ✅ Try to refresh token again
                 try {
                     if (auth.currentUser) {
                         await auth.currentUser.getIdToken(true);
-                        console.log('[SAVE] Token refreshed on retry');
-                    } else {
-                        // Wait for auth
-                        await new Promise((resolve) => {
-                            const unsubscribe = onAuthStateChanged(auth, (u) => {
-                                if (u) {
-                                    console.log('[SAVE] User appeared on retry');
-                                    unsubscribe();
-                                    resolve();
-                                }
-                            });
-                            setTimeout(resolve, 2000);
-                        });
                     }
                 } catch (e) {
-                    console.log('[SAVE] Token refresh failed on retry:', e.message);
+                    console.log('[SAVE] Token refresh failed on retry');
                 }
             }
         }
@@ -982,20 +967,20 @@ async function saveUserToFirebase(user, userData) {
         throw lastError;
     }
     
-    // ✅ Save referral
+    // Save referral
     try {
         await set(ref(rtdb, `referrals/${referralCode}`), {
             uid: user.uid,
             username: userData.username.toLowerCase(),
+            fullName: userData.fullName,
             createdAt: Date.now()
         });
         console.log('[SAVE] ✅ Referral saved');
     } catch (error) {
         console.error('[SAVE] ❌ Referral error:', error);
-        // Don't throw, just log
     }
     
-    // ✅ Save username
+    // Save username for uniqueness check
     try {
         await set(ref(rtdb, `usernames/${userData.username.toLowerCase()}`), {
             uid: user.uid,
@@ -1004,10 +989,9 @@ async function saveUserToFirebase(user, userData) {
         console.log('[SAVE] ✅ Username saved');
     } catch (error) {
         console.error('[SAVE] ❌ Username error:', error);
-        // Don't throw, just log
     }
     
-    // ✅ Save email
+    // Save email for uniqueness check
     if (user.email) {
         try {
             const emailHash = await hashString(user.email.toLowerCase());
@@ -1018,7 +1002,20 @@ async function saveUserToFirebase(user, userData) {
             console.log('[SAVE] ✅ Email saved');
         } catch (error) {
             console.error('[SAVE] ❌ Email error:', error);
-            // Don't throw, just log
+        }
+    }
+    
+    // Save phone for uniqueness check
+    if (userData.phone) {
+        try {
+            const phoneHash = await hashString(userData.phone);
+            await set(ref(rtdb, `phones/${phoneHash}`), {
+                uid: user.uid,
+                phone: userData.phone
+            });
+            console.log('[SAVE] ✅ Phone saved');
+        } catch (error) {
+            console.error('[SAVE] ❌ Phone error:', error);
         }
     }
     
@@ -1074,7 +1071,7 @@ function validatePassword(password) {
 }
 
 // ============================================================
-// EMAIL REGISTRATION - FIXED KABISA
+// EMAIL REGISTRATION
 // ============================================================
 async function registerWithEmail() {
     if (!termsCheckbox.checked) {
@@ -1089,8 +1086,12 @@ async function registerWithEmail() {
     const countryCode = document.getElementById('emailCountry').value;
     const country = countriesData.find(c => c.code === countryCode);
 
-    if (!fullName || !username || !email || !password || !country) {
+    if (!fullName || !username || !email || !password) {
         showNotification('All fields are required', 'error');
+        return;
+    }
+    if (!country) {
+        showNotification('Please select your country', 'error');
         return;
     }
     if (password.length < 8) {
@@ -1109,65 +1110,52 @@ async function registerWithEmail() {
     try {
         console.log('[REGISTER] Creating user with email:', email);
         
-        // ✅ Check username first
+        // Check username first
         const usernameRef = ref(rtdb, `usernames/${username}`);
         const usernameSnap = await get(usernameRef);
         if (usernameSnap.exists()) {
             throw new Error('Username already taken');
         }
 
-        // ✅ CREATE USER
+        // Check email
+        const emailHash = await hashString(email);
+        const emailRef = ref(rtdb, `emails/${emailHash}`);
+        const emailSnap = await get(emailRef);
+        if (emailSnap.exists()) {
+            throw new Error('Email already registered');
+        }
+
+        // Create user
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log('[REGISTER] ✅ User created:', user.uid);
         
-        // ✅ UPDATE PROFILE
         await updateProfile(user, { displayName: fullName });
         console.log('[REGISTER] ✅ Profile updated');
         
-        // ✅ 🔥 CRITICAL: WAIT FOR AUTH TO SYNC
-        console.log('[REGISTER] Waiting for auth to sync...');
+        // Wait for auth sync
         await new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, (u) => {
                 if (u && u.uid === user.uid) {
-                    console.log('[REGISTER] ✅ Auth synced!');
+                    console.log('[REGISTER] ✅ Auth synced');
                     unsubscribe();
                     resolve();
                 }
             });
             setTimeout(() => {
-                console.log('[REGISTER] Auth sync timeout, continuing...');
+                console.log('[REGISTER] Auth sync timeout');
                 resolve();
             }, 5000);
         });
         
-        // ✅ 🔥 CRITICAL: REFRESH TOKEN
         try {
             await user.getIdToken(true);
             console.log('[REGISTER] ✅ Token refreshed');
-        } catch (e) {
-            console.log('[REGISTER] Token refresh error:', e.message);
-        }
+        } catch (e) {}
         
-        // ✅ WAIT A BIT MORE
         await new Promise(r => setTimeout(r, 1000));
         
-        // ✅ DOUBLE CHECK AUTH
-        if (!auth.currentUser) {
-            console.log('[REGISTER] ⚠️ No current user, waiting...');
-            await new Promise((resolve) => {
-                const unsubscribe = onAuthStateChanged(auth, (u) => {
-                    if (u) {
-                        console.log('[REGISTER] ✅ User appeared!');
-                        unsubscribe();
-                        resolve();
-                    }
-                });
-                setTimeout(resolve, 3000);
-            });
-        }
-        
-        // ✅ SAVE USER DATA
+        // Save user data with correct fields
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
@@ -1178,10 +1166,9 @@ async function registerWithEmail() {
         });
         console.log('[REGISTER] ✅ User saved, referral:', referralCode);
         
-        // ✅ HANDLE REFERRAL
         await handleReferral(user.uid);
         
-        // ✅ ADD WELCOME NOTIFICATION
+        // Welcome notification
         try {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
             await set(notifRef, {
@@ -1194,7 +1181,7 @@ async function registerWithEmail() {
                 date: new Date().toISOString()
             });
         } catch (e) {
-            console.log('[NOTIF] Skip notification:', e.message);
+            console.log('[NOTIF] Skip:', e.message);
         }
         
         showNotification(`✅ Registration successful! Welcome ${fullName}!`, 'success');
@@ -1230,7 +1217,7 @@ async function registerWithEmail() {
 }
 
 // ============================================================
-// PHONE REGISTRATION - FIXED
+// PHONE REGISTRATION
 // ============================================================
 async function registerWithPhone() {
     if (!termsCheckbox.checked) {
@@ -1245,8 +1232,12 @@ async function registerWithPhone() {
     const countryCode = document.getElementById('phoneCountryCode').value;
     const country = countriesData.find(c => c.code === countryCode);
 
-    if (!fullName || !username || !phoneNumber || !password || !country) {
+    if (!fullName || !username || !phoneNumber || !password) {
         showNotification('All fields are required', 'error');
+        return;
+    }
+    if (!country) {
+        showNotification('Please select your country', 'error');
         return;
     }
     if (password.length < 8) {
@@ -1258,7 +1249,18 @@ async function registerWithPhone() {
         return;
     }
     if (phoneNumber.length < country.digits) {
-        showNotification(`Phone number must have ${country.digits} digits`, 'error');
+        showNotification(`Phone number must have ${country.digits} digits (excluding ${country.code})`, 'error');
+        return;
+    }
+
+    const fullPhone = countryCode + phoneNumber;
+    
+    // Check if phone already registered
+    const phoneHash = await hashString(fullPhone);
+    const phoneRef = ref(rtdb, `phones/${phoneHash}`);
+    const phoneSnap = await get(phoneRef);
+    if (phoneSnap.exists()) {
+        showNotification('Phone number already registered', 'error');
         return;
     }
 
@@ -1267,14 +1269,16 @@ async function registerWithPhone() {
     btn.innerHTML = '<span class="spinner"></span> Creating Account...';
 
     try {
-        console.log('[PHONE] Registering with phone:', countryCode + phoneNumber);
+        console.log('[PHONE] Registering with phone:', fullPhone);
         
+        // Check username
         const usernameRef = ref(rtdb, `usernames/${username}`);
         const usernameSnap = await get(usernameRef);
         if (usernameSnap.exists()) {
             throw new Error('Username already taken');
         }
 
+        // Create temporary email
         const tempEmail = `user_${Date.now()}_${Math.random().toString(36).substring(2,6)}@temp.abotra.com`;
         
         const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, password);
@@ -1288,41 +1292,38 @@ async function registerWithPhone() {
         await new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, (u) => {
                 if (u && u.uid === user.uid) {
-                    console.log('[PHONE] ✅ Auth synced!');
+                    console.log('[PHONE] ✅ Auth synced');
                     unsubscribe();
                     resolve();
                 }
             });
             setTimeout(() => {
-                console.log('[PHONE] Auth sync timeout, continuing...');
+                console.log('[PHONE] Auth sync timeout');
                 resolve();
             }, 5000);
         });
         
-        // Refresh token
         try {
             await user.getIdToken(true);
             console.log('[PHONE] ✅ Token refreshed');
-        } catch (e) {
-            console.log('[PHONE] Token refresh error:', e.message);
-        }
+        } catch (e) {}
         
-        // Wait a bit
         await new Promise(r => setTimeout(r, 1000));
         
-        // Save user data
+        // Save user data with correct fields
         const referralCode = await saveUserToFirebase(user, {
             fullName: fullName,
             username: username,
             country: country.name,
             countryCode: country.code,
             referredBy: referredByCode || null,
-            phone: countryCode + phoneNumber
+            phone: fullPhone
         });
         console.log('[PHONE] ✅ User saved, referral:', referralCode);
         
         await handleReferral(user.uid);
         
+        // Welcome notification
         try {
             const notifRef = push(ref(rtdb, `notifications/${user.uid}`));
             await set(notifRef, {
@@ -1335,7 +1336,7 @@ async function registerWithPhone() {
                 date: new Date().toISOString()
             });
         } catch (e) {
-            console.log('[NOTIF] Skip notification:', e.message);
+            console.log('[NOTIF] Skip:', e.message);
         }
         
         showNotification(`✅ Registration successful! Welcome ${fullName}!`, 'success');
@@ -1417,7 +1418,6 @@ initTheme();
 
 setTimeout(() => {
     initCountryDropdowns();
-    setTimeout(autoDetectCountry, 500);
 }, 100);
 
 // Check if already logged in

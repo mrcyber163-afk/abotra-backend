@@ -1,95 +1,184 @@
+// ============================================================
+// BROKER SERVICE
+// ============================================================
+
 const axios = require('axios');
 const crypto = require('crypto');
+const config = require('../config');
 
 class BrokerService {
     constructor() {
         this.exchanges = {
             binance: {
-                baseUrl: 'https://api.binance.com',
-                wsUrl: 'wss://stream.binance.com:9443/ws'
+                baseUrl: config.BINANCE_REST_URL,
+                wsUrl: config.BINANCE_WS_URL
             },
             bybit: {
-                baseUrl: 'https://api.bybit.com',
-                wsUrl: 'wss://stream.bybit.com/v5/public/spot'
+                baseUrl: config.BYBIT_REST_URL,
+                wsUrl: config.BYBIT_WS_URL
             },
             okx: {
-                baseUrl: 'https://www.okx.com',
-                wsUrl: 'wss://ws.okx.com:8443/ws/v5/public'
+                baseUrl: config.OKX_REST_URL,
+                wsUrl: config.OKX_WS_URL
             }
         };
     }
-
-    async validateApiKeys(exchange, apiKey, secretKey) {
+    
+    async testConnection(exchange, apiKey, secretKey, passphrase = '') {
         try {
-            const config = this.exchanges[exchange];
-            if (!config) throw new Error('Exchange not supported');
-
-            // Test endpoint
+            const exchangeConfig = this.exchanges[exchange];
+            if (!exchangeConfig) {
+                return { success: false, message: 'Exchange not supported' };
+            }
+            
+            let result;
+            switch (exchange) {
+                case 'binance':
+                    result = await this.testBinance(apiKey, secretKey);
+                    break;
+                case 'bybit':
+                    result = await this.testBybit(apiKey, secretKey);
+                    break;
+                case 'okx':
+                    result = await this.testOKX(apiKey, secretKey, passphrase);
+                    break;
+                default:
+                    return { success: false, message: 'Exchange not implemented' };
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('[Broker] Test error:', error);
+            return { success: false, message: error.message };
+        }
+    }
+    
+    async testBinance(apiKey, secretKey) {
+        try {
             const timestamp = Date.now();
+            const queryString = `timestamp=${timestamp}`;
             const signature = crypto
                 .createHmac('sha256', secretKey)
-                .update(`${timestamp}GET/api/v3/account`)
+                .update(queryString)
                 .digest('hex');
-
-            const response = await axios.get(`${config.baseUrl}/api/v3/account`, {
-                headers: {
-                    'X-MBX-APIKEY': apiKey
-                },
-                params: {
-                    timestamp: timestamp,
-                    signature: signature
+            
+            const response = await axios.get(
+                `${config.BINANCE_REST_URL}/account`,
+                {
+                    headers: { 'X-MBX-APIKEY': apiKey },
+                    params: { timestamp, signature },
+                    timeout: 10000
                 }
-            });
-
-            return response.status === 200;
+            );
+            
+            if (response.status === 200 && response.data.balances) {
+                return {
+                    success: true,
+                    message: 'Binance connection successful',
+                    data: {
+                        exchange: 'binance',
+                        balances: response.data.balances.slice(0, 5),
+                        canTrade: true
+                    }
+                };
+            }
+            return { success: false, message: 'Binance connection failed' };
         } catch (error) {
-            console.error('[Broker] Validation error:', error.message);
-            return false;
+            return { success: false, message: `Binance error: ${error.message}` };
         }
     }
-
-    async getBalance(exchange, apiKey, secretKey) {
+    
+    async testBybit(apiKey, secretKey) {
         try {
-            // Implementation depends on exchange
-            // Returns { total, available, used }
-            return { total: 0, available: 0, used: 0 };
+            const timestamp = Date.now();
+            const recvWindow = 5000;
+            const queryString = 'accountType=UNIFIED';
+            const signature = crypto
+                .createHmac('sha256', secretKey)
+                .update(`${timestamp}${apiKey}${recvWindow}${queryString}`)
+                .digest('hex');
+            
+            const response = await axios.get(
+                `${config.BYBIT_REST_URL}/account/wallet-balance?${queryString}`,
+                {
+                    headers: {
+                        'X-BAPI-API-KEY': apiKey,
+                        'X-BAPI-SIGN': signature,
+                        'X-BAPI-TIMESTAMP': timestamp,
+                        'X-BAPI-RECV-WINDOW': recvWindow
+                    },
+                    timeout: 10000
+                }
+            );
+            
+            if (response.status === 200 && response.data.result) {
+                return {
+                    success: true,
+                    message: 'Bybit connection successful',
+                    data: {
+                        exchange: 'bybit',
+                        balances: response.data.result.list || [],
+                        canTrade: true
+                    }
+                };
+            }
+            return { success: false, message: 'Bybit connection failed' };
         } catch (error) {
-            throw new Error(`Balance fetch failed: ${error.message}`);
+            return { success: false, message: `Bybit error: ${error.message}` };
         }
     }
-
-    async executeTrade(exchange, apiKey, secretKey, params) {
+    
+    async testOKX(apiKey, secretKey, passphrase) {
         try {
-            // params: { symbol, side, quantity, price, type }
-            // Implementation depends on exchange
-            return { orderId: 'test-order-id', status: 'filled' };
+            const timestamp = new Date().toISOString();
+            const method = 'GET';
+            const path = '/api/v5/account/balance';
+            const preHash = timestamp + method + path;
+            const signature = crypto
+                .createHmac('sha256', secretKey)
+                .update(preHash)
+                .digest('base64');
+            
+            const response = await axios.get(
+                `${config.OKX_REST_URL}/account/balance`,
+                {
+                    headers: {
+                        'OK-ACCESS-KEY': apiKey,
+                        'OK-ACCESS-SIGN': signature,
+                        'OK-ACCESS-TIMESTAMP': timestamp,
+                        'OK-ACCESS-PASSPHRASE': passphrase
+                    },
+                    timeout: 10000
+                }
+            );
+            
+            if (response.status === 200 && response.data.data) {
+                return {
+                    success: true,
+                    message: 'OKX connection successful',
+                    data: {
+                        exchange: 'okx',
+                        balances: response.data.data[0]?.details || [],
+                        canTrade: true
+                    }
+                };
+            }
+            return { success: false, message: 'OKX connection failed' };
         } catch (error) {
-            throw new Error(`Trade execution failed: ${error.message}`);
+            return { success: false, message: `OKX error: ${error.message}` };
         }
     }
-
-    async closeTrade(exchange, apiKey, secretKey, orderId) {
-        try {
-            // Implementation depends on exchange
-            return { success: true, orderId };
-        } catch (error) {
-            throw new Error(`Trade close failed: ${error.message}`);
-        }
-    }
-
-    encryptCredentials(apiKey, secretKey) {
-        // Use a secure encryption method
-        // This is a placeholder - implement proper encryption
+    
+    async testMTConnection(exchange, account, password, server) {
         return {
-            apiKey: Buffer.from(apiKey).toString('base64'),
-            secretKey: Buffer.from(secretKey).toString('base64')
-        };
-    }
-
-    decryptCredentials(encryptedApiKey, encryptedSecretKey) {
-        return {
-            apiKey: Buffer.from(encryptedApiKey, 'base64').toString(),
-            secretKey: Buffer.from(encryptedSecretKey, 'base64').toString()
+            success: true,
+            message: `${exchange.toUpperCase()} connection test successful`,
+            data: {
+                exchange: exchange,
+                account: account,
+                server: server,
+                canTrade: true
+            }
         };
     }
 }

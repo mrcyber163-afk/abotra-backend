@@ -70,10 +70,13 @@
     th{color:#FFD700;font-weight:600;font-size:8px;text-transform:uppercase;}
     td{color:#ddd;font-size:9px;}
     tr:hover td{background:rgba(255,215,0,0.04);}
-    .status-pending,.status-approved,.status-rejected{padding:2px 8px;border-radius:30px;font-size:8px;font-weight:700;display:inline-block;white-space:nowrap;}
+    .status-pending,.status-approved,.status-rejected,.status-waiting,.status-expired,.status-cancelled{padding:2px 8px;border-radius:30px;font-size:8px;font-weight:700;display:inline-block;white-space:nowrap;}
     .status-pending{background:rgba(255,215,0,0.2);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
+    .status-waiting{background:rgba(255,165,0,0.2);color:#FFA500;border:1px solid rgba(255,165,0,0.3);}
     .status-approved{background:rgba(14,203,129,0.2);color:#0ECB81;border:1px solid rgba(14,203,129,0.3);}
     .status-rejected{background:rgba(246,70,93,0.2);color:#F6465D;border:1px solid rgba(246,70,93,0.3);}
+    .status-expired{background:rgba(136,136,136,0.2);color:#888;border:1px solid rgba(136,136,136,0.3);}
+    .status-cancelled{background:rgba(136,136,136,0.2);color:#888;border:1px solid rgba(136,136,136,0.3);}
     .actions-cell{display:flex;gap:4px;flex-wrap:wrap;}
     .btn-view,.btn-approve,.btn-reject,.btn-delete{border:none;border-radius:4px;padding:3px 6px;color:white;cursor:pointer;font-size:8px;font-weight:600;transition:0.3s;display:inline-flex;align-items:center;gap:3px;}
     .btn-view{background:rgba(255,215,0,0.2);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
@@ -97,6 +100,7 @@
     .modal-detail-value{color:#FFD700;font-weight:600;font-size:11px;word-break:break-word;text-align:right;max-width:60%;}
     .modal-detail-value.green{color:#0ECB81;}
     .modal-detail-value.red{color:#F6465D;}
+    .modal-detail-value .tx-hash{font-family:monospace;font-size:10px;word-break:break-all;}
     .local-amount-box{background:rgba(14,203,129,0.12);border-radius:12px;padding:10px 12px;margin:10px 0;text-align:center;}
     .local-amount-box span{color:#0ECB81;font-size:11px;}
     .local-amount-box .amount{color:#FFD700;font-size:18px;font-weight:800;}
@@ -173,6 +177,7 @@
     .toast-notification.info{background:linear-gradient(135deg,#FFD700,#b8860b);color:#1a1a1a;}
     @keyframes slideInRight{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
     .pending-highlight{background:rgba(255,215,0,0.08);border-left:3px solid #FFD700;}
+    .binance-badge{background:rgba(240,185,11,0.2);color:#F0B90B;padding:2px 6px;border-radius:20px;font-size:7px;font-weight:600;border:1px solid rgba(240,185,11,0.3);display:inline-flex;align-items:center;gap:3px;}
     @media(max-width:768px){.main-content{padding:12px;margin-top:65px;}.page-title{font-size:18px;}.tabs{gap:4px;}.tab-btn{padding:5px 12px;font-size:9px;}.deposit-stat-value{font-size:18px;}.actions-cell{gap:2px;}.modal-content{padding:18px;max-width:95%;}.modal-detail-row{flex-direction:column;}.modal-detail-value{text-align:left;max-width:100%;}.logo-area p{display:none;}.menu-btn span{display:none;}.menu-btn{padding:8px 10px;}.notification-panel{width:100%;right:-100%;}table{min-width:800px;}th,td{font-size:8px;padding:4px 4px;}}
   </style>
 </head>
@@ -182,7 +187,7 @@
   <div class="header-left">
     <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
     <div class="logo-area">
-      <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\'fas fa-robot\' style=\'font-size:28px; color:#FFD700;\'></i>'">
+      <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
       <div><h2>ABOTRA-PROAI</h2><p>Admin Panel</p></div>
     </div>
   </div>
@@ -231,12 +236,14 @@
   <div class="deposit-stats">
     <div class="deposit-stat-card"><div class="deposit-stat-value" id="totalDeposits">$0</div><div class="deposit-stat-label">Total (Approved)</div></div>
     <div class="deposit-stat-card"><div class="deposit-stat-value" id="pendingCount">0</div><div class="deposit-stat-label">Pending</div></div>
+    <div class="deposit-stat-card"><div class="deposit-stat-value" id="waitingCount">0</div><div class="deposit-stat-label">Waiting Verification</div></div>
     <div class="deposit-stat-card"><div class="deposit-stat-value" id="approvedCount">0</div><div class="deposit-stat-label">Approved</div></div>
     <div class="deposit-stat-card"><div class="deposit-stat-value" id="rejectedCount">0</div><div class="deposit-stat-label">Rejected</div></div>
   </div>
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="pending"><i class="fas fa-clock"></i> Pending</button>
+    <button class="tab-btn" data-tab="waiting"><i class="fas fa-hourglass-half"></i> Waiting</button>
     <button class="tab-btn" data-tab="approved"><i class="fas fa-check-circle"></i> Approved</button>
     <button class="tab-btn" data-tab="rejected"><i class="fas fa-times-circle"></i> Rejected</button>
     <button class="tab-btn" data-tab="all"><i class="fas fa-list"></i> All</button>
@@ -533,7 +540,7 @@
   }
 
   // ============================================================
-  // DEPOSIT FUNCTIONS - FIXED TO READ FROM BOTH PATHS
+  // DEPOSIT FUNCTIONS - FIXED: PRIORITIZE adminDeposits
   // ============================================================
   async function loadDeposits() {
     try {
@@ -541,96 +548,128 @@
       if (container) container.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><p>Loading deposits...</p></div>';
 
       allDeposits = [];
-      let totalApproved = 0, pending = 0, approved = 0, rejected = 0;
+      let totalApproved = 0, pending = 0, waiting = 0, approved = 0, rejected = 0;
       const depositIds = new Set();
 
-      // ✅ 1. READ FROM adminDeposits
+      // ✅ STEP 1: READ FROM adminDeposits (PRIMARY SOURCE)
       const adminSnapshot = await db.ref('adminDeposits').once('value');
+      const adminDepositsMap = {};
+      
       if (adminSnapshot.exists()) {
         adminSnapshot.forEach(child => {
           const d = child.val();
           d.id = child.key;
           d.amount = getSafeNumber(d.amount);
           d._source = 'adminDeposits';
-          allDeposits.push(d);
+          adminDepositsMap[d.id] = d;
           depositIds.add(d.id);
-
-          if (d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) {
-            pending++;
-          } else if (d.status === 'approved' || d.status === 'completed' || d.status === 'verified') {
-            approved++;
-            totalApproved += d.amount;
-          } else if (d.status === 'rejected') {
-            rejected++;
-          }
         });
       }
 
-      // ✅ 2. READ FROM deposits/{userId}/ (USER DEPOSITS)
+      // ✅ STEP 2: READ FROM deposit_requests (BINANCE) - ADD TO adminDepositsMap
+      const requestsSnapshot = await db.ref('deposit_requests').once('value');
+      if (requestsSnapshot.exists()) {
+        requestsSnapshot.forEach(userRequests => {
+          const userId = userRequests.key;
+          userRequests.forEach(requestChild => {
+            const d = requestChild.val();
+            const id = requestChild.key;
+            
+            // Check if already exists in adminDeposits
+            if (adminDepositsMap[id]) {
+              // Update adminDeposits entry with missing fields
+              if (!adminDepositsMap[id].method) {
+                adminDepositsMap[id].method = 'Binance USDT';
+              }
+              if (!adminDepositsMap[id]._source) {
+                adminDepositsMap[id]._source = 'adminDeposits';
+              }
+              return;
+            }
+            
+            // New deposit from deposit_requests
+            d.id = id;
+            d.userId = userId;
+            d.amount = getSafeNumber(d.amount);
+            d.method = 'Binance USDT';
+            d._source = 'deposit_requests';
+            adminDepositsMap[id] = d;
+            depositIds.add(id);
+          });
+        });
+      }
+
+      // ✅ STEP 3: READ FROM deposits/{userId}/ - ADD MISSING ONLY
       const depositsSnapshot = await db.ref('deposits').once('value');
       if (depositsSnapshot.exists()) {
         depositsSnapshot.forEach(userDeposits => {
           const userId = userDeposits.key;
           userDeposits.forEach(depositChild => {
             const d = depositChild.val();
-            d.id = depositChild.key;
-            d.userId = userId;
-            d.amount = getSafeNumber(d.amount);
-            d._source = 'deposits';
+            const id = depositChild.key;
             
-            if (!depositIds.has(d.id)) {
-              allDeposits.push(d);
-              depositIds.add(d.id);
-              
-              if (d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) {
-                pending++;
-              } else if (d.status === 'approved' || d.status === 'completed' || d.status === 'verified') {
-                approved++;
-                totalApproved += d.amount;
-              } else if (d.status === 'rejected') {
-                rejected++;
-              }
+            if (!depositIds.has(id)) {
+              d.id = id;
+              d.userId = userId;
+              d.amount = getSafeNumber(d.amount);
+              d._source = 'deposits';
+              adminDepositsMap[id] = d;
+              depositIds.add(id);
             }
           });
         });
       }
 
-      // ✅ 3. READ FROM user_deposits/{userId}/ (BACKUP)
+      // ✅ STEP 4: READ FROM user_deposits/{userId}/ - ADD MISSING ONLY
       const userDepositsSnapshot = await db.ref('user_deposits').once('value');
       if (userDepositsSnapshot.exists()) {
         userDepositsSnapshot.forEach(userDeposits => {
           const userId = userDeposits.key;
           userDeposits.forEach(depositChild => {
             const d = depositChild.val();
-            d.id = depositChild.key;
-            d.userId = userId;
-            d.amount = getSafeNumber(d.amount);
-            d._source = 'user_deposits';
+            const id = depositChild.key;
             
-            if (!depositIds.has(d.id)) {
-              allDeposits.push(d);
-              depositIds.add(d.id);
-              
-              if (d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) {
-                pending++;
-              } else if (d.status === 'approved' || d.status === 'completed' || d.status === 'verified') {
-                approved++;
-                totalApproved += d.amount;
-              } else if (d.status === 'rejected') {
-                rejected++;
-              }
+            if (!depositIds.has(id)) {
+              d.id = id;
+              d.userId = userId;
+              d.amount = getSafeNumber(d.amount);
+              d._source = 'user_deposits';
+              adminDepositsMap[id] = d;
+              depositIds.add(id);
             }
           });
         });
       }
 
+      // ✅ Convert map to array and calculate stats
+      allDeposits = Object.values(adminDepositsMap);
+
+      allDeposits.forEach(d => {
+        const status = d.status || 'pending';
+        const amount = getSafeNumber(d.amount);
+        
+        if (status === 'pending' || status === 'pending_verification' || status === 'submitted') {
+          pending++;
+        } else if (status === 'waiting_verification') {
+          waiting++;
+        } else if (status === 'approved' || status === 'completed' || status === 'verified') {
+          approved++;
+          totalApproved += amount;
+        } else if (status === 'rejected') {
+          rejected++;
+        }
+      });
+
+      // Update stats
       document.getElementById('totalDeposits').innerHTML = `$${totalApproved.toFixed(2)}`;
       document.getElementById('pendingCount').textContent = pending;
+      document.getElementById('waitingCount').textContent = waiting;
       document.getElementById('approvedCount').textContent = approved;
       document.getElementById('rejectedCount').textContent = rejected;
 
       const badge = document.getElementById('depositBadge');
-      if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; } 
+      const totalPending = pending + waiting;
+      if (totalPending > 0) { badge.textContent = totalPending; badge.style.display = 'inline-block'; } 
       else { badge.style.display = 'none'; }
 
       renderDeposits();
@@ -645,10 +684,43 @@
   }
 
   function getDepositMethodLabel(d) {
-    if (d.method === 'mobile_money' || d.method === 'mobile') return 'Mobile Money';
+    // Check _source first - BINANCE
+    if (d._source === 'deposit_requests') return 'Binance USDT';
+    if (d._source === 'adminDeposits' && d.method === 'Binance USDT') return 'Binance USDT';
+    
+    // Check method field
     if (d.method === 'binance_usdt' || d.method === 'binance' || d.type === 'binance_usdt') return 'Binance USDT';
+    if (d.method === 'mobile_money' || d.method === 'mobile') return 'Mobile Money';
     if (d.method === 'p2p' || d.method === 'user_transfer') return 'User Transfer';
+    
+    // Check if it has depositId (Binance requests always have depositId)
+    if (d.depositId && (d.depositId.startsWith('DEP-') || d._source === 'deposit_requests')) return 'Binance USDT';
+    
     return d.method || 'Unknown';
+  }
+
+  function isBinanceDeposit(d) {
+    if (d._source === 'deposit_requests') return true;
+    if (d.depositId && d.depositId.startsWith('DEP-')) return true;
+    if (d.method === 'Binance USDT' || d.method === 'binance_usdt') return true;
+    if (d.network === 'TRC20' && d.walletAddress) return true;
+    return false;
+  }
+
+  function getStatusDisplay(status) {
+    const map = {
+      'pending': { label: 'Pending', class: 'status-pending' },
+      'pending_verification': { label: 'Pending', class: 'status-pending' },
+      'submitted': { label: 'Submitted', class: 'status-pending' },
+      'waiting_verification': { label: 'Waiting Verification', class: 'status-waiting' },
+      'approved': { label: 'Approved ✓', class: 'status-approved' },
+      'completed': { label: 'Completed ✓', class: 'status-approved' },
+      'verified': { label: 'Verified ✓', class: 'status-approved' },
+      'rejected': { label: 'Rejected ✗', class: 'status-rejected' },
+      'expired': { label: 'Expired', class: 'status-expired' },
+      'cancelled': { label: 'Cancelled', class: 'status-cancelled' }
+    };
+    return map[status] || map['pending'];
   }
 
   function renderDeposits() {
@@ -657,15 +729,23 @@
     if (currentTab === 'all') {
       filtered = [...allDeposits];
     } else if (currentTab === 'pending') {
-      // ✅ FIX: Include all pending statuses
-      filtered = allDeposits.filter(d => 
-        d.status === 'pending' || 
-        d.status === 'pending_verification' || 
-        d.status === 'submitted' || 
-        !d.status
-      );
+      filtered = allDeposits.filter(d => {
+        const status = d.status || 'pending';
+        return status === 'pending' || status === 'pending_verification' || status === 'submitted';
+      });
+    } else if (currentTab === 'waiting') {
+      filtered = allDeposits.filter(d => {
+        const status = d.status || 'pending';
+        return status === 'waiting_verification';
+      });
     } else {
-      filtered = allDeposits.filter(d => d.status === currentTab);
+      filtered = allDeposits.filter(d => {
+        const status = d.status || 'pending';
+        if (currentTab === 'approved') {
+          return status === 'approved' || status === 'completed' || status === 'verified';
+        }
+        return status === currentTab;
+      });
     }
     
     filtered.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
@@ -674,6 +754,7 @@
     if (filtered.length === 0) {
       const messages = {
         pending: 'No pending deposits awaiting approval',
+        waiting: 'No deposits waiting for verification',
         approved: 'No approved deposits',
         rejected: 'No rejected deposits',
         all: 'No deposits found'
@@ -683,44 +764,36 @@
     }
 
     let html = `<div class="table-responsive"><table>
-                <thead><tr><th>ID</th><th>Date</th><th>User</th><th>Method</th><th>Amount</th><th>Local</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+                <thead><tr><th>ID</th><th>Date</th><th>User</th><th>Method</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
 
     filtered.forEach((d) => {
-      let statusClass = 'pending';
-      let statusText = 'Pending';
-      
-      if (d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) {
-        statusClass = 'pending';
-        statusText = 'Pending';
-      } else if (d.status === 'approved' || d.status === 'verified' || d.status === 'completed') {
-        statusClass = 'approved';
-        statusText = 'Approved';
-      } else if (d.status === 'rejected') {
-        statusClass = 'rejected';
-        statusText = 'Rejected';
-      }
-
+      const statusInfo = getStatusDisplay(d.status || 'pending');
       const displayName = d.userEmail ? d.userEmail.split('@')[0] : (d.kycName || (d.userId ? d.userId.substring(0, 8) : 'User'));
       const methodLabel = getDepositMethodLabel(d);
       const amount = getSafeNumber(d.amount);
-      const country = d.country || 'Tanzania';
-      const localAmount = calculateLocalAmount(amount, country);
-      const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
       
-      // Highlight pending rows
-      const rowClass = (d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) ? 'pending-highlight' : '';
+      // Check if this is a Binance deposit
+      const isBinance = isBinanceDeposit(d);
+      const methodDisplay = isBinance ? `<span class="binance-badge"><i class="fab fa-bitcoin"></i> Binance</span>` : methodLabel;
+      
+      const isPending = d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status;
+      const isWaiting = d.status === 'waiting_verification';
+      const rowClass = isPending || isWaiting ? 'pending-highlight' : '';
+
+      // Show Deposit ID for Binance
+      const idDisplay = d.depositId || d.id || 'N/A';
+      const shortId = idDisplay.length > 12 ? idDisplay.substring(0, 10) + '...' : idDisplay;
 
       html += `<tr class="${rowClass}">
-                    <td><small>${d.id ? d.id.substring(0, 8) : 'N/A'}</small></td>
+                    <td><small>${escapeHtml(shortId)}</small></td>
                     <td>${d.createdAt ? new Date(d.createdAt).toLocaleDateString() : (d.timestamp ? new Date(d.timestamp).toLocaleDateString() : 'N/A')}</td>
                     <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(d.userEmail || '')}</small></td>
-                    <td>${methodLabel}</td>
+                    <td>${methodDisplay}</td>
                     <td><strong>$${amount.toFixed(2)}</strong></td>
-                    <td><strong style="color:#0ECB81;">${localAmount.toFixed(0)} ${currency}</strong></td>
-                    <td><span class="status-${statusClass}">${statusText}</span></td>
+                    <td><span class="${statusInfo.class}">${statusInfo.label}</span></td>
                     <td class="actions-cell">
                         <button class="btn-view" onclick="viewDeposit('${d.id}')"><i class="fas fa-eye"></i></button>
-                        ${(d.status === 'pending' || d.status === 'pending_verification' || d.status === 'submitted' || !d.status) ?
+                        ${(isPending || isWaiting) ?
         `<button class="btn-approve" onclick="showApproveConfirm('${d.id}')"><i class="fas fa-check"></i></button>
                                 <button class="btn-reject" onclick="showRejectConfirm('${d.id}')"><i class="fas fa-times"></i></button>` : ''}
                         <button class="btn-delete" onclick="showDeleteConfirm('${d.id}')"><i class="fas fa-trash"></i></button>
@@ -732,55 +805,63 @@
   }
 
   // ============================================================
-  // DEPOSIT ACTIONS WITH REFERRAL BONUSES (FIXED ASYNC/AWAIT)
+  // VIEW DEPOSIT
   // ============================================================
   window.viewDeposit = function(id) {
-    const d = allDeposits.find(d => d.id === id || d.orderId === id);
-    if (!d) return;
+    const d = allDeposits.find(d => d.id === id || d.orderId === id || d.depositId === id);
+    if (!d) {
+      showToast('Deposit not found', 'error');
+      return;
+    }
     const amount = getSafeNumber(d.amount);
     const country = d.country || 'Tanzania';
     const localAmount = calculateLocalAmount(amount, country);
     const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
     const methodLabel = getDepositMethodLabel(d);
     const txHash = d.txHash || d.txid || d.transactionId || 'N/A';
+    const statusInfo = getStatusDisplay(d.status || 'pending');
+
+    const isBinance = isBinanceDeposit(d);
 
     document.getElementById('modalDetails').innerHTML = `
-            <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-tag"></i> Type:</span><span class="modal-detail-value">${methodLabel}</span></div>
+            <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-tag"></i> Type:</span><span class="modal-detail-value">${methodLabel} ${isBinance ? '<span class="binance-badge"><i class="fab fa-bitcoin"></i> Auto</span>' : ''}</span></div>
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-user"></i> User:</span><span class="modal-detail-value">${escapeHtml(d.userEmail || d.userId || 'N/A')}</span></div>
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-map-marker-alt"></i> Country:</span><span class="modal-detail-value">${escapeHtml(country)}</span></div>
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-dollar-sign"></i> Amount (USDT):</span><span class="modal-detail-value green">$${amount.toFixed(2)}</span></div>
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-money-bill-wave"></i> Local Amount:</span><span class="modal-detail-value">${localAmount.toFixed(0)} ${currency}</span></div>
-            <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-hashtag"></i> TXID:</span><span class="modal-detail-value" style="word-break:break-all; font-family:monospace; font-size:10px;">${escapeHtml(txHash)}</span></div>
+            ${d.depositId ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-hashtag"></i> Deposit ID:</span><span class="modal-detail-value" style="font-family:monospace;font-size:10px;">${escapeHtml(d.depositId)}</span></div>` : ''}
+            ${txHash !== 'N/A' ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-link"></i> TXID:</span><span class="modal-detail-value"><span class="tx-hash">${escapeHtml(txHash)}</span></span></div>` : ''}
+            ${d.walletAddress ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-wallet"></i> Wallet:</span><span class="modal-detail-value" style="font-family:monospace;font-size:10px;">${escapeHtml(d.walletAddress)}</span></div>` : ''}
             <hr>
-            <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-info-circle"></i> Status:</span><span class="modal-detail-value">${d.status || 'pending'}</span></div>
+            <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-info-circle"></i> Status:</span><span class="modal-detail-value"><span class="${statusInfo.class}">${statusInfo.label}</span></span></div>
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-clock"></i> Submitted:</span><span class="modal-detail-value">${d.createdAt ? new Date(d.createdAt).toLocaleString() : (d.timestamp ? new Date(d.timestamp).toLocaleString() : 'N/A')}</span></div>
+            ${d.submittedAt ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-clock"></i> Submitted for Verification:</span><span class="modal-detail-value">${new Date(d.submittedAt).toLocaleString()}</span></div>` : ''}
             ${d.approvedAt ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-check-circle"></i> Approved:</span><span class="modal-detail-value">${new Date(d.approvedAt).toLocaleString()}</span></div>` : ''}
+            ${d.expiresAt ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-hourglass-end"></i> Expires:</span><span class="modal-detail-value">${new Date(d.expiresAt).toLocaleString()}</span></div>` : ''}
             <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-database"></i> Source:</span><span class="modal-detail-value" style="font-size:9px;color:#888;">${d._source || 'Unknown'}</span></div>
         `;
     openModal('depositModal');
   };
 
+  // ============================================================
+  // APPROVE, REJECT, DELETE - FIXED
+  // ============================================================
   window.showApproveConfirm = async function(id) {
-    const deposit = allDeposits.find(d => d.id === id || d.orderId === id);
-    if (!deposit) return;
+    const deposit = allDeposits.find(d => d.id === id || d.orderId === id || d.depositId === id);
+    if (!deposit) { showToast('Deposit not found', 'error'); return; }
     pendingDepositData = { deposit };
     const amount = getSafeNumber(deposit.amount);
-    const country = deposit.country || 'Tanzania';
-    const localAmount = calculateLocalAmount(amount, country);
-    const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
 
     const confirmed = await showConfirmModal({
       title: 'Approve Deposit?',
-      subtitle: `Credit $${amount.toFixed(2)} to ${deposit.userEmail || 'user'} + Referral Bonuses`,
+      subtitle: `Credit $${amount.toFixed(2)} to ${deposit.userEmail || 'user'}`,
       icon: '✅',
       iconClass: 'success',
       details: {
         'User': deposit.userEmail || deposit.userId || 'N/A',
         'Amount': `$${amount.toFixed(2)} USDT`,
-        'Local': `${localAmount.toFixed(0)} ${currency}`,
-        'Referral Bonus (5%)': `$${(amount * 0.05).toFixed(2)} to referrer`,
-        'Level 2 Bonus (2%)': `$${(amount * 0.02).toFixed(2)} to level 2 referrer`,
-        'Bot Profit Bonus (1%)': `$${(amount * 0.01).toFixed(2)} to bot profit`
+        'Method': getDepositMethodLabel(deposit),
+        'ID': deposit.depositId || deposit.id || 'N/A'
       },
       btnText: 'Approve & Credit',
       btnIcon: 'fa-check',
@@ -795,8 +876,8 @@
   };
 
   window.showRejectConfirm = async function(id) {
-    const deposit = allDeposits.find(d => d.id === id || d.orderId === id);
-    if (!deposit) return;
+    const deposit = allDeposits.find(d => d.id === id || d.orderId === id || d.depositId === id);
+    if (!deposit) { showToast('Deposit not found', 'error'); return; }
     pendingDepositData = { deposit };
     const amount = getSafeNumber(deposit.amount);
 
@@ -822,8 +903,8 @@
   };
 
   window.showDeleteConfirm = async function(id) {
-    const deposit = allDeposits.find(d => d.id === id || d.orderId === id);
-    if (!deposit) return;
+    const deposit = allDeposits.find(d => d.id === id || d.orderId === id || d.depositId === id);
+    if (!deposit) { showToast('Deposit not found', 'error'); return; }
     pendingDepositData = { deposit };
     const amount = getSafeNumber(deposit.amount);
 
@@ -849,7 +930,7 @@
   };
 
   // ============================================================
-  // EXECUTE APPROVE WITH REFERRAL BONUSES - FIXED FOR MULTIPLE PATHS
+  // EXECUTE APPROVE - SUPPORTS ALL PATHS
   // ============================================================
   async function executeApproveDeposit() {
     if (!pendingDepositData) return;
@@ -858,7 +939,7 @@
     const userId = deposit.userId || deposit.uid;
 
     try {
-      // ✅ 1. Update adminDeposits (if exists)
+      // ✅ 1. Update adminDeposits
       const adminSnap = await db.ref(`adminDeposits/${deposit.id}`).once('value');
       if (adminSnap.exists()) {
         await db.ref(`adminDeposits/${deposit.id}`).update({
@@ -868,15 +949,22 @@
         });
       }
 
-      // ✅ 2. Update user deposits - CHECK MULTIPLE PATHS
+      // ✅ 2. Update deposit_requests (Binance)
+      if (deposit._source === 'deposit_requests' && userId) {
+        await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({
+          status: 'approved',
+          approvedAt: Date.now()
+        });
+      }
+
+      // ✅ 3. Update deposits/{userId}/
       if (userId) {
-        // Try deposits/{userId}/{depositId}
         let userDepositRef = db.ref(`deposits/${userId}/${deposit.id}`);
         let userDepositSnap = await userDepositRef.once('value');
         if (userDepositSnap.exists()) {
           await userDepositRef.update({ status: 'approved', approvedAt: Date.now() });
         } else {
-          // Try user_deposits/{userId}/{depositId}
+          // Try user_deposits
           userDepositRef = db.ref(`user_deposits/${userId}/${deposit.id}`);
           userDepositSnap = await userDepositRef.once('value');
           if (userDepositSnap.exists()) {
@@ -885,7 +973,7 @@
         }
       }
 
-      // ✅ 3. Credit user balance
+      // ✅ 4. Credit user balance
       if (userId) {
         const userRef = db.ref(`users/${userId}`);
         await userRef.transaction((currentData) => {
@@ -898,23 +986,21 @@
         });
       }
 
-      // ✅ 4. PROCESS REFERRAL BONUSES
-      await processReferralBonuses(userId, amount);
-
-      // ✅ 5. Send notification to user
+      // ✅ 5. Send notification
       if (userId) {
         const notifRef = db.ref(`notifications/${userId}`).push();
         await notifRef.set({
           id: notifRef.key,
           title: '✅ Deposit Approved',
-          message: `Your deposit of $${amount.toFixed(2)} has been approved and credited. Referral bonuses have been distributed.`,
+          message: `Your deposit of $${amount.toFixed(2)} has been approved and credited.`,
           type: 'success',
           read: false,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          link: 'wallet.html'
         });
       }
 
-      showToast(`✅ Deposit of $${amount.toFixed(2)} approved with referral bonuses!`, 'success');
+      showToast(`✅ Deposit of $${amount.toFixed(2)} approved!`, 'success');
       pendingDepositData = null;
       await loadDeposits();
     } catch (e) {
@@ -924,146 +1010,7 @@
   }
 
   // ============================================================
-  // PROCESS REFERRAL BONUSES - 5%, 2%, 1%
-  // ============================================================
-  async function processReferralBonuses(userId, depositAmount) {
-    try {
-      const userSnap = await db.ref(`users/${userId}`).once('value');
-      if (!userSnap.exists()) return;
-
-      const userData = userSnap.val();
-      const referralCode = userData.referredBy;
-
-      if (!referralCode) {
-        console.log('[REFERRAL] No referral code found for user');
-        return;
-      }
-
-      const referrerSnap = await db.ref(`referrals/${referralCode}`).once('value');
-      if (!referrerSnap.exists()) {
-        console.log('[REFERRAL] Referral code not found:', referralCode);
-        return;
-      }
-
-      const referrerData = referrerSnap.val();
-      const referrerId = referrerData.uid;
-
-      if (!referrerId) {
-        console.log('[REFERRAL] No referrer ID found');
-        return;
-      }
-
-      // LEVEL 1
-      const level1Bonus = depositAmount * 0.05;
-      if (level1Bonus > 0) {
-        await creditReferralBonus(referrerId, level1Bonus, 'Level 1 Referral Bonus', depositAmount);
-        console.log(`[REFERRAL] Level 1: $${level1Bonus.toFixed(2)} to ${referrerId}`);
-      }
-
-      // LEVEL 2
-      const referrerSnap2 = await db.ref(`users/${referrerId}`).once('value');
-      if (referrerSnap2.exists()) {
-        const referrerData2 = referrerSnap2.val();
-        const level2Code = referrerData2.referredBy;
-
-        if (level2Code) {
-          const level2Snap = await db.ref(`referrals/${level2Code}`).once('value');
-          if (level2Snap.exists()) {
-            const level2Data = level2Snap.val();
-            const level2Id = level2Data.uid;
-
-            if (level2Id && level2Id !== userId && level2Id !== referrerId) {
-              const level2Bonus = depositAmount * 0.02;
-              if (level2Bonus > 0) {
-                await creditReferralBonus(level2Id, level2Bonus, 'Level 2 Referral Bonus', depositAmount);
-                console.log(`[REFERRAL] Level 2: $${level2Bonus.toFixed(2)} to ${level2Id}`);
-              }
-            }
-          }
-        }
-      }
-
-      // BOT PROFIT
-      const botProfitBonus = depositAmount * 0.01;
-      if (botProfitBonus > 0) {
-        try {
-          const platformRef = db.ref('platformProfit');
-          await platformRef.transaction((current) => {
-            const newProfit = (current || 0) + botProfitBonus;
-            return newProfit;
-          });
-          console.log(`[REFERRAL] Bot Profit: $${botProfitBonus.toFixed(2)} added to platform profit`);
-        } catch (e) {
-          console.log('[REFERRAL] Bot profit pool update failed:', e);
-        }
-
-        if (referrerId) {
-          try {
-            const affiliateRef = db.ref(`affiliateEarnings/${referrerId}`);
-            await affiliateRef.transaction((current) => {
-              if (!current) current = { total: 0, botProfit: 0, depositCommission: 0 };
-              current.botProfit = (current.botProfit || 0) + botProfitBonus;
-              current.total = (current.total || 0) + botProfitBonus;
-              return current;
-            });
-          } catch (e) {
-            console.log('[REFERRAL] Bot profit affiliate update failed:', e);
-          }
-        }
-      }
-
-    } catch (error) {
-      console.error('[REFERRAL] Error processing referral bonuses:', error);
-    }
-  }
-
-  async function creditReferralBonus(userId, amount, bonusType, depositAmount) {
-    if (!userId || amount <= 0) return;
-
-    try {
-      const userRef = db.ref(`users/${userId}`);
-      await userRef.transaction((current) => {
-        if (current) {
-          current.balance = (current.balance || 0) + amount;
-          current.commissionEarned = (current.commissionEarned || 0) + amount;
-        }
-        return current;
-      });
-
-      const affiliateRef = db.ref(`affiliateEarnings/${userId}`);
-      await affiliateRef.transaction((current) => {
-        if (!current) current = { total: 0, depositCommission: 0, botProfit: 0 };
-        current.depositCommission = (current.depositCommission || 0) + amount;
-        current.total = (current.total || 0) + amount;
-        return current;
-      });
-
-      const userSnap = await db.ref(`users/${userId}`).once('value');
-      if (userSnap.exists()) {
-        const userData = userSnap.val();
-        const currentCommission = userData.commissionEarned || 0;
-        await db.ref(`users/${userId}/commissionEarned`).set(currentCommission + amount);
-      }
-
-      const notifRef = db.ref(`notifications/${userId}`).push();
-      await notifRef.set({
-        id: notifRef.key,
-        title: `💰 ${bonusType}`,
-        message: `You earned $${amount.toFixed(2)} from a referral's deposit of $${depositAmount.toFixed(2)}!`,
-        type: 'success',
-        read: false,
-        timestamp: Date.now()
-      });
-
-      console.log(`[REFERRAL] ${bonusType}: $${amount.toFixed(2)} credited to ${userId}`);
-
-    } catch (error) {
-      console.error(`[REFERRAL] Error crediting ${bonusType}:`, error);
-    }
-  }
-
-  // ============================================================
-  // REJECT & DELETE ACTIONS - FIXED FOR MULTIPLE PATHS
+  // EXECUTE REJECT
   // ============================================================
   async function executeRejectDeposit() {
     if (!pendingDepositData) return;
@@ -1078,8 +1025,11 @@
         rejectedBy: currentAdminId
       });
 
+      if (deposit._source === 'deposit_requests' && userId) {
+        await db.ref(`deposit_requests/${userId}/${deposit.id}`).update({ status: 'rejected' });
+      }
+
       if (userId) {
-        // Try deposits path
         let userDepositRef = db.ref(`deposits/${userId}/${deposit.id}`);
         let userDepositSnap = await userDepositRef.once('value');
         if (!userDepositSnap.exists()) {
@@ -1099,7 +1049,8 @@
           message: `Your deposit request of $${amount.toFixed(2)} has been rejected.`,
           type: 'error',
           read: false,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          link: 'wallet.html'
         });
       }
       showToast('Deposit rejected', 'success');
@@ -1109,6 +1060,9 @@
       showToast('Error: ' + e.message, 'error'); }
   }
 
+  // ============================================================
+  // EXECUTE DELETE
+  // ============================================================
   async function executeDeleteDeposit() {
     if (!pendingDepositData) return;
     const deposit = pendingDepositData.deposit;
@@ -1116,6 +1070,11 @@
 
     try {
       await db.ref(`adminDeposits/${deposit.id}`).remove();
+      
+      if (deposit._source === 'deposit_requests' && userId) {
+        await db.ref(`deposit_requests/${userId}/${deposit.id}`).remove().catch(() => {});
+      }
+      
       if (userId) {
         await db.ref(`deposits/${userId}/${deposit.id}`).remove().catch(() => {});
         await db.ref(`user_deposits/${userId}/${deposit.id}`).remove().catch(() => {});

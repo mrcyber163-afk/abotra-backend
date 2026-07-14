@@ -1,4 +1,7 @@
-// backend/functions/services/subscription-service.js
+// ============================================================
+// SUBSCRIPTION SERVICE
+// ============================================================
+
 const { restGet, restPut, restPatch } = require('../firebase');
 
 class SubscriptionService {
@@ -7,9 +10,9 @@ class SubscriptionService {
         return sub || null;
     }
     
-    async createSubscription(uid, plan) {
+    async createSubscription(uid, plan = 'Starter') {
         const subscription = {
-            plan: plan || 'Starter',
+            plan: plan,
             active: true,
             capitalRange: '$50 - $500',
             createdAt: Date.now(),
@@ -22,8 +25,8 @@ class SubscriptionService {
     
     async upgradePlan(uid, newPlan) {
         const plans = {
-            'AI Pro': { capital: '$500 - $5,000', features: 'Advanced AI, 15 pairs' },
-            'AI Elite': { capital: '$5,000+', features: 'Professional AI, all pairs' }
+            'AI Pro': { capital: '$500 - $5,000', features: 'Advanced AI, 15 pairs, priority support' },
+            'AI Elite': { capital: '$5,000+', features: 'Professional AI, all pairs, dedicated manager' }
         };
         
         const planData = plans[newPlan];

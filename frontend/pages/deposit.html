@@ -21,6 +21,10 @@ body.light-theme .bottom-nav a { color: #888; }
 body.light-theme .bottom-nav a.active { color: #800000; }
 body.light-theme .network-card.selected { background: rgba(128,0,0,0.1); border-color: #800000; }
 body.light-theme .buy-usdt-btn { background: rgba(128,0,0,0.1); border-color: #800000; color: #800000; }
+body.light-theme .payment-request-card { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.08); }
+body.light-theme .payment-request-card .label { color: #666; }
+body.light-theme .payment-request-card .value { color: #1a1a2e; }
+body.light-theme .payment-request-card .divider { background: rgba(0,0,0,0.08); }
 
 .country-modal {
     position: fixed;
@@ -188,7 +192,175 @@ body.light-theme .country-selector-trigger .selected-display .code { color: #999
 .submit-btn { width: 100%; height: 48px; border: none; border-radius: 12px; background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
 .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-btn.binance-btn { background: linear-gradient(135deg, #F0B90B, #C9980A); }
+.submit-btn.binance-btn:hover { box-shadow: 0 8px 25px rgba(240,185,11,0.4); }
+.submit-btn.warning-btn { background: linear-gradient(135deg, #F6465D, #D6304A); }
+.submit-btn.warning-btn:hover { box-shadow: 0 8px 25px rgba(246,70,93,0.4); }
+.submit-btn.success-btn { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.submit-btn.success-btn:hover { box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+
 .auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
+
+/* KYC Button - Small and styled like a button */
+.kyc-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, #800000, #FFD700);
+    color: white;
+    font-weight: 600;
+    font-size: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    margin-top: 4px;
+}
+.kyc-action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+}
+.kyc-action-btn i { font-size: 11px; }
+.kyc-action-btn.verified {
+    background: rgba(14,203,129,0.2);
+    color: #0ECB81;
+    border: 1px solid rgba(14,203,129,0.3);
+    cursor: default;
+}
+.kyc-action-btn.verified:hover { transform: none; box-shadow: none; }
+.kyc-action-btn.pending {
+    background: rgba(255,215,0,0.2);
+    color: #FFD700;
+    border: 1px solid rgba(255,215,0,0.3);
+}
+.kyc-action-btn.rejected {
+    background: rgba(255,77,77,0.2);
+    color: #FF4D4D;
+    border: 1px solid rgba(255,77,77,0.3);
+}
+.kyc-action-btn.not-submitted {
+    background: rgba(255,255,255,0.05);
+    color: #888;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Payment Request Card */
+.payment-request-card {
+    background: rgba(255,255,255,0.03);
+    border: 2px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    animation: fadeSlideIn 0.5s ease;
+}
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.payment-request-card .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,215,0,0.1);
+}
+.payment-request-card .header .title {
+    color: #FFD700;
+    font-size: 13px;
+    font-weight: 700;
+}
+.payment-request-card .header .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.payment-request-card .header .status-badge.pending {
+    background: rgba(255,215,0,0.2);
+    color: #FFD700;
+}
+.payment-request-card .header .status-badge.waiting {
+    background: rgba(14,203,129,0.2);
+    color: #0ECB81;
+}
+.payment-request-card .header .status-badge.approved {
+    background: rgba(14,203,129,0.3);
+    color: #0ECB81;
+}
+.payment-request-card .header .status-badge.expired {
+    background: rgba(246,70,93,0.2);
+    color: #F6465D;
+}
+.payment-request-card .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    align-items: center;
+}
+.payment-request-card .row .label {
+    color: #888;
+    font-size: 10px;
+    font-weight: 500;
+}
+.payment-request-card .row .value {
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+}
+.payment-request-card .row .value.amount {
+    font-size: 18px;
+    color: #FFD700;
+}
+.payment-request-card .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+    margin: 8px 0;
+}
+.payment-request-card .qr-container {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+.payment-request-card .qr-container img {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    background: white;
+    padding: 8px;
+}
+.payment-request-card .action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.payment-request-card .action-buttons .btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.payment-request-card .action-buttons .btn:hover { transform: translateY(-2px); }
+.payment-request-card .action-buttons .btn.btn-gold { background: linear-gradient(135deg, #F0B90B, #C9980A); color: #0A0A0A; }
+.payment-request-card .action-buttons .btn.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; }
+.payment-request-card .action-buttons .btn.btn-outline:hover { border-color: #FFD700; color: #FFD700; }
+.payment-request-card .action-buttons .btn.btn-success { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.payment-request-card .action-buttons .btn.btn-danger { background: linear-gradient(135deg, #F6465D, #D6304A); color: white; }
 
 .skeleton-wallet-card {
 background: rgba(255,255,255,0.05);
@@ -550,7 +722,313 @@ color: #0ECB81;
 .notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-@media(max-width: 700px) { .main-content { padding: 0 12px; margin-top: 65px; } .page-title { font-size: 18px; } .tab-btn span { display: none; } .tab-btn { padding: 8px; min-width: 60px; font-size: 9px; } .bottom-nav a span { font-size: 6px; } .bottom-nav a i { font-size: 14px; } .networks-grid { grid-template-columns: 1fr; } .buy-usdt-btn { padding: 12px; font-size: 12px; } .wallet-address-box { flex-direction: column; align-items: stretch; } .wallet-address-box .copy-btn { align-self: flex-end; } .tab-btn .tab-label { display: none; } .deposit-steps { flex-wrap: wrap; gap: 8px; } .deposit-steps::before { display: none; } .deposit-step { flex: 0 0 45%; } .binance-account-info { flex-direction: column; align-items: stretch; } }
+@media(max-width: 700px) { .main-content { padding: 0 12px; margin-top: 65px; } .page-title { font-size: 18px; } .tab-btn span { display: none; } .tab-btn { padding: 8px; min-width: 60px; font-size: 9px; } .bottom-nav a span { font-size: 6px; } .bottom-nav a i { font-size: 14px; } .networks-grid { grid-template-columns: 1fr; } .buy-usdt-btn { padding: 12px; font-size: 12px; } .wallet-address-box { flex-direction: column; align-items: stretch; } .wallet-address-box .copy-btn { align-self: flex-end; } .tab-btn .tab-label { display: none; } .deposit-steps { flex-wrap: wrap; gap: 8px; } .deposit-steps::before { display: none; } .deposit-step { flex: 0 0 45%; } .binance-account-info { flex-direction: column; align-items: stretch; } .payment-request-card .action-buttons .btn { min-width: 80px; font-size: 9px; padding: 8px 12px; } }
+/* ============================================================
+   CUSTOM CANCEL MODAL - BEAUTIFUL DESIGN
+   ============================================================ */
+.cancel-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeInOverlay 0.3s ease;
+}
+.cancel-modal-overlay.active {
+    display: flex;
+}
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.cancel-modal-card {
+    background: linear-gradient(145deg, #1a1a2e, #161626);
+    border-radius: 28px;
+    max-width: 420px;
+    width: 100%;
+    padding: 32px 28px 28px;
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.05);
+    animation: modalBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+.cancel-modal-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+@keyframes modalBounceIn {
+    0% { opacity: 0; transform: scale(0.8) translateY(40px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+body.light-theme .cancel-modal-card {
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    border: 1px solid rgba(128, 0, 0, 0.15);
+}
+body.light-theme .cancel-modal-card::before {
+    background: radial-gradient(ellipse at 30% 20%, rgba(128, 0, 0, 0.03) 0%, transparent 60%);
+}
+
+/* Close button */
+.cancel-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.cancel-modal-close:hover {
+    background: rgba(246, 70, 93, 0.2);
+    color: #F6465D;
+    transform: rotate(90deg);
+}
+body.light-theme .cancel-modal-close {
+    background: rgba(0, 0, 0, 0.04);
+    color: #666;
+}
+body.light-theme .cancel-modal-close:hover {
+    background: rgba(246, 70, 93, 0.1);
+    color: #F6465D;
+}
+
+/* Icon */
+.cancel-modal-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+    background: rgba(246, 70, 93, 0.12);
+    color: #F6465D;
+    border: 2px solid rgba(246, 70, 93, 0.2);
+    position: relative;
+    animation: pulseIcon 2s ease-in-out infinite;
+}
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.cancel-modal-icon i {
+    filter: drop-shadow(0 0 10px rgba(246, 70, 93, 0.2));
+}
+
+/* Title */
+.cancel-modal-title {
+    text-align: center;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+}
+body.light-theme .cancel-modal-title {
+    color: #1a1a1a;
+}
+
+/* Subtitle */
+.cancel-modal-subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 0 8px;
+}
+body.light-theme .cancel-modal-subtitle {
+    color: #666;
+}
+
+/* Warning box */
+.cancel-modal-warning {
+    background: rgba(246, 70, 93, 0.08);
+    border: 1px solid rgba(246, 70, 93, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #F6465D;
+    font-size: 11px;
+    font-weight: 500;
+}
+.cancel-modal-warning i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.cancel-modal-warning span {
+    flex: 1;
+}
+body.light-theme .cancel-modal-warning {
+    background: rgba(246, 70, 93, 0.06);
+}
+
+/* Deposit details box */
+.cancel-modal-details {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+body.light-theme .cancel-modal-details {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.cancel-modal-details .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cancel-modal-details .detail-row:last-child {
+    border-bottom: none;
+}
+.cancel-modal-details .detail-label {
+    color: #888;
+    font-weight: 500;
+}
+.cancel-modal-details .detail-value {
+    color: #FFD700;
+    font-weight: 600;
+}
+body.light-theme .cancel-modal-details .detail-value {
+    color: #800000;
+}
+
+/* Buttons */
+.cancel-modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+.cancel-modal-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Keep button (cancel action) */
+.cancel-modal-btn.keep {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cancel-modal-btn.keep:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
+}
+body.light-theme .cancel-modal-btn.keep {
+    background: rgba(0, 0, 0, 0.04);
+    color: #555;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.light-theme .cancel-modal-btn.keep:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* Cancel button (confirm delete) */
+.cancel-modal-btn.confirm-cancel {
+    background: linear-gradient(135deg, #F6465D, #D43F52);
+    color: white;
+    box-shadow: 0 4px 15px rgba(246, 70, 93, 0.25);
+}
+.cancel-modal-btn.confirm-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(246, 70, 93, 0.4);
+}
+.cancel-modal-btn.confirm-cancel:active {
+    transform: scale(0.97);
+}
+
+/* Loading state for buttons */
+.cancel-modal-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+.cancel-modal-btn.loading .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media(max-width: 480px) {
+    .cancel-modal-card {
+        padding: 24px 18px 20px;
+        border-radius: 22px;
+    }
+    .cancel-modal-title {
+        font-size: 17px;
+    }
+    .cancel-modal-subtitle {
+        font-size: 12px;
+    }
+    .cancel-modal-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+    }
+    .cancel-modal-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .cancel-modal-btn {
+        padding: 14px 16px;
+        font-size: 13px;
+    }
+    .cancel-modal-details .detail-row {
+        font-size: 11px;
+    }
+}
 </style>
 </head>
 <body>
@@ -596,6 +1074,9 @@ color: #0ECB81;
 
 <div id="realContent" style="display: none;">
 
+<!-- ============================================================ -->
+<!-- MOBILE MONEY TAB -->
+<!-- ============================================================ -->
 <div id="mobileTab" class="deposit-container">
 <div class="wallet-card">
 <div class="wallet-title"><i class="fas fa-globe-africa"></i> Your Country</div>
@@ -608,6 +1089,13 @@ color: #0ECB81;
     <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
 </button>
 <div class="auto-payment-note"><i class="fas fa-info-circle"></i> Select your country and payment network below.</div>
+<!-- KYC Button for Mobile Tab -->
+<div style="margin-top: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
+    <button class="kyc-action-btn" id="mobileKycBtn" onclick="window.location.href='kyc.html'">
+        <i class="fas fa-id-card"></i> Complete KYC
+    </button>
+</div>
 </div>
 
 <div class="wallet-card">
@@ -637,6 +1125,9 @@ color: #0ECB81;
 </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- BINANCE USDT TAB - FIXED (NO DUPLICATE) -->
+<!-- ============================================================ -->
 <div id="binanceTab" class="deposit-container" style="display:none;">
 <div class="wallet-card" style="position:relative;">
 <div id="kycLockOverlay" class="kyc-lock-overlay" style="display:none;">
@@ -644,65 +1135,184 @@ color: #0ECB81;
 <p>Complete your KYC verification to enable Binance USDT deposits.</p>
 <button class="btn-kyc" onclick="window.location.href='kyc.html'">Complete KYC</button>
 </div>
-<div class="wallet-title"><img src="../assets/icons/binance.png" alt="Binance" class="title-icon" onerror="this.style.display='none';"> USDT TRC20 Auto Deposit</div>
+<div class="wallet-title"><img src="../assets/icons/binance.png" alt="Binance" style="width:24px;height:24px;object-fit:contain;"> USDT Payment Request</div>
 <div id="kycStatusDisplay" class="binance-account-info">
 <div class="user-details"><span class="name" id="userDisplayName">Loading...</span><span class="email" id="userDisplayEmail">-</span></div>
 <span id="kycStatusBadge" class="kyc-status-badge not-submitted">⏳ Checking KYC...</span>
 </div>
-<div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-bolt" style="color:#0ECB81;"></i> Send USDT via TRC20 network only. Deposits are verified and balance credited after admin approval.</div>
+
+<!-- Deposit Steps -->
 <div class="deposit-steps">
-<div class="deposit-step active" id="step1"><div class="step-circle">1</div><span class="step-label">Create Order</span></div>
-<div class="deposit-step" id="step2"><div class="step-circle">2</div><span class="step-label">Send USDT</span></div>
-<div class="deposit-step" id="step3"><div class="step-circle">3</div><span class="step-label">Paste TXID</span></div>
-<div class="deposit-step" id="step4"><div class="step-circle">4</div><span class="step-label">Wait Verify</span></div>
+<div class="deposit-step active" id="step1"><div class="step-circle">1</div><span class="step-label">Enter Amount</span></div>
+<div class="deposit-step" id="step2"><div class="step-circle">2</div><span class="step-label">Generate Request</span></div>
+<div class="deposit-step" id="step3"><div class="step-circle">3</div><span class="step-label">Send Payment</span></div>
+<div class="deposit-step" id="step4"><div class="step-circle">4</div><span class="step-label">Verify</span></div>
 </div>
-<div id="binanceOrderSection">
+
+<!-- STEP 1: Enter Amount -->
+<div id="binanceStep1">
+<div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-bolt" style="color:#0ECB81;"></i> Generate a payment request and pay using Binance App.</div>
 <div class="input-box"><input type="number" id="usdtAmount" placeholder="Enter Amount (Minimum 10 USDT)" step="1" min="10"></div>
-<button class="submit-btn" id="createBinanceOrderBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);"><i class="fas fa-file-invoice"></i> Generate Deposit Order</button>
+<button class="submit-btn binance-btn" id="generatePaymentRequestBtn"><i class="fas fa-file-invoice"></i> Generate Payment Request</button>
 </div>
-<div id="binanceOrderDetails" style="display:none;">
-<div style="background:rgba(14,203,129,0.1); border-radius:12px; padding:10px; margin:12px 0; text-align:center; border:1px solid rgba(14,203,129,0.3);"><i class="fas fa-check-circle" style="color:#0ECB81; font-size:16px;"></i><span style="color:#0ECB81; font-weight:600; font-size:11px;"> Order Created! Send USDT to the address below.</span></div>
-<div class="binance-order-details">
-<div class="row"><span class="label">Network</span><span class="value">TRC20</span></div>
-<div class="row"><span class="label">Order ID</span><span class="value"><span class="order-id" id="binanceOrderId">---</span></span></div>
-<div class="row"><span class="label">Order Expiry</span><span class="value" id="binanceOrderExpiry">2 Hours</span></div>
-<div class="row"><span class="label">Amount</span><span class="value" id="binanceOrderAmount">$0.00</span></div>
+
+<!-- STEP 2-4: Payment Request Display -->
+<div id="paymentRequestDisplay" style="display:none;">
+    <div class="payment-request-card" id="paymentRequestCard">
+        <div class="header">
+            <span class="title"><i class="fas fa-receipt"></i> Payment Request</span>
+            <span class="status-badge pending" id="paymentStatusBadge">⏳ Pending Payment</span>
+        </div>
+        
+        <div class="row">
+            <span class="label">Deposit ID</span>
+            <span class="value" id="displayDepositId">---</span>
+        </div>
+        <div class="row">
+            <span class="label">Amount</span>
+            <span class="value amount" id="displayAmount">$0.00</span>
+        </div>
+        <div class="row">
+            <span class="label">Network</span>
+            <span class="value">TRC20</span>
+        </div>
+        <div class="row">
+            <span class="label">Receiver Address</span>
+            <span class="value" id="displayWalletAddress" style="font-size:10px;font-family:monospace;">---</span>
+        </div>
+        <div class="divider"></div>
+        
+        <!-- QR Code -->
+        <div class="qr-container" id="qrContainer">
+            <img id="qrCodeImage" src="" alt="Payment QR Code" style="display:none;width:150px;height:150px;border-radius:12px;background:white;padding:8px;">
+            <div class="qr-placeholder" id="qrPlaceholder">
+                <i class="fas fa-qrcode"></i>
+                QR Code<br>
+                <span style="font-size:8px;">Generating...</span>
+            </div>
+        </div>
+        
+        <div style="text-align:center;font-size:9px;color:#888;margin:4px 0;">
+            <i class="fas fa-clock"></i> Expires in <span id="expiryCountdown">02:00:00</span>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-outline" id="copyAddressBtn"><i class="fas fa-copy"></i> Copy Address</button>
+            <button class="btn btn-gold" id="openBinanceBtn"><i class="fab fa-bitcoin"></i> Open Binance</button>
+        </div>
+        
+        <!-- I Have Paid Button -->
+        <button class="submit-btn success-btn" id="iHavePaidBtn" style="margin-top:12px;width:100%;">
+            <i class="fas fa-check-circle"></i> I Have Paid
+        </button>
+        
+        <!-- Cancel Button -->
+        <button class="submit-btn warning-btn" id="cancelPaymentBtn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,#F6465D,#D6304A);">
+            <i class="fas fa-times"></i> Cancel Request
+        </button>
+        
+        <div class="auto-payment-note" style="margin-top:8px;background:rgba(255,215,0,0.08);color:#FFD700;">
+            <i class="fas fa-info-circle"></i> After payment, click "I Have Paid" to submit for verification.
+        </div>
+    </div>
 </div>
-<div class="wallet-address-box"><span class="address" id="binanceWalletAddress">TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D</span><button class="copy-btn" id="copyWalletAddress"><i class="fas fa-copy"></i> Copy</button></div>
-<div id="binanceQrContainer" style="text-align:center; margin:10px 0;"><div class="qr-placeholder"><i class="fas fa-qrcode"></i>QR Code<br><span style="font-size:8px;">(Coming Soon)</span></div></div>
-<div class="input-box"><input type="text" id="txHash" placeholder="Paste Transaction Hash (TXID)"></div>
-<button class="submit-btn" id="verifyBinanceDepositBtn" style="background:linear-gradient(135deg,#F0B90B,#C9980A);"><i class="fas fa-check-double"></i> Submit for Verification</button>
-<div class="auto-payment-note" style="margin-top:8px;"><i class="fas fa-clock"></i> After sending USDT, paste the TXID and submit. Admin will verify and approve your deposit.</div>
-<div class="auto-payment-note" style="background:rgba(255,215,0,0.08); color:#FFD700; margin-top:6px;"><i class="fas fa-info-circle"></i> Your balance will be credited after admin verification. Please wait for confirmation.</div>
-<div class="auto-payment-note" style="background:rgba(255,77,77,0.1); color:#FF4D4D; margin-top:6px;"><i class="fas fa-exclamation-triangle"></i> Order expires in 2 hours. Please complete the transaction before expiry.</div>
+
+<!-- Waiting for Verification Status -->
+<div id="waitingVerificationDisplay" style="display:none;">
+    <div class="payment-request-card" style="border-color:rgba(14,203,129,0.3);background:rgba(14,203,129,0.05);">
+        <div class="header">
+            <span class="title"><i class="fas fa-clock"></i> Payment Submitted</span>
+            <span class="status-badge waiting">⏳ Waiting Verification</span>
+        </div>
+        <div style="text-align:center;padding:16px 0;">
+            <i class="fas fa-hourglass-half" style="font-size:40px;color:#FFD700;"></i>
+            <p style="color:#AAAAAA;font-size:11px;margin-top:8px;">
+                Your payment has been submitted.<br>
+                Admin will verify and approve within 24 hours.
+            </p>
+            <p style="color:#888;font-size:9px;margin-top:4px;">
+                Deposit ID: <span id="waitingDepositId" style="color:#FFD700;font-family:monospace;">---</span>
+            </p>
+        </div>
+        <div class="auto-payment-note" style="background:rgba(14,203,129,0.1);color:#0ECB81;">
+            <i class="fas fa-check-circle"></i> Your deposit will be credited after admin approval.
+        </div>
+        <button class="submit-btn" id="backToDashboardBtn" style="margin-top:12px;background:linear-gradient(135deg,#800000,#FFD700);">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+    </div>
 </div>
+
+<!-- Approved Status -->
+<div id="approvedDisplay" style="display:none;">
+    <div class="payment-request-card" style="border-color:rgba(14,203,129,0.5);background:rgba(14,203,129,0.1);">
+        <div class="header">
+            <span class="title"><i class="fas fa-check-circle" style="color:#0ECB81;"></i> Deposit Approved</span>
+            <span class="status-badge approved">✓ Approved</span>
+        </div>
+        <div style="text-align:center;padding:16px 0;">
+            <i class="fas fa-check-circle" style="font-size:40px;color:#0ECB81;"></i>
+            <p style="color:#0ECB81;font-size:14px;font-weight:700;margin-top:8px;">
+                Your deposit has been approved!
+            </p>
+            <p style="color:#AAAAAA;font-size:11px;margin-top:4px;">
+                Amount: <span id="approvedAmount" style="color:#FFD700;font-weight:700;">$0.00</span>
+            </p>
+        </div>
+        <button class="submit-btn" id="approvedDashboardBtn" style="background:linear-gradient(135deg,#0ECB81,#0A9E65);">
+            <i class="fas fa-arrow-left"></i> Go to Dashboard
+        </button>
+    </div>
+</div>
+
 </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- P2P / USER TRANSFER TAB -->
+<!-- ============================================================ -->
 <div id="p2pTab" class="deposit-container" style="display:none;">
 <div class="wallet-card">
 <div class="wallet-title"><i class="fas fa-users"></i> Transfer USDT from Another User</div>
+<!-- KYC Button for P2P Tab -->
+<div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
+    <button class="kyc-action-btn" id="p2pKycBtn" onclick="window.location.href='kyc.html'">
+        <i class="fas fa-id-card"></i> Complete KYC
+    </button>
+</div>
 <button class="buy-usdt-btn" id="buyUsdtBtn"><i class="fas fa-shopping-cart"></i> Buy USDT Now <i class="fas fa-arrow-right"></i></button>
 <div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-info-circle"></i> Click the button above to buy USDT from trusted merchants on our P2P Market</div>
 <div class="auto-payment-note" style="background: rgba(14,203,129,0.1);"><i class="fas fa-shield-alt"></i> All P2P transactions are secured and verified by ABOTRA-PROAI escrow system</div>
 </div>
 </div>
+
 </div>
 </div>
 
 <div class="bottom-nav">
 <a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
-<a href="market.html"><i class="fa-solid fa-chart-line"></i><span>Market</span></a>
-<a href="trade.html"><i class="fa-solid fa-arrow-trend-up"></i><span>Trade</span></a>
+<a href="wallet.html"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+<a href="kyc.html"><i class="fas fa-id-card"></i><span>KYC</span></a>
 <a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P</span></a>
 <a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
 </div>
 
 <script type="module">
+// ============================================================
+// IMPORTS
+// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { 
+    getDatabase, ref, push, set, get, onValue, update, 
+    runTransaction, query, orderByChild, equalTo 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
     authDomain: "abotra-proa1.firebaseapp.com",
@@ -717,19 +1327,45 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+// ============================================================
+// CONSTANTS
+// ============================================================
+const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
+const MIN_DEPOSIT_USDT = 10;
+const ORDER_EXPIRY_MINUTES = 120; // 2 hours
+
+// ============================================================
+// STATE
+// ============================================================
 let currentUser = null;
 let currentUserData = null;
 let currentKycData = null;
+let currentDepositId = null;
+let currentPaymentRequest = null;
+let expiryInterval = null;
 let selectedCountry = "";
 let selectedNetwork = null;
 let exchangeRates = {};
 let mobileNetworksData = {};
-let currentOrderId = null;
-let currentStep = 1;
 
-const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
-const ORDER_EXPIRY_HOURS = 2;
-const MIN_DEPOSIT_USDT = 10;
+// ============================================================
+// COUNTRY DATA
+// ============================================================
+const allCountries = [
+    { code: "Tanzania", flag: "tz" }, { code: "Malawi", flag: "mw" },
+    { code: "Zambia", flag: "zm" }, { code: "Kenya", flag: "ke" },
+    { code: "Uganda", flag: "ug" }, { code: "Nigeria", flag: "ng" },
+    { code: "Ghana", flag: "gh" }, { code: "South Africa", flag: "za" },
+    { code: "Congo DRC", flag: "cd" }, { code: "Burundi", flag: "bi" },
+    { code: "Botswana", flag: "bw" }, { code: "Namibia", flag: "na" },
+    { code: "Mozambique", flag: "mz" }, { code: "Rwanda", flag: "rw" },
+    { code: "Egypt", flag: "eg" }, { code: "Morocco", flag: "ma" },
+    { code: "Algeria", flag: "dz" }, { code: "Tunisia", flag: "tn" },
+    { code: "Libya", flag: "ly" }, { code: "Sudan", flag: "sd" },
+    { code: "Ethiopia", flag: "et" }, { code: "Somalia", flag: "so" },
+    { code: "Angola", flag: "ao" }, { code: "Zimbabwe", flag: "zw" },
+    { code: "United States", flag: "us" }, { code: "United Kingdom", flag: "gb" }
+];
 
 const DEFAULT_EXCHANGE_RATES = {
     'Tanzania': 2800, 'Malawi': 5600, 'Zambia': 30,
@@ -738,114 +1374,21 @@ const DEFAULT_EXCHANGE_RATES = {
     'Nigeria': 1500
 };
 
-const allCountries = [
-    { code: "Tanzania", flag: "tz" },
-    { code: "Malawi", flag: "mw" },
-    { code: "Zambia", flag: "zm" },
-    { code: "Kenya", flag: "ke" },
-    { code: "Uganda", flag: "ug" },
-    { code: "Nigeria", flag: "ng" },
-    { code: "Ghana", flag: "gh" },
-    { code: "South Africa", flag: "za" },
-    { code: "Congo DRC", flag: "cd" },
-    { code: "Burundi", flag: "bi" },
-    { code: "Botswana", flag: "bw" },
-    { code: "Namibia", flag: "na" },
-    { code: "Mozambique", flag: "mz" },
-    { code: "Rwanda", flag: "rw" },
-    { code: "Egypt", flag: "eg" },
-    { code: "Morocco", flag: "ma" },
-    { code: "Algeria", flag: "dz" },
-    { code: "Tunisia", flag: "tn" },
-    { code: "Libya", flag: "ly" },
-    { code: "Sudan", flag: "sd" },
-    { code: "Ethiopia", flag: "et" },
-    { code: "Somalia", flag: "so" },
-    { code: "Angola", flag: "ao" },
-    { code: "Zimbabwe", flag: "zw" },
-    { code: "United States", flag: "us" },
-    { code: "United Kingdom", flag: "gb" },
-    { code: "Germany", flag: "de" },
-    { code: "France", flag: "fr" },
-    { code: "Italy", flag: "it" },
-    { code: "Spain", flag: "es" },
-    { code: "Portugal", flag: "pt" },
-    { code: "Netherlands", flag: "nl" },
-    { code: "Belgium", flag: "be" },
-    { code: "Switzerland", flag: "ch" },
-    { code: "Austria", flag: "at" },
-    { code: "Sweden", flag: "se" },
-    { code: "Norway", flag: "no" },
-    { code: "Denmark", flag: "dk" },
-    { code: "Finland", flag: "fi" },
-    { code: "Ireland", flag: "ie" },
-    { code: "Poland", flag: "pl" },
-    { code: "Czech Republic", flag: "cz" },
-    { code: "Hungary", flag: "hu" },
-    { code: "Romania", flag: "ro" },
-    { code: "Bulgaria", flag: "bg" },
-    { code: "Greece", flag: "gr" },
-    { code: "Turkey", flag: "tr" },
-    { code: "Russia", flag: "ru" },
-    { code: "Ukraine", flag: "ua" },
-    { code: "India", flag: "in" },
-    { code: "China", flag: "cn" },
-    { code: "Japan", flag: "jp" },
-    { code: "South Korea", flag: "kr" },
-    { code: "Indonesia", flag: "id" },
-    { code: "Philippines", flag: "ph" },
-    { code: "Vietnam", flag: "vn" },
-    { code: "Thailand", flag: "th" },
-    { code: "Malaysia", flag: "my" },
-    { code: "Singapore", flag: "sg" },
-    { code: "Australia", flag: "au" },
-    { code: "New Zealand", flag: "nz" },
-    { code: "Brazil", flag: "br" },
-    { code: "Argentina", flag: "ar" },
-    { code: "Mexico", flag: "mx" },
-    { code: "Chile", flag: "cl" },
-    { code: "Peru", flag: "pe" },
-    { code: "Colombia", flag: "co" },
-    { code: "Venezuela", flag: "ve" },
-    { code: "Pakistan", flag: "pk" },
-    { code: "Bangladesh", flag: "bd" },
-    { code: "Sri Lanka", flag: "lk" },
-    { code: "Nepal", flag: "np" },
-    { code: "Afghanistan", flag: "af" },
-    { code: "Iraq", flag: "iq" },
-    { code: "Iran", flag: "ir" },
-    { code: "Saudi Arabia", flag: "sa" },
-    { code: "Yemen", flag: "ye" },
-    { code: "Oman", flag: "om" },
-    { code: "UAE", flag: "ae" },
-    { code: "Qatar", flag: "qa" },
-    { code: "Kuwait", flag: "kw" },
-    { code: "Israel", flag: "il" },
-    { code: "Jordan", flag: "jo" },
-    { code: "Lebanon", flag: "lb" },
-    { code: "Syria", flag: "sy" },
-    { code: "Canada", flag: "ca" },
-    { code: "Cuba", flag: "cu" },
-    { code: "Jamaica", flag: "jm" },
-    { code: "Haiti", flag: "ht" },
-    { code: "Dominican Republic", flag: "do" },
-    { code: "Bahamas", flag: "bs" },
-    { code: "Trinidad and Tobago", flag: "tt" },
-    { code: "Barbados", flag: "bb" }
-];
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function generateDepositId() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}${month}${day}`;
+    const random = String(Math.floor(1000 + Math.random() * 9000));
+    return `DEP-${dateStr}-${random}`;
+}
 
 function getCountryFlag(code) {
     return `https://flagcdn.com/${code}.svg`;
-}
-
-function getCountryName(code) {
-    const found = allCountries.find(c => c.code === code);
-    return found ? found.code : code;
-}
-
-function getFlagCode(code) {
-    const found = allCountries.find(c => c.code === code);
-    return found ? found.flag : 'tz';
 }
 
 function getCurrency(country) {
@@ -854,10 +1397,7 @@ function getCurrency(country) {
         'Congo DRC': 'CDF', 'Burundi': 'BIF', 'Kenya': 'KES',
         'Botswana': 'BWP', 'Namibia': 'NAD', 'Mozambique': 'MZN',
         'Nigeria': 'NGN', 'Rwanda': 'RWF', 'Ghana': 'GHS',
-        'Uganda': 'UGX', 'South Africa': 'ZAR', 'Egypt': 'EGP',
-        'Morocco': 'MAD', 'Algeria': 'DZD', 'Tunisia': 'TND',
-        'Libya': 'LYD', 'Sudan': 'SDG', 'Ethiopia': 'ETB',
-        'Somalia': 'SOS', 'Angola': 'AOA', 'Zimbabwe': 'USD'
+        'Uganda': 'UGX', 'South Africa': 'ZAR'
     };
     return currencies[country] || 'USD';
 }
@@ -873,15 +1413,12 @@ function showNotification(message, type) {
     setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 5000);
 }
 
-// ✅ FIXED: Notification helper with proper link
 async function addNotification(userId, title, message, type = 'info') {
     if (!userId) return;
     try {
         const notifRef = push(ref(db, `notifications/${userId}`));
         await set(notifRef, { 
-            title, 
-            message, 
-            type, 
+            title, message, type, 
             link: 'wallet.html',
             read: false, 
             timestamp: Date.now(),
@@ -894,9 +1431,7 @@ async function addAdminNotification(title, message, type = 'info') {
     try {
         const adminNotifRef = push(ref(db, 'adminNotifications'));
         await set(adminNotifRef, { 
-            title, 
-            message, 
-            type, 
+            title, message, type, 
             link: 'admin-dashboard.html',
             read: false, 
             timestamp: Date.now(),
@@ -905,6 +1440,16 @@ async function addAdminNotification(title, message, type = 'info') {
     } catch(e) { console.error('Admin notification error:', e); }
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================================
+// KYC FUNCTIONS
+// ============================================================
 async function loadKYCData(userId) {
     try {
         const kycRef = ref(db, `kyc/${userId}`);
@@ -975,6 +1520,8 @@ function updateKYCUI() {
     const kycStatus = checkKYCStatus(currentKycData);
     const fullName = getKycFullName(currentKycData);
     const email = currentUser?.email || 'No email';
+    
+    // Update Binance KYC
     document.getElementById('userDisplayName').textContent = fullName;
     document.getElementById('userDisplayEmail').textContent = email;
     const badge = document.getElementById('kycStatusBadge');
@@ -984,11 +1531,31 @@ function updateKYCUI() {
     const lockOverlay = document.getElementById('kycLockOverlay');
     lockOverlay.style.display = isVerified ? 'none' : 'flex';
     document.getElementById('usdtAmount').disabled = !isVerified;
-    document.getElementById('createBinanceOrderBtn').disabled = !isVerified;
-    document.getElementById('txHash').disabled = !isVerified;
-    document.getElementById('verifyBinanceDepositBtn').disabled = !isVerified;
+    document.getElementById('generatePaymentRequestBtn').disabled = !isVerified;
+    
+    // Update KYC buttons in ALL tabs
+    const kycBtns = document.querySelectorAll('.kyc-action-btn');
+    kycBtns.forEach(btn => {
+        btn.className = `kyc-action-btn ${kycStatus.class}`;
+        if (kycStatus.status === 'verified') {
+            btn.innerHTML = `<i class="fas fa-check-circle"></i> KYC Verified`;
+            btn.onclick = null;
+        } else if (kycStatus.status === 'pending') {
+            btn.innerHTML = `<i class="fas fa-clock"></i> KYC Pending`;
+            btn.onclick = null;
+        } else if (kycStatus.status === 'rejected') {
+            btn.innerHTML = `<i class="fas fa-times-circle"></i> Re-verify KYC`;
+            btn.onclick = () => window.location.href = 'kyc.html';
+        } else {
+            btn.innerHTML = `<i class="fas fa-id-card"></i> Complete KYC`;
+            btn.onclick = () => window.location.href = 'kyc.html';
+        }
+    });
 }
 
+// ============================================================
+// COUNTRY SELECTOR
+// ============================================================
 function openCountryModal() {
     document.getElementById('countryModal').classList.add('active');
     renderCountryList(allCountries);
@@ -1093,10 +1660,9 @@ async function autoDetectCountry() {
     }
 }
 
-document.getElementById('buyUsdtBtn')?.addEventListener('click', () => {
-    window.location.href = 'p2p-market.html';
-});
-
+// ============================================================
+// MOBILE MONEY FUNCTIONS
+// ============================================================
 async function loadExchangeRates() {
     try {
         const ratesRef = ref(db, 'exchangeRates');
@@ -1122,38 +1688,6 @@ function loadMobileNetworksFromSettings() {
         }
         renderMobileNetworks();
     });
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function updateRateDisplay() {
-    const rateDisplay = document.getElementById('rateDisplay');
-    const rateDisplayValue = document.getElementById('rateDisplayValue');
-    const localAmountDisplay = document.getElementById('localAmountDisplay');
-    
-    if (!selectedNetwork || !selectedCountry) {
-        rateDisplay.style.display = 'none';
-        return;
-    }
-    
-    const usdAmount = parseFloat(document.getElementById('mobileAmount').value) || 0;
-    if (usdAmount < 10) {
-        rateDisplay.style.display = 'none';
-        return;
-    }
-    
-    const rate = exchangeRates[selectedCountry] || 2800;
-    const currency = getCurrency(selectedCountry);
-    const localAmount = usdAmount * rate;
-    
-    rateDisplayValue.textContent = `1 USDT = ${rate.toFixed(0)} ${currency}`;
-    localAmountDisplay.textContent = `${localAmount.toFixed(0)} ${currency}`;
-    rateDisplay.style.display = 'block';
 }
 
 function renderMobileNetworks() {
@@ -1219,6 +1753,34 @@ function renderMobileNetworks() {
     });
 }
 
+function updateRateDisplay() {
+    const rateDisplay = document.getElementById('rateDisplay');
+    const rateDisplayValue = document.getElementById('rateDisplayValue');
+    const localAmountDisplay = document.getElementById('localAmountDisplay');
+    
+    if (!selectedNetwork || !selectedCountry) {
+        rateDisplay.style.display = 'none';
+        return;
+    }
+    
+    const usdAmount = parseFloat(document.getElementById('mobileAmount').value) || 0;
+    if (usdAmount < 10) {
+        rateDisplay.style.display = 'none';
+        return;
+    }
+    
+    const rate = exchangeRates[selectedCountry] || 2800;
+    const currency = getCurrency(selectedCountry);
+    const localAmount = usdAmount * rate;
+    
+    rateDisplayValue.textContent = `1 USDT = ${rate.toFixed(0)} ${currency}`;
+    localAmountDisplay.textContent = `${localAmount.toFixed(0)} ${currency}`;
+    rateDisplay.style.display = 'block';
+}
+
+// ============================================================
+// MOBILE MONEY DEPOSIT
+// ============================================================
 async function processMobileDeposit() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
     if (!selectedNetwork) { showNotification('Please select a payment network', 'error'); return; }
@@ -1282,7 +1844,6 @@ async function processMobileDeposit() {
             adminCreatedAt: Date.now()
         });
 
-        // ✅ FIXED: Deposit notification with proper link
         await addNotification(currentUser.uid, 
             '📱 Mobile Deposit Submitted', 
             `Your mobile deposit of $${amount.toFixed(2)} has been submitted. Admin will verify within 24 hours.`, 
@@ -1312,42 +1873,35 @@ async function processMobileDeposit() {
     }
 }
 
-document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
-document.getElementById('mobileAmount').addEventListener('input', updateRateDisplay);
+// ============================================================
+// BINANCE PAYMENT REQUEST SYSTEM - FIXED (NO DUPLICATE)
+// ============================================================
 
-function updateStep(step) {
-    currentStep = step;
-    for (let i = 1; i <= 4; i++) {
-        const el = document.getElementById(`step${i}`);
-        el.classList.remove('active', 'completed');
-        if (i < step) el.classList.add('completed');
-        if (i === step) el.classList.add('active');
-    }
+// Generate unique Deposit ID
+function generateUniqueDepositId() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}${month}${day}`;
+    const random = String(Math.floor(1000 + Math.random() * 9000));
+    return `DEP-${dateStr}-${random}`;
 }
 
-async function checkExistingTxHash(txHash) {
-    if (!txHash) return false;
-    try {
-        const depositsRef = ref(db, 'binance_deposits');
-        const snapshot = await get(depositsRef);
-        if (snapshot.exists()) {
-            const allDeposits = snapshot.val();
-            for (const userId in allDeposits) {
-                for (const orderId in allDeposits[userId]) {
-                    if (allDeposits[userId][orderId].txHash === txHash) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    } catch (error) {
-        console.error('Error checking TXID:', error);
-        return false;
-    }
+// Generate QR Code URL (using API)
+function generateQRCode(data, size = 200) {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
 }
 
-async function createBinanceOrder() {
+// Create Binance Pay payment link
+function createBinancePayLink(address, amount, memo) {
+    return `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+}
+
+// ============================================================
+// STEP 1: Generate Payment Request - FIXED (NO DUPLICATE)
+// ============================================================
+async function generatePaymentRequest() {
     if (!currentUser) { showNotification('Please login first', 'error'); return; }
     
     const kycStatus = checkKYCStatus(currentKycData);
@@ -1362,202 +1916,463 @@ async function createBinanceOrder() {
         return; 
     }
     
-    const btn = document.getElementById('createBinanceOrderBtn');
+    const btn = document.getElementById('generatePaymentRequestBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Order...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
     
     try {
+        const depositId = generateUniqueDepositId();
         const kycName = getKycFullName(currentKycData);
-        const orderId = 'ORD_' + Date.now().toString() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
-        const expiryTime = Date.now() + (ORDER_EXPIRY_HOURS * 60 * 60 * 1000);
+        const expiresAt = Date.now() + (ORDER_EXPIRY_MINUTES * 60 * 1000);
         
-        const orderData = {
-            orderId: orderId,
+        const paymentData = {
+            depositId: depositId,
             userId: currentUser.uid,
             userEmail: currentUser.email,
             kycName: kycName,
             amount: amount,
-            walletAddress: BINANCE_WALLET_ADDRESS,
+            currency: 'USDT',
             network: 'TRC20',
-            status: 'pending',
+            walletAddress: BINANCE_WALLET_ADDRESS,
+            status: 'pending_payment',
+            createdAt: Date.now(),
+            createdAtISO: new Date().toISOString(),
+            expiresAt: expiresAt,
+            expiresAtISO: new Date(expiresAt).toISOString(),
+            paymentLink: createBinancePayLink(BINANCE_WALLET_ADDRESS, amount, depositId),
+            qrCode: generateQRCode(`USDT:${BINANCE_WALLET_ADDRESS}?amount=${amount}&memo=${depositId}`, 200),
             txHash: null,
-            createdAt: Date.now(),
-            expiryAt: expiryTime
+            submittedAt: null,
+            approvedAt: null,
+            _source: 'deposit_requests'
         };
-
-        const orderRef = ref(db, `binance_deposits/${currentUser.uid}/${orderId}`);
-        await set(orderRef, orderData);
-
-        const depositRef = ref(db, `deposits/${currentUser.uid}/${orderId}`);
-        await set(depositRef, {
-            id: orderId,
-            userId: currentUser.uid,
-            userEmail: currentUser.email,
-            kycName: kycName,
-            amount: amount,
-            method: 'binance_usdt',
-            network: 'TRC20',
-            walletAddress: BINANCE_WALLET_ADDRESS,
-            status: 'pending',
-            createdAt: Date.now()
-        });
-
-        const adminDepositRef = ref(db, `adminDeposits/${orderId}`);
-        await set(adminDepositRef, {
-            id: orderId,
-            userId: currentUser.uid,
-            userEmail: currentUser.email,
-            kycName: kycName,
-            amount: amount,
-            method: 'binance_usdt',
-            network: 'TRC20',
-            walletAddress: BINANCE_WALLET_ADDRESS,
-            status: 'pending',
-            createdAt: Date.now(),
+        
+        // ✅ 1. Save to deposit_requests (PRIMARY SOURCE)
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${depositId}`);
+        await set(requestRef, paymentData);
+        
+        // ✅ 2. Save to adminDeposits for admin panel
+        const adminRef = ref(db, `adminDeposits/${depositId}`);
+        await set(adminRef, {
+            ...paymentData,
             adminRead: false,
             adminCreatedAt: Date.now()
         });
-
-        currentOrderId = orderId;
         
-        document.getElementById('binanceOrderDetails').style.display = 'block';
-        document.getElementById('binanceOrderId').textContent = orderId;
-        document.getElementById('binanceOrderAmount').textContent = `$${amount.toFixed(2)}`;
-        document.getElementById('binanceOrderExpiry').textContent = `${ORDER_EXPIRY_HOURS} Hours`;
+        // ❌ REMOVED: Saving to deposits/{userId}/ to avoid duplicates
+        // const depositRef = ref(db, `deposits/${currentUser.uid}/${depositId}`);
+        // await set(depositRef, { ... });
         
-        const qrContainer = document.getElementById('binanceQrContainer');
-        qrContainer.innerHTML = `
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${BINANCE_WALLET_ADDRESS}" 
-                 alt="QR Code for USDT TRC20 Deposit" 
-                 style="width:150px; height:150px; border-radius:12px; display:block; margin:0 auto; background:white; padding:10px;">
-            <p style="color:#888; font-size:9px; margin-top:6px;">Scan to send USDT TRC20</p>
-        `;
+        currentDepositId = depositId;
+        currentPaymentRequest = paymentData;
         
+        // Display payment request
+        displayPaymentRequest(paymentData);
+        
+        // Update steps
         updateStep(2);
         
-        showNotification('✅ Deposit order created! Send USDT to the address provided.', 'success');
-        btn.innerHTML = '<i class="fas fa-check"></i> Order Created';
+        showNotification('✅ Payment request generated successfully!', 'success');
+        btn.innerHTML = '<i class="fas fa-check"></i> Request Generated';
         btn.disabled = true;
         
     } catch (error) {
-        console.error('Create order error:', error);
-        showNotification('Error creating order: ' + error.message, 'error');
+        console.error('Generate payment error:', error);
+        showNotification('Error generating payment: ' + error.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Deposit Order';
+        btn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Payment Request';
     }
 }
 
-document.getElementById('createBinanceOrderBtn').addEventListener('click', createBinanceOrder);
-
-document.getElementById('copyWalletAddress')?.addEventListener('click', () => {
-    const address = document.getElementById('binanceWalletAddress').textContent;
-    navigator.clipboard.writeText(address);
-    showNotification('Wallet address copied!', 'success');
-});
-
-async function verifyBinanceDeposit() {
-    if (!currentUser) { showNotification('Please login first', 'error'); return; }
-    if (!currentOrderId) { showNotification('Please create an order first', 'error'); return; }
+// ============================================================
+// STEP 2: Display Payment Request
+// ============================================================
+function displayPaymentRequest(data) {
+    // Hide step 1, show payment request
+    document.getElementById('binanceStep1').style.display = 'none';
+    document.getElementById('paymentRequestDisplay').style.display = 'block';
+    document.getElementById('waitingVerificationDisplay').style.display = 'none';
+    document.getElementById('approvedDisplay').style.display = 'none';
     
-    const txHash = document.getElementById('txHash').value.trim();
-    if (!txHash || txHash.length < 10) { showNotification('Please enter a valid Transaction Hash (TXID)', 'error'); return; }
+    // Fill data
+    document.getElementById('displayDepositId').textContent = data.depositId;
+    document.getElementById('displayAmount').textContent = `$${data.amount.toFixed(2)}`;
+    document.getElementById('displayWalletAddress').textContent = data.walletAddress;
     
-    const isDuplicate = await checkExistingTxHash(txHash);
-    if (isDuplicate) {
-        showNotification('❌ This TXID has already been used. Please check and try again.', 'error');
+    // Show QR Code
+    const qrImg = document.getElementById('qrCodeImage');
+    const qrPlaceholder = document.getElementById('qrPlaceholder');
+    qrImg.src = data.qrCode;
+    qrImg.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+    
+    // Start expiry countdown
+    startExpiryCountdown(data.expiresAt);
+    
+    // Update status badge
+    updateStatusBadge('pending');
+    
+    // Update steps
+    updateStep(2);
+}
+
+// ============================================================
+// STEP 3: "I Have Paid" - Submit for Verification
+// ============================================================
+async function submitForVerification() {
+    if (!currentUser || !currentDepositId) {
+        showNotification('No active payment request found', 'error');
         return;
     }
     
-    const btn = document.getElementById('verifyBinanceDepositBtn');
+    const btn = document.getElementById('iHavePaidBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     
     try {
-        const orderRef = ref(db, `binance_deposits/${currentUser.uid}/${currentOrderId}`);
-        const orderSnapshot = await get(orderRef);
-        if (!orderSnapshot.exists()) {
-            showNotification('Order not found', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
-            return;
-        }
+        // Update status to waiting_verification
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+        await update(requestRef, {
+            status: 'waiting_verification',
+            submittedAt: Date.now(),
+            submittedAtISO: new Date().toISOString()
+        });
         
-        const orderData = orderSnapshot.val();
-        
-        if (orderData.expiryAt && Date.now() > orderData.expiryAt) {
-            showNotification('❌ Order has expired. Please create a new order.', 'error');
-            await update(orderRef, { status: 'expired' });
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
-            return;
-        }
-        
-        await update(orderRef, {
-            txHash: txHash,
-            status: 'pending_verification',
+        // Update admin deposits
+        const adminRef = ref(db, `adminDeposits/${currentDepositId}`);
+        await update(adminRef, {
+            status: 'waiting_verification',
             submittedAt: Date.now()
         });
-
-        const depositRef = ref(db, `deposits/${currentUser.uid}/${currentOrderId}`);
-        const depositSnap = await get(depositRef);
-        if (depositSnap.exists()) {
-            await update(depositRef, {
-                txHash: txHash,
-                status: 'pending_verification',
-                submittedAt: Date.now()
-            });
-        }
-
-        const adminDepositRef = ref(db, `adminDeposits/${currentOrderId}`);
-        await update(adminDepositRef, {
-            txHash: txHash,
-            status: 'pending_verification',
-            submittedAt: Date.now()
-        });
-
-        // ✅ FIXED: Deposit notification with proper link
+        
+        // Send notifications
         await addNotification(currentUser.uid, 
             '💰 Binance USDT Deposit Submitted', 
-            `Your deposit of $${orderData.amount} has been submitted. Admin will verify and approve.`, 
+            `Your deposit of $${currentPaymentRequest.amount.toFixed(2)} has been submitted for verification.`, 
             'deposit');
         await addAdminNotification('📊 New Binance Deposit', 
-            `${currentUser.email} deposited $${orderData.amount} USDT via TRC20. TXID: ${txHash}`, 
+            `${currentUser.email} deposited $${currentPaymentRequest.amount.toFixed(2)} USDT. Request ID: ${currentDepositId}`, 
             'deposit');
         
+        // Update UI
+        document.getElementById('paymentRequestDisplay').style.display = 'none';
+        document.getElementById('waitingVerificationDisplay').style.display = 'block';
+        document.getElementById('waitingDepositId').textContent = currentDepositId;
+        
         updateStep(4);
-        showNotification('✅ Deposit submitted for verification! Admin will approve soon.', 'success');
+        updateStatusBadge('waiting');
         
+        showNotification('✅ Payment submitted for verification!', 'success');
         btn.innerHTML = '<i class="fas fa-check"></i> Submitted';
-        btn.disabled = true;
-        
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 3000);
         
     } catch (error) {
-        console.error('Submit deposit error:', error);
-        showNotification('Error submitting deposit: ' + error.message, 'error');
+        console.error('Submit verification error:', error);
+        showNotification('Error submitting: ' + error.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-double"></i> Submit for Verification';
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> I Have Paid';
     }
 }
 
-document.getElementById('verifyBinanceDepositBtn').addEventListener('click', verifyBinanceDeposit);
-
-function switchTab(tab) {
-    document.getElementById('mobileTab').style.display = tab === 'mobile' ? 'block' : 'none';
-    document.getElementById('binanceTab').style.display = tab === 'binance' ? 'block' : 'none';
-    document.getElementById('p2pTab').style.display = tab === 'p2p' ? 'block' : 'none';
-    document.querySelectorAll('.tab-btn').forEach(btn => { 
-        btn.classList.remove('active'); 
-        if (btn.getAttribute('data-tab') === tab) btn.classList.add('active'); 
+// ============================================================
+// CANCEL PAYMENT REQUEST - WITH BEAUTIFUL POPUP
+// ============================================================
+function showCancelModal() {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('cancelModalOverlay');
+        const closeBtn = document.getElementById('cancelModalClose');
+        const keepBtn = document.getElementById('cancelKeepBtn');
+        const confirmBtn = document.getElementById('cancelConfirmBtn');
+        
+        // Fill details
+        document.getElementById('cancelDepositId').textContent = currentDepositId || '---';
+        document.getElementById('cancelAmount').textContent = `$${currentPaymentRequest?.amount?.toFixed(2) || '0.00'}`;
+        
+        // Show modal
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Cleanup function
+        const cleanup = (result) => {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            closeBtn.removeEventListener('click', onClose);
+            keepBtn.removeEventListener('click', onKeep);
+            confirmBtn.removeEventListener('click', onConfirm);
+            overlay.removeEventListener('click', onOverlayClick);
+            resolve(result);
+        };
+        
+        // Event handlers
+        const onClose = () => cleanup(false);
+        const onKeep = () => cleanup(false);
+        const onConfirm = () => {
+            // Add loading state
+            confirmBtn.classList.add('loading');
+            confirmBtn.innerHTML = '<span class="spinner"></span> Cancelling...';
+            
+            // Execute cancellation after short delay for UX
+            setTimeout(() => {
+                cleanup(true);
+            }, 800);
+        };
+        const onOverlayClick = (e) => {
+            if (e.target === overlay) cleanup(false);
+        };
+        
+        // Add event listeners
+        closeBtn.addEventListener('click', onClose);
+        keepBtn.addEventListener('click', onKeep);
+        confirmBtn.addEventListener('click', onConfirm);
+        overlay.addEventListener('click', onOverlayClick);
+        
+        // Keyboard support (Escape to close)
+        const onKeydown = (e) => {
+            if (e.key === 'Escape') {
+                cleanup(false);
+                document.removeEventListener('keydown', onKeydown);
+            }
+        };
+        document.addEventListener('keydown', onKeydown);
     });
 }
 
-document.querySelectorAll('.tab-btn').forEach(btn => 
-    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')))
-);
+async function cancelPaymentRequest() {
+    if (!currentUser || !currentDepositId) {
+        showNotification('No active payment request found', 'error');
+        return;
+    }
+    
+    // Show beautiful cancel modal
+    const confirmed = await showCancelModal();
+    
+    if (confirmed) {
+        try {
+            const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+            await update(requestRef, { status: 'cancelled' });
+            
+            // Update admin deposits
+            const adminRef = ref(db, `adminDeposits/${currentDepositId}`);
+            await update(adminRef, { status: 'cancelled' });
+            
+            // Send notification
+            await addNotification(currentUser.uid, 
+                '❌ Payment Request Cancelled', 
+                `Your payment request of $${currentPaymentRequest?.amount?.toFixed(2) || '0.00'} has been cancelled.`, 
+                'info');
+            
+            // Reset UI
+            resetPaymentFlow();
+            showNotification('✅ Payment request cancelled successfully', 'info');
+            
+        } catch (error) {
+            console.error('Cancel error:', error);
+            showNotification('Error cancelling: ' + error.message, 'error');
+        }
+    }
+}
 
+// ============================================================
+// Utility Functions for Payment Flow
+// ============================================================
+function updateStep(step) {
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step${i}`);
+        el.classList.remove('active', 'completed');
+        if (i < step) el.classList.add('completed');
+        if (i === step) el.classList.add('active');
+    }
+}
+
+function updateStatusBadge(status) {
+    const badge = document.getElementById('paymentStatusBadge');
+    badge.className = `status-badge ${status}`;
+    const labels = {
+        'pending': '⏳ Pending Payment',
+        'waiting': '⏳ Waiting Verification',
+        'approved': '✓ Approved',
+        'expired': '✗ Expired',
+        'cancelled': '✗ Cancelled'
+    };
+    badge.textContent = labels[status] || status;
+}
+
+function startExpiryCountdown(expiresAt) {
+    if (expiryInterval) clearInterval(expiryInterval);
+    
+    const countdownEl = document.getElementById('expiryCountdown');
+    
+    expiryInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = expiresAt - now;
+        
+        if (remaining <= 0) {
+            clearInterval(expiryInterval);
+            countdownEl.textContent = '00:00:00';
+            handleExpired();
+            return;
+        }
+        
+        const hours = String(Math.floor(remaining / (1000 * 60 * 60))).padStart(2, '0');
+        const minutes = String(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        const seconds = String(Math.floor((remaining % (1000 * 60)) / 1000)).padStart(2, '0');
+        countdownEl.textContent = `${hours}:${minutes}:${seconds}`;
+    }, 1000);
+}
+
+async function handleExpired() {
+    if (!currentUser || !currentDepositId) return;
+    
+    try {
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+        await update(requestRef, { status: 'expired' });
+        
+        updateStatusBadge('expired');
+        document.getElementById('iHavePaidBtn').disabled = true;
+        document.getElementById('iHavePaidBtn').innerHTML = '<i class="fas fa-clock"></i> Expired';
+        
+        showNotification('⏰ Payment request has expired. Please generate a new one.', 'error');
+        
+    } catch (error) {
+        console.error('Expiry update error:', error);
+    }
+}
+
+function resetPaymentFlow() {
+    if (expiryInterval) {
+        clearInterval(expiryInterval);
+        expiryInterval = null;
+    }
+    
+    currentDepositId = null;
+    currentPaymentRequest = null;
+    
+    document.getElementById('binanceStep1').style.display = 'block';
+    document.getElementById('paymentRequestDisplay').style.display = 'none';
+    document.getElementById('waitingVerificationDisplay').style.display = 'none';
+    document.getElementById('approvedDisplay').style.display = 'none';
+    
+    // Reset QR
+    document.getElementById('qrCodeImage').style.display = 'none';
+    document.getElementById('qrPlaceholder').style.display = 'block';
+    
+    // Reset button
+    const genBtn = document.getElementById('generatePaymentRequestBtn');
+    genBtn.disabled = false;
+    genBtn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Payment Request';
+    
+    const paidBtn = document.getElementById('iHavePaidBtn');
+    paidBtn.disabled = false;
+    paidBtn.innerHTML = '<i class="fas fa-check-circle"></i> I Have Paid';
+    
+    // Reset amount
+    document.getElementById('usdtAmount').value = '';
+    
+    updateStep(1);
+}
+
+// ============================================================
+// Admin Approval Listener (Real-time)
+// ============================================================
+function listenForApproval(userId, depositId) {
+    const requestRef = ref(db, `deposit_requests/${userId}/${depositId}`);
+    
+    onValue(requestRef, async (snapshot) => {
+        if (!snapshot.exists()) return;
+        
+        const data = snapshot.val();
+        
+        // If approved, update balance and show success
+        if (data.status === 'approved' && !data._balanceUpdated) {
+            await processApproval(userId, data);
+            // Mark as processed to avoid double processing
+            await update(requestRef, { _balanceUpdated: true });
+        }
+    });
+}
+
+async function processApproval(userId, data) {
+    try {
+        // Update user balance using transaction
+        const userRef = ref(db, `users/${userId}`);
+        await runTransaction(userRef, (current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + data.amount;
+                current.totalDeposited = (current.totalDeposited || 0) + data.amount;
+                current.updatedAt = Date.now();
+            }
+            return current;
+        });
+        
+        // Add transaction record
+        const txRef = push(ref(db, `transactions/${userId}`));
+        await set(txRef, {
+            type: 'deposit',
+            amount: data.amount,
+            method: 'Binance USDT',
+            status: 'completed',
+            depositId: data.depositId,
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        });
+        
+        // Show approved UI
+        document.getElementById('waitingVerificationDisplay').style.display = 'none';
+        document.getElementById('approvedDisplay').style.display = 'block';
+        document.getElementById('approvedAmount').textContent = `$${data.amount.toFixed(2)}`;
+        
+        updateStatusBadge('approved');
+        
+        showNotification(`✅ Deposit of $${data.amount.toFixed(2)} approved!`, 'success');
+        
+    } catch (error) {
+        console.error('Approval processing error:', error);
+    }
+}
+
+// ============================================================
+// OPEN BINANCE - FIXED FOR MOBILE & DESKTOP
+// ============================================================
+function openBinanceApp() {
+    const amount = currentPaymentRequest?.amount || 0;
+    const memo = currentDepositId || '';
+    const address = BINANCE_WALLET_ADDRESS;
+    
+    // Check if on mobile
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    
+    // Copy address as backup
+    navigator.clipboard.writeText(address).catch(() => {});
+    
+    if (isMobile) {
+        // Try to open Binance App
+        const appLink = `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+        window.location.href = appLink;
+        
+        showNotification('📱 Opening Binance App... If not installed, download from Play Store/App Store.', 'info');
+        
+        // Fallback to web after 3 seconds if app doesn't open
+        setTimeout(() => {
+            const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+            window.open(webLink, '_blank');
+        }, 3000);
+    } else {
+        // Desktop - open web version
+        const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+        window.open(webLink, '_blank');
+        showNotification('📋 Address copied! Visit Binance Pay to complete payment.', 'info');
+    }
+}
+
+// ============================================================
+// P2P BUY USDT
+// ============================================================
+document.getElementById('buyUsdtBtn')?.addEventListener('click', () => {
+    window.location.href = 'p2p-market.html';
+});
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
 function initTheme() {
     const saved = localStorage.getItem('abotra_theme');
     if (saved === 'light') {
@@ -1583,6 +2398,9 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     }
 });
 
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
 document.getElementById('countrySelectorTrigger').addEventListener('click', openCountryModal);
 document.getElementById('countryModalClose').addEventListener('click', closeCountryModal);
 document.getElementById('countrySearch').addEventListener('input', (e) => {
@@ -1594,6 +2412,48 @@ document.getElementById('countryModal').addEventListener('click', (e) => {
     }
 });
 
+document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
+document.getElementById('mobileAmount').addEventListener('input', updateRateDisplay);
+
+// Binance Payment Request Events
+document.getElementById('generatePaymentRequestBtn').addEventListener('click', generatePaymentRequest);
+document.getElementById('iHavePaidBtn').addEventListener('click', submitForVerification);
+document.getElementById('cancelPaymentBtn').addEventListener('click', cancelPaymentRequest);
+document.getElementById('copyAddressBtn').addEventListener('click', () => {
+    const address = document.getElementById('displayWalletAddress').textContent;
+    navigator.clipboard.writeText(address);
+    showNotification('Address copied to clipboard!', 'success');
+});
+document.getElementById('openBinanceBtn').addEventListener('click', openBinanceApp);
+
+// Dashboard navigation
+document.getElementById('backToDashboardBtn')?.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+});
+document.getElementById('approvedDashboardBtn')?.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+});
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab) {
+    document.getElementById('mobileTab').style.display = tab === 'mobile' ? 'block' : 'none';
+    document.getElementById('binanceTab').style.display = tab === 'binance' ? 'block' : 'none';
+    document.getElementById('p2pTab').style.display = tab === 'p2p' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(btn => { 
+        btn.classList.remove('active'); 
+        if (btn.getAttribute('data-tab') === tab) btn.classList.add('active'); 
+    });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => 
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')))
+);
+
+// ============================================================
+// AUTH STATE
+// ============================================================
 async function loadUserCountry() {
     if (!currentUser) return;
     try {
@@ -1644,6 +2504,58 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 initTheme();
+
+console.log('[DEPOSIT] ✅ Page loaded - NO DUPLICATE Binance entries');
 </script>
+
+<!-- ============================================================
+     CANCEL MODAL - BEAUTIFUL POPUP
+     ============================================================ -->
+<div class="cancel-modal-overlay" id="cancelModalOverlay">
+    <div class="cancel-modal-card">
+        <button class="cancel-modal-close" id="cancelModalClose">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="cancel-modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="cancel-modal-title">Cancel Payment Request?</div>
+        <div class="cancel-modal-subtitle">
+            Are you sure you want to cancel this payment request?<br>
+            <span style="color:#888;font-size:11px;">This action cannot be undone.</span>
+        </div>
+        
+        <div class="cancel-modal-warning">
+            <i class="fas fa-info-circle"></i>
+            <span>Your payment request will be cancelled and you will need to generate a new one.</span>
+        </div>
+        
+        <div class="cancel-modal-details" id="cancelModalDetails">
+            <div class="detail-row">
+                <span class="detail-label">Deposit ID</span>
+                <span class="detail-value" id="cancelDepositId">---</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Amount</span>
+                <span class="detail-value" id="cancelAmount">$0.00</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Network</span>
+                <span class="detail-value">TRC20</span>
+            </div>
+        </div>
+        
+        <div class="cancel-modal-buttons">
+            <button class="cancel-modal-btn keep" id="cancelKeepBtn">
+                <i class="fas fa-arrow-left"></i> Keep Request
+            </button>
+            <button class="cancel-modal-btn confirm-cancel" id="cancelConfirmBtn">
+                <i class="fas fa-trash-alt"></i> Yes, Cancel
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

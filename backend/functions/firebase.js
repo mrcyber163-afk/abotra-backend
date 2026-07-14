@@ -2,20 +2,16 @@
 // FIREBASE - REST API ONLY (No Admin SDK)
 // ============================================================
 
-require('dotenv').config();
+const config = require('./config');
 
 // ============================================================
-// CONFIG
-// ============================================================
-const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY;
-const FIREBASE_DATABASE_URL = process.env.FIREBASE_DATABASE_URL || 'https://abotra-proa1-default-rtdb.firebaseio.com';
-const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'abotra-proa1';
-
-// ============================================================
-// REST API HELPERS
+// DATABASE REST METHODS
 // ============================================================
 async function restFetch(endpoint, options = {}) {
-    const url = endpoint.startsWith('http') ? endpoint : `${FIREBASE_DATABASE_URL}/${endpoint}.json`;
+    const url = endpoint.startsWith('http') ?
+        endpoint :
+        `${config.FIREBASE_DATABASE_URL}/${endpoint}.json`;
+    
     const response = await fetch(url, {
         ...options,
         headers: {
@@ -29,17 +25,13 @@ async function restFetch(endpoint, options = {}) {
         throw new Error(`Firebase REST API error: ${response.status} - ${errorText}`);
     }
     
-    const data = await response.json();
-    return data;
+    if (response.status === 204) return null;
+    return response.json();
 }
 
-// ============================================================
-// DATABASE REST METHODS
-// ============================================================
 async function restGet(path) {
     try {
-        const data = await restFetch(path);
-        return data;
+        return await restFetch(path);
     } catch (error) {
         console.error(`[REST] GET ${path} error:`, error.message);
         return null;
@@ -94,12 +86,12 @@ async function restDelete(path) {
 }
 
 // ============================================================
-// AUTHENTICATION REST METHODS (Identity Toolkit)
+// AUTHENTICATION REST METHODS
 // ============================================================
 const IDENTITY_TOOLKIT_URL = 'https://identitytoolkit.googleapis.com/v1';
 
 async function authRequest(endpoint, data) {
-    const url = `${IDENTITY_TOOLKIT_URL}/${endpoint}?key=${FIREBASE_WEB_API_KEY}`;
+    const url = `${IDENTITY_TOOLKIT_URL}/${endpoint}?key=${config.FIREBASE_API_KEY}`;
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,41 +122,11 @@ async function authSignUp(email, password) {
 }
 
 async function authGetUser(idToken) {
-    return authRequest('accounts:lookup', {
-        idToken
-    });
-}
-
-async function authUpdateUser(idToken, data) {
-    return authRequest('accounts:update', {
-        idToken,
-        ...data,
-        returnSecureToken: true
-    });
-}
-
-async function authDeleteUser(idToken) {
-    return authRequest('accounts:delete', {
-        idToken
-    });
-}
-
-async function authSendPasswordReset(email) {
-    return authRequest('accounts:sendOobCode', {
-        requestType: 'PASSWORD_RESET',
-        email
-    });
-}
-
-async function authSendEmailVerification(idToken) {
-    return authRequest('accounts:sendOobCode', {
-        requestType: 'VERIFY_EMAIL',
-        idToken
-    });
+    return authRequest('accounts:lookup', { idToken });
 }
 
 async function authRefreshToken(refreshToken) {
-    const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_WEB_API_KEY}`;
+    const url = `https://securetoken.googleapis.com/v1/token?key=${config.FIREBASE_API_KEY}`;
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -181,7 +143,7 @@ async function authRefreshToken(refreshToken) {
 }
 
 // ============================================================
-// VERIFY ID TOKEN (Using REST API)
+// VERIFY ID TOKEN
 // ============================================================
 async function verifyIdToken(idToken) {
     try {
@@ -195,7 +157,8 @@ async function verifyIdToken(idToken) {
                 displayName: user.displayName || user.email?.split('@')[0] || 'User',
                 photoURL: user.photoUrl || null,
                 phoneNumber: user.phoneNumber || null,
-                providerData: user.providerUserInfo || []
+                createdAt: user.createdAt,
+                lastLoginAt: user.lastLoginAt
             };
         }
         throw new Error('User not found');
@@ -206,178 +169,17 @@ async function verifyIdToken(idToken) {
 }
 
 // ============================================================
-// DATABASE READ WITH AUTH (using idToken)
-// ============================================================
-async function restGetAuth(path, idToken) {
-    try {
-        const url = `${FIREBASE_DATABASE_URL}/${path}.json?auth=${idToken}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    } catch (error) {
-        console.error(`[REST] GET auth ${path} error:`, error.message);
-        return null;
-    }
-}
-
-async function restPutAuth(path, data, idToken) {
-    const url = `${FIREBASE_DATABASE_URL}/${path}.json?auth=${idToken}`;
-    const response = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    return response.json();
-}
-
-async function restPatchAuth(path, data, idToken) {
-    const url = `${FIREBASE_DATABASE_URL}/${path}.json?auth=${idToken}`;
-    const response = await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    return response.json();
-}
-
-// ============================================================
-// DUMMY OBJECTS (for compatibility)
-// ============================================================
-// These are only for compatibility with existing code that expects
-// db.ref() pattern. All actual operations should use restGet/Put/Post/Patch.
-const dummyRef = (path) => ({
-    once: async (event) => {
-        const data = await restGet(path);
-        return {
-            exists: () => data !== null && data !== undefined,
-            val: () => data,
-            forEach: (callback) => {
-                if (data && typeof data === 'object') {
-                    Object.keys(data).forEach(key => {
-                        callback({ key, val: () => data[key] });
-                    });
-                }
-            }
-        };
-    },
-    set: async (data) => restPut(path, data),
-    update: async (data) => restPatch(path, data),
-    push: async (data) => {
-        const newId = Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
-        const fullPath = `${path}/${newId}`;
-        await restPut(fullPath, data);
-        return { key: newId, set: async (d) => restPut(fullPath, d) };
-    },
-    remove: async () => restDelete(path),
-    transaction: async (updateFn) => {
-        const current = await restGet(path);
-        const result = updateFn(current);
-        await restPut(path, result);
-        return { committed: true, snapshot: { val: () => result } };
-    },
-    child: (childPath) => dummyRef(`${path}/${childPath}`),
-    orderByChild: () => ({
-        equalTo: async (value) => {
-            const data = await restGet(path);
-            const result = {};
-            if (data && typeof data === 'object') {
-                Object.keys(data).forEach(key => {
-                    if (data[key] && data[key][childPath] === value) {
-                        result[key] = data[key];
-                    }
-                });
-            }
-            return {
-                exists: () => Object.keys(result).length > 0,
-                forEach: (callback) => {
-                    Object.keys(result).forEach(key => {
-                        callback({ key, val: () => result[key] });
-                    });
-                }
-            };
-        },
-        limitToLast: async (limit) => {
-            const data = await restGet(path);
-            const result = {};
-            if (data && typeof data === 'object') {
-                const keys = Object.keys(data).sort();
-                const lastKeys = keys.slice(-limit);
-                lastKeys.forEach(key => { result[key] = data[key]; });
-            }
-            return {
-                exists: () => Object.keys(result).length > 0,
-                forEach: (callback) => {
-                    Object.keys(result).forEach(key => {
-                        callback({ key, val: () => result[key] });
-                    });
-                }
-            };
-        }
-    })
-});
-
-const dummyDB = {
-    ref: (path) => dummyRef(path)
-};
-
-const dummyAuth = {
-    verifyIdToken: async (token) => verifyIdToken(token),
-    getUser: async (uid) => {
-        // Fallback: try to get user from database
-        const userData = await restGet(`users/${uid}`);
-        if (userData) {
-            return { uid, ...userData };
-        }
-        throw new Error('User not found');
-    }
-};
-
-// ============================================================
 // EXPORTS
 // ============================================================
 module.exports = {
-    // Config
-    FIREBASE_WEB_API_KEY,
-    FIREBASE_DATABASE_URL,
-    FIREBASE_PROJECT_ID,
-    
-    // Database REST
     restGet,
     restPut,
     restPost,
     restPatch,
     restDelete,
-    restGetAuth,
-    restPutAuth,
-    restPatchAuth,
-    
-    // Auth REST
     authSignIn,
     authSignUp,
     authGetUser,
-    authUpdateUser,
-    authDeleteUser,
-    authSendPasswordReset,
-    authSendEmailVerification,
     authRefreshToken,
-    verifyIdToken,
-    
-    // Compatibility exports (for existing code)
-    getDB: () => dummyDB,
-    getAuth: () => dummyAuth,
-    admin: {
-        auth: () => dummyAuth,
-        database: () => dummyDB,
-        initializeApp: () => { console.log('[FIREBASE] Admin SDK is disabled (REST API only)'); }
-    },
-    db: dummyDB,
-    auth: dummyAuth
+    verifyIdToken
 };

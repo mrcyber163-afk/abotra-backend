@@ -1,30 +1,6 @@
-// functions/helpers.js
-const { getDB } = require('./firebase');
-
 // ============================================================
-// OPTIMIZED TRANSACTION - With retry and timeout
+// HELPER FUNCTIONS
 // ============================================================
-async function runTransaction(path, updateFn, maxRetries = 3) {
-    const db = getDB();
-    const ref = db.ref(path);
-    
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-            const result = await ref.transaction(updateFn);
-            if (result.committed) {
-                return result;
-            }
-            if (attempt < maxRetries - 1) {
-                await sleep(100 * (attempt + 1));
-            }
-        } catch (error) {
-            console.error(`[TRANSACTION] Error on attempt ${attempt + 1}:`, error.message);
-            if (attempt === maxRetries - 1) throw error;
-            await sleep(100 * (attempt + 1));
-        }
-    }
-    throw new Error(`Transaction failed after ${maxRetries} attempts`);
-}
 
 function formatUsd(value) {
     return `$${parseFloat(value || 0).toFixed(2)}`;
@@ -45,20 +21,22 @@ function getSymbolFromTrade(trade) {
     return 'BTCUSDT';
 }
 
-function getLeverageFee(leverage, config) {
-    const fees = config.LEVERAGE_FEES || {};
-    const keys = Object.keys(fees).map(Number).sort((a, b) => a - b);
-    for (const key of keys) {
-        if (leverage <= key) return fees[key];
-    }
-    return fees[100] || 0.10;
+function calculateDaysRemaining(expiryDate) {
+    const now = Date.now();
+    const diff = expiryDate - now;
+    if (diff <= 0) return 0;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function formatPrice(amount) {
+    return amount.toFixed(2);
 }
 
 module.exports = {
-    runTransaction,
     formatUsd,
     generateId,
     sleep,
     getSymbolFromTrade,
-    getLeverageFee
+    calculateDaysRemaining,
+    formatPrice
 };

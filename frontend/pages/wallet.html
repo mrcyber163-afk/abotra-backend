@@ -175,8 +175,13 @@ border-radius: 16px; padding: 16px; margin-bottom: 16px;
 .history-right .amount.negative { color: #F6465D; }
 .history-right .status { font-size: 8px; margin-top: 3px; }
 .status-pending { color: #FFD700; }
+.status-waiting { color: #FFA500; }
 .status-completed { color: #0ECB81; }
 .status-failed { color: #F6465D; }
+.status-approved { color: #0ECB81; }
+.status-rejected { color: #F6465D; }
+.status-cancelled { color: #888; }
+.status-expired { color: #888; }
 
 .loading-container { text-align: center; padding: 35px 20px; }
 .loading-spinner { width: 30px; height: 30px; border: 2px solid rgba(255,215,0,0.2); border-top: 2px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px auto; }
@@ -273,7 +278,7 @@ display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100;
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, set, get, update, push, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, get, set, update, push, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -327,7 +332,6 @@ function showNotification(message, type) {
     setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
-// ✅ FIXED: Notification helper with proper link
 async function addNotification(userId, title, message, type = 'info', link = 'wallet.html') {
     if (!userId) return;
     try {
@@ -369,66 +373,193 @@ function setupRealtimeBalance() {
     });
 }
 
+// ============================================================
+// LOAD TRANSACTION HISTORY - FIXED (NO DUPLICATES)
+// ============================================================
 async function loadTransactionHistory() {
     if (!currentUser) return;
     allTransactions = [];
-    
+    const seenIds = new Set();
+
+    // ✅ 1. Load deposit_requests (Binance) - PRIMARY SOURCE
+    const requestsRef = ref(db, `deposit_requests/${currentUser.uid}`);
+    const requestsSnapshot = await get(requestsRef);
+    if (requestsSnapshot.exists()) {
+        requestsSnapshot.forEach(child => {
+            const request = child.val();
+            const depositId = request.depositId || child.key;
+            
+            if (seenIds.has(depositId)) return;
+            seenIds.add(depositId);
+
+            let status = request.status || 'pending';
+            let displayStatus = status;
+            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
+            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
+            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
+            else if (status === 'rejected') displayStatus = 'rejected';
+            else if (status === 'cancelled') displayStatus = 'cancelled';
+            else if (status === 'expired') displayStatus = 'expired';
+
+            allTransactions.push({
+                id: child.key,
+                type: 'deposit',
+                amount: request.amount || 0,
+                status: displayStatus,
+                timestamp: request.approvedAt || request.submittedAt || request.createdAt || Date.now(),
+                method: 'Binance USDT',
+                depositId: depositId,
+                isBinance: true,
+                _source: 'deposit_requests'
+            });
+        });
+    }
+
+    // ✅ 2. Load deposits - SKIP BINANCE ONES
     const depositsRef = ref(db, `deposits/${currentUser.uid}`);
     const depositsSnapshot = await get(depositsRef);
     if (depositsSnapshot.exists()) {
         depositsSnapshot.forEach(child => {
             const deposit = child.val();
+            const depositId = deposit.depositId || deposit.id || child.key;
+            
+            if (seenIds.has(depositId)) return;
+            
+            if (deposit.method === 'binance_usdt' || deposit.method === 'Binance USDT' || 
+                (deposit.depositId && deposit.depositId.startsWith('DEP-'))) {
+                return;
+            }
+            
+            seenIds.add(depositId);
+
+            let status = deposit.status || 'pending';
+            let displayStatus = status;
+            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
+            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
+            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
+            else if (status === 'rejected') displayStatus = 'rejected';
+            else if (status === 'cancelled') displayStatus = 'cancelled';
+            else if (status === 'expired') displayStatus = 'expired';
+
             allTransactions.push({
-                id: child.key, type: 'deposit', amount: deposit.amount,
-                status: deposit.status === 'approved' || deposit.status === 'completed' ? 'completed' : 'pending',
+                id: child.key,
+                type: 'deposit',
+                amount: deposit.amount || 0,
+                status: displayStatus,
                 timestamp: deposit.approvedAt || deposit.createdAt || Date.now(),
-                method: deposit.method || 'Bank Transfer'
+                method: deposit.method || 'Deposit',
+                depositId: depositId,
+                _source: 'deposits'
             });
         });
     }
-    
+
+    // ✅ 3. Load user_deposits - SKIP BINANCE ONES
+    const userDepositsRef = ref(db, `user_deposits/${currentUser.uid}`);
+    const userDepositsSnapshot = await get(userDepositsRef);
+    if (userDepositsSnapshot.exists()) {
+        userDepositsSnapshot.forEach(child => {
+            const deposit = child.val();
+            const depositId = deposit.depositId || deposit.id || child.key;
+            
+            if (seenIds.has(depositId)) return;
+            if (deposit.method === 'binance_usdt' || deposit.method === 'Binance USDT') return;
+            
+            seenIds.add(depositId);
+
+            let status = deposit.status || 'pending';
+            let displayStatus = status;
+            if (status === 'pending_verification' || status === 'pending_payment') displayStatus = 'pending';
+            else if (status === 'waiting_verification') displayStatus = 'waiting_verification';
+            else if (status === 'approved' || status === 'completed' || status === 'verified') displayStatus = 'approved';
+            else if (status === 'rejected') displayStatus = 'rejected';
+            else if (status === 'cancelled') displayStatus = 'cancelled';
+            else if (status === 'expired') displayStatus = 'expired';
+
+            allTransactions.push({
+                id: child.key,
+                type: 'deposit',
+                amount: deposit.amount || 0,
+                status: displayStatus,
+                timestamp: deposit.approvedAt || deposit.createdAt || Date.now(),
+                method: deposit.method || 'Deposit',
+                depositId: depositId,
+                _source: 'user_deposits'
+            });
+        });
+    }
+
+    // ✅ 4. Load withdrawals
     const withdrawalsRef = ref(db, `withdrawals/${currentUser.uid}`);
     const withdrawalsSnapshot = await get(withdrawalsRef);
     if (withdrawalsSnapshot.exists()) {
         withdrawalsSnapshot.forEach(child => {
             const withdrawal = child.val();
             allTransactions.push({
-                id: child.key, type: 'withdraw', amount: withdrawal.amount,
+                id: child.key,
+                type: 'withdraw',
+                amount: withdrawal.amount || 0,
                 status: withdrawal.status || 'pending',
                 timestamp: withdrawal.createdAt || Date.now(),
-                method: withdrawal.method || 'Bank Transfer'
+                method: withdrawal.method || 'Withdrawal'
             });
         });
     }
-    
+
+    // ✅ 5. Load transfers received
     const receivedRef = ref(db, `transfers/received/${currentUser.uid}`);
     const receivedSnapshot = await get(receivedRef);
     if (receivedSnapshot.exists()) {
         receivedSnapshot.forEach(child => {
             const transfer = child.val();
             allTransactions.push({
-                id: child.key, type: 'transfer_received', amount: transfer.amount,
-                sender: transfer.senderEmail, status: 'completed',
+                id: child.key,
+                type: 'transfer_received',
+                amount: transfer.amount || 0,
+                sender: transfer.senderEmail,
+                status: 'completed',
                 timestamp: transfer.timestamp || Date.now()
             });
         });
     }
-    
+
+    // ✅ 6. Load transfers sent
     const sentRef = ref(db, `transfers/sent/${currentUser.uid}`);
     const sentSnapshot = await get(sentRef);
     if (sentSnapshot.exists()) {
         sentSnapshot.forEach(child => {
             const transfer = child.val();
             allTransactions.push({
-                id: child.key, type: 'transfer_sent', amount: transfer.amount,
-                recipient: transfer.recipientEmail, status: transfer.status || 'completed',
+                id: child.key,
+                type: 'transfer_sent',
+                amount: transfer.amount || 0,
+                recipient: transfer.recipientEmail,
+                status: transfer.status || 'completed',
                 timestamp: transfer.timestamp || Date.now()
             });
         });
     }
-    
+
+    // Sort by timestamp (newest first)
     allTransactions.sort((a, b) => b.timestamp - a.timestamp);
     renderHistory();
+}
+
+function getStatusDisplay(status) {
+    const statusMap = {
+        'pending': { label: 'Pending', class: 'status-pending' },
+        'pending_verification': { label: 'Pending', class: 'status-pending' },
+        'pending_payment': { label: 'Pending', class: 'status-pending' },
+        'waiting_verification': { label: 'Waiting Verification', class: 'status-waiting' },
+        'approved': { label: 'Approved ✓', class: 'status-approved' },
+        'completed': { label: 'Completed ✓', class: 'status-completed' },
+        'verified': { label: 'Verified ✓', class: 'status-approved' },
+        'rejected': { label: 'Rejected ✗', class: 'status-rejected' },
+        'failed': { label: 'Failed ✗', class: 'status-failed' },
+        'cancelled': { label: 'Cancelled', class: 'status-cancelled' },
+        'expired': { label: 'Expired', class: 'status-expired' }
+    };
+    return statusMap[status] || { label: status || 'Unknown', class: 'status-pending' };
 }
 
 function renderHistory() {
@@ -442,23 +573,46 @@ function renderHistory() {
         const isPositive = tx.type === 'deposit' || tx.type === 'transfer_received';
         const amountClass = isPositive ? 'positive' : 'negative';
         const amountPrefix = isPositive ? '+' : '-';
+        
         let typeIcon = '', typeText = '';
         switch(tx.type) {
-            case 'deposit': typeIcon = '<i class="fas fa-arrow-down" style="color:#0ECB81;"></i>'; typeText = 'Deposit'; break;
-            case 'withdraw': typeIcon = '<i class="fas fa-arrow-up" style="color:#F6465D;"></i>'; typeText = 'Withdrawal'; break;
-            case 'transfer_received': typeIcon = '<i class="fas fa-exchange-alt" style="color:#0ECB81;"></i>'; typeText = `Received from ${tx.sender ? tx.sender.split('@')[0] : 'User'}`; break;
-            case 'transfer_sent': typeIcon = '<i class="fas fa-exchange-alt" style="color:#F6465D;"></i>'; typeText = `Sent to ${tx.recipient ? tx.recipient.split('@')[0] : 'User'}`; break;
-            default: typeIcon = '<i class="fas fa-receipt"></i>'; typeText = 'Transaction';
+            case 'deposit': 
+                typeIcon = '<i class="fas fa-arrow-down" style="color:#0ECB81;"></i>'; 
+                typeText = tx.method || 'Deposit';
+                break;
+            case 'withdraw': 
+                typeIcon = '<i class="fas fa-arrow-up" style="color:#F6465D;"></i>'; 
+                typeText = 'Withdrawal';
+                break;
+            case 'transfer_received': 
+                typeIcon = '<i class="fas fa-exchange-alt" style="color:#0ECB81;"></i>'; 
+                typeText = `Received from ${tx.sender ? tx.sender.split('@')[0] : 'User'}`;
+                break;
+            case 'transfer_sent': 
+                typeIcon = '<i class="fas fa-exchange-alt" style="color:#F6465D;"></i>'; 
+                typeText = `Sent to ${tx.recipient ? tx.recipient.split('@')[0] : 'User'}`;
+                break;
+            default: 
+                typeIcon = '<i class="fas fa-receipt"></i>'; 
+                typeText = 'Transaction';
         }
-        let statusClass = tx.status === 'pending' ? 'status-pending' : (tx.status === 'completed' ? 'status-completed' : 'status-failed');
-        let statusText = tx.status === 'pending' ? 'Pending' : (tx.status === 'completed' ? 'Completed' : 'Failed');
+        
+        const statusInfo = getStatusDisplay(tx.status);
         const date = new Date(tx.timestamp);
         const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        
         const txCard = document.createElement('div');
         txCard.className = 'history-card';
         txCard.innerHTML = `
-            <div class="history-left"><div class="type">${typeIcon} ${typeText}</div><div class="date">${formattedDate}</div></div>
-            <div class="history-right"><div class="amount ${amountClass}">${amountPrefix}$${Math.abs(tx.amount).toFixed(2)}</div><div class="status ${statusClass}">${statusText}</div></div>
+            <div class="history-left">
+                <div class="type">${typeIcon} ${typeText}</div>
+                <div class="date">${formattedDate}</div>
+                ${tx.depositId ? `<div class="date" style="font-family:monospace;font-size:8px;color:#666;">ID: ${tx.depositId}</div>` : ''}
+            </div>
+            <div class="history-right">
+                <div class="amount ${amountClass}">${amountPrefix}$${Math.abs(tx.amount).toFixed(2)}</div>
+                <div class="status ${statusInfo.class}">${statusInfo.label}</div>
+            </div>
         `;
         container.appendChild(txCard);
     });
@@ -526,14 +680,12 @@ async function sendTransfer() {
         await set(ref(db, `transfers/sent/${currentUser.uid}/${transferId}`), transferData);
         await set(ref(db, `transfers/received/${recipient.uid}/${transferId}`), transferData);
         
-        // ✅ FIXED: Notification for sender with proper link
         await addNotification(currentUser.uid, 
             '💸 Transfer Sent', 
             `You sent $${amount.toFixed(2)} to ${recipient.email}.`, 
             'wallet', 
             'wallet.html');
         
-        // ✅ FIXED: Notification for recipient with proper link
         await addNotification(recipient.uid, 
             '💰 Transfer Received', 
             `You received $${amount.toFixed(2)} from ${currentUser.email}.`, 

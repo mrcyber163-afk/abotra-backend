@@ -15,6 +15,7 @@
 <!-- ============================================================ -->
 <script>
 const ONESIGNAL_APP_ID = 'e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc';
+const VAPID_PUBLIC_KEY = 'BFmZqG4wX7mCgq8Xj9nPq2sT3uV5wY7zA8bC9dE0fG1hI2jK3lM4nO5pQ6rS7tU8vW9xY0z';
 </script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
@@ -30,17 +31,188 @@ window.OneSignalDeferred.push(async function(OneSignal) {
             notifyButton: { enable: false }
         });
         console.log('[ONESIGNAL] ✅ Admin initialized');
+        
+        const user = await new Promise((resolve) => {
+            const unsubscribe = firebase.auth().onAuthStateChanged((u) => {
+                unsubscribe();
+                resolve(u);
+            });
+        });
+        
+        if (user) {
+            await OneSignal.login(user.uid);
+            console.log('[ONESIGNAL] ✅ User logged in:', user.uid);
+        }
+        
+        await OneSignal.registerForPushNotifications();
+        console.log('[ONESIGNAL] ✅ Registered for push notifications');
+        
     } catch(e) { console.warn('[ONESIGNAL] Init error:', e); }
 });
 </script>
 
-<!-- ============================================================ -->
-<!-- STYLES -->
-<!-- ============================================================ -->
+<!-- ============================================================
+   SERVICE WORKER REGISTRATION
+   ============================================================ -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(reg => console.log('[SW] Service Worker registered:', reg))
+        .catch(err => console.warn('[SW] Service Worker registration failed:', err));
+}
+
+async function requestNotificationPermission() {
+    try {
+        if (typeof Notification === 'undefined') {
+            console.warn('[PUSH] Notifications not supported');
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            console.log('[PUSH] Permission already granted');
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            console.warn('[PUSH] Permission denied');
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('[PUSH] Permission granted');
+            return true;
+        }
+        return false;
+    } catch(e) {
+        console.warn('[PUSH] Permission error:', e);
+        return false;
+    }
+}
+
+function sendDeviceNotification(title, body, link = '/admin/admin-dashboard.html') {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        console.log('[PUSH] Notifications not available');
+        return;
+    }
+    
+    try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(registration => {
+                if (registration && registration.showNotification) {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: '/assets/images/logo-192.png',
+                        badge: '/assets/images/logo-192.png',
+                        vibrate: [200, 100, 200],
+                        data: { url: link },
+                        tag: 'admin_abotra_' + Date.now(),
+                        requireInteraction: true
+                    });
+                    console.log('[SW] Notification sent via service worker:', title);
+                    return;
+                }
+            }).catch(() => {});
+        }
+        
+        const notif = new Notification(title, {
+            body: body,
+            icon: '/assets/images/logo-192.png',
+            badge: '/assets/images/logo-192.png',
+            vibrate: [200, 100, 200]
+        });
+        
+        notif.onclick = function() {
+            window.focus();
+            if (link) {
+                window.location.href = link;
+            }
+            notif.close();
+        };
+        
+        setTimeout(() => notif.close(), 10000);
+    } catch(e) {
+        console.error('[PUSH] Notification error:', e);
+    }
+}
+
+async function sendOneSignalNotification(title, message, link = '/admin/admin-dashboard.html') {
+    try {
+        const response = await fetch('https://onesignal.com/api/v1/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                app_id: ONESIGNAL_APP_ID,
+                contents: { en: message },
+                headings: { en: title },
+                included_segments: ['Total Subscriptions'],
+                data: { link: link },
+                web_buttons: [
+                    { 
+                        id: 'open', 
+                        text: 'Open ABOTRA Admin', 
+                        icon: 'https://abotraproai.surge.sh/assets/images/logo.png', 
+                        url: `https://abotraproai.surge.sh${link}` 
+                    }
+                ]
+            })
+        });
+        console.log('[ONESIGNAL] Notification sent:', response.ok);
+        return response.ok;
+    } catch(e) {
+        console.warn('[ONESIGNAL] Error:', e);
+        return false;
+    }
+}
+
+async function notifyAllAdmins(title, message, link = '/admin/admin-dashboard.html') {
+    try {
+        await sendOneSignalNotification(title, message, link);
+        sendDeviceNotification(title, message, link);
+        
+        const db = firebase.database();
+        const notifRef = db.ref('adminNotifications').push();
+        await notifRef.set({
+            title: title,
+            message: message,
+            type: 'system',
+            read: false,
+            timestamp: Date.now(),
+            date: new Date().toISOString(),
+            link: link
+        });
+        
+        console.log('[PUSH] Notification sent to all admins');
+        return true;
+    } catch(e) {
+        console.error('[PUSH] Error notifying admins:', e);
+        return false;
+    }
+}
+
+function setupAdminNotificationListener() {
+    const db = firebase.database();
+    const notifRef = db.ref('adminNotifications');
+    
+    notifRef.on('child_added', (snapshot) => {
+        const notif = snapshot.val();
+        if (!notif.read) {
+            const title = notif.title || '📢 Admin Alert';
+            const message = notif.message || 'You have a new notification';
+            const link = notif.link || '/admin/admin-dashboard.html';
+            sendDeviceNotification(title, message, link);
+            sendOneSignalNotification(title, message, link);
+        }
+    });
+}
+</script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
-body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); }
+body { background: #050505; background-image: url("../../assets/images/background.png"); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../../assets/images/background-light.png"); }
 body.light-theme .admin-header, body.light-theme .sidebar, body.light-theme .section-card, body.light-theme .stat-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); }
 body.light-theme .admin-header h2, body.light-theme .page-title, body.light-theme .section-title, body.light-theme .stat-value { color: #800000; }
 body.light-theme .nav-item { color: #555; }
@@ -85,7 +257,7 @@ body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 .main-content { position: relative; z-index: 2; margin-top: 75px; padding: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
 .page-title { font-size: 22px; font-weight: 800; color: #FFD700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
 .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 10px 8px; text-align: center; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
 .stat-card:hover { transform: translateY(-3px); border-color: #FFD700; background: rgba(255,215,0,0.08); }
 .stat-icon { width: 36px; height: 36px; background: rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-size: 16px; color: #FFD700; }
@@ -94,7 +266,7 @@ body.light-theme .overlay { background: rgba(255,255,255,0.85); }
 
 .section-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.1); border-radius: 16px; padding: 16px; margin-bottom: 16px; backdrop-filter: blur(10px); }
 .section-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,215,0,0.2); }
-.view-all-btn { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 4px 10px; color: #FFD700; font-size: 9px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; }
+.view-all-btn { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 4px 10px; color: #FFD700; font-size: 9px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
 .view-all-btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); }
 
 .table-responsive { overflow-x: auto; }
@@ -111,7 +283,7 @@ tr:hover td { background: rgba(255,215,0,0.04); }
 .status-approved { background: rgba(14,203,129,0.2); color: #0ECB81; border: 1px solid rgba(14,203,129,0.3); }
 .status-rejected { background: rgba(246,70,93,0.2); color: #F6465D; border: 1px solid rgba(246,70,93,0.3); }
 
-.view-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 3px 8px; color: #FFD700; cursor: pointer; font-size: 9px; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 3px; }
+.view-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 3px 8px; color: #FFD700; cursor: pointer; font-size: 9px; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 3px; text-decoration: none; }
 .view-btn:hover { background: rgba(255,215,0,0.4); transform: translateY(-2px); }
 
 .btn-push-all { background: rgba(33, 150, 243, 0.15); border: none; border-radius: 12px; padding: 8px 16px; color: #2196F3; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; transition: 0.3s; }
@@ -206,6 +378,26 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
 .toast-notification.info { background: linear-gradient(135deg, #FFD700, #b8860b); color: #1a1a1a; }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @media(max-width:768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .stat-value { font-size: 16px; } .stat-icon { width: 32px; height: 32px; font-size: 14px; } .logo-area p { display: none; } .menu-btn span { display: none; } .menu-btn { padding: 8px 10px; } .main-content { padding: 12px; margin-top: 70px; } .page-title { font-size: 18px; } .notification-panel { width: 100%; right: -100%; } .modal-content { padding: 18px; max-width: 95%; } }
+
+.push-permission-btn {
+    background: rgba(14,203,129,0.15);
+    border: 1px solid rgba(14,203,129,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: #0ECB81;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.push-permission-btn:hover {
+    background: rgba(14,203,129,0.3);
+    transform: scale(1.02);
+}
+.push-permission-btn i { font-size: 10px; }
 </style>
 </head>
 <body>
@@ -214,12 +406,13 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
     <div class="header-left">
         <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
         <div class="logo-area">
-            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
+            <img src="../../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-robot\\' style=\\'font-size:28px; color:#FFD700;\\'></i>'">
             <div><h2>ABOTRA-PROAI</h2><p>Admin Dashboard</p></div>
         </div>
     </div>
     <div class="header-right">
         <div class="notif-icon" id="notifIcon"><i class="fas fa-bell"></i><span class="notif-badge" id="notifBadge">0</span></div>
+        <button class="push-permission-btn" id="pushPermissionBtn" style="display:none;"><i class="fas fa-bell"></i> Enable Push</button>
         <button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i> <span>Theme</span></button>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
@@ -349,7 +542,7 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-id-card"></i> Pending KYC Requests
-            <button class="view-all-btn" onclick="window.location.href='admin-kyc.html'"><i class="fas fa-eye"></i> View All</button>
+            <a href="admin-kyc.html" class="view-all-btn"><i class="fas fa-eye"></i> View All</a>
         </div>
         <div class="table-responsive">
             <table>
@@ -362,7 +555,7 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-arrow-down"></i> Recent Deposits
-            <button class="view-all-btn" onclick="window.location.href='admin-deposits.html'"><i class="fas fa-eye"></i> View All</button>
+            <a href="admin-deposits.html" class="view-all-btn"><i class="fas fa-eye"></i> View All</a>
         </div>
         <div class="table-responsive">
             <table>
@@ -375,7 +568,7 @@ body.light-theme .notification-panel { background: white; border-left: 1px solid
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-arrow-up"></i> Recent Withdrawals
-            <button class="view-all-btn" onclick="window.location.href='admin-withdrawals.html'"><i class="fas fa-eye"></i> View All</button>
+            <a href="admin-withdrawals.html" class="view-all-btn"><i class="fas fa-eye"></i> View All</a>
         </div>
         <div class="table-responsive">
             <table>
@@ -407,6 +600,7 @@ const auth = firebase.auth();
 let currentAdminId = null;
 let currentAdminEmail = null;
 let notificationListener = null;
+let pushPermissionGranted = false;
 
 // ============================================================
 // TOAST
@@ -541,6 +735,50 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 
 // ============================================================
+// PUSH NOTIFICATIONS
+// ============================================================
+async function requestPushPermission() {
+    try {
+        if (typeof Notification === 'undefined') {
+            showToast('Notifications not supported in this browser', 'error');
+            return false;
+        }
+        
+        if (Notification.permission === 'granted') {
+            showToast('Push notifications already enabled!', 'success');
+            pushPermissionGranted = true;
+            document.getElementById('pushPermissionBtn').style.display = 'none';
+            return true;
+        }
+        
+        if (Notification.permission === 'denied') {
+            showToast('Notifications are blocked. Please enable in browser settings.', 'error');
+            return false;
+        }
+        
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            showToast('✅ Push notifications enabled!', 'success');
+            pushPermissionGranted = true;
+            document.getElementById('pushPermissionBtn').style.display = 'none';
+            try {
+                if (window.OneSignalDeferred) {
+                    await OneSignal.registerForPushNotifications();
+                }
+            } catch(e) {}
+            return true;
+        } else {
+            showToast('Push notifications denied', 'error');
+            return false;
+        }
+    } catch(e) {
+        console.error('Push permission error:', e);
+        showToast('Error enabling notifications', 'error');
+        return false;
+    }
+}
+
+// ============================================================
 // NOTIFICATIONS
 // ============================================================
 function getNotificationType(type) {
@@ -577,6 +815,8 @@ function loadAdminNotifications() {
             const typeInfo = getNotificationType(notif.type);
             const item = document.createElement('div');
             item.className = `notification-item ${isUnread ? 'unread' : ''}`;
+            // Fix: Use correct path for navigation
+            const pageLink = typeInfo.page ? `admin-${typeInfo.page}` : 'admin-dashboard.html';
             item.innerHTML = `
                 <div class="notification-icon-small" style="background:${typeInfo.color}22;">
                     <i class="fas ${typeInfo.icon}" style="color:${typeInfo.color};"></i>
@@ -608,7 +848,9 @@ function loadAdminNotifications() {
                         await db.ref(`adminNotifications/${notifId}`).remove();
                         loadAdminNotifications();
                     }
-                } else if (page) { window.location.href = page; }
+                } else if (page) { 
+                    window.location.href = `admin-${page}`; 
+                }
             });
         });
     });
@@ -643,7 +885,162 @@ document.getElementById('clearAllNotifBtn').addEventListener('click', async () =
 });
 
 // ============================================================
-// LOAD STATS - WITH KYC
+// PUSH TO ALL USERS
+// ============================================================
+async function sendPushToAllUsers(title, message, link = null) {
+    try {
+        const usersSnap = await db.ref('users').once('value');
+        const userIds = [];
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                const uid = child.val().uid || child.key;
+                userIds.push(uid);
+            });
+        }
+        if (userIds.length === 0) {
+            return { success: false, error: 'No users found' };
+        }
+        
+        // Send to Firebase notifications
+        const promises = [];
+        for (const userId of userIds) {
+            const notifRef = db.ref(`notifications/${userId}`).push();
+            const notifData = {
+                id: notifRef.key,
+                title: title,
+                message: message,
+                type: 'broadcast',
+                read: false,
+                timestamp: Date.now(),
+                date: new Date().toISOString(),
+                link: link || 'dashboard.html'
+            };
+            promises.push(notifRef.set(notifData));
+        }
+        await Promise.all(promises);
+        
+        // Send via OneSignal
+        try {
+            const response = await fetch('https://onesignal.com/api/v1/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    app_id: ONESIGNAL_APP_ID,
+                    contents: { en: message },
+                    headings: { en: title },
+                    included_segments: ['Total Subscriptions'],
+                    data: { link: link || '/dashboard.html' },
+                    web_buttons: [
+                        { id: 'open', text: 'Open ABOTRA', icon: 'https://abotraproai.surge.sh/assets/images/logo.png', url: `https://abotraproai.surge.sh${link || '/dashboard.html'}` }
+                    ]
+                })
+            });
+            console.log('[PUSH] OneSignal sent:', response.ok);
+        } catch(e) {
+            console.warn('[PUSH] OneSignal error:', e);
+        }
+        
+        // Also send device notification to current admin
+        sendDeviceNotification(title, message, link || '/admin/admin-dashboard.html');
+        
+        return { success: true, totalUsers: userIds.length };
+    } catch (error) {
+        console.error('[PUSH] Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// SEND DEVICE NOTIFICATION
+// ============================================================
+function sendDeviceNotification(title, body, link = '/admin/admin-dashboard.html') {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        console.log('[PUSH] Notifications not available');
+        return;
+    }
+    
+    try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(registration => {
+                if (registration && registration.showNotification) {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: '/assets/images/logo-192.png',
+                        badge: '/assets/images/logo-192.png',
+                        vibrate: [200, 100, 200],
+                        data: { url: link },
+                        tag: 'admin_abotra_' + Date.now(),
+                        requireInteraction: true
+                    });
+                    console.log('[SW] Notification sent:', title);
+                    return;
+                }
+            }).catch(() => {});
+        }
+        
+        const notif = new Notification(title, {
+            body: body,
+            icon: '/assets/images/logo-192.png',
+            badge: '/assets/images/logo-192.png',
+            vibrate: [200, 100, 200]
+        });
+        
+        notif.onclick = function() {
+            window.focus();
+            if (link) {
+                window.location.href = link;
+            }
+            notif.close();
+        };
+        
+        setTimeout(() => notif.close(), 10000);
+    } catch(e) {
+        console.error('[PUSH] Notification error:', e);
+    }
+}
+
+// ============================================================
+// PUSH BUTTON HANDLERS
+// ============================================================
+document.getElementById('pushPermissionBtn')?.addEventListener('click', requestPushPermission);
+
+document.getElementById('pushAllBtn')?.addEventListener('click', async () => {
+    const usersCount = document.getElementById('totalUsers').textContent || '0';
+    document.getElementById('pushRecipientCount').textContent = `${usersCount} Users`;
+    document.getElementById('pushTitle').value = '📢 Admin Announcement';
+    document.getElementById('pushMessage').value = 'Hello ABOTRA-PROAI users! Important announcement from the admin team.';
+    openModal('pushModal');
+});
+
+document.getElementById('sendPushBtn')?.addEventListener('click', async function() {
+    const title = document.getElementById('pushTitle').value.trim();
+    const message = document.getElementById('pushMessage').value.trim();
+    if (!title || !message) {
+        showToast('Please enter both title and message', 'error');
+        return;
+    }
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    try {
+        const result = await sendPushToAllUsers(title, message);
+        if (result.success) {
+            showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
+            sendDeviceNotification('📢 Push Sent', `Your announcement was sent to ${result.totalUsers} users.`);
+        } else {
+            showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
+        }
+        closeModal('pushModal');
+    } catch (error) {
+        showToast('❌ Error: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
+    }
+});
+
+// ============================================================
+// LOAD STATS
 // ============================================================
 async function loadStats() {
     try {
@@ -720,6 +1117,7 @@ async function loadStats() {
 // ============================================================
 async function loadRecentKyc() {
     try {
+        // Read from pendingKyc node (where new KYC submissions go)
         const snapshot = await db.ref('pendingKyc').once('value');
         const kycList = [];
         if (snapshot.exists()) {
@@ -728,7 +1126,20 @@ async function loadRecentKyc() {
                 kycList.push({ id: child.key, ...data });
             });
         }
-        kycList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        // Also check kyc node for pending status
+        const kycSnap = await db.ref('kyc').once('value');
+        if (kycSnap.exists()) {
+            kycSnap.forEach(child => {
+                const data = child.val();
+                if (data.status === 'pending' || !data.status) {
+                    // Check if not already in list
+                    if (!kycList.find(k => k.id === child.key)) {
+                        kycList.push({ id: child.key, ...data });
+                    }
+                }
+            });
+        }
+        kycList.sort((a, b) => (b.timestamp || b.submittedAt || 0) - (a.timestamp || a.submittedAt || 0));
         const recent = kycList.slice(0, 5);
         
         const tbody = document.getElementById('recentKycBody');
@@ -740,14 +1151,14 @@ async function loadRecentKyc() {
         for (const kyc of recent) {
             const displayName = kyc.fullName || kyc.username || (kyc.userId ? kyc.userId.substring(0,8) : 'Unknown');
             const docType = kyc.documentType || 'ID Card';
-            const dateStr = kyc.timestamp ? new Date(kyc.timestamp).toLocaleDateString() : 'N/A';
+            const dateStr = kyc.timestamp ? new Date(kyc.timestamp).toLocaleDateString() : (kyc.submittedAt ? new Date(kyc.submittedAt).toLocaleDateString() : 'N/A');
             const row = tbody.insertRow();
             row.innerHTML = `
                 <td>${dateStr}</td>
                 <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(kyc.email || '')}</small></td>
                 <td>${escapeHtml(docType)}</td>
                 <td><span class="status-pending">pending</span></td>
-                <td><button class="view-btn" onclick="window.location.href='admin-kyc.html'"><i class="fas fa-eye"></i> Review</button></td>
+                <td><a href="admin-kyc.html" class="view-btn"><i class="fas fa-eye"></i> Review</a></td>
             `;
         }
     } catch (error) { console.error("Recent KYC error:", error); }
@@ -794,7 +1205,7 @@ async function loadRecentDeposits() {
                 <td><strong style="color:#0ECB81;">$${getSafeNumber(d.amount).toFixed(2)}</strong></td>
                 <td>${escapeHtml(methodName)}</td>
                 <td><span class="status-${statusClass}">${statusText}</span></td>
-                <td><button class="view-btn" onclick="window.location.href='admin-deposits.html'"><i class="fas fa-eye"></i> View</button></td>
+                <td><a href="admin-deposits.html" class="view-btn"><i class="fas fa-eye"></i> View</a></td>
             `;
         }
     } catch (error) { console.error("Recent deposits error:", error); }
@@ -837,103 +1248,11 @@ async function loadRecentWithdrawals() {
                 <td>$${getSafeNumber(w.amount).toFixed(2)}</td>
                 <td>$${getSafeNumber(w.fee).toFixed(2)}</td>
                 <td><span class="status-${statusClass}">${statusText}</span></td>
-                <td><button class="view-btn" onclick="window.location.href='admin-withdrawals.html'"><i class="fas fa-eye"></i> View</button></td>
+                <td><a href="admin-withdrawals.html" class="view-btn"><i class="fas fa-eye"></i> View</a></td>
             `;
         }
     } catch (error) { console.error("Recent withdrawals error:", error); }
 }
-
-// ============================================================
-// PUSH NOTIFICATIONS
-// ============================================================
-async function sendPushToAllUsers(title, message, link = null) {
-    try {
-        const usersSnap = await db.ref('users').once('value');
-        const userIds = [];
-        if (usersSnap.exists()) {
-            usersSnap.forEach(child => {
-                const uid = child.val().uid || child.key;
-                userIds.push(uid);
-            });
-        }
-        if (userIds.length === 0) {
-            return { success: false, error: 'No users found' };
-        }
-        const promises = [];
-        for (const userId of userIds) {
-            const notifRef = db.ref(`notifications/${userId}`).push();
-            const notifData = {
-                id: notifRef.key,
-                title: title,
-                message: message,
-                type: 'broadcast',
-                read: false,
-                timestamp: Date.now(),
-                date: new Date().toISOString(),
-                link: link || 'dashboard.html'
-            };
-            promises.push(notifRef.set(notifData));
-        }
-        await Promise.all(promises);
-        
-        // Also send via OneSignal
-        try {
-            await fetch('https://onesignal.com/api/v1/notifications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    app_id: ONESIGNAL_APP_ID,
-                    contents: { en: message },
-                    headings: { en: title },
-                    included_segments: ['Total Subscriptions'],
-                    data: { link: link || '/dashboard.html' },
-                    web_buttons: [
-                        { id: 'open', text: 'Open ABOTRA', icon: 'https://abotraproai.surge.sh/assets/images/logo.png', url: `https://abotraproai.surge.sh${link || '/dashboard.html'}` }
-                    ]
-                })
-            });
-        } catch(e) { console.warn('[PUSH] OneSignal error:', e); }
-        
-        return { success: true, totalUsers: userIds.length };
-    } catch (error) {
-        console.error('[PUSH] Error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-document.getElementById('pushAllBtn').addEventListener('click', async () => {
-    const usersCount = document.getElementById('totalUsers').textContent || '0';
-    document.getElementById('pushRecipientCount').textContent = `${usersCount} Users`;
-    document.getElementById('pushTitle').value = '📢 Admin Announcement';
-    document.getElementById('pushMessage').value = 'Hello ABOTRA-PROAI users! Important announcement from the admin team.';
-    openModal('pushModal');
-});
-
-document.getElementById('sendPushBtn').addEventListener('click', async function() {
-    const title = document.getElementById('pushTitle').value.trim();
-    const message = document.getElementById('pushMessage').value.trim();
-    if (!title || !message) {
-        showToast('Please enter both title and message', 'error');
-        return;
-    }
-    const btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    try {
-        const result = await sendPushToAllUsers(title, message);
-        if (result.success) {
-            showToast(`✅ Push sent to ${result.totalUsers || 'all'} users!`, 'success');
-        } else {
-            showToast('⚠️ ' + (result.error || 'Failed to send'), 'error');
-        }
-        closeModal('pushModal');
-    } catch (error) {
-        showToast('❌ Error: ' + error.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
-    }
-});
 
 // ============================================================
 // LOGOUT
@@ -942,7 +1261,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     if (await showConfirmModal({ title: 'Logout?', subtitle: 'Are you sure you want to logout?', icon: '🚪', iconClass: 'warning', btnText: 'Logout', btnIcon: 'fa-sign-out-alt' })) {
         await auth.signOut();
         localStorage.removeItem('abotra_admin_logged_in');
-        window.location.href = 'login.html';
+        window.location.href = '../login.html';
     }
 });
 
@@ -978,6 +1297,26 @@ async function checkAdminSession(user) {
 async function init() {
     initTheme();
     
+    if (typeof Notification !== 'undefined') {
+        if (Notification.permission === 'granted') {
+            pushPermissionGranted = true;
+            document.getElementById('pushPermissionBtn').style.display = 'none';
+        } else if (Notification.permission === 'default') {
+            document.getElementById('pushPermissionBtn').style.display = 'inline-flex';
+        } else {
+            document.getElementById('pushPermissionBtn').style.display = 'none';
+        }
+    }
+    
+    if ('serviceWorker' in navigator) {
+        try {
+            await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            console.log('[SW] Service Worker registered');
+        } catch(e) {
+            console.warn('[SW] Service Worker registration failed:', e);
+        }
+    }
+    
     auth.onAuthStateChanged(async (user) => {
         if (!user) { window.location.href = '../login.html'; return; }
         const isAdmin = await checkAdminSession(user);
@@ -986,6 +1325,14 @@ async function init() {
             setTimeout(() => { window.location.href = '../login.html'; }, 1500);
             return;
         }
+        
+        try {
+            if (window.OneSignalDeferred) {
+                await OneSignal.login(user.uid);
+                console.log('[ONESIGNAL] Admin logged in:', user.uid);
+            }
+        } catch(e) {}
+        
         await loadStats();
         await loadRecentKyc();
         await loadRecentDeposits();

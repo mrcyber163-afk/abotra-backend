@@ -1,7 +1,12 @@
+// ============================================================
+// ROBOT ROUTES
+// ============================================================
+
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/auth');
-const { restGet, restPut, restPatch, restPost } = require('../services/firebase');
+const { restGet, restPut, restPatch } = require('../firebase');
+const robotService = require('../services/robot-service');
 
 // ============================================================
 // GET USER ROBOT
@@ -9,14 +14,52 @@ const { restGet, restPut, restPatch, restPost } = require('../services/firebase'
 router.get('/my-robot', verifyToken, async (req, res) => {
     try {
         const { uid } = req.user;
-        const robot = await restGet(`users/${uid}/robots/currentRobot`);
+        const robot = await robotService.getRobot(uid);
         
         if (!robot) {
             return res.status(404).json({ success: false, error: 'No robot found' });
         }
         
+        const expiryCheck = await robotService.checkExpiry(uid);
+        if (expiryCheck) {
+            robot.status = expiryCheck.expired ? 'expired' : robot.status;
+        }
+        
         res.json({ success: true, robot });
     } catch (error) {
+        console.error('[Robot] GET error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// GET ROBOT STATUS
+// ============================================================
+router.get('/status', verifyToken, async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const robot = await robotService.getRobot(uid);
+        const plans = await restGet('robotPlans');
+        const trades = await restGet(`robotTrades/${uid}`);
+        const performance = await restGet(`robotPerformance/${uid}`);
+        
+        let tradeArray = [];
+        if (trades) {
+            Object.keys(trades).forEach(key => {
+                tradeArray.push({ id: key, ...trades[key] });
+            });
+            tradeArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        }
+        
+        res.json({
+            success: true,
+            robot: robot || null,
+            plans: plans || {},
+            trades: tradeArray,
+            performance: performance || null
+        });
+    } catch (error) {
+        console.error('[Robot] Status error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -29,6 +72,7 @@ router.get('/plans', verifyToken, async (req, res) => {
         const plans = await restGet('robotPlans');
         res.json({ success: true, plans: plans || {} });
     } catch (error) {
+        console.error('[Robot] Plans error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -40,8 +84,16 @@ router.get('/trades', verifyToken, async (req, res) => {
     try {
         const { uid } = req.user;
         const trades = await restGet(`robotTrades/${uid}`);
-        res.json({ success: true, trades: trades || {} });
+        let tradeArray = [];
+        if (trades) {
+            Object.keys(trades).forEach(key => {
+                tradeArray.push({ id: key, ...trades[key] });
+            });
+            tradeArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        }
+        res.json({ success: true, trades: tradeArray });
     } catch (error) {
+        console.error('[Robot] Trades error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -55,6 +107,25 @@ router.get('/performance', verifyToken, async (req, res) => {
         const performance = await restGet(`robotPerformance/${uid}`);
         res.json({ success: true, performance: performance || null });
     } catch (error) {
+        console.error('[Robot] Performance error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// CREATE TRIAL ROBOT
+// ============================================================
+router.post('/create-trial', verifyToken, async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const existing = await robotService.getRobot(uid);
+        if (existing) {
+            return res.status(400).json({ success: false, error: 'Robot already exists' });
+        }
+        const robot = await robotService.createTrialRobot(uid);
+        res.json({ success: true, robot });
+    } catch (error) {
+        console.error('[Robot] Create trial error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -71,49 +142,10 @@ router.post('/upgrade', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Plan ID and amount required' });
         }
         
-        // Get plan details
-        const plan = await restGet(`robotPlans/${planId}`);
-        if (!plan) {
-            return res.status(404).json({ success: false, error: 'Plan not found' });
-        }
-        
-        // Check user balance
-        const user = await restGet(`users/${uid}`);
-        if (!user || user.balance < amount) {
-            return res.status(400).json({ success: false, error: 'Insufficient balance' });
-        }
-        
-        // Deduct balance
-        await restPatch(`users/${uid}`, {
-            balance: user.balance - amount
-        });
-        
-        // Create premium robot
-        const startDate = Date.now();
-        const expiryDate = startDate + (plan.duration * 24 * 60 * 60 * 1000);
-        
-        const premiumRobot = {
-            name: plan.name || 'Premium Robot',
-            type: 'premium',
-            premium: true,
-            status: 'active',
-            duration: plan.duration,
-            startDate: startDate,
-            expiryDate: expiryDate,
-            investment: amount,
-            balance: amount,
-            totalProfit: 0,
-            tradesCount: 0,
-            winRate: 0,
-            planId: planId,
-            upgradedAt: Date.now()
-        };
-        
-        await restPut(`users/${uid}/robots/currentRobot`, premiumRobot);
-        
-        res.json({ success: true, message: 'Upgraded successfully', robot: premiumRobot });
-        
+        const robot = await robotService.upgradeRobot(uid, planId, amount);
+        res.json({ success: true, robot });
     } catch (error) {
+        console.error('[Robot] Upgrade error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -124,12 +156,10 @@ router.post('/upgrade', verifyToken, async (req, res) => {
 router.post('/pause', verifyToken, async (req, res) => {
     try {
         const { uid } = req.user;
-        await restPatch(`users/${uid}/robots/currentRobot`, {
-            status: 'paused',
-            pausedAt: Date.now()
-        });
+        await robotService.pauseRobot(uid);
         res.json({ success: true, message: 'Robot paused' });
     } catch (error) {
+        console.error('[Robot] Pause error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -140,12 +170,10 @@ router.post('/pause', verifyToken, async (req, res) => {
 router.post('/activate', verifyToken, async (req, res) => {
     try {
         const { uid } = req.user;
-        await restPatch(`users/${uid}/robots/currentRobot`, {
-            status: 'active',
-            activatedAt: Date.now()
-        });
+        await robotService.activateRobot(uid);
         res.json({ success: true, message: 'Robot activated' });
     } catch (error) {
+        console.error('[Robot] Activate error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -156,23 +184,25 @@ router.post('/activate', verifyToken, async (req, res) => {
 router.get('/check-expiry', verifyToken, async (req, res) => {
     try {
         const { uid } = req.user;
-        const robot = await restGet(`users/${uid}/robots/currentRobot`);
-        
-        if (!robot) {
-            return res.json({ success: true, expired: true, message: 'No robot found' });
-        }
-        
-        const now = Date.now();
-        const expired = robot.expiryDate && now > robot.expiryDate;
-        
-        if (expired && robot.status !== 'expired') {
-            await restPatch(`users/${uid}/robots/currentRobot`, {
-                status: 'expired'
-            });
-        }
-        
-        res.json({ success: true, expired, robot });
+        const result = await robotService.checkExpiry(uid);
+        res.json({ success: true, ...result });
     } catch (error) {
+        console.error('[Robot] Expiry check error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// GET SUBSCRIPTION
+// ============================================================
+router.get('/subscription', verifyToken, async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const subscription = require('../services/subscription-service');
+        const sub = await subscription.getSubscription(uid);
+        res.json({ success: true, subscription: sub || null });
+    } catch (error) {
+        console.error('[Robot] Subscription error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

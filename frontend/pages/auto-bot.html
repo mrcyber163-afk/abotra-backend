@@ -68,6 +68,7 @@ body.light-theme .signal-box-mini .signal-coin-mini { color: #800000; }
 body.light-theme .signal-box-mini .signal-type-mini.buy { color: #0A9E65; }
 body.light-theme .signal-box-mini .signal-type-mini.sell { color: #D43F52; }
 body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
+body.light-theme .expired-badge { background: rgba(246,70,93,0.15); color: #D43F52; border-color: rgba(246,70,93,0.3); }
 
 .theme-toggle {
     background: rgba(0,0,0,0.7);
@@ -228,6 +229,11 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
     border-color: #0ECB81;
     box-shadow: 0 0 20px rgba(14,203,129,0.1);
 }
+.robot-card.expired-robot {
+    border-color: #F6465D;
+    box-shadow: 0 0 20px rgba(246,70,93,0.08);
+    opacity: 0.85;
+}
 .robot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .robot-name { color: #FFD700; font-size: 14px; font-weight: 800; }
 .robot-level { background: rgba(255,215,0,0.2); padding: 2px 8px; border-radius: 16px; font-size: 8px; color: #FFD700; }
@@ -271,6 +277,7 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
 .status-indicator { width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; }
 .status-indicator.active { background: #0ECB81; box-shadow: 0 0 5px #0ECB81; animation: pulse 1.5s infinite; }
 .status-indicator.inactive { background: #F6465D; }
+.status-indicator.expired { background: #FF9800; }
 @keyframes pulse {
     0% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.2); }
@@ -279,7 +286,16 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
 .status-text { color: #FFFFFF; font-size: 9px; }
 .robot-profit { color: #0ECB81; font-size: 11px; font-weight: 700; }
 .robot-progress { color: #FFD700; font-size: 8px; margin-top: 3px; }
-.robot-buttons { display: flex; gap: 6px; margin-top: 6px; }
+.expired-badge {
+    background: rgba(246,70,93,0.2);
+    color: #F6465D;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 8px;
+    font-weight: 600;
+    border: 1px solid rgba(246,70,93,0.3);
+}
+.robot-buttons { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .btn-start-robot {
     background: linear-gradient(135deg, #0ECB81, #0A9E65);
     border: none;
@@ -315,6 +331,26 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
     cursor: pointer;
     transition: 0.3s;
     flex: 1;
+}
+.btn-upgrade {
+    background: linear-gradient(135deg, #F6465D, #D43F52);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.btn-upgrade:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(246,70,93,0.4);
 }
 .btn-start-robot:disabled, .btn-add-capital:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-start-robot:hover:not(:disabled), .btn-restart-robot:hover:not(:disabled), .btn-add-capital:hover:not(:disabled) { transform: translateY(-1px); }
@@ -405,10 +441,18 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
 }
 .log-item:hover { background: rgba(255,215,0,0.05); }
 .log-item .log-time {
+    font-size: 8px;
+    color: #888;
+    font-family: monospace;
+    min-width: 75px;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+.log-item .log-date {
     font-size: 7px;
     color: #666;
     font-family: monospace;
-    min-width: 50px;
+    min-width: 55px;
     flex-shrink: 0;
 }
 .log-item .log-icon {
@@ -440,6 +484,8 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
 .log-item.profit .log-message { color: #00FF88; }
 .log-item.warning { border-left-color: #FF9800; background: rgba(255,152,0,0.06); }
 .log-item.warning .log-message { color: #FF9800; }
+.log-item.upgrade { border-left-color: #2196F3; background: rgba(33,150,243,0.06); }
+.log-item.upgrade .log-message { color: #2196F3; }
 
 .log-count-badge {
     background: rgba(255,215,0,0.2);
@@ -622,9 +668,6 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
     50% { opacity: 1; }
 }
 
-/* ============================================================
-   SIGNAL BOX MINI - Inaonekana juu ya robot cards
-   ============================================================ */
 .signal-box-mini {
     background: rgba(255,215,0,0.08);
     border: 1px solid rgba(255,215,0,0.25);
@@ -710,10 +753,6 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
 .signal-box-mini .signal-confidence-mini .conf-dot.high { background: #0ECB81; }
 .signal-box-mini .signal-confidence-mini .conf-dot.medium { background: #FFD700; }
 .signal-box-mini .signal-confidence-mini .conf-dot.low { background: #F6465D; }
-
-/* ============================================================
-   LIVE INDICATOR KWA SIGNAL BOX MINI
-   ============================================================ */
 .signal-box-mini .live-dot {
     display: inline-block;
     width: 6px;
@@ -738,7 +777,8 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
     .bottom-nav a i { font-size: 14px; }
     .log-robot { min-width: 55px; font-size: 8px; }
     .log-message { font-size: 8px; }
-    .log-time { font-size: 6px; min-width: 45px; }
+    .log-time { font-size: 7px; min-width: 60px; }
+    .log-date { font-size: 6px; min-width: 45px; }
     .logs-container { gap: 3px; padding: 5px 8px; }
     .currency-toggle-btn { padding: 3px 8px; font-size: 9px; height: 28px; }
     .currency-toggle-btn i { font-size: 10px; }
@@ -787,7 +827,6 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
         <div class="stats-card"><div class="stats-title"><i class="fas fa-percent"></i> Win Rate</div><div class="stat-value" id="statWinRate">0%</div></div>
     </div>
 
-    <!-- ===== SIGNAL BOX MINI - Inaonekana juu ya robots ===== -->
     <div class="signal-box-mini" id="signalBoxMini" onclick="window.location.href='ai-signal.html'">
         <div class="signal-left">
             <span class="live-dot"></span>
@@ -835,15 +874,14 @@ body.light-theme .signal-box-mini .signal-type-mini.hold { color: #888; }
     <div class="instructions-box">
         <h3><i class="fas fa-info-circle"></i> How AI Auto Trading Works</h3>
         <ul>
-            <li><i class="fas fa-lock"></i> <span>When you start a robot, <strong class="highlight">100% of your balance is locked</strong> for <strong class="highlight">365 days</strong>.</span></li>
+            <li><i class="fas fa-lock"></i> <span>When you start a robot, <strong class="highlight">your investment is locked</strong> for <strong class="highlight">120 days (4 months)</strong>.</span></li>
             <li><i class="fas fa-chart-line"></i> <span>Daily profits are calculated based on your robot's daily percentage and <strong class="highlight">credited to your balance every 24 hours</strong>.</span></li>
-            <li><i class="fas fa-coins"></i> <span>Your locked capital (principal) is <strong class="highlight">released after 365 days</strong> along with the final day's profit.</span></li>
-            <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Important:</strong> Daily returns are <strong class="warning">approximations and NOT guaranteed</strong>. Actual returns depend on market conditions, AI performance, and trading strategies.</span></li>
+            <li><i class="fas fa-coins"></i> <span>Your invested capital (principal) <strong class="highlight">remains locked</strong> and after 120 days, the robot <strong class="highlight">automatically upgrades</strong> to the next level.</span></li>
+            <li><i class="fas fa-arrow-up"></i> <span>After 120 days, you must <strong class="highlight">buy the next level robot</strong> (bot price only) to continue trading. The invested capital moves to the new robot.</span></li>
+            <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Important:</strong> Daily returns are <strong class="warning">approximations and NOT guaranteed</strong>. Actual returns depend on market conditions.</span></li>
             <li><i class="fas fa-robot"></i> <span>Higher level robots have <strong class="highlight">higher daily profit percentages</strong> but also higher investment requirements.</span></li>
-            <li><i class="fas fa-play-circle"></i> <span>Once started, the robot runs automatically for <strong class="highlight">365 days</strong>. You cannot withdraw the locked capital until the 365 days are complete.</span></li>
-            <li><i class="fas fa-plus-circle"></i> <span>You can <strong class="highlight">add more capital</strong> to an active robot to increase potential earnings.</span></li>
+            <li><i class="fas fa-plus-circle"></i> <span>You can <strong class="highlight">add more capital</strong> to an active robot at any time to increase potential earnings.</span></li>
             <li><i class="fas fa-shield-alt"></i> <span>All trading is automated by AI - <strong class="highlight">no manual intervention needed</strong> after starting.</span></li>
-            <li><i class="fas fa-undo"></i> <span>After 365 days, you can <strong class="highlight">manually restart</strong> the robot using the <strong class="highlight">"Restart Robot"</strong> button.</span></li>
         </ul>
     </div>
 </div>
@@ -883,28 +921,23 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================
-// ROBOT CONFIG - SIKU 365
+// ROBOT CONFIG - 120 DAYS (4 MONTHS)
 // ============================================================
-const robotProfits = {
-    0: { name: "Starter Bot", dailyProfit: 3 },
-    1: { name: "Bronze Bot", dailyProfit: 4 },
-    2: { name: "Silver Bot", dailyProfit: 5 },
-    3: { name: "Gold Bot", dailyProfit: 7 },
-    4: { name: "Platinum Bot", dailyProfit: 9 },
-    5: { name: "Diamond Bot", dailyProfit: 11 },
-    6: { name: "Emerald Bot", dailyProfit: 15 },
-    7: { name: "Ruby Bot", dailyProfit: 19 },
-    8: { name: "Sapphire Bot", dailyProfit: 23 },
-    9: { name: "Onyx Bot", dailyProfit: 28 },
-    10: { name: "Legendary Bot", dailyProfit: 38 }
-};
+const DURATION_DAYS = 120;
 
-const robotMinTrade = {
-    0: 3, 1: 10, 2: 30, 3: 50, 4: 90,
-    5: 120, 6: 150, 7: 200, 8: 250, 9: 300, 10: 500
+const robotDefinitions = {
+    0: { name: "Starter Bot", dailyProfit: 3, botPrice: 10, minInvest: 10, maxInvest: 10000 },
+    1: { name: "Bronze Bot", dailyProfit: 4, botPrice: 30, minInvest: 30, maxInvest: 20000 },
+    2: { name: "Silver Bot", dailyProfit: 5, botPrice: 72, minInvest: 72, maxInvest: 50000 },
+    3: { name: "Gold Bot", dailyProfit: 7, botPrice: 120, minInvest: 120, maxInvest: 100000 },
+    4: { name: "Platinum Bot", dailyProfit: 9, botPrice: 180, minInvest: 180, maxInvest: 150000 },
+    5: { name: "Diamond Bot", dailyProfit: 11, botPrice: 240, minInvest: 240, maxInvest: 200000 },
+    6: { name: "Emerald Bot", dailyProfit: 15, botPrice: 300, minInvest: 300, maxInvest: 300000 },
+    7: { name: "Ruby Bot", dailyProfit: 19, botPrice: 450, minInvest: 450, maxInvest: 500000 },
+    8: { name: "Sapphire Bot", dailyProfit: 23, botPrice: 560, minInvest: 560, maxInvest: 750000 },
+    9: { name: "Onyx Bot", dailyProfit: 28, botPrice: 720, minInvest: 720, maxInvest: 1000000 },
+    10: { name: "Legendary Bot", dailyProfit: 38, botPrice: 1000, minInvest: 1000, maxInvest: 2000000 }
 };
-
-const DEFAULT_DURATION_DAYS = 365; // <<< SIKU 365
 
 // ============================================================
 // STATE
@@ -920,9 +953,10 @@ let localRate = 2800;
 let localSymbol = 'TZS';
 let userCountry = 'Tanzania';
 let rtdbListeners = [];
+let dailyProfitTimer = null;
 
 // ============================================================
-// SIGNAL STATE KWA SIGNAL BOX MINI
+// SIGNAL STATE
 // ============================================================
 let currentSignal = 'HOLD';
 let currentConfidence = 0;
@@ -996,8 +1030,8 @@ function updateAllPrices() {
             balanceEl.classList.add('currency-updated');
         }
     }
-    // Update signal price mini
     updateSignalPriceMini();
+    renderRobots();
 }
 
 // ============================================================
@@ -1037,7 +1071,6 @@ function processPriceForSignal(price) {
     if (priceHistory.length > 100) priceHistory.shift();
     if (priceHistory.length < 14) return;
     
-    // Simple signal detection
     const rsi = calculateRSI(priceHistory, 14);
     const macd = calculateMACD(priceHistory, 12, 26);
     const ma = calculateMA(priceHistory, 20);
@@ -1210,54 +1243,275 @@ async function loadTradingLogsDirect() {
 }
 
 // ============================================================
-// PROCESS DAILY PROFITS - SIKU 365
+// CHECK AND AUTO-START ROBOTS WITH INVESTMENT
 // ============================================================
-async function processDailyProfitsDirect() {
+async function autoStartRobotsWithInvestment() {
     if (!currentUser) return;
     try {
-        console.log('[BOT] Processing daily profits...');
+        console.log('[BOT] 🔍 Checking robots that need auto-start...');
         const uid = currentUser.uid;
-        const now = Date.now();
-        let processed = 0;
-        
         const snapshot = await get(ref(db, `userRobots/${uid}`));
         if (!snapshot.exists()) return;
         
-        const promises = [];
+        let started = 0;
         snapshot.forEach(child => {
             const robot = child.val();
             const robotId = child.key;
-            if (robot.status !== 'active') return;
             
-            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
-            const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
-            if (now < nextProfitTime) return;
+            const investedAmount = robot.investedAmount || robot.amount || 0;
+            const isTrading = robot.status === 'trading';
+            const isExpired = robot.status === 'expired' || robot.status === 'completed';
             
-            promises.push(processSingleRobotProfitDirect(robot, robotId, uid));
+            if (investedAmount > 0 && !isTrading && !isExpired) {
+                console.log(`[BOT] Auto-starting ${robot.name || 'Robot'} with investment ${formatPrice(investedAmount)}`);
+                
+                const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
+                const now = Date.now();
+                const today = new Date().toISOString().split('T')[0];
+                const endTime = robot.endTime || (now + (DURATION_DAYS * 24 * 60 * 60 * 1000));
+                
+                update(robotRef, {
+                    status: 'trading',
+                    startTime: robot.startTime || now,
+                    endTime: endTime,
+                    lastProfitTime: robot.lastProfitTime || now,
+                    lastProfitDate: robot.lastProfitDate || today,
+                    updatedAt: now
+                }).then(() => {
+                    console.log(`[BOT] ✅ Auto-started ${robot.name || 'Robot'}`);
+                }).catch(err => {
+                    console.error(`[BOT] Failed to auto-start ${robot.name}:`, err);
+                });
+                
+                started++;
+            }
         });
         
-        const results = await Promise.all(promises);
-        processed = results.filter(r => r === true).length;
+        if (started > 0) {
+            console.log(`[BOT] ✅ Auto-started ${started} robots with existing investments`);
+            setTimeout(async () => {
+                await loadActiveRobotsDirect();
+                await loadRobotStatsDirect();
+                await loadTradingLogsDirect();
+                showToast(`✅ ${started} robot(s) auto-started with existing investments!`, 'success');
+            }, 1000);
+        }
+    } catch (error) {
+        console.error('[BOT] Auto-start error:', error);
+    }
+}
+
+// ============================================================
+// RETROACTIVE PROFIT CHECKER - Accumulates offline profits
+// ============================================================
+async function checkAndProcessMissedProfits() {
+    if (!currentUser) return;
+    try {
+        console.log('[BOT] 🔍 Checking for missed profits (offline accumulation)...');
+        const uid = currentUser.uid;
+        const now = Date.now();
+        const today = new Date().toISOString().split('T')[0];
         
-        if (processed > 0) {
-            console.log(`[BOT] ✅ Processed ${processed} daily profits`);
+        const snapshot = await get(ref(db, `userRobots/${uid}`));
+        if (!snapshot.exists()) {
+            console.log('[BOT] No robots found');
+            return;
+        }
+        
+        let totalMissedProfit = 0;
+        let processedCount = 0;
+        let totalDaysMissed = 0;
+        const processedRobots = [];
+        
+        snapshot.forEach(child => {
+            const robot = child.val();
+            const robotId = child.key;
+            
+            // Skip if not trading
+            if (robot.status !== 'trading') return;
+            if (robot.endTime && now > robot.endTime) return;
+            
+            const lastProfitDate = robot.lastProfitDate || '';
+            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
+            const profitDays = robot.profitDays || 0;
+            const totalDays = robot.durationDays || DURATION_DAYS;
+            
+            let missedDays = 0;
+            let missedTotal = 0;
+            const investedAmount = robot.investedAmount || robot.amount || 0;
+            if (investedAmount <= 0) return;
+            
+            const dailyPercent = robot.dailyProfit || 3;
+            const grossProfit = (investedAmount * dailyPercent) / 100;
+            const hiddenFee = grossProfit * 0.10;
+            const netProfit = grossProfit - hiddenFee;
+            
+            // Calculate days since last profit
+            const daysSinceLastProfit = Math.floor((now - lastProfitTime) / (24 * 60 * 60 * 1000));
+            
+            // Check if we missed any days
+            if (lastProfitDate && lastProfitDate !== today && daysSinceLastProfit >= 1) {
+                // Number of missed days (including today if not processed)
+                let missedCount = daysSinceLastProfit;
+                
+                // Don't exceed remaining days
+                const remainingDays = totalDays - profitDays;
+                missedCount = Math.min(missedCount, remainingDays);
+                
+                // Limit to 30 days max to prevent huge calculations
+                missedCount = Math.min(missedCount, 30);
+                
+                if (missedCount > 0) {
+                    missedDays = missedCount;
+                    missedTotal = netProfit * missedCount;
+                    totalMissedProfit += missedTotal;
+                    processedCount++;
+                    totalDaysMissed += missedCount;
+                    processedRobots.push({
+                        id: robotId,
+                        name: robot.name || 'Robot',
+                        days: missedCount,
+                        amount: missedTotal,
+                        netProfit: netProfit,
+                        dailyPercent: dailyPercent
+                    });
+                }
+            }
+        });
+        
+        if (processedCount > 0 && totalMissedProfit > 0) {
+            console.log(`[BOT] 📊 Processing ${processedCount} robots with ${totalDaysMissed} missed days totaling ${formatPrice(totalMissedProfit)}`);
+            
+            // Credit all missed profits to balance
+            await runTransaction(ref(db, `users/${uid}`), (current) => {
+                if (current) {
+                    current.balance = (current.balance || 0) + totalMissedProfit;
+                }
+                return current;
+            });
+            
+            // Update each robot
+            for (const robotInfo of processedRobots) {
+                const robotRef = ref(db, `userRobots/${uid}/${robotInfo.id}`);
+                const snap = await get(robotRef);
+                if (snap.exists()) {
+                    const data = snap.val();
+                    const newProfitDays = (data.profitDays || 0) + robotInfo.days;
+                    const newLastProfitTime = data.lastProfitTime || Date.now();
+                    
+                    await update(robotRef, {
+                        lastProfitDate: today,
+                        lastProfitTime: newLastProfitTime + (robotInfo.days * 24 * 60 * 60 * 1000),
+                        profitDays: newProfitDays,
+                        lastProfitAmount: robotInfo.netProfit
+                    });
+                }
+                
+                // Add log for each day's profit (consolidated)
+                const logRef = push(ref(db, `tradingLogs/${uid}`));
+                const dateStr = new Date().toISOString().split('T')[0];
+                await set(logRef, {
+                    id: logRef.key,
+                    robot: robotInfo.name,
+                    message: `🔄 Offline profit: +${formatPrice(robotInfo.amount)} (${robotInfo.days} days accumulated at ${robotInfo.dailyPercent}%)`,
+                    type: 'profit',
+                    time: new Date().toLocaleTimeString(),
+                    date: dateStr,
+                    timestamp: Date.now()
+                });
+            }
+            
+            showToast(`💰 Credited ${formatPrice(totalMissedProfit)} for ${totalDaysMissed} day(s) of offline profits!`, 'success');
             await Promise.all([
                 loadUserDataDirect(),
                 loadActiveRobotsDirect(),
                 loadRobotStatsDirect(),
                 loadTradingLogsDirect()
             ]);
+        } else {
+            console.log('[BOT] No missed profits found');
         }
+        
+    } catch (error) {
+        console.error('[BOT] Missed profit check error:', error);
+    }
+}
+
+// ============================================================
+// PROCESS DAILY PROFITS
+// ============================================================
+async function processDailyProfitsDirect() {
+    if (!currentUser) return;
+    try {
+        console.log('[BOT] 🔄 Checking daily profits...');
+        const uid = currentUser.uid;
+        const now = Date.now();
+        const today = new Date().toISOString().split('T')[0];
+        let processed = 0;
+        let totalProfit = 0;
+        
+        const snapshot = await get(ref(db, `userRobots/${uid}`));
+        if (!snapshot.exists()) {
+            console.log('[BOT] No robots found');
+            return;
+        }
+        
+        const promises = [];
+        snapshot.forEach(child => {
+            const robot = child.val();
+            const robotId = child.key;
+            
+            if (robot.status !== 'trading') return;
+            if (robot.endTime && now > robot.endTime) {
+                promises.push(markRobotExpiredDirect(robot, robotId, uid));
+                return;
+            }
+            
+            const lastProfitDate = robot.lastProfitDate || '';
+            if (lastProfitDate === today) {
+                console.log(`[BOT] ${robot.name || 'Robot'} already processed today`);
+                return;
+            }
+            
+            const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
+            const nextProfitTime = lastProfitTime + (24 * 60 * 60 * 1000);
+            if (now < nextProfitTime) {
+                console.log(`[BOT] ${robot.name || 'Robot'} next profit at ${new Date(nextProfitTime).toLocaleString()}`);
+                return;
+            }
+            
+            promises.push(processSingleRobotProfitDirect(robot, robotId, uid, today));
+        });
+        
+        const results = await Promise.all(promises);
+        results.forEach(r => {
+            if (r && r.profit) {
+                processed++;
+                totalProfit += r.profit;
+            }
+        });
+        
+        if (processed > 0) {
+            console.log(`[BOT] ✅ Processed ${processed} daily profits totaling ${formatPrice(totalProfit)} for today`);
+            await Promise.all([
+                loadUserDataDirect(),
+                loadActiveRobotsDirect(),
+                loadRobotStatsDirect(),
+                loadTradingLogsDirect()
+            ]);
+            showToast(`💰 ${processed} robot(s) credited daily profit: ${formatPrice(totalProfit)}`, 'success');
+        }
+        
     } catch (error) {
         console.error('[BOT] Daily profit error:', error);
     }
 }
 
-async function processSingleRobotProfitDirect(robot, robotId, uid) {
+async function processSingleRobotProfitDirect(robot, robotId, uid, today) {
     try {
         const now = Date.now();
         const investedAmount = robot.investedAmount || robot.amount || 0;
-        if (investedAmount <= 0) return false;
+        if (investedAmount <= 0) return null;
         
         const dailyPercent = robot.dailyProfit || 3;
         const grossProfit = (investedAmount * dailyPercent) / 100;
@@ -1265,31 +1519,38 @@ async function processSingleRobotProfitDirect(robot, robotId, uid) {
         const netProfit = grossProfit - hiddenFee;
         
         const profitDays = robot.profitDays || 0;
-        const totalDays = robot.durationDays || 365;
+        const totalDays = robot.durationDays || DURATION_DAYS;
         const isLastDay = (profitDays + 1) >= totalDays;
         
-        let finalNetReturn = netProfit;
-        let isCompleted = false;
-        
-        if (isLastDay) {
-            const totalReturn = investedAmount + netProfit;
-            const finalFee = totalReturn * 0.10;
-            finalNetReturn = totalReturn - finalFee;
-            isCompleted = true;
-        }
+        console.log(`[BOT] Processing ${robot.name || 'Robot'}: ${formatPrice(netProfit)} profit (Day ${profitDays + 1}/${totalDays})`);
         
         const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
         
-        if (isCompleted) {
+        if (isLastDay) {
             await update(robotRef, {
-                status: 'completed',
-                completedAt: now,
-                investedAmount: 0,
-                amount: 0
+                lastProfitTime: now,
+                lastProfitDate: today,
+                lastProfitAmount: netProfit,
+                profitDays: profitDays + 1,
+                status: 'expired',
+                completedAt: now
             });
+            
+            const logRef = push(ref(db, `tradingLogs/${uid}`));
+            await set(logRef, {
+                id: logRef.key,
+                robot: robot.name || 'Robot',
+                message: `⏰ 120 days completed! Upgrade to continue trading. Capital: ${formatPrice(investedAmount)} preserved.`,
+                type: 'upgrade',
+                time: new Date().toLocaleTimeString(),
+                date: today,
+                timestamp: Date.now()
+            });
+            
         } else {
             await update(robotRef, {
                 lastProfitTime: now,
+                lastProfitDate: today,
                 lastProfitAmount: netProfit,
                 profitDays: profitDays + 1
             });
@@ -1297,36 +1558,103 @@ async function processSingleRobotProfitDirect(robot, robotId, uid) {
         
         await runTransaction(ref(db, `users/${uid}`), (current) => {
             if (current) {
-                current.balance = (current.balance || 0) + finalNetReturn;
+                current.balance = (current.balance || 0) + netProfit;
             }
             return current;
         });
         
         await runTransaction(ref(db, `robotStats/${uid}/${robotId}`), (current) => {
             if (!current) current = { profit: 0, trades: 0, wins: 0 };
-            current.profit += finalNetReturn;
-            current.trades += 1;
-            current.wins += 1;
+            current.profit = (current.profit || 0) + netProfit;
+            current.trades = (current.trades || 0) + 1;
+            current.wins = (current.wins || 0) + 1;
             return current;
         });
         
-        const profitDisplay = formatPrice(finalNetReturn);
+        if (!isLastDay) {
+            const logRef = push(ref(db, `tradingLogs/${uid}`));
+            await set(logRef, {
+                id: logRef.key,
+                robot: robot.name || 'Robot',
+                message: `💰 Daily profit: +${formatPrice(netProfit)} (${dailyPercent}%) - Day ${profitDays + 1}/${totalDays}`,
+                type: 'profit',
+                time: new Date().toLocaleTimeString(),
+                date: today,
+                timestamp: Date.now()
+            });
+        }
+        
+        return { profit: netProfit, day: profitDays + 1 };
+    } catch (error) {
+        console.error('[BOT] Process robot profit error:', error);
+        return null;
+    }
+}
+
+async function markRobotExpiredDirect(robot, robotId, uid) {
+    try {
+        console.log(`[BOT] ${robot.name || 'Robot'} marked as expired`);
+        const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
+        await update(robotRef, {
+            status: 'expired',
+            completedAt: Date.now()
+        });
+        
+        const today = new Date().toISOString().split('T')[0];
         const logRef = push(ref(db, `tradingLogs/${uid}`));
         await set(logRef, {
             id: logRef.key,
             robot: robot.name || 'Robot',
-            message: `💰 Daily profit: +${profitDisplay} (${dailyPercent}%)`,
-            type: 'profit',
+            message: `⏰ Robot expired! Upgrade to continue trading. Capital preserved.`,
+            type: 'upgrade',
             time: new Date().toLocaleTimeString(),
+            date: today,
             timestamp: Date.now()
         });
-        
         return true;
     } catch (error) {
-        console.error('[BOT] Process robot profit error:', error);
+        console.error('[BOT] Mark expired error:', error);
         return false;
     }
 }
+
+// ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+function showToast(message, type = 'info') {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+    toast.style.cssText = `
+        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+        padding: 12px 24px; border-radius: 12px; background: linear-gradient(135deg, #1a1a2e, #161626);
+        border: 1px solid rgba(255,215,0,0.3); color: white; z-index: 9999;
+        font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+        max-width: 90%; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        animation: slideInUp 0.3s ease;
+    `;
+    if (type === 'success') {
+        toast.style.borderColor = 'rgba(14,203,129,0.4)';
+    } else if (type === 'error') {
+        toast.style.borderColor = 'rgba(246,70,93,0.4)';
+    }
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+// Add CSS for toast animation
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+`;
+document.head.appendChild(styleSheet);
 
 // ============================================================
 // SETUP RTDB LISTENERS
@@ -1393,7 +1721,7 @@ function setupRTDBListeners() {
 // UI RENDER FUNCTIONS
 // ============================================================
 function updateStatsUI() {
-    let activeCount = activeRobots.filter(r => r.status === 'active').length;
+    let activeCount = activeRobots.filter(r => r.status === 'trading').length;
     let totalTrades = 0, totalProfit = 0, totalWins = 0;
     Object.values(robotStats).forEach(s => {
         totalTrades += s.trades || 0;
@@ -1425,16 +1753,17 @@ function renderRobots() {
     
     let html = '<div class="robots-grid">';
     activeRobots.forEach(robot => {
-        const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-        const isActive = robot.status === 'active';
-        const isCompleted = robot.status === 'completed';
+        const info = robotDefinitions[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3, botPrice: 10, minInvest: 10, maxInvest: 10000 };
+        const isActive = robot.status === 'trading';
+        const isExpired = robot.status === 'expired' || robot.status === 'completed';
         const stats = robotStats[robot.id] || { profit: 0, trades: 0, wins: 0 };
         const invested = robot.investedAmount || robot.amount || 0;
         const dailyPercent = info.dailyProfit * subscriptionMultiplier;
         const estimatedDaily = (invested * dailyPercent) / 100;
         const totalProfit = stats.profit || 0;
         const winRate = stats.trades > 0 ? (stats.wins / stats.trades * 100).toFixed(1) : 0;
-        const minTrade = robotMinTrade[robot.robotId] || 3;
+        const minTrade = info.minInvest || 10;
+        const maxTrade = info.maxInvest || 10000;
         
         let progressPercent = 0;
         let daysCompleted = robot.profitDays || 0;
@@ -1443,11 +1772,24 @@ function renderRobots() {
             const totalDuration = robot.endTime - (robot.startTime || now);
             const elapsed = now - (robot.startTime || now);
             progressPercent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-        } else if (isCompleted) {
+        } else if (isExpired) {
             progressPercent = 100;
         }
         
-        const cardClass = isActive ? 'robot-card active-robot' : 'robot-card';
+        const cardClass = isActive ? 'robot-card active-robot' : (isExpired ? 'robot-card expired-robot' : 'robot-card');
+        const statusText = isActive ? '🤖 Active' : (isExpired ? '⏰ Expired - Upgrade Needed' : '⏸ Inactive');
+        const statusIndicator = isActive ? 'active' : (isExpired ? 'expired' : 'inactive');
+        
+        const nextLevel = robot.robotId + 1;
+        const nextRobotInfo = robotDefinitions[nextLevel];
+        const canUpgrade = nextRobotInfo !== undefined;
+        const upgradePrice = canUpgrade ? nextRobotInfo.botPrice : 0;
+        const upgradePriceFormatted = formatPrice(upgradePrice);
+        
+        const lastProfit = robot.lastProfitAmount || 0;
+        const lastProfitDate = robot.lastProfitDate || '--';
+        const profitDaysDisplay = `${daysCompleted}/${DURATION_DAYS}`;
+        
         html += `
             <div class="${cardClass}">
                 <div class="robot-header">
@@ -1455,8 +1797,8 @@ function renderRobots() {
                     <span class="robot-level">Level ${robot.robotId}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:4px 10px; border-radius:8px; margin-bottom:6px;">
-                    <span style="color:#888; font-size:8px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min Trade</span>
-                    <span style="color:#0ECB81; font-weight:700; font-size:12px;">${formatPrice(minTrade)}</span>
+                    <span style="color:#888; font-size:8px;"><i class="fas fa-play-circle" style="color:#FFD700;"></i> Min/Max Invest</span>
+                    <span style="color:#0ECB81; font-weight:700; font-size:12px;">${formatPrice(minTrade)} - ${formatPrice(maxTrade)}</span>
                 </div>
                 <div class="invested-amount">
                     <span class="invested-label"><i class="fas fa-lock"></i> Invested:</span>
@@ -1470,24 +1812,37 @@ function renderRobots() {
                 <div class="robot-stats">
                     <div class="robot-stat"><div class="robot-stat-label">Total Profit</div><div class="robot-stat-value" style="color:${totalProfit>=0?'#0ECB81':'#F6465D'}">${formatPrice(totalProfit)}</div></div>
                     <div class="robot-stat"><div class="robot-stat-label">Win Rate</div><div class="robot-stat-value">${winRate}%</div></div>
-                    <div class="robot-stat"><div class="robot-stat-label">Days</div><div class="robot-stat-value">${daysCompleted}/${DEFAULT_DURATION_DAYS}</div></div>
+                    <div class="robot-stat"><div class="robot-stat-label">Progress</div><div class="robot-stat-value">${profitDaysDisplay}</div></div>
                 </div>
+                ${isActive ? `
+                    <div style="background:rgba(14,203,129,0.08); border-radius:8px; padding:4px 10px; margin:4px 0; display:flex; justify-content:space-between; font-size:8px;">
+                        <span style="color:#888;">Last Profit:</span>
+                        <span style="color:#0ECB81;font-weight:600;">${formatPrice(lastProfit)} on ${lastProfitDate}</span>
+                    </div>
+                ` : ''}
                 <div class="robot-status">
                     <div>
-                        <span class="status-indicator ${isActive?'active':'inactive'}"></span>
-                        <span class="status-text">${isActive?'🤖 Active':(isCompleted?'✅ Completed':'⏸ Inactive')}</span>
+                        <span class="status-indicator ${statusIndicator}"></span>
+                        <span class="status-text">${statusText}</span>
+                        ${isExpired ? '<span class="expired-badge"><i class="fas fa-clock"></i> EXPIRED</span>' : ''}
                     </div>
                     <div class="robot-profit">💰 ${formatPrice(totalProfit)}</div>
                 </div>
                 ${isActive ? `<div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
                 <div class="robot-buttons">
-                    ${isCompleted ? 
-                        `<button class="btn-restart-robot" data-id="${robot.id}"><i class="fas fa-undo"></i> Restart</button>` : 
-                        isActive ? 
-                        `<button class="btn-add-capital" data-id="${robot.id}"><i class="fas fa-plus-circle"></i> Add Capital</button>` :
-                        `<button class="btn-start-robot" data-id="${robot.id}"><i class="fas fa-play"></i> Start Robot</button>`
+                    ${isExpired ? 
+                        (canUpgrade ? 
+                            `<button class="btn-upgrade" data-id="${robot.id}" data-next="${nextLevel}"><i class="fas fa-arrow-up"></i> Upgrade to ${nextRobotInfo.name} (${upgradePriceFormatted})</button>` : 
+                            `<button class="btn-restart-robot" data-id="${robot.id}"><i class="fas fa-undo"></i> Restart (Max Level)</button>`
+                        ) : 
+                        (isActive ? 
+                            `<button class="btn-add-capital" data-id="${robot.id}" data-min="${minTrade}" data-max="${maxTrade}"><i class="fas fa-plus-circle"></i> Add Capital</button>` :
+                            `<button class="btn-start-robot" data-id="${robot.id}"><i class="fas fa-play"></i> Start Robot</button>`
+                        )
                     }
                 </div>
+                ${!isActive && !isExpired ? `<div style="margin-top:6px; background:rgba(255,215,0,0.1); border-radius:8px; padding:4px 10px; color:#FFD700; font-size:8px; text-align:center;"><i class="fas fa-info-circle"></i> Click "Start Robot" to begin trading with your investment</div>` : ''}
+                ${isExpired ? `<div style="margin-top:6px; background:rgba(255,215,0,0.15); border-radius:8px; padding:6px 10px; color:#FFD700; font-size:9px; text-align:center;"><i class="fas fa-info-circle"></i> Upgrade to continue earning profits. Your capital (${formatPrice(invested)}) is preserved.</div>` : ''}
             </div>
         `;
     });
@@ -1511,8 +1866,18 @@ function renderRobots() {
     container.querySelectorAll('.btn-add-capital').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
+            const min = parseFloat(btn.dataset.min);
+            const max = parseFloat(btn.dataset.max);
             const robot = activeRobots.find(r => r.id === id);
-            if (robot) addCapital(robot);
+            if (robot) addCapital(robot, min, max);
+        });
+    });
+    container.querySelectorAll('.btn-upgrade').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const nextLevel = parseInt(btn.dataset.next);
+            const robot = activeRobots.find(r => r.id === id);
+            if (robot) upgradeRobot(robot, nextLevel);
         });
     });
 }
@@ -1532,14 +1897,17 @@ function renderLogs() {
             'loss': '❌',
             'profit': '💰',
             'warning': '⚠️',
-            'info': '📋'
+            'info': '📋',
+            'upgrade': '🔄'
         };
         const icon = iconMap[type] || '📋';
         const time = log.time || new Date(log.timestamp).toLocaleTimeString() || '--:--:--';
+        const date = log.date || new Date(log.timestamp).toISOString().split('T')[0] || '----';
         const robotName = log.robot || 'Robot';
         
         html += `
             <div class="log-item ${type}">
+                <span class="log-date">${date}</span>
                 <span class="log-time">${time}</span>
                 <span class="log-icon">${icon}</span>
                 <span class="log-robot">${robotName}</span>
@@ -1587,8 +1955,58 @@ function showModal(title, message, onConfirm) {
 // TRADE FUNCTIONS
 // ============================================================
 async function startRobot(robot) {
-    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-    const minTrade = robotMinTrade[robot.robotId] || 3;
+    const info = robotDefinitions[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3, minInvest: 10 };
+    const minTrade = info.minInvest || 10;
+    const invested = robot.investedAmount || robot.amount || 0;
+    
+    if (invested > 0) {
+        showModal(
+            `Start ${info.name}`,
+            `This robot already has ${formatPrice(invested)} invested.\n\nStart trading now to earn daily profits?`,
+            async () => {
+                try {
+                    const uid = currentUser.uid;
+                    const robotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                    const now = Date.now();
+                    const today = new Date().toISOString().split('T')[0];
+                    const endTime = robot.endTime || (now + (DURATION_DAYS * 24 * 60 * 60 * 1000));
+                    
+                    await update(robotRef, {
+                        status: 'trading',
+                        startTime: robot.startTime || now,
+                        endTime: endTime,
+                        lastProfitTime: now,
+                        lastProfitDate: today,
+                        updatedAt: now
+                    });
+                    
+                    const logRef = push(ref(db, `tradingLogs/${uid}`));
+                    await set(logRef, {
+                        id: logRef.key,
+                        robot: info.name,
+                        message: `🚀 Robot started trading! Investment: ${formatPrice(invested)}. Daily: ${robot.dailyProfit || info.dailyProfit}%`,
+                        type: 'info',
+                        time: new Date().toLocaleTimeString(),
+                        date: today,
+                        timestamp: Date.now()
+                    });
+                    
+                    await Promise.all([
+                        loadActiveRobotsDirect(),
+                        loadUserDataDirect(),
+                        loadRobotStatsDirect(),
+                        loadTradingLogsDirect()
+                    ]);
+                    
+                    showModal('Success', `✅ Robot started trading!\n\nInvestment: ${formatPrice(invested)}\nDaily: ${robot.dailyProfit || info.dailyProfit}%`, null);
+                } catch (error) {
+                    console.error('[BOT] Start error:', error);
+                    showModal('Error', 'Failed to start robot. Please try again.', null);
+                }
+            }
+        );
+        return;
+    }
     
     if (userBalance < minTrade) {
         showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to start this robot.`, null);
@@ -1598,11 +2016,11 @@ async function startRobot(robot) {
     const lockAmount = userBalance;
     const dailyPercent = info.dailyProfit * subscriptionMultiplier;
     const estimatedDaily = (lockAmount * dailyPercent) / 100;
-    const totalEstimated = estimatedDaily * DEFAULT_DURATION_DAYS;
+    const totalEstimated = estimatedDaily * DURATION_DAYS;
     
     showModal(
         `Start ${info.name}`,
-        `Lock ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)\n💰 Est. Total: ${formatPrice(totalEstimated)}`,
+        `Lock ${formatPrice(lockAmount)} for ${DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)\n💰 Est. Total: ${formatPrice(totalEstimated)}`,
         async () => {
             try {
                 const uid = currentUser.uid;
@@ -1618,19 +2036,33 @@ async function startRobot(robot) {
                     return current;
                 });
                 
-                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                const today = new Date().toISOString().split('T')[0];
+                const endTime = Date.now() + (DURATION_DAYS * 24 * 60 * 60 * 1000);
                 await update(robotRef, {
-                    status: 'active',
+                    status: 'trading',
                     startTime: Date.now(),
                     endTime: endTime,
                     lastProfitTime: Date.now(),
+                    lastProfitDate: today,
                     profitDays: 0,
                     investedAmount: lockAmount,
                     originalAmount: lockAmount,
-                    minTrade: minTrade,
-                    durationDays: DEFAULT_DURATION_DAYS,
+                    minTrade: info.minInvest || 10,
+                    maxTrade: info.maxInvest || 10000,
+                    durationDays: DURATION_DAYS,
                     dailyProfit: dailyPercent,
                     completedAt: null
+                });
+                
+                const logRef = push(ref(db, `tradingLogs/${uid}`));
+                await set(logRef, {
+                    id: logRef.key,
+                    robot: info.name,
+                    message: `🚀 Robot started! Locked ${formatPrice(lockAmount)} for ${DURATION_DAYS} days. Daily: ${dailyPercent}%`,
+                    type: 'info',
+                    time: new Date().toLocaleTimeString(),
+                    date: today,
+                    timestamp: Date.now()
                 });
                 
                 await Promise.all([
@@ -1651,8 +2083,8 @@ async function startRobot(robot) {
 }
 
 async function restartRobot(robot) {
-    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-    const minTrade = robotMinTrade[robot.robotId] || 3;
+    const info = robotDefinitions[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
+    const minTrade = info.minInvest || 10;
     
     if (userBalance < minTrade) {
         showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to restart this robot.`, null);
@@ -1665,7 +2097,7 @@ async function restartRobot(robot) {
     
     showModal(
         `Restart ${info.name}`,
-        `Restart with ${formatPrice(lockAmount)} for ${DEFAULT_DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)`,
+        `Restart with ${formatPrice(lockAmount)} for ${DURATION_DAYS} days?\n\n📈 Daily: ${dailyPercent}% (≈${formatPrice(estimatedDaily)}/day)`,
         async () => {
             try {
                 const uid = currentUser.uid;
@@ -1681,19 +2113,31 @@ async function restartRobot(robot) {
                     return current;
                 });
                 
-                const endTime = Date.now() + (DEFAULT_DURATION_DAYS * 24 * 60 * 60 * 1000);
+                const today = new Date().toISOString().split('T')[0];
+                const endTime = Date.now() + (DURATION_DAYS * 24 * 60 * 60 * 1000);
                 await update(robotRef, {
-                    status: 'active',
+                    status: 'trading',
                     startTime: Date.now(),
                     endTime: endTime,
                     lastProfitTime: Date.now(),
+                    lastProfitDate: today,
                     profitDays: 0,
                     investedAmount: lockAmount,
                     originalAmount: lockAmount,
-                    minTrade: minTrade,
-                    durationDays: DEFAULT_DURATION_DAYS,
+                    durationDays: DURATION_DAYS,
                     dailyProfit: dailyPercent,
                     completedAt: null
+                });
+                
+                const logRef = push(ref(db, `tradingLogs/${uid}`));
+                await set(logRef, {
+                    id: logRef.key,
+                    robot: info.name,
+                    message: `🔄 Robot restarted! Locked ${formatPrice(lockAmount)} for ${DURATION_DAYS} days.`,
+                    type: 'info',
+                    time: new Date().toLocaleTimeString(),
+                    date: today,
+                    timestamp: Date.now()
                 });
                 
                 await Promise.all([
@@ -1713,17 +2157,20 @@ async function restartRobot(robot) {
     );
 }
 
-async function addCapital(robot) {
-    const info = robotProfits[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
-    const minTrade = robotMinTrade[robot.robotId] || 3;
+async function addCapital(robot, minInvest, maxInvest) {
+    const info = robotDefinitions[robot.robotId] || { name: robot.name || 'Robot', dailyProfit: 3 };
     
-    if (userBalance < minTrade) {
-        showModal('Insufficient Balance', `Need at least ${formatPrice(minTrade)} to add capital.`, null);
+    if (userBalance < minInvest) {
+        showModal('Insufficient Balance', `Need at least ${formatPrice(minInvest)} to add capital.`, null);
         return;
     }
     
-    const maxAdd = Math.min(userBalance, 10000);
+    const maxAdd = Math.min(userBalance, maxInvest);
     const currentInvested = robot.investedAmount || robot.amount || 0;
+    const formattedMin = formatPrice(minInvest);
+    const formattedMax = formatPrice(maxInvest);
+    const formattedCurrent = formatPrice(currentInvested);
+    const formattedAvailable = formatPrice(userBalance);
     
     const modalDiv = document.createElement('div');
     modalDiv.className = 'modal-overlay';
@@ -1731,11 +2178,12 @@ async function addCapital(robot) {
         <div class="modal-container">
             <div class="modal-title">Add Capital to ${info.name}</div>
             <div class="modal-message" style="text-align:left;">
-                <p style="margin-bottom:8px;">Current: <strong style="color:#0ECB81;">${formatPrice(currentInvested)}</strong></p>
-                <p style="margin-bottom:8px;">Available: <strong style="color:#FFD700;">${formatPrice(userBalance)}</strong></p>
-                <p style="margin-bottom:8px;">Min Trade: <strong style="color:#FFD700;">${formatPrice(minTrade)}</strong></p>
+                <p style="margin-bottom:8px;">Current: <strong style="color:#0ECB81;">${formattedCurrent}</strong></p>
+                <p style="margin-bottom:8px;">Available: <strong style="color:#FFD700;">${formattedAvailable}</strong></p>
+                <p style="margin-bottom:8px;">Investment Range: <strong style="color:#FFD700;">${formattedMin} - ${formattedMax}</strong></p>
                 <label style="color:#FFD700;">Amount to add:</label>
-                <input type="number" id="addCapitalAmount" min="${minTrade}" max="${maxAdd}" step="1" value="${Math.min(maxAdd, 100)}" style="width:100%; padding:8px; margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:white; font-size:14px;">
+                <input type="number" id="addCapitalAmount" min="${minInvest}" max="${maxAdd}" step="1" value="${Math.min(maxAdd, minInvest * 2)}" style="width:100%; padding:8px; margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:white; font-size:14px;">
+                <p style="color:#888;font-size:9px;margin-top:4px;">Min: ${formattedMin} | Max: ${formattedMax}</p>
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
@@ -1747,8 +2195,12 @@ async function addCapital(robot) {
     
     document.getElementById('modalConfirmBtn').addEventListener('click', async () => {
         const amount = parseFloat(document.getElementById('addCapitalAmount').value);
-        if (!amount || amount < minTrade) {
-            showModal('Invalid Amount', `Minimum add is ${formatPrice(minTrade)}`, null);
+        if (!amount || amount < minInvest) {
+            showModal('Invalid Amount', `Minimum add is ${formattedMin}`, null);
+            return;
+        }
+        if (amount > maxInvest) {
+            showModal('Invalid Amount', `Maximum add is ${formattedMax}`, null);
             return;
         }
         if (amount > userBalance) {
@@ -1775,8 +2227,24 @@ async function addCapital(robot) {
             if (snap.exists()) {
                 const data = snap.val();
                 const newInvested = (data.investedAmount || data.amount || 0) + amount;
-                await update(robotRef, { investedAmount: newInvested, amount: newInvested });
+                await update(robotRef, { 
+                    investedAmount: newInvested, 
+                    amount: newInvested,
+                    dailyProfit: data.dailyProfit || info.dailyProfit
+                });
             }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const logRef = push(ref(db, `tradingLogs/${uid}`));
+            await set(logRef, {
+                id: logRef.key,
+                robot: info.name,
+                message: `💰 Added ${formatPrice(amount)} capital to robot. New total: ${formatPrice((robot.investedAmount || 0) + amount)}`,
+                type: 'info',
+                time: new Date().toLocaleTimeString(),
+                date: today,
+                timestamp: Date.now()
+            });
             
             await Promise.all([
                 loadActiveRobotsDirect(),
@@ -1792,6 +2260,101 @@ async function addCapital(robot) {
         }
     });
     document.getElementById('modalCancelBtn').addEventListener('click', () => modalDiv.remove());
+}
+
+async function upgradeRobot(robot, nextLevel) {
+    const nextInfo = robotDefinitions[nextLevel];
+    if (!nextInfo) {
+        showModal('Upgrade Unavailable', 'You have reached the maximum level.', null);
+        return;
+    }
+    
+    const upgradeCost = nextInfo.botPrice;
+    const currentInvested = robot.investedAmount || robot.amount || 0;
+    
+    if (userBalance < upgradeCost) {
+        showModal('Insufficient Balance', `Need ${formatPrice(upgradeCost)} to upgrade to ${nextInfo.name}.`, null);
+        return;
+    }
+    
+    showModal(
+        `Upgrade to ${nextInfo.name}`,
+        `Upgrade from ${robotDefinitions[robot.robotId].name} to ${nextInfo.name}?\n\n🤖 Bot Price: ${formatPrice(upgradeCost)}\n💰 Your invested capital: ${formatPrice(currentInvested)} will be transferred to the new robot.\n📈 New Daily Profit: ${nextInfo.dailyProfit}%`,
+        async () => {
+            try {
+                const uid = currentUser.uid;
+                const userRef = ref(db, `users/${uid}`);
+                const oldRobotRef = ref(db, `userRobots/${uid}/${robot.id}`);
+                
+                await runTransaction(userRef, (current) => {
+                    if (current) {
+                        const balance = current.balance || 0;
+                        if (balance < upgradeCost) return current;
+                        current.balance = balance - upgradeCost;
+                    }
+                    return current;
+                });
+                
+                await update(oldRobotRef, {
+                    status: 'upgraded',
+                    upgradedAt: Date.now(),
+                    upgradedTo: nextLevel
+                });
+                
+                const today = new Date().toISOString().split('T')[0];
+                const newRobotRef = ref(db, `userRobots/${uid}/${robot.id}_upgraded`);
+                const endTime = Date.now() + (DURATION_DAYS * 24 * 60 * 60 * 1000);
+                
+                await set(newRobotRef, {
+                    robotId: nextLevel,
+                    name: nextInfo.name,
+                    level: nextLevel,
+                    dailyProfit: nextInfo.dailyProfit * subscriptionMultiplier,
+                    botPrice: nextInfo.botPrice,
+                    investedAmount: currentInvested,
+                    totalCost: currentInvested + upgradeCost,
+                    status: 'trading',
+                    startTime: Date.now(),
+                    endTime: endTime,
+                    lastProfitTime: Date.now(),
+                    lastProfitDate: today,
+                    profitDays: 0,
+                    durationDays: DURATION_DAYS,
+                    createdAt: Date.now(),
+                    minInvest: nextInfo.minInvest,
+                    maxInvest: nextInfo.maxInvest,
+                    completedAt: null,
+                    nextLevel: nextLevel + 1,
+                    upgradedFrom: robot.robotId,
+                    upgradedFromId: robot.id
+                });
+                
+                const logRef = push(ref(db, `tradingLogs/${uid}`));
+                await set(logRef, {
+                    id: logRef.key,
+                    robot: nextInfo.name,
+                    message: `🔄 Upgraded from ${robotDefinitions[robot.robotId].name} to ${nextInfo.name}. Capital: ${formatPrice(currentInvested)}. New daily: ${nextInfo.dailyProfit}%`,
+                    type: 'upgrade',
+                    time: new Date().toLocaleTimeString(),
+                    date: today,
+                    timestamp: Date.now()
+                });
+                
+                await Promise.all([
+                    loadActiveRobotsDirect(),
+                    loadUserDataDirect(),
+                    loadRobotStatsDirect(),
+                    loadTradingLogsDirect()
+                ]);
+                
+                showModal('Success', `✅ Successfully upgraded to ${nextInfo.name}! Trading has resumed.`, null);
+                
+            } catch (error) {
+                console.error('[BOT] Upgrade error:', error);
+                showModal('Error', 'Failed to upgrade. Please try again.', null);
+            }
+        }
+    );
 }
 
 // ============================================================
@@ -1826,6 +2389,34 @@ document.getElementById('themeToggle').addEventListener('click', () => {
         sunIcon.style.display = document.body.classList.contains('light-theme') ? 'none' : 'inline-block';
     }
 });
+
+// ============================================================
+// SETUP DAILY PROFIT CHECKER
+// ============================================================
+function setupDailyProfitChecker() {
+    if (dailyProfitTimer) clearInterval(dailyProfitTimer);
+    dailyProfitTimer = setInterval(() => {
+        if (currentUser) {
+            console.log('[BOT] ⏰ Running scheduled daily profit check...');
+            processDailyProfitsDirect();
+        }
+    }, 60 * 60 * 1000);
+    
+    // Also run missed profit check every 6 hours
+    setInterval(() => {
+        if (currentUser) {
+            console.log('[BOT] ⏰ Running scheduled missed profit check...');
+            checkAndProcessMissedProfits();
+        }
+    }, 6 * 60 * 60 * 1000);
+    
+    setTimeout(() => {
+        if (currentUser) {
+            console.log('[BOT] 🔄 Initial daily profit check after login...');
+            processDailyProfitsDirect();
+        }
+    }, 5000);
+}
 
 // ============================================================
 // INIT
@@ -1876,20 +2467,30 @@ async function init() {
         await loadRobotStatsDirect();
         await loadTradingLogsDirect();
         
-        // Process daily profits on init
+        // FIRST: Auto-start robots with existing investments
+        console.log('[BOT] 🔄 Checking robots that need auto-start...');
+        await autoStartRobotsWithInvestment();
+        
+        // SECOND: Check and process missed profits (offline accumulation)
+        console.log('[BOT] 🔍 Checking for missed profits (offline accumulation)...');
+        await checkAndProcessMissedProfits();
+        
+        // THIRD: Process daily profits for today
         await processDailyProfitsDirect();
         
         setupRTDBListeners();
+        setupDailyProfitChecker();
         
         // Connect signal WebSocket
         connectSignalWebSocket();
         
         // Auto-refresh every 30 seconds
         setInterval(() => { if (currentUser) loadUserDataDirect(); }, 30000);
-        // Check daily profits every 5 minutes
-        setInterval(() => { if (currentUser) processDailyProfitsDirect(); }, 5 * 60 * 1000);
         
-        console.log('[BOT] ✅ Auto Bot initialized with 365 days');
+        console.log('[BOT] ✅ Auto Bot initialized with 120 days upgrade cycle');
+        console.log('[BOT] ✅ Daily profit checker running every hour');
+        console.log('[BOT] ✅ Missed profit checker running every 6 hours (offline accumulation)');
+        console.log('[BOT] ✅ Auto-start checker enabled for robots with investments');
     });
 }
 
