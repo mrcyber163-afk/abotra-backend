@@ -51,8 +51,8 @@ router.post('/test', verifyToken, async (req, res) => {
             });
         }
         
-        // Simple validation - just check if keys are provided
         // In production, you would actually test the connection
+        // For now, return success if keys are provided
         res.json({
             success: true,
             message: 'Connection test successful',

@@ -8,7 +8,7 @@ const { verifyToken } = require('../middleware/auth');
 const { restGet, restPut, restPatch, restPost, restDelete } = require('../firebase');
 
 // ============================================================
-// GET ROBOT STATUS
+// GET ROBOT STATUS (Full status with plans and trades)
 // ============================================================
 router.get('/status', verifyToken, async (req, res) => {
     try {
@@ -299,6 +299,20 @@ router.get('/check-expiry', verifyToken, async (req, res) => {
         });
     } catch (error) {
         console.error('[Robot] Expiry check error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// GET SUBSCRIPTION
+// ============================================================
+router.get('/subscription', verifyToken, async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const subscription = await restGet(`subscriptions/${uid}`);
+        res.json({ success: true, subscription: subscription || null });
+    } catch (error) {
+        console.error('[Robot] Subscription error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

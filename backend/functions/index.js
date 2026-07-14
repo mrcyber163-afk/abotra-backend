@@ -89,6 +89,10 @@ app.use('/api/signals', signalRoutes);
 app.use('/api/trade-history', tradeHistoryRoutes);
 app.use('/api/user', userRoutes);
 
+// Also add without /api for compatibility
+app.use('/robot', robotRoutes);
+app.use('/broker', brokerRoutes);
+
 // ============================================================
 // 404 HANDLER
 // ============================================================
