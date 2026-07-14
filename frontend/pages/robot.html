@@ -1390,8 +1390,10 @@
         }
 
         // ============================================================
-        // API FUNCTIONS
+        // API FUNCTIONS - USING CORRECT BACKEND ROUTES
         // ============================================================
+        const BASE_URL = 'https://abotra-backend-production.up.railway.app';
+
         async function getToken() {
             if (currentUser) {
                 return await currentUser.getIdToken();
@@ -1406,7 +1408,7 @@
                 'Authorization': token ? `Bearer ${token}` : ''
             };
 
-            const url = `https://abotra-proai.railway.app/api.php?path=${endpoint}`;
+            const url = `${BASE_URL}${endpoint}`;
 
             const options = {
                 method: method,
@@ -1428,7 +1430,7 @@
         }
 
         // ============================================================
-        // LOAD DATA
+        // LOAD DATA - USING CORRECT API ROUTES
         // ============================================================
         async function loadAllData() {
             if (isLoading || !currentUser) return;
@@ -1454,11 +1456,20 @@
                     <div class="skeleton-card"></div>
                 `;
 
-                // Load robot status
-                const robotResult = await apiRequest('robot-status');
+                // Load robot status - using /api/robot/status as defined in backend
+                let robotResult;
+                try {
+                    console.log('[ROBOT] Fetching robot status from /api/robot/status');
+                    robotResult = await apiRequest('/api/robot/status', 'GET');
+                } catch (e) {
+                    console.log('[ROBOT] /api/robot/status failed, trying /robot/status');
+                    robotResult = await apiRequest('/robot/status', 'GET');
+                }
 
-                if (robotResult.robot) {
+                if (robotResult && robotResult.robot) {
                     userRobot = robotResult.robot;
+                } else if (robotResult && robotResult.data) {
+                    userRobot = robotResult.data;
                 } else {
                     userRobot = null;
                 }
@@ -1475,9 +1486,16 @@
                     robotPlans.sort((a, b) => (a.duration || 0) - (b.duration || 0));
                 }
 
-                // Load trades
-                const tradesResult = await apiRequest('history');
-                robotTrades = tradesResult.trades || [];
+                // Load trades - using /api/robot/trades
+                let tradesResult;
+                try {
+                    console.log('[ROBOT] Fetching trades from /api/robot/trades');
+                    tradesResult = await apiRequest('/api/robot/trades', 'GET');
+                } catch (e) {
+                    console.log('[ROBOT] /api/robot/trades failed, trying /robot/trades');
+                    tradesResult = await apiRequest('/robot/trades', 'GET');
+                }
+                robotTrades = tradesResult?.trades || [];
 
                 // Render everything
                 renderRobot(userRobot);
@@ -1658,7 +1676,6 @@
                 const isCurrent = isPremium && plan.id === userRobot?.planId;
                 const icon = iconMap[plan.id?.toLowerCase()] || 'fa-robot';
 
-                // Parse features if string
                 let features = plan.features || 'Full AI Trading • Priority Support • Advanced Analytics';
                 if (typeof features === 'string') {
                     features = features.split('•').map(f => f.trim());
@@ -1985,6 +2002,7 @@
 
                 document.getElementById('refreshBtn').addEventListener('click', loadAllData);
                 console.log('🤖 Robot Management page loaded');
+                console.log('🌐 Backend URL:', BASE_URL);
             });
         }
 
