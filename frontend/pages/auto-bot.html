@@ -954,6 +954,7 @@ let localSymbol = 'TZS';
 let userCountry = 'Tanzania';
 let rtdbListeners = [];
 let dailyProfitTimer = null;
+let missedProfitTimer = null;
 
 // ============================================================
 // SIGNAL STATE
@@ -1243,7 +1244,7 @@ async function loadTradingLogsDirect() {
 }
 
 // ============================================================
-// CHECK AND AUTO-START ROBOTS WITH INVESTMENT
+// AUTO-START ROBOTS WITH INVESTMENT
 // ============================================================
 async function autoStartRobotsWithInvestment() {
     if (!currentUser) return;
@@ -1254,6 +1255,7 @@ async function autoStartRobotsWithInvestment() {
         if (!snapshot.exists()) return;
         
         let started = 0;
+        const promises = [];
         snapshot.forEach(child => {
             const robot = child.val();
             const robotId = child.key;
@@ -1264,28 +1266,30 @@ async function autoStartRobotsWithInvestment() {
             
             if (investedAmount > 0 && !isTrading && !isExpired) {
                 console.log(`[BOT] Auto-starting ${robot.name || 'Robot'} with investment ${formatPrice(investedAmount)}`);
-                
                 const robotRef = ref(db, `userRobots/${uid}/${robotId}`);
                 const now = Date.now();
                 const today = new Date().toISOString().split('T')[0];
                 const endTime = robot.endTime || (now + (DURATION_DAYS * 24 * 60 * 60 * 1000));
                 
-                update(robotRef, {
-                    status: 'trading',
-                    startTime: robot.startTime || now,
-                    endTime: endTime,
-                    lastProfitTime: robot.lastProfitTime || now,
-                    lastProfitDate: robot.lastProfitDate || today,
-                    updatedAt: now
-                }).then(() => {
-                    console.log(`[BOT] ✅ Auto-started ${robot.name || 'Robot'}`);
-                }).catch(err => {
-                    console.error(`[BOT] Failed to auto-start ${robot.name}:`, err);
-                });
-                
-                started++;
+                promises.push(
+                    update(robotRef, {
+                        status: 'trading',
+                        startTime: robot.startTime || now,
+                        endTime: endTime,
+                        lastProfitTime: robot.lastProfitTime || now,
+                        lastProfitDate: robot.lastProfitDate || today,
+                        updatedAt: now
+                    }).then(() => {
+                        console.log(`[BOT] ✅ Auto-started ${robot.name || 'Robot'}`);
+                        started++;
+                    }).catch(err => {
+                        console.error(`[BOT] Failed to auto-start ${robot.name}:`, err);
+                    })
+                );
             }
         });
+        
+        await Promise.all(promises);
         
         if (started > 0) {
             console.log(`[BOT] ✅ Auto-started ${started} robots with existing investments`);
@@ -1302,7 +1306,7 @@ async function autoStartRobotsWithInvestment() {
 }
 
 // ============================================================
-// RETROACTIVE PROFIT CHECKER - Accumulates offline profits
+// CHECK AND PROCESS MISSED PROFITS (OFFLINE ACCUMULATION)
 // ============================================================
 async function checkAndProcessMissedProfits() {
     if (!currentUser) return;
@@ -1322,22 +1326,23 @@ async function checkAndProcessMissedProfits() {
         let processedCount = 0;
         let totalDaysMissed = 0;
         const processedRobots = [];
+        const promises = [];
         
         snapshot.forEach(child => {
             const robot = child.val();
             const robotId = child.key;
             
-            // Skip if not trading
             if (robot.status !== 'trading') return;
-            if (robot.endTime && now > robot.endTime) return;
+            if (robot.endTime && now > robot.endTime) {
+                promises.push(markRobotExpiredDirect(robot, robotId, uid));
+                return;
+            }
             
             const lastProfitDate = robot.lastProfitDate || '';
             const lastProfitTime = robot.lastProfitTime || robot.startTime || now;
             const profitDays = robot.profitDays || 0;
             const totalDays = robot.durationDays || DURATION_DAYS;
             
-            let missedDays = 0;
-            let missedTotal = 0;
             const investedAmount = robot.investedAmount || robot.amount || 0;
             if (investedAmount <= 0) return;
             
@@ -1346,24 +1351,16 @@ async function checkAndProcessMissedProfits() {
             const hiddenFee = grossProfit * 0.10;
             const netProfit = grossProfit - hiddenFee;
             
-            // Calculate days since last profit
             const daysSinceLastProfit = Math.floor((now - lastProfitTime) / (24 * 60 * 60 * 1000));
             
-            // Check if we missed any days
             if (lastProfitDate && lastProfitDate !== today && daysSinceLastProfit >= 1) {
-                // Number of missed days (including today if not processed)
                 let missedCount = daysSinceLastProfit;
-                
-                // Don't exceed remaining days
                 const remainingDays = totalDays - profitDays;
                 missedCount = Math.min(missedCount, remainingDays);
-                
-                // Limit to 30 days max to prevent huge calculations
                 missedCount = Math.min(missedCount, 30);
                 
                 if (missedCount > 0) {
-                    missedDays = missedCount;
-                    missedTotal = netProfit * missedCount;
+                    const missedTotal = netProfit * missedCount;
                     totalMissedProfit += missedTotal;
                     processedCount++;
                     totalDaysMissed += missedCount;
@@ -1382,7 +1379,6 @@ async function checkAndProcessMissedProfits() {
         if (processedCount > 0 && totalMissedProfit > 0) {
             console.log(`[BOT] 📊 Processing ${processedCount} robots with ${totalDaysMissed} missed days totaling ${formatPrice(totalMissedProfit)}`);
             
-            // Credit all missed profits to balance
             await runTransaction(ref(db, `users/${uid}`), (current) => {
                 if (current) {
                     current.balance = (current.balance || 0) + totalMissedProfit;
@@ -1390,24 +1386,20 @@ async function checkAndProcessMissedProfits() {
                 return current;
             });
             
-            // Update each robot
             for (const robotInfo of processedRobots) {
                 const robotRef = ref(db, `userRobots/${uid}/${robotInfo.id}`);
                 const snap = await get(robotRef);
                 if (snap.exists()) {
                     const data = snap.val();
                     const newProfitDays = (data.profitDays || 0) + robotInfo.days;
-                    const newLastProfitTime = data.lastProfitTime || Date.now();
-                    
                     await update(robotRef, {
                         lastProfitDate: today,
-                        lastProfitTime: newLastProfitTime + (robotInfo.days * 24 * 60 * 60 * 1000),
+                        lastProfitTime: data.lastProfitTime ? data.lastProfitTime + (robotInfo.days * 24 * 60 * 60 * 1000) : Date.now(),
                         profitDays: newProfitDays,
                         lastProfitAmount: robotInfo.netProfit
                     });
                 }
                 
-                // Add log for each day's profit (consolidated)
                 const logRef = push(ref(db, `tradingLogs/${uid}`));
                 const dateStr = new Date().toISOString().split('T')[0];
                 await set(logRef, {
@@ -2402,8 +2394,8 @@ function setupDailyProfitChecker() {
         }
     }, 60 * 60 * 1000);
     
-    // Also run missed profit check every 6 hours
-    setInterval(() => {
+    if (missedProfitTimer) clearInterval(missedProfitTimer);
+    missedProfitTimer = setInterval(() => {
         if (currentUser) {
             console.log('[BOT] ⏰ Running scheduled missed profit check...');
             checkAndProcessMissedProfits();

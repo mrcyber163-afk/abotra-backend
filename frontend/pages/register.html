@@ -601,7 +601,10 @@ import {
     get,
     runTransaction,
     push,
-    update
+    update,
+    query,
+    orderByChild,
+    equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // ============================================================
@@ -624,76 +627,60 @@ const rtdb = getDatabase(app);
 console.log('[FIREBASE] ✅ Firebase initialized');
 
 // ============================================================
-// COUNTRIES DATA - ALL AFRICAN COUNTRIES
+// COUNTRIES DATA - AFRICAN COUNTRIES ONLY
 // ============================================================
 const countriesData = [
-    // East Africa
     { code: "+255", iso: "tz", name: "Tanzania", digits: 9 },
-    { code: "+254", iso: "ke", name: "Kenya", digits: 9 },
-    { code: "+256", iso: "ug", name: "Uganda", digits: 9 },
-    { code: "+250", iso: "rw", name: "Rwanda", digits: 9 },
-    { code: "+257", iso: "bi", name: "Burundi", digits: 8 },
-    { code: "+252", iso: "so", name: "Somalia", digits: 8 },
-    { code: "+251", iso: "et", name: "Ethiopia", digits: 9 },
-    { code: "+291", iso: "er", name: "Eritrea", digits: 7 },
-    { code: "+253", iso: "dj", name: "Djibouti", digits: 8 },
-    { code: "+211", iso: "ss", name: "South Sudan", digits: 9 },
-    
-    // Southern Africa
     { code: "+265", iso: "mw", name: "Malawi", digits: 9 },
     { code: "+260", iso: "zm", name: "Zambia", digits: 9 },
-    { code: "+263", iso: "zw", name: "Zimbabwe", digits: 9 },
-    { code: "+258", iso: "mz", name: "Mozambique", digits: 9 },
-    { code: "+244", iso: "ao", name: "Angola", digits: 9 },
-    { code: "+264", iso: "na", name: "Namibia", digits: 9 },
-    { code: "+267", iso: "bw", name: "Botswana", digits: 7 },
-    { code: "+27", iso: "za", name: "South Africa", digits: 9 },
-    { code: "+266", iso: "ls", name: "Lesotho", digits: 8 },
-    { code: "+268", iso: "sz", name: "Eswatini", digits: 7 },
-    
-    // Central Africa
-    { code: "+243", iso: "cd", name: "Congo DRC", digits: 9 },
-    { code: "+242", iso: "cg", name: "Congo Republic", digits: 9 },
-    { code: "+241", iso: "ga", name: "Gabon", digits: 8 },
-    { code: "+237", iso: "cm", name: "Cameroon", digits: 9 },
-    { code: "+236", iso: "cf", name: "Central African Republic", digits: 8 },
-    { code: "+235", iso: "td", name: "Chad", digits: 8 },
-    { code: "+240", iso: "gq", name: "Equatorial Guinea", digits: 9 },
-    
-    // West Africa
+    { code: "+254", iso: "ke", name: "Kenya", digits: 9 },
+    { code: "+256", iso: "ug", name: "Uganda", digits: 9 },
     { code: "+234", iso: "ng", name: "Nigeria", digits: 10 },
     { code: "+233", iso: "gh", name: "Ghana", digits: 9 },
-    { code: "+225", iso: "ci", name: "Ivory Coast", digits: 8 },
-    { code: "+221", iso: "sn", name: "Senegal", digits: 9 },
-    { code: "+224", iso: "gn", name: "Guinea", digits: 9 },
-    { code: "+245", iso: "gw", name: "Guinea-Bissau", digits: 7 },
-    { code: "+223", iso: "ml", name: "Mali", digits: 8 },
-    { code: "+226", iso: "bf", name: "Burkina Faso", digits: 8 },
-    { code: "+229", iso: "bj", name: "Benin", digits: 8 },
-    { code: "+228", iso: "tg", name: "Togo", digits: 8 },
-    { code: "+231", iso: "lr", name: "Liberia", digits: 7 },
-    { code: "+232", iso: "sl", name: "Sierra Leone", digits: 8 },
-    { code: "+220", iso: "gm", name: "Gambia", digits: 7 },
-    { code: "+238", iso: "cv", name: "Cape Verde", digits: 7 },
-    { code: "+222", iso: "mr", name: "Mauritania", digits: 8 },
-    { code: "+227", iso: "ne", name: "Niger", digits: 8 },
-    
-    // North Africa
+    { code: "+27", iso: "za", name: "South Africa", digits: 9 },
+    { code: "+243", iso: "cd", name: "Congo DRC", digits: 9 },
+    { code: "+257", iso: "bi", name: "Burundi", digits: 8 },
+    { code: "+267", iso: "bw", name: "Botswana", digits: 7 },
+    { code: "+264", iso: "na", name: "Namibia", digits: 9 },
+    { code: "+258", iso: "mz", name: "Mozambique", digits: 9 },
+    { code: "+250", iso: "rw", name: "Rwanda", digits: 9 },
     { code: "+20", iso: "eg", name: "Egypt", digits: 10 },
     { code: "+212", iso: "ma", name: "Morocco", digits: 9 },
-    { code: "+213", iso: "dz", name: "Algeria", digits: 9 },
-    { code: "+216", iso: "tn", name: "Tunisia", digits: 8 },
-    { code: "+218", iso: "ly", name: "Libya", digits: 9 },
+    { code: "+263", iso: "zw", name: "Zimbabwe", digits: 9 },
+    { code: "+244", iso: "ao", name: "Angola", digits: 9 },
+    { code: "+251", iso: "et", name: "Ethiopia", digits: 9 },
+    { code: "+252", iso: "so", name: "Somalia", digits: 8 },
     { code: "+249", iso: "sd", name: "Sudan", digits: 9 },
-    
-    // Island Nations
-    { code: "+261", iso: "mg", name: "Madagascar", digits: 9 },
+    { code: "+218", iso: "ly", name: "Libya", digits: 9 },
+    { code: "+216", iso: "tn", name: "Tunisia", digits: 8 },
+    { code: "+213", iso: "dz", name: "Algeria", digits: 9 },
+    { code: "+222", iso: "mr", name: "Mauritania", digits: 8 },
+    { code: "+221", iso: "sn", name: "Senegal", digits: 9 },
+    { code: "+225", iso: "ci", name: "Ivory Coast", digits: 8 },
+    { code: "+226", iso: "bf", name: "Burkina Faso", digits: 8 },
+    { code: "+227", iso: "ne", name: "Niger", digits: 8 },
+    { code: "+228", iso: "tg", name: "Togo", digits: 8 },
+    { code: "+229", iso: "bj", name: "Benin", digits: 8 },
     { code: "+230", iso: "mu", name: "Mauritius", digits: 7 },
-    { code: "+248", iso: "sc", name: "Seychelles", digits: 7 },
-    { code: "+269", iso: "km", name: "Comoros", digits: 7 },
+    { code: "+231", iso: "lr", name: "Liberia", digits: 7 },
+    { code: "+232", iso: "sl", name: "Sierra Leone", digits: 8 },
+    { code: "+235", iso: "td", name: "Chad", digits: 8 },
+    { code: "+236", iso: "cf", name: "Central African Republic", digits: 8 },
+    { code: "+237", iso: "cm", name: "Cameroon", digits: 9 },
+    { code: "+238", iso: "cv", name: "Cape Verde", digits: 7 },
     { code: "+239", iso: "st", name: "Sao Tome", digits: 7 },
+    { code: "+240", iso: "gq", name: "Equatorial Guinea", digits: 9 },
+    { code: "+241", iso: "ga", name: "Gabon", digits: 8 },
+    { code: "+242", iso: "cg", name: "Congo Republic", digits: 9 },
+    { code: "+245", iso: "gw", name: "Guinea-Bissau", digits: 7 },
+    { code: "+248", iso: "sc", name: "Seychelles", digits: 7 },
+    { code: "+253", iso: "dj", name: "Djibouti", digits: 8 },
+    { code: "+261", iso: "mg", name: "Madagascar", digits: 9 },
     { code: "+262", iso: "re", name: "Reunion", digits: 9 },
-    { code: "+262", iso: "yt", name: "Mayotte", digits: 9 }
+    { code: "+266", iso: "ls", name: "Lesotho", digits: 8 },
+    { code: "+268", iso: "sz", name: "Eswatini", digits: 7 },
+    { code: "+269", iso: "km", name: "Comoros", digits: 7 },
+    { code: "+291", iso: "er", name: "Eritrea", digits: 7 }
 ];
 
 function getFlagSvg(country) {
@@ -959,7 +946,7 @@ function setSelectedCountry(country) {
 }
 
 // ============================================================
-// ✅ FIXED: LOAD REFERRER DATA - PRIORITIZE USERS NODE
+// ✅ LOAD REFERRER DATA - SEARCH ONLY IN USERS NODE
 // ============================================================
 async function loadReferrerData() {
     if (!referredByCode) {
@@ -974,66 +961,43 @@ async function loadReferrerData() {
         let displayName = 'User';
         let referrerUidFound = null;
         let referralData = null;
-        let foundLocation = '';
         
-        // ✅ STEP 1: FIRST check users node (PRIORITY)
-        console.log('[REFERRAL] 📁 Step 1: Searching /users/ node...');
-        const usersSnap = await get(ref(rtdb, 'users'));
-        
-        if (usersSnap.exists()) {
-            let foundUser = null;
-            let foundUid = null;
+        // ✅ Search users by referralCode using query
+        try {
+            console.log('[REFERRAL] 📁 Searching /users/ by referralCode...');
+            const usersRef = ref(rtdb, 'users');
+            const usersQuery = query(usersRef, orderByChild('referralCode'), equalTo(referredByCode));
+            const snapshot = await get(usersQuery);
             
-            usersSnap.forEach(child => {
-                const user = child.val();
-                // Check if user has referralCode and it matches
-                if (user.referralCode) {
-                    const userCode = user.referralCode.toUpperCase().trim();
-                    const searchCode = referredByCode.toUpperCase().trim();
-                    if (userCode === searchCode) {
-                        foundUser = user;
-                        foundUid = child.key;
-                        console.log('[REFERRAL] ✅ Found in /users/ node:', foundUid);
-                        console.log('[REFERRAL] 📋 User data:', foundUser);
-                    }
+            if (snapshot.exists()) {
+                let foundUser = null;
+                let foundUid = null;
+                snapshot.forEach(child => {
+                    foundUser = child.val();
+                    foundUid = child.key;
+                });
+                
+                if (foundUser && foundUid) {
+                    found = true;
+                    referrerUidFound = foundUid;
+                    displayName = foundUser.fullName || foundUser.username || foundUser.name || 'User';
+                    referralData = {
+                        uid: foundUid,
+                        username: foundUser.username || 'User',
+                        fullName: foundUser.fullName || 'User',
+                        referralCode: foundUser.referralCode
+                    };
+                    console.log('[REFERRAL] ✅ Found:', displayName);
                 }
-            });
-            
-            if (foundUser && foundUid) {
-                found = true;
-                referrerUidFound = foundUid;
-                displayName = foundUser.fullName || foundUser.username || foundUser.name || 'User';
-                referralData = {
-                    uid: foundUid,
-                    username: foundUser.username || 'User',
-                    fullName: foundUser.fullName || 'User',
-                    createdAt: foundUser.createdAt || Date.now()
-                };
-                foundLocation = '/users/ node (referralCode)';
             }
+        } catch (queryError) {
+            console.log('[REFERRAL] Query failed:', queryError.message);
         }
         
-        // ✅ STEP 2: If not found, check referrals node
-        if (!found) {
-            console.log('[REFERRAL] 📁 Step 2: Searching /referrals/ node...');
-            const refPath = ref(rtdb, `referrals/${referredByCode}`);
-            const refSnap = await get(refPath);
-            
-            if (refSnap.exists()) {
-                console.log('[REFERRAL] ✅ Found in /referrals/ node');
-                const data = refSnap.val();
-                found = true;
-                referrerUidFound = data.uid || data.referrerUid;
-                displayName = data.fullName || data.username || data.name || 'User';
-                referralData = data;
-                foundLocation = '/referrals/ node';
-            }
-        }
-        
-        // ✅ STEP 3: If still not found, try to find by UID (if code is UID)
-        if (!found) {
-            console.log('[REFERRAL] 📁 Step 3: Trying as UID...');
+        // ✅ If not found, try as UID
+        if (!found && referredByCode.length > 10) {
             try {
+                console.log('[REFERRAL] 📁 Trying as UID...');
                 const userSnap = await get(ref(rtdb, `users/${referredByCode}`));
                 if (userSnap.exists()) {
                     const user = userSnap.val();
@@ -1044,63 +1008,12 @@ async function loadReferrerData() {
                         uid: referredByCode,
                         username: user.username || 'User',
                         fullName: user.fullName || 'User',
-                        createdAt: user.createdAt || Date.now()
+                        referralCode: user.referralCode
                     };
-                    foundLocation = '/users/ node (by UID)';
                     console.log('[REFERRAL] ✅ Found by UID');
                 }
-            } catch (e) {
-                console.log('[REFERRAL] Not a UID');
-            }
-        }
-        
-        // ✅ STEP 4: Try email
-        if (!found && referredByCode.includes('@')) {
-            console.log('[REFERRAL] 📁 Step 4: Trying as email...');
-            const usersSnap = await get(ref(rtdb, 'users'));
-            if (usersSnap.exists()) {
-                usersSnap.forEach(child => {
-                    const user = child.val();
-                    if (user.email && user.email.toLowerCase() === referredByCode.toLowerCase()) {
-                        found = true;
-                        referrerUidFound = child.key;
-                        displayName = user.fullName || user.username || user.name || 'User';
-                        referralData = {
-                            uid: child.key,
-                            username: user.username || 'User',
-                            fullName: user.fullName || 'User',
-                            email: user.email,
-                            createdAt: user.createdAt || Date.now()
-                        };
-                        foundLocation = '/users/ node (by email)';
-                        console.log('[REFERRAL] ✅ Found by email');
-                    }
-                });
-            }
-        }
-        
-        // ✅ STEP 5: Try phone
-        if (!found && referredByCode.startsWith('+')) {
-            console.log('[REFERRAL] 📁 Step 5: Trying as phone...');
-            const usersSnap = await get(ref(rtdb, 'users'));
-            if (usersSnap.exists()) {
-                usersSnap.forEach(child => {
-                    const user = child.val();
-                    if (user.phone && user.phone === referredByCode) {
-                        found = true;
-                        referrerUidFound = child.key;
-                        displayName = user.fullName || user.username || user.name || 'User';
-                        referralData = {
-                            uid: child.key,
-                            username: user.username || 'User',
-                            fullName: user.fullName || 'User',
-                            phone: user.phone,
-                            createdAt: user.createdAt || Date.now()
-                        };
-                        foundLocation = '/users/ node (by phone)';
-                        console.log('[REFERRAL] ✅ Found by phone');
-                    }
-                });
+            } catch (uidError) {
+                console.log('[REFERRAL] UID check failed');
             }
         }
         
@@ -1116,11 +1029,10 @@ async function loadReferrerData() {
             referralIcon.innerHTML = '<i class="fas fa-user-check"></i>';
             
             console.log('[REFERRAL] ✅ Found!', displayName, 'UID:', referrerUid);
-            console.log('[REFERRAL] 📍 Location:', foundLocation);
         } else {
-            console.log('[REFERRAL] ❌ Not found anywhere');
+            console.log('[REFERRAL] ❌ Not found');
             referralName.textContent = `"${referredByCode}" - Not Found`;
-            referralCodeDisplay.textContent = '💡 Create a referral code first';
+            referralCodeDisplay.textContent = '💡 No user has this referral code';
             referralBox.className = 'referral-box visible error';
             referralLabel.textContent = '⚠️ Invalid Referral';
             referralBadge.textContent = 'NOT FOUND';
@@ -1138,7 +1050,7 @@ async function loadReferrerData() {
 }
 
 // ============================================================
-// GENERATE STATIC REFERRAL CODE - ABOTRAXXXXXX
+// GENERATE REFERRAL CODE
 // ============================================================
 function generateStaticReferralCode(uid) {
     const prefix = 'ABOTRA';
@@ -1173,25 +1085,11 @@ function generateStaticReferralCode(uid) {
 
 async function checkReferralCodeExists(code) {
     try {
-        // Check users node first
-        const usersSnap = await get(ref(rtdb, 'users'));
-        if (usersSnap.exists()) {
-            let found = false;
-            usersSnap.forEach(child => {
-                const user = child.val();
-                if (user.referralCode && user.referralCode.toUpperCase() === code.toUpperCase()) {
-                    found = true;
-                }
-            });
-            if (found) return true;
-        }
-        
-        // Check referrals node
-        const refPath = ref(rtdb, `referrals/${code}`);
-        const snapshot = await get(refPath);
-        if (snapshot.exists()) return true;
-        
-        return false;
+        // Check if any user has this referralCode
+        const usersRef = ref(rtdb, 'users');
+        const usersQuery = query(usersRef, orderByChild('referralCode'), equalTo(code));
+        const snapshot = await get(usersQuery);
+        return snapshot.exists();
     } catch (e) { return false; }
 }
 
@@ -1207,45 +1105,40 @@ async function hashString(str) {
 }
 
 // ============================================================
-// CHECK IF USER EXISTS
+// CHECK IF USER EXISTS - ONLY IN USERS NODE
 // ============================================================
 async function checkUserExists(email, username, phone) {
     try {
-        if (username) {
-            const usernameRef = ref(rtdb, `usernames/${username.toLowerCase()}`);
-            const snap = await get(usernameRef);
-            if (snap.exists()) {
-                return { exists: true, field: 'username', message: 'Username already taken' };
+        const usersRef = ref(rtdb, 'users');
+        const snapshot = await get(usersRef);
+        
+        if (snapshot.exists()) {
+            let found = false;
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.username && user.username.toLowerCase() === username.toLowerCase()) {
+                    found = true;
+                }
+                if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                    found = true;
+                }
+                if (user.phone && user.phone === phone) {
+                    found = true;
+                }
+            });
+            if (found) {
+                return { exists: true, message: 'User already exists' };
             }
         }
-        
-        if (email) {
-            const emailHash = await hashString(email.toLowerCase());
-            const emailRef = ref(rtdb, `emails/${emailHash}`);
-            const snap = await get(emailRef);
-            if (snap.exists()) {
-                return { exists: true, field: 'email', message: 'Email already registered' };
-            }
-        }
-        
-        if (phone) {
-            const phoneHash = await hashString(phone);
-            const phoneRef = ref(rtdb, `phones/${phoneHash}`);
-            const snap = await get(phoneRef);
-            if (snap.exists()) {
-                return { exists: true, field: 'phone', message: 'Phone number already registered' };
-            }
-        }
-        
         return { exists: false };
     } catch (error) {
-        console.error('[CHECK] Error checking user:', error);
+        console.error('[CHECK] Error:', error);
         return { exists: false };
     }
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE
+// ✅ SAVE USER TO FIREBASE - SINGLE NODE ONLY (users/{uid})
 // ============================================================
 async function saveUserToFirebase(user, userData) {
     console.log('[SAVE] Starting save for user:', user.uid);
@@ -1256,6 +1149,7 @@ async function saveUserToFirebase(user, userData) {
     const emailLower = userData.email ? userData.email.toLowerCase() : null;
     const fullPhone = userData.phone || null;
     
+    // Generate referral code
     let referralCode = generateStaticReferralCode(user.uid);
     let attempts = 0;
     while (await checkReferralCodeExists(referralCode) && attempts < 10) {
@@ -1263,6 +1157,7 @@ async function saveUserToFirebase(user, userData) {
         attempts++;
     }
     
+    // ✅ ALL DATA IN ONE NODE - users/{uid}
     const dataToSave = {
         uid: user.uid,
         username: usernameLower,
@@ -1282,84 +1177,34 @@ async function saveUserToFirebase(user, userData) {
         updatedAt: timestamp
     };
     
-    console.log('[SAVE] Data to save:', JSON.stringify(dataToSave, null, 2));
+    console.log('[SAVE] ✅ Saving to users/', user.uid);
+    console.log('[SAVE] Data:', JSON.stringify(dataToSave, null, 2));
     
+    // ✅ ONLY SAVE TO users/{uid} - NO OTHER NODES
     try {
         await set(ref(rtdb, `users/${user.uid}`), dataToSave);
-        console.log('[SAVE] ✅ User saved with fullName and username');
+        console.log('[SAVE] ✅ User saved successfully!');
+        console.log('[SAVE] ✅ FullName:', userData.fullName);
+        console.log('[SAVE] ✅ Username:', usernameLower);
+        console.log('[SAVE] ✅ ReferralCode:', referralCode);
+        console.log('[SAVE] ✅ ReferredBy:', userData.referredBy || 'none');
+        return referralCode;
     } catch (err) {
         console.error('[SAVE] ❌ Failed to save user:', err);
         throw err;
     }
-    
-    // Save referral
-    try {
-        await set(ref(rtdb, `referrals/${referralCode}`), {
-            uid: user.uid,
-            username: usernameLower,
-            fullName: userData.fullName,
-            createdAt: timestamp
-        });
-        console.log('[SAVE] ✅ Referral saved');
-    } catch (error) {
-        console.error('[SAVE] Referral save error (non-critical):', error);
-    }
-    
-    // Save username
-    try {
-        await set(ref(rtdb, `usernames/${usernameLower}`), {
-            uid: user.uid,
-            username: usernameLower,
-            timestamp: timestamp
-        });
-        console.log('[SAVE] ✅ Username saved');
-    } catch (error) {
-        console.error('[SAVE] Username save error (non-critical):', error);
-    }
-    
-    // Save email
-    if (emailLower) {
-        try {
-            const emailHash = await hashString(emailLower);
-            await set(ref(rtdb, `emails/${emailHash}`), {
-                uid: user.uid,
-                email: emailLower,
-                timestamp: timestamp
-            });
-            console.log('[SAVE] ✅ Email saved');
-        } catch (error) {
-            console.error('[SAVE] Email save error (non-critical):', error);
-        }
-    }
-    
-    // Save phone
-    if (fullPhone) {
-        try {
-            const phoneHash = await hashString(fullPhone);
-            await set(ref(rtdb, `phones/${phoneHash}`), {
-                uid: user.uid,
-                phone: fullPhone,
-                timestamp: timestamp
-            });
-            console.log('[SAVE] ✅ Phone saved');
-        } catch (error) {
-            console.error('[SAVE] Phone save error (non-critical):', error);
-        }
-    }
-    
-    return referralCode;
 }
 
 // ============================================================
-// HANDLE REFERRAL
+// HANDLE REFERRAL - UPDATE REFERRER'S USERS NODE
 // ============================================================
 async function handleReferral(newUserId) {
     if (!referredByCode || !referrerUid) {
-        console.log('[REFERRAL] No referral to process (no UID)');
+        console.log('[REFERRAL] No referral to process');
         return;
     }
     
-    console.log('[REFERRAL] Processing referral for:', referredByCode, 'UID:', referrerUid);
+    console.log('[REFERRAL] Processing for:', referredByCode, 'UID:', referrerUid);
     
     try {
         await runTransaction(ref(rtdb, `users/${referrerUid}`), (current) => {
@@ -1387,7 +1232,7 @@ async function handleReferral(newUserId) {
             current.referrals = referrals;
             return current;
         });
-        console.log('[REFERRAL] ✅ Referrer updated via transaction');
+        console.log('[REFERRAL] ✅ Referrer updated');
     } catch (txError) {
         console.error('[REFERRAL] Transaction failed:', txError);
         try {
@@ -1404,10 +1249,10 @@ async function handleReferral(newUserId) {
                     referralCode: referredByCode
                 });
                 await update(ref(rtdb, `users/${referrerUid}`), { referrals: referrals });
-                console.log('[REFERRAL] ✅ Referrer updated via direct update');
+                console.log('[REFERRAL] ✅ Direct update');
             }
         } catch (updateError) {
-            console.error('[REFERRAL] Direct update failed:', updateError);
+            console.error('[REFERRAL] Update failed:', updateError);
         }
     }
 }
@@ -1498,7 +1343,7 @@ async function registerWithEmail() {
         try {
             await handleReferral(user.uid);
         } catch (refError) {
-            console.error('[REGISTER] Referral handling error (non-critical):', refError);
+            console.error('[REGISTER] Referral error:', refError);
         }
         
         try {
@@ -1511,7 +1356,7 @@ async function registerWithEmail() {
                 read: false,
                 timestamp: Date.now()
             });
-            console.log('[REGISTER] ✅ Welcome notification sent');
+            console.log('[REGISTER] ✅ Notification sent');
         } catch (e) {
             console.log('[REGISTER] Notification skip:', e.message);
         }
@@ -1526,22 +1371,19 @@ async function registerWithEmail() {
 
     } catch (error) {
         console.error('[REGISTER] ❌ Error:', error);
-        
         let message = 'Registration failed. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
             message = 'Email already registered';
         } else if (error.code === 'auth/weak-password') {
-            message = 'Password too weak. Use at least 8 characters with uppercase, lowercase, number and special character.';
+            message = 'Password too weak.';
         } else if (error.code === 'auth/operation-not-allowed') {
-            message = 'Email/password accounts are not enabled. Please contact support.';
+            message = 'Email/password accounts are not enabled.';
         } else if (error.code === 'auth/network-request-failed') {
-            message = 'Network error. Please check your connection.';
+            message = 'Network error.';
         } else if (error.code === 'auth/invalid-email') {
             message = 'Invalid email address';
         } else if (error.code === 'auth/too-many-requests') {
-            message = 'Too many requests. Please try again later.';
-        } else if (error.message && error.message.includes('permission_denied')) {
-            message = 'Permission denied. Please contact support.';
+            message = 'Too many requests.';
         } else if (error.message) {
             message = error.message;
         }
@@ -1584,7 +1426,7 @@ async function registerWithPhone() {
         return;
     }
     if (phoneNumber.length < country.digits) {
-        showNotification(`Phone number must have ${country.digits} digits (excluding ${country.code})`, 'error');
+        showNotification(`Phone number must have ${country.digits} digits`, 'error');
         return;
     }
 
@@ -1633,7 +1475,7 @@ async function registerWithPhone() {
         try {
             await handleReferral(user.uid);
         } catch (refError) {
-            console.error('[PHONE] Referral handling error (non-critical):', refError);
+            console.error('[PHONE] Referral error:', refError);
         }
         
         try {
@@ -1646,7 +1488,7 @@ async function registerWithPhone() {
                 read: false,
                 timestamp: Date.now()
             });
-            console.log('[PHONE] ✅ Welcome notification sent');
+            console.log('[PHONE] ✅ Notification sent');
         } catch (e) {
             console.log('[PHONE] Notification skip:', e.message);
         }
@@ -1661,15 +1503,9 @@ async function registerWithPhone() {
 
     } catch (error) {
         console.error('[PHONE] ❌ Error:', error);
-        let message = 'Registration failed. Please try again.';
+        let message = 'Registration failed.';
         if (error.code === 'auth/email-already-in-use') {
             message = 'Phone number already registered';
-        } else if (error.code === 'auth/weak-password') {
-            message = 'Password too weak.';
-        } else if (error.code === 'auth/operation-not-allowed') {
-            message = 'Phone registration is not enabled.';
-        } else if (error.code === 'auth/network-request-failed') {
-            message = 'Network error. Please check your connection.';
         } else if (error.message) {
             message = error.message;
         }
@@ -1732,21 +1568,19 @@ setTimeout(() => {
     initCountryDropdowns();
 }, 100);
 
-// Load referrer data
 setTimeout(() => {
     loadReferrerData();
 }, 800);
 
-// Check if already logged in
 onAuthStateChanged(auth, (user) => {
     if (user && window.location.pathname.includes('register.html')) {
-        console.log('[AUTH] User already logged in, redirecting to dashboard');
+        console.log('[AUTH] Already logged in, redirecting');
         window.location.href = 'dashboard.html';
     }
 });
 
 console.log('[REGISTER] ✅ Page loaded');
-console.log('[REGISTER] Referral code detected:', referredByCode);
+console.log('[REGISTER] Referral code:', referredByCode || 'none');
 </script>
 </body>
 </html>
