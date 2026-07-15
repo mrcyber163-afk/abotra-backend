@@ -624,10 +624,10 @@ const rtdb = getDatabase(app);
 console.log('[FIREBASE] ✅ Firebase initialized');
 
 // ============================================================
-// COUNTRIES DATA - ALL COUNTRIES IN THE WORLD
+// COUNTRIES DATA - ALL COUNTRIES
 // ============================================================
 const countriesData = [
-    // Africa
+    // AFRICA - All countries
     { code: "+255", iso: "tz", name: "Tanzania", digits: 9 },
     { code: "+265", iso: "mw", name: "Malawi", digits: 9 },
     { code: "+260", iso: "zm", name: "Zambia", digits: 9 },
@@ -681,9 +681,6 @@ const countriesData = [
     { code: "+268", iso: "sz", name: "Eswatini", digits: 7 },
     { code: "+269", iso: "km", name: "Comoros", digits: 7 },
     { code: "+291", iso: "er", name: "Eritrea", digits: 7 },
-    { code: "+297", iso: "aw", name: "Aruba", digits: 7 },
-    { code: "+298", iso: "fo", name: "Faroe Islands", digits: 6 },
-    { code: "+299", iso: "gl", name: "Greenland", digits: 6 },
     
     // North America
     { code: "+1", iso: "us", name: "United States", digits: 10 },
@@ -839,27 +836,12 @@ const countriesData = [
     { code: "+975", iso: "bt", name: "Bhutan", digits: 8 },
     { code: "+976", iso: "mn", name: "Mongolia", digits: 8 },
     { code: "+977", iso: "np", name: "Nepal", digits: 10 },
-    { code: "+978", iso: "np", name: "Nepal", digits: 10 },
-    { code: "+979", iso: "np", name: "Nepal", digits: 10 },
-    { code: "+981", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+982", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+983", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+984", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+985", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+986", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+987", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+988", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+989", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+990", iso: "ir", name: "Iran", digits: 10 },
-    { code: "+991", iso: "ir", name: "Iran", digits: 10 },
     { code: "+992", iso: "tj", name: "Tajikistan", digits: 9 },
     { code: "+993", iso: "tm", name: "Turkmenistan", digits: 8 },
     { code: "+994", iso: "az", name: "Azerbaijan", digits: 9 },
     { code: "+995", iso: "ge", name: "Georgia", digits: 9 },
     { code: "+996", iso: "kg", name: "Kyrgyzstan", digits: 9 },
-    { code: "+997", iso: "kg", name: "Kyrgyzstan", digits: 9 },
-    { code: "+998", iso: "uz", name: "Uzbekistan", digits: 9 },
-    { code: "+999", iso: "uz", name: "Uzbekistan", digits: 9 }
+    { code: "+998", iso: "uz", name: "Uzbekistan", digits: 9 }
 ];
 
 function getFlagSvg(country) {
@@ -1135,12 +1117,6 @@ async function loadReferrerData() {
     console.log('[REFERRAL] Loading referrer data for code:', referredByCode);
     
     try {
-        // Check if user is authenticated first
-        if (!auth.currentUser) {
-            console.log('[REFERRAL] User not authenticated, waiting...');
-            // Still try to read, rules might allow public read
-        }
-        
         const refPath = ref(rtdb, `referrals/${referredByCode}`);
         console.log('[REFERRAL] Reading from path:', refPath.toString());
         
@@ -1154,7 +1130,6 @@ async function loadReferrerData() {
             
             let displayName = 'User';
             
-            // Try to get user details from users node
             try {
                 if (data.uid) {
                     const userSnap = await get(ref(rtdb, `users/${data.uid}`));
@@ -1163,7 +1138,6 @@ async function loadReferrerData() {
                         console.log('[REFERRAL] User data found:', userData);
                         displayName = userData.fullName || userData.username || data.username || 'User';
                     } else {
-                        // Fallback to data from referrals
                         displayName = data.fullName || data.username || 'User';
                     }
                 } else {
@@ -1174,7 +1148,6 @@ async function loadReferrerData() {
                 displayName = data.fullName || data.username || 'User';
             }
             
-            // Update UI
             referralName.textContent = displayName;
             referralCodeDisplay.textContent = `Code: ${referredByCode}`;
             referralBox.className = 'referral-box visible success';
@@ -1194,8 +1167,6 @@ async function loadReferrerData() {
         }
     } catch (error) {
         console.error('[REFERRAL] ❌ Error loading referrer:', error);
-        console.error('[REFERRAL] Error details:', error.message);
-        
         referralName.textContent = 'Error loading referral';
         referralCodeDisplay.textContent = `Code: ${referredByCode}`;
         referralBox.className = 'referral-box visible error';
@@ -1206,18 +1177,41 @@ async function loadReferrerData() {
 }
 
 // ============================================================
-// STATIC REFERRAL CODE GENERATION
+// ✅ FIXED: GENERATE STATIC REFERRAL CODE - ABOTRAXXXXXX FORMAT
 // ============================================================
 function generateStaticReferralCode(uid) {
     const prefix = 'ABOTRA';
-    const uidPart = uid.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+    const uidPart = uid.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let suffix = '';
+    
+    // Use first 6 chars of uid for uniqueness
+    const base = uidPart.slice(0, 6);
+    if (base.length < 6) {
+        // Pad with random chars if uid is short
+        for (let i = 0; i < 6; i++) {
+            const idx = Math.floor(Math.random() * chars.length);
+            suffix += chars.charAt(idx);
+        }
+        return prefix + uidPart + suffix;
+    }
+    
+    // Generate 3 char suffix based on uid
     for (let i = 0; i < 3; i++) {
-        const idx = parseInt(uidPart[i] || '0', 36) % chars.length;
+        const idx = parseInt(base[i] || '0', 36) % chars.length;
         suffix += chars.charAt(idx);
     }
-    return prefix + uidPart + suffix;
+    
+    // Ensure total length is at least 10
+    let code = prefix + uidPart.slice(0, 6) + suffix;
+    if (code.length < 10) {
+        const pad = 10 - code.length;
+        for (let i = 0; i < pad; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+    }
+    
+    return code.toUpperCase();
 }
 
 async function checkReferralCodeExists(code) {
@@ -1278,16 +1272,18 @@ async function checkUserExists(email, username, phone) {
 }
 
 // ============================================================
-// SAVE USER TO FIREBASE
+// ✅ FIXED: SAVE USER WITH ALL FIELDS (FULLNAME, USERNAME, ETC)
 // ============================================================
 async function saveUserToFirebase(user, userData) {
     console.log('[SAVE] Starting save for user:', user.uid);
+    console.log('[SAVE] UserData:', userData);
     
     const timestamp = Date.now();
     const usernameLower = userData.username.toLowerCase();
     const emailLower = userData.email ? userData.email.toLowerCase() : null;
     const fullPhone = userData.phone || null;
     
+    // Generate referral code - ABOTRAXXXXXX format
     let referralCode = generateStaticReferralCode(user.uid);
     let attempts = 0;
     while (await checkReferralCodeExists(referralCode) && attempts < 10) {
@@ -1295,6 +1291,7 @@ async function saveUserToFirebase(user, userData) {
         attempts++;
     }
     
+    // ✅ Save ALL user data - including fullName and username
     const dataToSave = {
         uid: user.uid,
         username: usernameLower,
@@ -1319,7 +1316,7 @@ async function saveUserToFirebase(user, userData) {
     // Save user data
     try {
         await set(ref(rtdb, `users/${user.uid}`), dataToSave);
-        console.log('[SAVE] ✅ User saved');
+        console.log('[SAVE] ✅ User saved with fullName and username');
     } catch (err) {
         console.error('[SAVE] ❌ Failed to save user:', err);
         throw err;
@@ -1464,7 +1461,7 @@ function validatePassword(password) {
 }
 
 // ============================================================
-// EMAIL REGISTRATION
+// EMAIL REGISTRATION - FIXED
 // ============================================================
 async function registerWithEmail() {
     if (!termsCheckbox.checked) {
@@ -1592,7 +1589,7 @@ async function registerWithEmail() {
 }
 
 // ============================================================
-// PHONE REGISTRATION
+// PHONE REGISTRATION - FIXED
 // ============================================================
 async function registerWithPhone() {
     if (!termsCheckbox.checked) {

@@ -392,6 +392,18 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function generateStaticReferralCode(uid) {
+    const prefix = 'ABOTRA';
+    const uidPart = uid.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let suffix = '';
+    for (let i = 0; i < 3; i++) {
+        const idx = parseInt(uidPart[i] || '0', 36) % chars.length;
+        suffix += chars.charAt(idx);
+    }
+    return prefix + uidPart + suffix;
+}
+
 async function loadUserData() {
     if (!currentUser) return;
     try {
@@ -402,7 +414,7 @@ async function loadUserData() {
             
             let referralCode = currentUserData.referralCode;
             if (!referralCode) {
-                referralCode = generateReferralCode();
+                referralCode = generateStaticReferralCode(currentUser.uid);
                 await update(ref(db, `users/${currentUser.uid}`), { referralCode });
                 currentUserData.referralCode = referralCode;
                 console.log('[AFFILIATE] New referral code generated:', referralCode);
@@ -417,7 +429,7 @@ async function loadUserData() {
             document.getElementById('dailyBotProfit').innerHTML = `<span style="color:#FFD700;">$${(currentUserData.botProfitCommissionEarned || 0).toFixed(2)}</span>`;
             document.getElementById('withdrawnCommission').innerHTML = `<span style="color:#FFD700;">$${(currentUserData.affiliateWithdrawn || 0).toFixed(2)}</span>`;
         } else {
-            const referralCode = generateReferralCode();
+            const referralCode = generateStaticReferralCode(currentUser.uid);
             await set(ref(db, `users/${currentUser.uid}`), {
                 uid: currentUser.uid,
                 email: currentUser.email,
@@ -437,19 +449,11 @@ async function loadUserData() {
     }
 }
 
-function generateReferralCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-    return result;
-}
-
 async function loadReferralData() {
     if (!currentUser) return;
     try {
         await loadUserData();
         
-        // Load from users node (referredBy = referral code)
         const usersSnap = await get(ref(db, 'users'));
         const referrals = [];
         const refCode = currentUserData?.referralCode;
@@ -470,14 +474,12 @@ async function loadReferralData() {
             });
         }
         
-        // Also check affiliate node for backup
         try {
             const affSnap = await get(ref(db, 'affiliate'));
             if (affSnap.exists()) {
                 affSnap.forEach(child => {
                     const refData = child.val();
                     if (refData.referredBy === currentUser.uid) {
-                        // Check if already added
                         const exists = referrals.some(r => r.id === child.key);
                         if (!exists) {
                             referrals.push({
@@ -494,7 +496,6 @@ async function loadReferralData() {
             }
         } catch(e) {}
         
-        // Sort by join date (newest first)
         referrals.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
         
         const container = document.getElementById('recentReferralsList');
@@ -551,7 +552,6 @@ async function loadTeamStructure() {
                 }
             });
             
-            // Count level 2 (referrals of level 1)
             for (const member of members) {
                 if (member.uid) {
                     snapshot.forEach(child => {

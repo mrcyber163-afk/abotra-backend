@@ -429,29 +429,31 @@ let phoneConfirmationResult = null;
 let rtdbListeners = [];
 
 // ============================================================
-// SVG COUNTRY FLAGS
+// SVG COUNTRY FLAGS - ALL AFRICAN COUNTRIES
 // ============================================================
 const countryCodeMap = {
-    "Tanzania":"tz","Kenya":"ke","Uganda":"ug","Malawi":"mw","Zambia":"zm",
-    "South Africa":"za","Nigeria":"ng","Ghana":"gh","Egypt":"eg","Morocco":"ma",
-    "Algeria":"dz","Tunisia":"tn","Libya":"ly","Sudan":"sd","Ethiopia":"et",
-    "Somalia":"so","Rwanda":"rw","Burundi":"bi","Mozambique":"mz","Angola":"ao",
-    "Botswana":"bw","Namibia":"na","Zimbabwe":"zw","United States":"us",
-    "United Kingdom":"gb","Germany":"de","France":"fr","Italy":"it","Spain":"es",
-    "Portugal":"pt","Netherlands":"nl","Belgium":"be","Switzerland":"ch",
-    "Austria":"at","Sweden":"se","Norway":"no","Denmark":"dk","Finland":"fi",
-    "Ireland":"ie","Poland":"pl","Czech Republic":"cz","Hungary":"hu",
-    "Romania":"ro","Bulgaria":"bg","Greece":"gr","Turkey":"tr","Russia":"ru",
-    "Ukraine":"ua","India":"in","China":"cn","Japan":"jp","South Korea":"kr",
-    "Indonesia":"id","Philippines":"ph","Vietnam":"vn","Thailand":"th",
-    "Malaysia":"my","Singapore":"sg","Australia":"au","New Zealand":"nz",
-    "Brazil":"br","Argentina":"ar","Mexico":"mx","Chile":"cl","Peru":"pe",
-    "Colombia":"co","Venezuela":"ve","Pakistan":"pk","Bangladesh":"bd",
-    "Sri Lanka":"lk","Nepal":"np","Afghanistan":"af","Iraq":"iq","Iran":"ir",
-    "Saudi Arabia":"sa","Yemen":"ye","Oman":"om","UAE":"ae","Qatar":"qa",
-    "Kuwait":"kw","Israel":"il","Jordan":"jo","Lebanon":"lb","Syria":"sy",
-    "Canada":"ca","Cuba":"cu","Jamaica":"jm","Haiti":"ht","Dominican Republic":"do",
-    "Bahamas":"bs","Trinidad and Tobago":"tt","Barbados":"bb"
+    // East Africa
+    "Tanzania":"tz","Kenya":"ke","Uganda":"ug","Rwanda":"rw","Burundi":"bi",
+    "Somalia":"so","Ethiopia":"et","Eritrea":"er","Djibouti":"dj","South Sudan":"ss",
+    // Southern Africa
+    "Malawi":"mw","Zambia":"zm","Zimbabwe":"zw","Mozambique":"mz","Angola":"ao",
+    "Namibia":"na","Botswana":"bw","South Africa":"za","Lesotho":"ls","Eswatini":"sz",
+    // Central Africa
+    "Congo DRC":"cd","Congo Republic":"cg","Gabon":"ga","Cameroon":"cm",
+    "Central African Republic":"cf","Chad":"td","Equatorial Guinea":"gq",
+    // West Africa
+    "Nigeria":"ng","Ghana":"gh","Ivory Coast":"ci","Senegal":"sn","Guinea":"gn",
+    "Guinea-Bissau":"gw","Mali":"ml","Burkina Faso":"bf","Benin":"bj","Togo":"tg",
+    "Liberia":"lr","Sierra Leone":"sl","Gambia":"gm","Cape Verde":"cv",
+    "Mauritania":"mr","Niger":"ne",
+    // North Africa
+    "Egypt":"eg","Morocco":"ma","Algeria":"dz","Tunisia":"tn","Libya":"ly",
+    "Sudan":"sd","Western Sahara":"eh",
+    // Island Nations
+    "Madagascar":"mg","Mauritius":"mu","Seychelles":"sc","Comoros":"km",
+    "Sao Tome and Principe":"st","Reunion":"re","Mayotte":"yt",
+    // Others
+    "Zanzibar":"tz","Puntland":"so"
 };
 
 function getCountryFlagUrl(country) {
@@ -487,6 +489,21 @@ function escapeHtml(t) {
 
 function getFlag(country) {
     return getCountryFlagHtml(country);
+}
+
+// ============================================================
+// GENERATE REFERRAL CODE - FIXED (STATIC, BASED ON UID)
+// ============================================================
+function generateStaticReferralCode(uid) {
+    const prefix = 'ABOTRA';
+    const uidPart = uid.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let suffix = '';
+    for (let i = 0; i < 3; i++) {
+        const idx = parseInt(uidPart[i] || '0', 36) % chars.length;
+        suffix += chars.charAt(idx);
+    }
+    return prefix + uidPart + suffix;
 }
 
 // ============================================================
@@ -847,7 +864,12 @@ function renderUserUI(user, data) {
     document.getElementById('refCount').textContent = referralCount;
     document.getElementById('totalCommission').textContent = `$${totalCommission.toFixed(2)}`;
     
-    const refCode = data.referralCode || 'ABOTRA' + Math.random().toString(36).substring(2,8).toUpperCase();
+    // ✅ FIXED: Use existing referral code from database
+    let refCode = data.referralCode;
+    if (!refCode) {
+        refCode = generateStaticReferralCode(user.uid);
+        update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode }).catch(() => {});
+    }
     const domain = window.location.origin;
     const refLinkInput = document.getElementById('referralLink');
     if (refLinkInput) {
@@ -1027,7 +1049,7 @@ document.getElementById('saveUsernameModal')?.addEventListener('click', async ()
 });
 
 // ============================================================
-// LOAD USER DATA - With referral counting from users node
+// LOAD USER DATA
 // ============================================================
 async function loadUserData(user) {
     if (!user) return;
@@ -1044,18 +1066,27 @@ async function loadUserData(user) {
         if(userSnap.exists()) {
             userData = userSnap.val();
         } else {
+            const refCode = generateStaticReferralCode(user.uid);
             userData = { 
                 username: user.email ? user.email.split('@')[0] : 'user_' + user.uid.substring(0, 6),
                 email: user.email || '',
                 createdAt: Date.now(),
                 country: 'Tanzania',
                 commissionEarned: 0,
-                referralCount: 0 
+                referralCount: 0,
+                referralCode: refCode
             };
             await set(userRef, userData);
         }
         
-        // Count referrals from all users who have referredBy = user's referral code
+        // Ensure referral code exists
+        if (!userData.referralCode) {
+            const refCode = generateStaticReferralCode(user.uid);
+            await update(ref(rtdb, `users/${user.uid}`), { referralCode: refCode });
+            userData.referralCode = refCode;
+        }
+        
+        // Count referrals
         let referralCount = 0;
         const refCode = userData.referralCode;
         if (allUsersSnap.exists() && refCode) {
@@ -1068,7 +1099,6 @@ async function loadUserData(user) {
         }
         userData.referralCount = referralCount;
         
-        // Also check affiliate node for backup
         try {
             const affSnap = await get(ref(rtdb, 'affiliate'));
             if (affSnap.exists()) {
@@ -1106,7 +1136,6 @@ async function loadUserData(user) {
         renderUserUI(user, userData);
         await BiometricManager.checkStatus(user);
         
-        // Update referral count in database
         if (userData.referralCount !== (userSnap.val()?.referralCount || 0)) {
             await update(ref(rtdb, `users/${user.uid}`), { 
                 referralCount: userData.referralCount 
@@ -1148,7 +1177,6 @@ function setupRTDBListeners(user) {
     });
     rtdbListeners.push(bioUnsub);
     
-    // Listen for changes in all users to update referral count
     const allUsersUnsub = onValue(ref(rtdb, 'users'), () => {
         loadUserData(user);
     });
@@ -1209,7 +1237,7 @@ onAuthStateChanged(auth, async(user) => {
 
 initTheme();
 
-console.log('[Account] ✅ Page loaded with SVG flags + Biometric Manager');
+console.log('[Account] ✅ Page loaded with SVG flags + Biometric Manager + Fixed referral code');
 </script>
 </body>
 </html>
