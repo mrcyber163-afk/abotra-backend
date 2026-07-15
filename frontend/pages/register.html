@@ -624,7 +624,7 @@ const rtdb = getDatabase(app);
 console.log('[FIREBASE] ✅ Firebase initialized');
 
 // ============================================================
-// COUNTRIES DATA - AFRICAN COUNTRIES ONLY
+// COUNTRIES DATA - ALL AFRICAN COUNTRIES
 // ============================================================
 const countriesData = [
     // East Africa
@@ -959,7 +959,7 @@ function setSelectedCountry(country) {
 }
 
 // ============================================================
-// ✅ FIXED: LOAD REFERRER DATA - CHECKS BOTH NODES
+// ✅ FIXED: LOAD REFERRER DATA - SEARCHES EVERYWHERE
 // ============================================================
 async function loadReferrerData() {
     if (!referredByCode) {
@@ -967,7 +967,7 @@ async function loadReferrerData() {
         return;
     }
     
-    console.log('[REFERRAL] Loading referrer data for code:', referredByCode);
+    console.log('[REFERRAL] 🔍 Searching for referral code:', referredByCode);
     
     try {
         let found = false;
@@ -975,22 +975,23 @@ async function loadReferrerData() {
         let referrerUidFound = null;
         let referralData = null;
         
-        // ✅ FIRST: Check referrals node
+        // ✅ STEP 1: Check referrals node
+        console.log('[REFERRAL] 📁 Checking /referrals/ node...');
         const refPath = ref(rtdb, `referrals/${referredByCode}`);
-        console.log('[REFERRAL] Checking referrals node:', refPath.toString());
         const refSnap = await get(refPath);
         
         if (refSnap.exists()) {
-            console.log('[REFERRAL] ✅ Found in referrals node');
+            console.log('[REFERRAL] ✅ Found in /referrals/ node');
             referralData = refSnap.val();
             found = true;
-            referrerUidFound = referralData.uid;
-            displayName = referralData.fullName || referralData.username || 'User';
+            referrerUidFound = referralData.uid || referralData.referrerUid;
+            displayName = referralData.fullName || referralData.username || referralData.name || 'User';
+            console.log('[REFERRAL] 📋 Referral data:', referralData);
         }
         
-        // ✅ SECOND: If not found, check users node for referralCode
+        // ✅ STEP 2: If not found, search users node for ANY referralCode
         if (!found) {
-            console.log('[REFERRAL] Not found in referrals, checking users node...');
+            console.log('[REFERRAL] 📁 Searching /users/ node for referralCode...');
             const usersSnap = await get(ref(rtdb, 'users'));
             
             if (usersSnap.exists()) {
@@ -999,17 +1000,23 @@ async function loadReferrerData() {
                 
                 usersSnap.forEach(child => {
                     const user = child.val();
-                    if (user.referralCode && user.referralCode.toUpperCase() === referredByCode) {
-                        foundUser = user;
-                        foundUid = child.key;
+                    // Check if user has referralCode and it matches (case insensitive)
+                    if (user.referralCode) {
+                        const userCode = user.referralCode.toUpperCase().trim();
+                        const searchCode = referredByCode.toUpperCase().trim();
+                        if (userCode === searchCode) {
+                            foundUser = user;
+                            foundUid = child.key;
+                            console.log('[REFERRAL] ✅ Found in /users/ node:', foundUid);
+                            console.log('[REFERRAL] 📋 User data:', foundUser);
+                        }
                     }
                 });
                 
                 if (foundUser && foundUid) {
-                    console.log('[REFERRAL] ✅ Found in users node:', foundUid);
                     found = true;
                     referrerUidFound = foundUid;
-                    displayName = foundUser.fullName || foundUser.username || 'User';
+                    displayName = foundUser.fullName || foundUser.username || foundUser.name || 'User';
                     referralData = {
                         uid: foundUid,
                         username: foundUser.username || 'User',
@@ -1020,24 +1027,72 @@ async function loadReferrerData() {
             }
         }
         
-        // ✅ THIRD: If still not found, try to find by UID if code is ABOTRA format
-        if (!found && referredByCode.startsWith('ABOTRA')) {
-            console.log('[REFERRAL] Checking if code is ABOTRA format, searching users...');
+        // ✅ STEP 3: If still not found, search by UID (if code might be a UID)
+        if (!found) {
+            console.log('[REFERRAL] 📁 Searching /users/ by UID (code might be UID)...');
+            try {
+                const userSnap = await get(ref(rtdb, `users/${referredByCode}`));
+                if (userSnap.exists()) {
+                    const user = userSnap.val();
+                    console.log('[REFERRAL] ✅ Found user by UID:', referredByCode);
+                    found = true;
+                    referrerUidFound = referredByCode;
+                    displayName = user.fullName || user.username || user.name || 'User';
+                    referralData = {
+                        uid: referredByCode,
+                        username: user.username || 'User',
+                        fullName: user.fullName || 'User',
+                        createdAt: user.createdAt || Date.now()
+                    };
+                }
+            } catch (e) {
+                console.log('[REFERRAL] Not a UID or error:', e.message);
+            }
+        }
+        
+        // ✅ STEP 4: If still not found, search by email (if code looks like email)
+        if (!found && referredByCode.includes('@')) {
+            console.log('[REFERRAL] 📁 Searching /users/ by email...');
             const usersSnap = await get(ref(rtdb, 'users'));
-            
             if (usersSnap.exists()) {
                 usersSnap.forEach(child => {
                     const user = child.val();
-                    if (user.referralCode && user.referralCode.toUpperCase() === referredByCode) {
+                    if (user.email && user.email.toLowerCase() === referredByCode.toLowerCase()) {
                         found = true;
                         referrerUidFound = child.key;
-                        displayName = user.fullName || user.username || 'User';
+                        displayName = user.fullName || user.username || user.name || 'User';
                         referralData = {
                             uid: child.key,
                             username: user.username || 'User',
                             fullName: user.fullName || 'User',
+                            email: user.email,
                             createdAt: user.createdAt || Date.now()
                         };
+                        console.log('[REFERRAL] ✅ Found by email:', user.email);
+                    }
+                });
+            }
+        }
+        
+        // ✅ STEP 5: If still not found, search by phone (if code looks like phone)
+        if (!found && referredByCode.startsWith('+')) {
+            console.log('[REFERRAL] 📁 Searching /users/ by phone...');
+            const usersSnap = await get(ref(rtdb, 'users'));
+            if (usersSnap.exists()) {
+                usersSnap.forEach(child => {
+                    const user = child.val();
+                    if (user.phone && user.phone === referredByCode) {
+                        found = true;
+                        referrerUidFound = child.key;
+                        displayName = user.fullName || user.username || user.name || 'User';
+                        referralData = {
+                            uid: child.key,
+                            username: user.username || 'User',
+                            fullName: user.fullName || 'User',
+                            phone: user.phone,
+                            createdAt: user.createdAt || Date.now()
+                        };
+                        console.log('[REFERRAL] ✅ Found by phone:', user.phone);
                     }
                 });
             }
@@ -1047,6 +1102,7 @@ async function loadReferrerData() {
             referrerData = referralData;
             referrerUid = referrerUidFound;
             
+            // Update UI
             referralName.textContent = displayName;
             referralCodeDisplay.textContent = `Code: ${referredByCode}`;
             referralBox.className = 'referral-box visible success';
@@ -1056,7 +1112,7 @@ async function loadReferrerData() {
             
             console.log('[REFERRAL] ✅ Referrer loaded successfully:', displayName, 'UID:', referrerUid);
         } else {
-            console.log('[REFERRAL] ❌ Referral code not found in any node:', referredByCode);
+            console.log('[REFERRAL] ❌ Referral code not found anywhere:', referredByCode);
             referralName.textContent = 'Invalid referral code';
             referralCodeDisplay.textContent = `Code: ${referredByCode} (not found)`;
             referralBox.className = 'referral-box visible error';
@@ -1076,7 +1132,7 @@ async function loadReferrerData() {
 }
 
 // ============================================================
-// STATIC REFERRAL CODE GENERATION - ABOTRAXXXXXX
+// GENERATE STATIC REFERRAL CODE - ABOTRAXXXXXX
 // ============================================================
 function generateStaticReferralCode(uid) {
     const prefix = 'ABOTRA';
@@ -1111,6 +1167,7 @@ function generateStaticReferralCode(uid) {
 
 async function checkReferralCodeExists(code) {
     try {
+        // Check referrals node
         const refPath = ref(rtdb, `referrals/${code}`);
         const snapshot = await get(refPath);
         if (snapshot.exists()) return true;
@@ -1287,7 +1344,7 @@ async function saveUserToFirebase(user, userData) {
 }
 
 // ============================================================
-// HANDLE REFERRAL - USES REFERRER UID FROM LOADED DATA
+// HANDLE REFERRAL
 // ============================================================
 async function handleReferral(newUserId) {
     if (!referredByCode || !referrerUid) {
