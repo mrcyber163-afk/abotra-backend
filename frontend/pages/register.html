@@ -959,7 +959,7 @@ function setSelectedCountry(country) {
 }
 
 // ============================================================
-// ✅ FIXED: LOAD REFERRER DATA - SEARCHES EVERYWHERE
+// ✅ FIXED: LOAD REFERRER DATA - PRIORITIZE USERS NODE
 // ============================================================
 async function loadReferrerData() {
     if (!referredByCode) {
@@ -967,74 +967,76 @@ async function loadReferrerData() {
         return;
     }
     
-    console.log('[REFERRAL] 🔍 Searching for referral code:', referredByCode);
+    console.log('[REFERRAL] 🔍 Searching for code:', referredByCode);
     
     try {
         let found = false;
         let displayName = 'User';
         let referrerUidFound = null;
         let referralData = null;
+        let foundLocation = '';
         
-        // ✅ STEP 1: Check referrals node
-        console.log('[REFERRAL] 📁 Checking /referrals/ node...');
-        const refPath = ref(rtdb, `referrals/${referredByCode}`);
-        const refSnap = await get(refPath);
+        // ✅ STEP 1: FIRST check users node (PRIORITY)
+        console.log('[REFERRAL] 📁 Step 1: Searching /users/ node...');
+        const usersSnap = await get(ref(rtdb, 'users'));
         
-        if (refSnap.exists()) {
-            console.log('[REFERRAL] ✅ Found in /referrals/ node');
-            referralData = refSnap.val();
-            found = true;
-            referrerUidFound = referralData.uid || referralData.referrerUid;
-            displayName = referralData.fullName || referralData.username || referralData.name || 'User';
-            console.log('[REFERRAL] 📋 Referral data:', referralData);
-        }
-        
-        // ✅ STEP 2: If not found, search users node for ANY referralCode
-        if (!found) {
-            console.log('[REFERRAL] 📁 Searching /users/ node for referralCode...');
-            const usersSnap = await get(ref(rtdb, 'users'));
+        if (usersSnap.exists()) {
+            let foundUser = null;
+            let foundUid = null;
             
-            if (usersSnap.exists()) {
-                let foundUser = null;
-                let foundUid = null;
-                
-                usersSnap.forEach(child => {
-                    const user = child.val();
-                    // Check if user has referralCode and it matches (case insensitive)
-                    if (user.referralCode) {
-                        const userCode = user.referralCode.toUpperCase().trim();
-                        const searchCode = referredByCode.toUpperCase().trim();
-                        if (userCode === searchCode) {
-                            foundUser = user;
-                            foundUid = child.key;
-                            console.log('[REFERRAL] ✅ Found in /users/ node:', foundUid);
-                            console.log('[REFERRAL] 📋 User data:', foundUser);
-                        }
+            usersSnap.forEach(child => {
+                const user = child.val();
+                // Check if user has referralCode and it matches
+                if (user.referralCode) {
+                    const userCode = user.referralCode.toUpperCase().trim();
+                    const searchCode = referredByCode.toUpperCase().trim();
+                    if (userCode === searchCode) {
+                        foundUser = user;
+                        foundUid = child.key;
+                        console.log('[REFERRAL] ✅ Found in /users/ node:', foundUid);
+                        console.log('[REFERRAL] 📋 User data:', foundUser);
                     }
-                });
-                
-                if (foundUser && foundUid) {
-                    found = true;
-                    referrerUidFound = foundUid;
-                    displayName = foundUser.fullName || foundUser.username || foundUser.name || 'User';
-                    referralData = {
-                        uid: foundUid,
-                        username: foundUser.username || 'User',
-                        fullName: foundUser.fullName || 'User',
-                        createdAt: foundUser.createdAt || Date.now()
-                    };
                 }
+            });
+            
+            if (foundUser && foundUid) {
+                found = true;
+                referrerUidFound = foundUid;
+                displayName = foundUser.fullName || foundUser.username || foundUser.name || 'User';
+                referralData = {
+                    uid: foundUid,
+                    username: foundUser.username || 'User',
+                    fullName: foundUser.fullName || 'User',
+                    createdAt: foundUser.createdAt || Date.now()
+                };
+                foundLocation = '/users/ node (referralCode)';
             }
         }
         
-        // ✅ STEP 3: If still not found, search by UID (if code might be a UID)
+        // ✅ STEP 2: If not found, check referrals node
         if (!found) {
-            console.log('[REFERRAL] 📁 Searching /users/ by UID (code might be UID)...');
+            console.log('[REFERRAL] 📁 Step 2: Searching /referrals/ node...');
+            const refPath = ref(rtdb, `referrals/${referredByCode}`);
+            const refSnap = await get(refPath);
+            
+            if (refSnap.exists()) {
+                console.log('[REFERRAL] ✅ Found in /referrals/ node');
+                const data = refSnap.val();
+                found = true;
+                referrerUidFound = data.uid || data.referrerUid;
+                displayName = data.fullName || data.username || data.name || 'User';
+                referralData = data;
+                foundLocation = '/referrals/ node';
+            }
+        }
+        
+        // ✅ STEP 3: If still not found, try to find by UID (if code is UID)
+        if (!found) {
+            console.log('[REFERRAL] 📁 Step 3: Trying as UID...');
             try {
                 const userSnap = await get(ref(rtdb, `users/${referredByCode}`));
                 if (userSnap.exists()) {
                     const user = userSnap.val();
-                    console.log('[REFERRAL] ✅ Found user by UID:', referredByCode);
                     found = true;
                     referrerUidFound = referredByCode;
                     displayName = user.fullName || user.username || user.name || 'User';
@@ -1044,15 +1046,17 @@ async function loadReferrerData() {
                         fullName: user.fullName || 'User',
                         createdAt: user.createdAt || Date.now()
                     };
+                    foundLocation = '/users/ node (by UID)';
+                    console.log('[REFERRAL] ✅ Found by UID');
                 }
             } catch (e) {
-                console.log('[REFERRAL] Not a UID or error:', e.message);
+                console.log('[REFERRAL] Not a UID');
             }
         }
         
-        // ✅ STEP 4: If still not found, search by email (if code looks like email)
+        // ✅ STEP 4: Try email
         if (!found && referredByCode.includes('@')) {
-            console.log('[REFERRAL] 📁 Searching /users/ by email...');
+            console.log('[REFERRAL] 📁 Step 4: Trying as email...');
             const usersSnap = await get(ref(rtdb, 'users'));
             if (usersSnap.exists()) {
                 usersSnap.forEach(child => {
@@ -1068,15 +1072,16 @@ async function loadReferrerData() {
                             email: user.email,
                             createdAt: user.createdAt || Date.now()
                         };
-                        console.log('[REFERRAL] ✅ Found by email:', user.email);
+                        foundLocation = '/users/ node (by email)';
+                        console.log('[REFERRAL] ✅ Found by email');
                     }
                 });
             }
         }
         
-        // ✅ STEP 5: If still not found, search by phone (if code looks like phone)
+        // ✅ STEP 5: Try phone
         if (!found && referredByCode.startsWith('+')) {
-            console.log('[REFERRAL] 📁 Searching /users/ by phone...');
+            console.log('[REFERRAL] 📁 Step 5: Trying as phone...');
             const usersSnap = await get(ref(rtdb, 'users'));
             if (usersSnap.exists()) {
                 usersSnap.forEach(child => {
@@ -1092,7 +1097,8 @@ async function loadReferrerData() {
                             phone: user.phone,
                             createdAt: user.createdAt || Date.now()
                         };
-                        console.log('[REFERRAL] ✅ Found by phone:', user.phone);
+                        foundLocation = '/users/ node (by phone)';
+                        console.log('[REFERRAL] ✅ Found by phone');
                     }
                 });
             }
@@ -1102,26 +1108,26 @@ async function loadReferrerData() {
             referrerData = referralData;
             referrerUid = referrerUidFound;
             
-            // Update UI
             referralName.textContent = displayName;
-            referralCodeDisplay.textContent = `Code: ${referredByCode}`;
+            referralCodeDisplay.textContent = `✅ Code: ${referredByCode}`;
             referralBox.className = 'referral-box visible success';
             referralLabel.textContent = '🎯 Invited By';
-            referralBadge.textContent = 'REFERRAL';
+            referralBadge.textContent = 'REFERRAL ✓';
             referralIcon.innerHTML = '<i class="fas fa-user-check"></i>';
             
-            console.log('[REFERRAL] ✅ Referrer loaded successfully:', displayName, 'UID:', referrerUid);
+            console.log('[REFERRAL] ✅ Found!', displayName, 'UID:', referrerUid);
+            console.log('[REFERRAL] 📍 Location:', foundLocation);
         } else {
-            console.log('[REFERRAL] ❌ Referral code not found anywhere:', referredByCode);
-            referralName.textContent = 'Invalid referral code';
-            referralCodeDisplay.textContent = `Code: ${referredByCode} (not found)`;
+            console.log('[REFERRAL] ❌ Not found anywhere');
+            referralName.textContent = `"${referredByCode}" - Not Found`;
+            referralCodeDisplay.textContent = '💡 Create a referral code first';
             referralBox.className = 'referral-box visible error';
             referralLabel.textContent = '⚠️ Invalid Referral';
-            referralBadge.textContent = 'ERROR';
+            referralBadge.textContent = 'NOT FOUND';
             referralIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
         }
     } catch (error) {
-        console.error('[REFERRAL] ❌ Error loading referrer:', error);
+        console.error('[REFERRAL] ❌ Error:', error);
         referralName.textContent = 'Error loading referral';
         referralCodeDisplay.textContent = `Code: ${referredByCode}`;
         referralBox.className = 'referral-box visible error';
@@ -1167,12 +1173,7 @@ function generateStaticReferralCode(uid) {
 
 async function checkReferralCodeExists(code) {
     try {
-        // Check referrals node
-        const refPath = ref(rtdb, `referrals/${code}`);
-        const snapshot = await get(refPath);
-        if (snapshot.exists()) return true;
-        
-        // Check users node
+        // Check users node first
         const usersSnap = await get(ref(rtdb, 'users'));
         if (usersSnap.exists()) {
             let found = false;
@@ -1184,6 +1185,12 @@ async function checkReferralCodeExists(code) {
             });
             if (found) return true;
         }
+        
+        // Check referrals node
+        const refPath = ref(rtdb, `referrals/${code}`);
+        const snapshot = await get(refPath);
+        if (snapshot.exists()) return true;
+        
         return false;
     } catch (e) { return false; }
 }
