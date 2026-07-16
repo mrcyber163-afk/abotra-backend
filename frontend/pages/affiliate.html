@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Affiliate | ABOTRA-PROAI - Earn Commission</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+body {
+background:#050505;
+background-image:url("../assets/images/background.png");
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+min-height:100vh;
+padding-bottom:75px;
+position:relative;
+font-size:11px;
+}
+body.light-theme {
+background:#f5f5f5;
+background-image:url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background:rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .affiliate-container,
+body.light-theme .affiliate-card,
+body.light-theme .stats-card,
+body.light-theme .leaderboard-card,
+body.light-theme .referral-card,
+body.light-theme .team-card {
+background:rgba(255,255,255,0.95);
+border:1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .card-title { color:#800000; }
+body.light-theme .stat-value { color:#800000; }
+body.light-theme .stat-label { color:#555; }
+body.light-theme .referral-link-input { background:rgba(0,0,0,0.05); color:#333; }
+body.light-theme .leaderboard-item { border-bottom:1px solid rgba(0,0,0,0.08); }
+body.light-theme .leaderboard-name { color:#333; }
+body.light-theme .team-member { border-bottom:1px solid rgba(0,0,0,0.08); }
+body.light-theme .team-member-name { color:#333; }
+body.light-theme .theme-toggle { background:rgba(0,0,0,0.08); border-color:rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color:#800000; }
+body.light-theme .bottom-nav { background:rgba(255,255,255,0.95); border-top:1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color:#888; }
+body.light-theme .bottom-nav a.active { color:#800000; }
+
+.skeleton-container { max-width:1400px; margin:75px auto 20px; padding:0 15px; }
+.skeleton-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.skeleton-stats-card { background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.4); border-radius:18px; padding:12px; text-align:center; animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+.skeleton-stats-card:nth-child(1) { animation-delay: 0.1s; }
+.skeleton-stats-card:nth-child(2) { animation-delay: 0.2s; }
+.skeleton-stats-card:nth-child(3) { animation-delay: 0.3s; }
+.skeleton-stats-card:nth-child(4) { animation-delay: 0.4s; }
+.skeleton-stats-title { height:10px; width:80px; background:linear-gradient(90deg, rgba(255,215,0,0.4) 25%, rgba(255,215,0,0.7) 50%, rgba(255,215,0,0.4) 75%); background-size:200% 100%; border-radius:5px; margin:0 auto 8px auto; animation: shimmer 1.5s infinite; }
+.skeleton-stats-value { height:24px; width:60px; background:linear-gradient(90deg, rgba(255,215,0,0.35) 25%, rgba(255,215,0,0.65) 50%, rgba(255,215,0,0.35) 75%); background-size:200% 100%; border-radius:5px; margin:0 auto 5px auto; animation: shimmer 1.5s infinite; }
+.skeleton-stats-label { height:7px; width:45px; background:linear-gradient(90deg, rgba(255,215,0,0.25) 25%, rgba(255,215,0,0.5) 50%, rgba(255,215,0,0.25) 75%); background-size:200% 100%; border-radius:3px; margin:0 auto; animation: shimmer 1.5s infinite; }
+.skeleton-card { background:rgba(255,255,255,0.08); border:1px solid rgba(255,215,0,0.3); border-radius:18px; padding:16px; margin-bottom:18px; animation: fadeInUp 0.5s ease forwards; opacity: 0; animation-delay: 0.5s; }
+.skeleton-card-title { height:16px; width:130px; background:linear-gradient(90deg, rgba(255,215,0,0.35) 25%, rgba(255,215,0,0.65) 50%, rgba(255,215,0,0.35) 75%); background-size:200% 100%; border-radius:6px; margin-bottom:10px; animation: shimmer 1.5s infinite; }
+.skeleton-link-row { display:flex; gap:6px; margin-bottom:12px; }
+.skeleton-link-input { flex:2; height:38px; background:linear-gradient(90deg, rgba(255,215,0,0.25) 25%, rgba(255,215,0,0.55) 50%, rgba(255,215,0,0.25) 75%); background-size:200% 100%; border-radius:10px; animation: shimmer 1.5s infinite; }
+.skeleton-link-btn { flex:0.6; height:38px; background:linear-gradient(90deg, rgba(14,203,129,0.3) 25%, rgba(14,203,129,0.6) 50%, rgba(14,203,129,0.3) 75%); background-size:200% 100%; border-radius:10px; animation: shimmer 1.5s infinite; }
+.skeleton-commission-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+.skeleton-commission-item { background:linear-gradient(90deg, rgba(255,215,0,0.25) 25%, rgba(255,215,0,0.55) 50%, rgba(255,215,0,0.25) 75%); background-size:200% 100%; border-radius:12px; padding:10px; height:60px; animation: shimmer 1.5s infinite; }
+.skeleton-referral-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,215,0,0.2); animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+.skeleton-referral-item:nth-child(1) { animation-delay: 0.6s; }
+.skeleton-referral-item:nth-child(2) { animation-delay: 0.7s; }
+.skeleton-referral-item:nth-child(3) { animation-delay: 0.8s; }
+.skeleton-referral-info { flex:1; }
+.skeleton-referral-name { height:10px; width:90px; background:linear-gradient(90deg, rgba(255,215,0,0.3) 25%, rgba(255,215,0,0.6) 50%, rgba(255,215,0,0.3) 75%); background-size:200% 100%; border-radius:5px; margin-bottom:5px; animation: shimmer 1.5s infinite; }
+.skeleton-referral-date { height:7px; width:60px; background:linear-gradient(90deg, rgba(255,215,0,0.2) 25%, rgba(255,215,0,0.45) 50%, rgba(255,215,0,0.2) 75%); background-size:200% 100%; border-radius:3px; animation: shimmer 1.5s infinite; }
+.skeleton-referral-stats { display:flex; gap:12px; }
+.skeleton-referral-deposit { height:10px; width:60px; background:linear-gradient(90deg, rgba(14,203,129,0.25) 25%, rgba(14,203,129,0.55) 50%, rgba(14,203,129,0.25) 75%); background-size:200% 100%; border-radius:5px; animation: shimmer 1.5s infinite; }
+.skeleton-referral-commission { height:10px; width:60px; background:linear-gradient(90deg, rgba(255,215,0,0.3) 25%, rgba(255,215,0,0.6) 50%, rgba(255,215,0,0.3) 75%); background-size:200% 100%; border-radius:5px; animation: shimmer 1.5s infinite; }
+.skeleton-withdraw { display:flex; gap:6px; margin-top:10px; }
+.skeleton-withdraw-input { flex:1; height:38px; background:linear-gradient(90deg, rgba(255,215,0,0.25) 25%, rgba(255,215,0,0.55) 50%, rgba(255,215,0,0.25) 75%); background-size:200% 100%; border-radius:10px; animation: shimmer 1.5s infinite; }
+.skeleton-withdraw-btn { width:90px; height:38px; background:linear-gradient(90deg, rgba(14,203,129,0.3) 25%, rgba(14,203,129,0.6) 50%, rgba(14,203,129,0.3) 75%); background-size:200% 100%; border-radius:10px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.verified-badge { display: inline-flex; align-items: center; justify-content: center; margin-left: 5px; background: #1E90FF; border-radius: 50%; width: 13px; height: 13px; font-size: 7px; color: white; vertical-align: middle; }
+.verified-badge i { font-size: 6px; color: white; }
+
+.theme-toggle { background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); border:1px solid rgba(255,215,0,0.3); border-radius:10px; padding:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.3s; }
+.theme-toggle:hover { background:rgba(255,215,0,0.2); transform:scale(1.05); }
+.theme-toggle i { font-size:14px; color:#FFFFFF; }
+
+.overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); backdrop-filter:blur(4px); z-index:1; }
+
+.top-bar {
+position:fixed; top:0; left:0; right:0; z-index:100;
+background:rgba(10,10,10,0.95); backdrop-filter:blur(12px);
+border-bottom:1px solid rgba(255,215,0,0.2);
+padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+}
+.logo-area { display:flex; align-items:center; gap:8px; }
+.logo-area img { width:32px; height:32px; border-radius:8px; object-fit:cover; background:transparent; }
+.logo-area h2 { color:#FFD700; font-size:14px; margin-bottom:2px; }
+.logo-area p { color:#AAAAAA; font-size:7px; }
+.top-bar-right { display:flex; align-items:center; gap:6px; }
+.back-btn-top { background:rgba(255,215,0,0.15); border:none; border-radius:8px; padding:6px 10px; color:#FFD700; cursor:pointer; transition:0.3s; display:flex; align-items:center; gap:5px; font-size:10px; font-weight:500; }
+.back-btn-top:hover { background:rgba(255,215,0,0.3); }
+
+.affiliate-container { position:relative; z-index:2; max-width:1400px; margin:70px auto 20px; padding:0 12px; }
+.page-title { text-align:center; font-size:18px; font-weight:800; color:#FFD700; margin-bottom:14px; display:flex; align-items:center; justify-content:center; gap:6px; }
+
+.section-tabs {
+display:flex; gap:6px; margin-bottom:16px; background:rgba(0,0,0,0.3); border-radius:12px; padding:3px;
+}
+.tab-btn { flex:1; padding:8px; border:none; border-radius:8px; background:transparent; color:#AAAAAA; font-weight:600; cursor:pointer; transition:0.3s; font-size:10px; display:flex; align-items:center; justify-content:center; gap:5px; }
+.tab-btn.active { background:linear-gradient(135deg,#800000,#FFD700); color:white; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+.stats-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:16px; padding:12px; text-align:center; }
+.card-title { color:#AAAAAA; font-size:8px; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:3px; }
+.stat-value { color:#FFD700; font-size:18px; font-weight:800; }
+.stat-label { color:#888; font-size:8px; margin-top:3px; }
+
+.affiliate-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px; text-align:center; }
+.affiliate-card h3 { color:#FFD700; font-size:13px; margin-bottom:10px; }
+.referral-link-row { display:flex; gap:0; margin-bottom:12px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,215,0,0.3); }
+.referral-link-input { flex:2; background:rgba(255,255,255,0.1); border:none; padding:10px 12px; color:#FFD700; font-size:10px; outline:none; font-family:monospace; }
+.copy-btn { flex:0.6; background:linear-gradient(135deg,#800000,#FFD700); border:none; padding:10px 8px; color:white; font-weight:700; cursor:pointer; transition:0.3s; display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; white-space:nowrap; }
+.copy-btn:hover { background:linear-gradient(135deg,#a00000,#FFD700); }
+
+.commission-structure { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+.commission-level { background:rgba(255,215,0,0.08); border-radius:12px; padding:8px; text-align:center; }
+.commission-level .level { color:#FFD700; font-size:10px; font-weight:700; }
+.commission-level .percentage { color:#0ECB81; font-size:14px; font-weight:800; margin:3px 0; }
+.commission-level .desc { color:#888; font-size:8px; }
+
+.team-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:6px; }
+.section-header h3 { color:#FFD700; font-size:13px; display:flex; align-items:center; gap:5px; }
+.team-stats { display:flex; gap:12px; }
+.team-stat { text-align:center; }
+.team-stat .number { color:#FFD700; font-size:15px; font-weight:800; }
+.team-stat .label { color:#888; font-size:8px; }
+.team-tree { max-height:500px; overflow-y:auto; }
+.team-member { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:0.3s; }
+.team-member:hover { background:rgba(255,215,0,0.05); transform:translateX(3px); }
+.team-member-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#800000,#FFD700); display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; font-size:12px; flex-shrink:0; }
+.team-member-info { flex:1; }
+.team-member-name { color:#FFD700; font-weight:600; font-size:10px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.team-member-level { font-size:8px; color:#AAAAAA; margin-top:2px; }
+.team-member-stats { text-align:right; flex-shrink:0; }
+.team-member-profit { color:#0ECB81; font-size:10px; font-weight:700; }
+.team-member-commission { color:#FFD700; font-size:9px; margin-top:2px; }
+
+.referral-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px; }
+.refresh-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:6px; padding:5px 10px; color:#FFD700; cursor:pointer; transition:0.3s; font-size:9px; }
+.refresh-btn:hover { background:rgba(255,215,0,0.2); }
+.referrals-list { max-height:400px; overflow-y:auto; margin-top:6px; }
+.referral-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.08); }
+.referral-info { flex:1; }
+.referral-name { color:#FFFFFF; font-size:10px; font-weight:500; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.referral-date { color:#888; font-size:8px; margin-top:2px; }
+.referral-stats { display:flex; gap:10px; flex-shrink:0; }
+.referral-deposit { color:#0ECB81; font-size:9px; }
+.referral-commission { color:#FFD700; font-size:9px; font-weight:700; }
+
+.leaderboard-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px; }
+.leaderboard-list { max-height:400px; overflow-y:auto; }
+.leaderboard-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.08); }
+.leaderboard-rank { width:28px; height:28px; background:linear-gradient(135deg,#800000,#FFD700); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; color:white; font-size:10px; flex-shrink:0; }
+.leaderboard-rank.gold { background:linear-gradient(135deg,#FFD700,#B8860B); }
+.leaderboard-rank.silver { background:linear-gradient(135deg,#C0C0C0,#808080); }
+.leaderboard-rank.bronze { background:linear-gradient(135deg,#CD7F32,#8B4513); }
+.leaderboard-info { flex:1; }
+.leaderboard-name { color:#FFD700; font-weight:600; font-size:10px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.leaderboard-stats { color:#888; font-size:8px; margin-top:2px; }
+.leaderboard-commission { color:#0ECB81; font-weight:700; font-size:10px; }
+
+.withdraw-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); backdrop-filter:blur(10px); border-radius:18px; padding:16px; margin-bottom:16px; }
+.withdraw-card h3 { font-size:13px; margin-bottom:10px; }
+.withdraw-card p { font-size:10px; margin-bottom:10px; }
+.withdraw-input { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.withdraw-input input { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 12px; color:white; font-size:10px; outline:none; }
+.withdraw-input input::placeholder { color:#888; }
+.withdraw-btn { background:linear-gradient(135deg,#0ECB81,#0A9E65); border:none; border-radius:10px; padding:10px 16px; color:white; font-weight:700; cursor:pointer; transition:0.3s; font-size:10px; }
+.withdraw-btn:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(14,203,129,0.3); }
+.info-text { font-size:9px; color:#888; margin-top:6px; text-align:center; }
+.info-text a { color:#FFD700; text-decoration:none; }
+
+.bottom-nav {
+position:fixed; bottom:0; left:0; right:0;
+background:rgba(10,10,10,0.95); backdrop-filter:blur(12px);
+border-top:1px solid rgba(255,215,0,0.2);
+border-radius:18px 18px 0 0;
+display:flex; justify-content:space-around; padding:6px 10px; z-index:100;
+}
+.bottom-nav a { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:#888; font-size:7px; gap:2px; }
+.bottom-nav a i { font-size:14px; }
+.bottom-nav a.active { color:#FFD700; }
+
+.notification-popup { display:none !important; }
+
+@media(max-width:768px){
+.stats-grid { grid-template-columns:repeat(2,1fr); }
+.affiliate-container { padding:0 12px; margin-top:65px; }
+.page-title { font-size:16px; }
+.referral-link-row { flex-direction:row; border-radius:10px; }
+.referral-link-input { border-radius:10px 0 0 10px; font-size:9px; }
+.copy-btn { border-radius:0 10px 10px 0; justify-content:center; }
+.commission-structure { grid-template-columns:1fr; }
+.team-stats { flex-direction:column; gap:4px; }
+.tab-btn span { display:none; }
+.tab-btn { padding:6px; }
+.bottom-nav a span { font-size:6px; }
+.bottom-nav a i { font-size:12px; }
+.referral-stats { flex-direction:column; gap:4px; text-align:right; }
+.leaderboard-rank { width:24px; height:24px; font-size:9px; }
+.team-member { flex-wrap:wrap; }
+.team-member-stats { text-align:left; width:100%; padding-left:42px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>Affiliate Program</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div id="skeletonContainer" class="skeleton-container">
+    <div class="skeleton-stats-grid"><div class="skeleton-stats-card"><div class="skeleton-stats-title"></div><div class="skeleton-stats-value"></div><div class="skeleton-stats-label"></div></div><div class="skeleton-stats-card"><div class="skeleton-stats-title"></div><div class="skeleton-stats-value"></div><div class="skeleton-stats-label"></div></div><div class="skeleton-stats-card"><div class="skeleton-stats-title"></div><div class="skeleton-stats-value"></div><div class="skeleton-stats-label"></div></div><div class="skeleton-stats-card"><div class="skeleton-stats-title"></div><div class="skeleton-stats-value"></div><div class="skeleton-stats-label"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-card-title"></div><div class="skeleton-link-row"><div class="skeleton-link-input"></div><div class="skeleton-link-btn"></div></div><div class="skeleton-commission-grid"><div class="skeleton-commission-item"></div><div class="skeleton-commission-item"></div><div class="skeleton-commission-item"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-card-title"></div><div class="skeleton-referral-item"><div class="skeleton-referral-info"><div class="skeleton-referral-name"></div><div class="skeleton-referral-date"></div></div><div class="skeleton-referral-stats"><div class="skeleton-referral-deposit"></div><div class="skeleton-referral-commission"></div></div></div><div class="skeleton-referral-item"><div class="skeleton-referral-info"><div class="skeleton-referral-name"></div><div class="skeleton-referral-date"></div></div><div class="skeleton-referral-stats"><div class="skeleton-referral-deposit"></div><div class="skeleton-referral-commission"></div></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-card-title"></div><div class="skeleton-withdraw"><div class="skeleton-withdraw-input"></div><div class="skeleton-withdraw-btn"></div></div></div>
+</div>
+
+<div class="affiliate-container" id="contentContainer" style="display:none;">
+<div class="page-title"><i class="fas fa-handshake"></i> Affiliate Program</div>
+
+<div class="section-tabs">
+<button class="tab-btn active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+<button class="tab-btn" data-tab="team"><i class="fas fa-users"></i> <span>My Team</span></button>
+<button class="tab-btn" data-tab="leaderboard"><i class="fas fa-trophy"></i> <span>Leaderboard</span></button>
+</div>
+
+<div id="dashboardTab">
+<div class="stats-grid">
+<div class="stats-card"><div class="card-title"><i class="fas fa-users"></i> Total Referrals</div><div class="stat-value" id="totalReferrals">0</div><div class="stat-label">People joined via your link</div></div>
+<div class="stats-card"><div class="card-title"><i class="fas fa-dollar-sign"></i> Deposit Commission</div><div class="stat-value" id="totalCommission">$0</div><div class="stat-label">From referrals' deposits</div></div>
+<div class="stats-card"><div class="card-title"><i class="fas fa-robot"></i> Bot Profit Commission</div><div class="stat-value" id="dailyBotProfit">$0</div><div class="stat-label">From referrals' AI robots</div></div>
+<div class="stats-card"><div class="card-title"><i class="fas fa-check-circle"></i> Total Withdrawn</div><div class="stat-value" id="withdrawnCommission">$0</div><div class="stat-label">Already withdrawn</div></div>
+</div>
+
+<div class="affiliate-card">
+<h3><i class="fas fa-link"></i> Your Referral Link</h3>
+<div class="referral-link-row">
+<input type="text" id="referralLink" class="referral-link-input" readonly value="Loading...">
+<button id="copyBtn" class="copy-btn"><i class="fas fa-copy"></i> Copy</button>
+</div>
+<div class="commission-structure">
+<div class="commission-level"><div class="level">Level 1 (Deposit)</div><div class="percentage">5%</div><div class="desc">From direct referrals' deposits</div></div>
+<div class="commission-level"><div class="level">Level 2</div><div class="percentage">2%</div><div class="desc">From 2nd level referrals' deposits</div></div>
+<div class="commission-level"><div class="level">Daily Bot Profit</div><div class="percentage">1%</div><div class="desc">From referrals' AI robot daily profits</div></div>
+</div>
+</div>
+
+<div class="referral-card">
+<div class="section-header">
+<h3><i class="fas fa-clock"></i> Recent Referrals (Last 10)</h3>
+<button class="refresh-btn" onclick="loadReferralData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+</div>
+<div class="referrals-list" id="recentReferralsList"><div style="text-align:center; padding:20px;">Loading referrals...</div></div>
+</div>
+
+<div class="withdraw-card">
+<h3 style="color:#FFD700; margin-bottom:10px;"><i class="fas fa-money-bill-wave"></i> Withdraw Commission</h3>
+<div id="withdrawInfoArea"></div>
+<div class="withdraw-input">
+<input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw (min $20)">
+<button class="withdraw-btn" id="withdrawBtn"><i class="fas fa-paper-plane"></i> Withdraw</button>
+</div>
+<div id="withdrawPreview" style="background:rgba(255,215,0,0.08); border-radius:10px; padding:8px; margin-top:10px; font-size:9px; display:none;"></div>
+<div class="info-text"><i class="fas fa-info-circle"></i> Commission is calculated from your referrals' deposits + AI bot daily profits</div>
+</div>
+</div>
+
+<div id="teamTab" style="display:none;">
+<div class="team-card">
+<div class="section-header">
+<h3><i class="fas fa-users"></i> My Team Structure</h3>
+<div class="team-stats">
+<div class="team-stat"><div class="number" id="teamLevel1">0</div><div class="label">Level 1 (5%)</div></div>
+<div class="team-stat"><div class="number" id="teamLevel2">0</div><div class="label">Level 2 (2%)</div></div>
+<div class="team-stat"><div class="number" id="teamTotal">0</div><div class="label">Total Team</div></div>
+</div>
+</div>
+<div class="team-tree" id="teamTree"><div style="text-align:center; padding:20px;">Loading team structure...</div></div>
+</div>
+</div>
+
+<div id="leaderboardTab" style="display:none;">
+<div class="leaderboard-card">
+<div class="section-header">
+<h3><i class="fas fa-trophy"></i> Top Affiliates Leaderboard</h3>
+<button class="refresh-btn" onclick="loadAffiliateLeaderboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
+</div>
+<div class="leaderboard-list" id="leaderboardList"><div style="text-align:center; padding:20px;">Loading leaderboard...</div></div>
+</div>
+</div>
+
+<div class="info-text"><a href="terms.html">Terms & Conditions</a> | <a href="privacy.html">Privacy Policy</a></div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="trade.html"><i class="fas fa-chart-line"></i><span>Trade</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="affiliate.html" class="active"><i class="fas fa-handshake"></i><span>Affiliate</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, get, push, update, runTransaction, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentUserData = null;
+let exchangeRates = { Tanzania: 2800, Malawi: 5600, Zambia: 30 };
+let allUsersCache = [];
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function generateStaticReferralCode(uid) {
+    const prefix = 'ABOTRA';
+    const uidPart = uid.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let suffix = '';
+    for (let i = 0; i < 3; i++) {
+        const idx = parseInt(uidPart[i] || '0', 36) % chars.length;
+        suffix += chars.charAt(idx);
+    }
+    return prefix + uidPart + suffix;
+}
+
+async function loadUserData() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            currentUserData = snapshot.val();
+            console.log('[AFFILIATE] User data loaded:', currentUserData);
+            
+            let referralCode = currentUserData.referralCode;
+            if (!referralCode) {
+                referralCode = generateStaticReferralCode(currentUser.uid);
+                await update(ref(db, `users/${currentUser.uid}`), { referralCode });
+                currentUserData.referralCode = referralCode;
+                console.log('[AFFILIATE] New referral code generated:', referralCode);
+            }
+            
+            const domain = window.location.origin;
+            const referralLink = `${domain}/pages/register.html?ref=${referralCode}`;
+            document.getElementById('referralLink').value = referralLink;
+            
+            document.getElementById('totalReferrals').textContent = currentUserData.referralCount || 0;
+            document.getElementById('totalCommission').innerHTML = `<span style="color:#FFD700;">$${(currentUserData.commissionEarned || 0).toFixed(2)}</span>`;
+            document.getElementById('dailyBotProfit').innerHTML = `<span style="color:#FFD700;">$${(currentUserData.botProfitCommissionEarned || 0).toFixed(2)}</span>`;
+            document.getElementById('withdrawnCommission').innerHTML = `<span style="color:#FFD700;">$${(currentUserData.affiliateWithdrawn || 0).toFixed(2)}</span>`;
+        } else {
+            const referralCode = generateStaticReferralCode(currentUser.uid);
+            await set(ref(db, `users/${currentUser.uid}`), {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                referralCode: referralCode,
+                referralCount: 0,
+                commissionEarned: 0,
+                botProfitCommissionEarned: 0,
+                affiliateWithdrawn: 0,
+                createdAt: Date.now()
+            });
+            currentUserData = { referralCode };
+            const domain = window.location.origin;
+            document.getElementById('referralLink').value = `${domain}/pages/register.html?ref=${referralCode}`;
+        }
+    } catch (error) { 
+        console.error("Error loading user data:", error); 
+    }
+}
+
+async function loadReferralData() {
+    if (!currentUser) return;
+    try {
+        await loadUserData();
+        
+        const usersSnap = await get(ref(db, 'users'));
+        const referrals = [];
+        const refCode = currentUserData?.referralCode;
+        
+        if (usersSnap.exists() && refCode) {
+            usersSnap.forEach(child => {
+                const user = child.val();
+                if (user.referredBy === refCode) {
+                    referrals.push({
+                        id: child.key,
+                        name: user.username || user.fullName || user.email?.split('@')[0] || 'User',
+                        joinedAt: user.createdAt || Date.now(),
+                        totalDeposit: user.totalDeposited || 0,
+                        commission: user.commissionEarned || 0,
+                        isVerified: user.isVerified || false
+                    });
+                }
+            });
+        }
+        
+        try {
+            const affSnap = await get(ref(db, 'affiliate'));
+            if (affSnap.exists()) {
+                affSnap.forEach(child => {
+                    const refData = child.val();
+                    if (refData.referredBy === currentUser.uid) {
+                        const exists = referrals.some(r => r.id === child.key);
+                        if (!exists) {
+                            referrals.push({
+                                id: child.key,
+                                name: refData.name || 'User',
+                                joinedAt: refData.joinedAt || Date.now(),
+                                totalDeposit: refData.totalDeposit || 0,
+                                commission: refData.commission || 0,
+                                isVerified: false
+                            });
+                        }
+                    }
+                });
+            }
+        } catch(e) {}
+        
+        referrals.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+        
+        const container = document.getElementById('recentReferralsList');
+        if (referrals.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No referrals yet. Share your link!</div>';
+        } else {
+            container.innerHTML = '';
+            referrals.slice(0, 10).forEach(ref => {
+                const item = document.createElement('div');
+                item.className = 'referral-item';
+                const verifiedBadge = ref.isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
+                item.innerHTML = `
+                    <div class="referral-info">
+                        <div class="referral-name"><i class="fas fa-user"></i> ${escapeHtml(ref.name)} ${verifiedBadge}</div>
+                        <div class="referral-date">Joined: ${new Date(ref.joinedAt || Date.now()).toLocaleDateString()}</div>
+                    </div>
+                    <div class="referral-stats">
+                        <div class="referral-deposit">Deposit: $${(ref.totalDeposit || 0).toFixed(2)}</div>
+                        <div class="referral-commission">Commission: $${(ref.commission || 0).toFixed(2)}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+    } catch (error) { 
+        console.error("Error loading referral data:", error); 
+    }
+}
+
+async function loadTeamStructure() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, 'users'));
+        let level1 = 0;
+        let level2 = 0;
+        const members = [];
+        const refCode = currentUserData?.referralCode;
+        
+        if (snapshot.exists() && refCode) {
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.referredBy === refCode) {
+                    level1++;
+                    members.push({ 
+                        uid: child.key,
+                        name: user.username || user.fullName || user.email?.split('@')[0] || 'User',
+                        level: 1,
+                        totalDeposit: user.totalDeposited || 0,
+                        commission: user.commissionEarned || 0,
+                        botProfit: user.botProfitCommissionEarned || 0,
+                        isVerified: user.isVerified || false,
+                        joinedAt: user.createdAt || Date.now()
+                    });
+                }
+            });
+            
+            for (const member of members) {
+                if (member.uid) {
+                    snapshot.forEach(child => {
+                        const user = child.val();
+                        if (user.referredBy === member.uid) {
+                            level2++;
+                        }
+                    });
+                }
+            }
+        }
+        
+        document.getElementById('teamLevel1').textContent = level1;
+        document.getElementById('teamLevel2').textContent = level2;
+        document.getElementById('teamTotal').textContent = level1 + level2;
+        
+        const container = document.getElementById('teamTree');
+        if (members.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No team members yet. Share your referral link!</div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        members.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+        
+        members.forEach(member => {
+            const div = document.createElement('div');
+            div.className = 'team-member';
+            const initial = member.name.charAt(0).toUpperCase();
+            const verifiedBadge = member.isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
+            const joinDate = member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : 'Unknown';
+            
+            div.innerHTML = `
+                <div class="team-member-avatar">${escapeHtml(initial)}</div>
+                <div class="team-member-info">
+                    <div class="team-member-name">${escapeHtml(member.name)} ${verifiedBadge}</div>
+                    <div class="team-member-level">Level 1 (5% deposit + 1% bot) • Joined: ${joinDate}</div>
+                </div>
+                <div class="team-member-stats">
+                    <div class="team-member-profit">Deposit: $${(member.totalDeposit || 0).toFixed(2)}</div>
+                    <div class="team-member-commission">Commission: $${(member.commission || 0).toFixed(2)}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+    } catch (error) { 
+        console.error("Error loading team:", error); 
+    }
+}
+
+async function loadAffiliateLeaderboard() {
+    const container = document.getElementById('leaderboardList');
+    container.innerHTML = '<div style="text-align:center; padding:20px;">Loading leaderboard...</div>';
+    try {
+        const snapshot = await get(ref(db, 'users'));
+        const leaders = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.referralCount > 0 || user.commissionEarned > 0) {
+                    leaders.push({
+                        name: user.username || user.fullName || user.email?.split('@')[0] || 'User',
+                        referralCount: user.referralCount || 0,
+                        commission: user.commissionEarned || 0,
+                        isVerified: user.isVerified || false,
+                        botProfit: user.botProfitCommissionEarned || 0
+                    });
+                }
+            });
+        }
+        leaders.sort((a, b) => b.commission - a.commission);
+        
+        if (leaders.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No affiliates yet. Be the first!</div>';
+            return;
+        }
+        container.innerHTML = '';
+        leaders.slice(0, 20).forEach((aff, i) => {
+            const rank = i + 1;
+            let rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+            const verifiedBadge = aff.isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : '';
+            const item = document.createElement('div');
+            item.className = 'leaderboard-item';
+            item.innerHTML = `
+                <div class="leaderboard-rank ${rankClass}">${rank}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">${escapeHtml(aff.name)} ${verifiedBadge}</div>
+                    <div class="leaderboard-stats">📊 ${aff.referralCount || 0} referrals • Bot: $${(aff.botProfit || 0).toFixed(2)}</div>
+                </div>
+                <div class="leaderboard-commission">$${(aff.commission || 0).toFixed(2)}</div>
+            `;
+            container.appendChild(item);
+        });
+    } catch (error) { 
+        console.error("Error loading leaderboard:", error); 
+    }
+}
+
+async function withdrawCommission() {
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    if (!amount || amount <= 0) { showNotification('Please enter a valid amount', 'error'); return; }
+    if (amount < 20) { showNotification('Minimum withdrawal amount is $20', 'error'); return; }
+    
+    const totalCommission = currentUserData?.commissionEarned || 0;
+    const withdrawn = currentUserData?.affiliateWithdrawn || 0;
+    const affiliateBalance = totalCommission - withdrawn;
+    if (amount > affiliateBalance) { 
+        showNotification(`Insufficient affiliate balance. Available: $${affiliateBalance.toFixed(2)}`, 'error'); 
+        return; 
+    }
+    
+    const fee = amount * 0.1;
+    const receiveAmount = amount * 0.9;
+    
+    try {
+        await update(ref(db, `users/${currentUser.uid}`), {
+            affiliateWithdrawn: (currentUserData.affiliateWithdrawn || 0) + amount
+        });
+        
+        const notifRef = push(ref(db, `notifications/${currentUser.uid}`));
+        await set(notifRef, {
+            title: '💰 Affiliate Withdrawal',
+            message: `Your affiliate withdrawal of $${amount.toFixed(2)} has been submitted. You will receive $${receiveAmount.toFixed(2)} after 10% fee.`,
+            type: 'withdrawal',
+            link: 'wallet.html',
+            read: false,
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+        
+        showNotification(`Withdrawal request for $${amount.toFixed(2)} submitted! You will receive $${receiveAmount.toFixed(2)} after 10% fee.`, 'success');
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('withdrawPreview').style.display = 'none';
+        await loadReferralData();
+    } catch (error) {
+        showNotification('Error processing withdrawal', 'error');
+    }
+}
+
+function switchTab(tab) {
+    document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
+    document.getElementById('teamTab').style.display = tab === 'team' ? 'block' : 'none';
+    document.getElementById('leaderboardTab').style.display = tab === 'leaderboard' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tab) btn.classList.add('active');
+    });
+    if (tab === 'team') loadTeamStructure();
+    else if (tab === 'leaderboard') loadAffiliateLeaderboard();
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+    const link = document.getElementById('referralLink');
+    if (link.value) { 
+        navigator.clipboard.writeText(link.value); 
+        showNotification('Referral link copied!', 'success'); 
+    }
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+});
+
+document.getElementById('withdrawBtn').addEventListener('click', withdrawCommission);
+
+document.getElementById('withdrawAmount').addEventListener('input', () => {
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    const preview = document.getElementById('withdrawPreview');
+    if (amount && amount > 0) {
+        const totalCommission = currentUserData?.commissionEarned || 0;
+        const withdrawn = currentUserData?.affiliateWithdrawn || 0;
+        const affiliateBalance = totalCommission - withdrawn;
+        if (amount > affiliateBalance) {
+            preview.style.display = 'block';
+            preview.style.background = 'rgba(246,70,93,0.15)';
+            preview.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Amount exceeds balance! Available: $${affiliateBalance.toFixed(2)}`;
+        } else {
+            const fee = amount * 0.1;
+            const receiveAmount = amount * 0.9;
+            preview.style.display = 'block';
+            preview.style.background = 'rgba(255,215,0,0.08)';
+            preview.innerHTML = `
+                <i class="fas fa-calculator"></i> Withdraw: <strong>$${amount.toFixed(2)}</strong><br>
+                <i class="fas fa-percent"></i> Fee (10%): <strong style="color:#F6465D;">-$${fee.toFixed(2)}</strong><br>
+                <i class="fas fa-arrow-down"></i> You receive: <strong style="color:#0ECB81;">$${receiveAmount.toFixed(2)}</strong>
+            `;
+        }
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
+async function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { 
+            window.location.href = 'login.html'; 
+            return; 
+        }
+        currentUser = user;
+        console.log('[AFFILIATE] User logged in:', user.uid);
+        
+        document.getElementById('skeletonContainer').style.display = 'block';
+        document.getElementById('contentContainer').style.display = 'none';
+        
+        await loadUserData();
+        await loadReferralData();
+        await loadTeamStructure();
+        
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'block';
+        }, 800);
+        
+        setInterval(() => {
+            loadReferralData();
+            if (document.getElementById('teamTab').style.display !== 'none') loadTeamStructure();
+            if (document.getElementById('leaderboardTab').style.display !== 'none') loadAffiliateLeaderboard();
+        }, 30000);
+    });
+}
+init();
+</script>
+</body>
+</html>

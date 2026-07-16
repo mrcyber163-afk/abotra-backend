@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Robot Management | ABOTRA-PROAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        /* ============================================================
+           ROOT & RESET
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #b8860b;
+            --maroon: #800000;
+            --maroon-light: #a00000;
+            --black: #050505;
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(255, 255, 255, 0.06);
+            --bg-card-hover: rgba(255, 255, 255, 0.10);
+            --border-card: rgba(255, 215, 0, 0.12);
+            --text-primary: #FFFFFF;
+            --text-secondary: #CCCCCC;
+            --text-muted: #888888;
+            --shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-amount: 20px;
+        }
+
+        body {
+            background: var(--black);
+            background-image: url("../assets/images/background.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            font-size: 11px;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        /* Glass overlay for background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 5, 5, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 0;
+        }
+
+        body.light-theme {
+            --bg-card: rgba(255, 255, 255, 0.15);
+            --bg-card-hover: rgba(255, 255, 255, 0.25);
+            --border-card: rgba(128, 0, 0, 0.10);
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            background: #f0f0f5;
+            background-image: url("../assets/images/background-light.png");
+        }
+
+        body.light-theme::before {
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        body.light-theme .top-bar,
+        body.light-theme .card,
+        body.light-theme .modal-content {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        body.light-theme .top-bar h2,
+        body.light-theme .page-title {
+            color: var(--maroon);
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(128, 0, 0, 0.2);
+        }
+
+        body.light-theme .theme-toggle i {
+            color: var(--maroon);
+        }
+
+        body.light-theme .bottom-nav {
+            background: rgba(255, 255, 255, 0.90);
+            border-top: 1px solid rgba(128, 0, 0, 0.10);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        body.light-theme .bottom-nav a.active {
+            color: var(--maroon);
+        }
+
+        body.light-theme .premium-plan-card {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .premium-plan-card:hover {
+            background: rgba(128, 0, 0, 0.05);
+            border-color: var(--maroon);
+        }
+
+        body.light-theme .status-bar {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .expired-message {
+            background: rgba(255, 152, 0, 0.08);
+            border-color: rgba(255, 152, 0, 0.15);
+        }
+
+        body.light-theme table tr:hover td {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        body.light-theme table th {
+            color: var(--maroon);
+        }
+
+        body.light-theme table td {
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+        }
+
+        /* ============================================================
+           TOP BAR
+           ============================================================ */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.10);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-area img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: transparent;
+        }
+
+        .logo-area .logo-text h2 {
+            color: var(--gold);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .logo-area .logo-text p {
+            color: var(--text-secondary);
+            font-size: 7px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-bar-btn {
+            background: rgba(255, 215, 0, 0.10);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 10px;
+            padding: 7px 12px;
+            color: var(--gold);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 9px;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .top-bar-btn:hover {
+            background: rgba(255, 215, 0, 0.20);
+            transform: scale(1.02);
+            border-color: rgba(255, 215, 0, 0.30);
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 215, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle i {
+            font-size: 15px;
+            color: var(--gold);
+        }
+
+        /* ============================================================
+           MAIN CONTAINER
+           ============================================================ */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 75px auto 20px;
+            padding: 0 16px;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+
+        .page-title .sub {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .page-title i {
+            font-size: 24px;
+        }
+
+        /* ============================================================
+           CARDS - Enhanced Glass Effect
+           ============================================================ */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 18px;
+            transition: var(--transition);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.20);
+            box-shadow: 0 8px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-title {
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.08);
+        }
+
+        .card-title i {
+            font-size: 16px;
+        }
+
+        /* ============================================================
+           BADGES
+           ============================================================ */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-status.online {
+            background: rgba(14, 203, 129, 0.15);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.20);
+        }
+
+        .badge-status.offline {
+            background: rgba(246, 70, 93, 0.15);
+            color: #F6465D;
+            border: 1px solid rgba(246, 70, 93, 0.20);
+        }
+
+        .badge-status.expired {
+            background: rgba(255, 152, 0, 0.15);
+            color: #FF9800;
+            border: 1px solid rgba(255, 152, 0, 0.20);
+        }
+
+        .badge-status.premium {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(255, 215, 0, 0.20);
+        }
+
+        .badge-status.trial {
+            background: rgba(14, 203, 129, 0.12);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.15);
+        }
+
+        .badge-status.active {
+            background: rgba(14, 203, 129, 0.15);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.20);
+        }
+
+        .badge-status.paused {
+            background: rgba(255, 152, 0, 0.15);
+            color: #FF9800;
+            border: 1px solid rgba(255, 152, 0, 0.20);
+        }
+
+        .badge-status.completed {
+            background: rgba(14, 203, 129, 0.10);
+            color: #0ECB81;
+            border: 1px solid rgba(14, 203, 129, 0.12);
+        }
+
+        /* ============================================================
+           STATUS BAR
+           ============================================================ */
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 215, 0, 0.04);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 215, 0, 0.06);
+            margin-bottom: 12px;
+        }
+
+        .status-bar .status-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-bar .status-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================================
+           STATS GRID
+           ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 215, 0, 0.08);
+        }
+
+        .stat-item .label {
+            color: var(--text-secondary);
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .stat-item .value {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .stat-item .value.green {
+            color: #0ECB81;
+        }
+        .stat-item .value.red {
+            color: #F6465D;
+        }
+        .stat-item .value.gold {
+            color: var(--gold);
+        }
+
+        /* ============================================================
+           COUNTDOWN
+           ============================================================ */
+        .countdown-container {
+            text-align: center;
+            padding: 12px 0;
+            background: rgba(255, 215, 0, 0.04);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 215, 0, 0.06);
+            margin: 8px 0 12px;
+        }
+
+        .countdown {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        .countdown .days {
+            font-size: 32px;
+        }
+
+        .countdown-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .countdown-dates {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           PREMIUM PLANS
+           ============================================================ */
+        .premium-plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .premium-plan-card {
+            background: rgba(255, 215, 0, 0.04);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.10);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .premium-plan-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.10);
+            background: rgba(255, 215, 0, 0.06);
+        }
+
+        .premium-plan-card .plan-icon {
+            font-size: 32px;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .premium-plan-card .plan-name {
+            color: var(--gold);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .premium-plan-card .plan-duration {
+            color: var(--text-secondary);
+            font-size: 10px;
+            margin: 4px 0;
+            opacity: 0.8;
+        }
+
+        .premium-plan-card .plan-price {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .premium-plan-card .plan-price span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .premium-plan-card .plan-features {
+            color: var(--text-secondary);
+            font-size: 9px;
+            margin: 8px 0 12px;
+            line-height: 1.8;
+            opacity: 0.8;
+        }
+
+        .premium-plan-card .plan-features i {
+            color: var(--gold);
+            margin-right: 4px;
+            font-size: 8px;
+        }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--maroon), #a00000);
+            color: white;
+            border: 1px solid rgba(255, 215, 0, 0.20);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(128, 0, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.40);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #0ECB81, #0A9E65);
+            color: white;
+            border: 1px solid rgba(14, 203, 129, 0.20);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(14, 203, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #F6465D, #D43F52);
+            color: white;
+            border: 1px solid rgba(246, 70, 93, 0.20);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(246, 70, 93, 0.3);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.20);
+            color: var(--gold);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: rgba(255, 215, 0, 0.10);
+            transform: translateY(-2px);
+            border-color: rgba(255, 215, 0, 0.40);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 9px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 0 1 auto;
+        }
+
+        /* ============================================================
+           EXPIRED MESSAGE
+           ============================================================ */
+        .expired-message {
+            background: rgba(255, 152, 0, 0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 152, 0, 0.12);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            text-align: center;
+            color: #FF9800;
+            font-size: 12px;
+            margin: 8px 0 12px;
+        }
+
+        .expired-message i {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .expired-message .btn {
+            margin-top: 8px;
+        }
+
+        /* ============================================================
+           TABLE
+           ============================================================ */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 4px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            min-width: 500px;
+        }
+
+        th {
+            padding: 10px 12px;
+            text-align: left;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.08);
+            background: rgba(255, 215, 0, 0.03);
+        }
+
+        td {
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 10px;
+        }
+
+        tr:hover td {
+            background: rgba(255, 215, 0, 0.03);
+        }
+
+        .trade-profit {
+            font-weight: 700;
+        }
+        .trade-profit.positive {
+            color: #0ECB81;
+        }
+        .trade-profit.negative {
+            color: #F6465D;
+        }
+
+        .trade-status {
+            font-weight: 600;
+        }
+        .trade-status.closed {
+            color: #0ECB81;
+        }
+        .trade-status.pending {
+            color: var(--gold);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .empty-state i {
+            font-size: 32px;
+            color: var(--gold);
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.80);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(14, 14, 26, 0.95));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        body.light-theme .modal-content {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 245, 0.95));
+            border-color: rgba(128, 0, 0, 0.10);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-title {
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 14px;
+        }
+
+        .modal-body .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .modal-body .form-group input,
+        .modal-body .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.12);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
+        }
+
+        .modal-body .form-group select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 11px;
+            font-size: 12px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 8px;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .modal-close-btn:hover {
+            opacity: 1;
+            background: rgba(255, 215, 0, 0.10);
+            transform: rotate(90deg);
+        }
+
+        /* ============================================================
+           TOAST
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            font-size: 11px;
+            color: white;
+        }
+
+        .toast.success {
+            background: rgba(14, 203, 129, 0.15);
+            border-color: rgba(14, 203, 129, 0.20);
+        }
+        .toast.success i { color: #0ECB81; }
+        .toast.error {
+            background: rgba(246, 70, 93, 0.15);
+            border-color: rgba(246, 70, 93, 0.20);
+        }
+        .toast.error i { color: #F6465D; }
+        .toast.info {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: rgba(255, 215, 0, 0.15);
+        }
+        .toast.info i { color: var(--gold); }
+        .toast.warning {
+            background: rgba(255, 152, 0, 0.12);
+            border-color: rgba(255, 152, 0, 0.15);
+        }
+        .toast.warning i { color: #FF9800; }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 4px;
+            transition: var(--transition);
+        }
+
+        .toast .toast-close:hover {
+            color: white;
+        }
+
+        /* ============================================================
+           BOTTOM NAV
+           ============================================================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 215, 0, 0.08);
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 10px 10px;
+            z-index: 100;
+        }
+
+        .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 7px;
+            transition: var(--transition);
+            gap: 2px;
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+
+        .bottom-nav a i {
+            font-size: 16px;
+        }
+
+        .bottom-nav a.active {
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.06);
+        }
+
+        .bottom-nav a:hover {
+            color: var(--gold);
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media(max-width: 768px) {
+            .main-container {
+                padding: 0 12px;
+                margin-top: 70px;
+            }
+            .page-title {
+                font-size: 18px;
+            }
+            .page-title .sub {
+                font-size: 10px;
+            }
+            .top-bar-right .top-bar-btn span {
+                display: none;
+            }
+            .logo-area .logo-text p {
+                display: none;
+            }
+            .bottom-nav a span {
+                font-size: 6px;
+            }
+            .bottom-nav a i {
+                font-size: 14px;
+            }
+            .modal-content {
+                padding: 20px;
+                max-width: 100%;
+                margin: 10px;
+            }
+            .modal-actions {
+                flex-direction: column;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .premium-plans-grid {
+                grid-template-columns: 1fr;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .status-bar .status-left {
+                justify-content: center;
+            }
+            .status-bar .status-right {
+                justify-content: center;
+            }
+            .btn-group {
+                justify-content: center;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-item .value {
+                font-size: 13px;
+            }
+            .countdown .days {
+                font-size: 26px;
+            }
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mt-8 { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
+        .mt-16 { margin-top: 16px; }
+        .mb-8 { margin-bottom: 8px; }
+        .mb-12 { margin-bottom: 12px; }
+
+        .text-gold { color: var(--gold); }
+        .text-green { color: #0ECB81; }
+        .text-red { color: #F6465D; }
+        .text-muted { color: var(--text-muted); }
+        .text-secondary { color: var(--text-secondary); }
+
+        .fw-700 { font-weight: 700; }
+        .fw-600 { font-weight: 600; }
+
+        .fs-10 { font-size: 10px; }
+        .fs-12 { font-size: 12px; }
+        .fs-14 { font-size: 14px; }
+
+        .w-full { width: 100%; }
+        .gap-8 { gap: 8px; }
+        .gap-12 { gap: 12px; }
+
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        .skeleton-text {
+            height: 12px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.06);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    TOP BAR
+    ============================================================ -->
+    <header class="top-bar">
+        <div class="logo-area">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+            <div class="logo-text">
+                <h2>ABOTRA-PROAI</h2>
+                <p>Robot Management</p>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="top-bar-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> <span>Refresh</span></button>
+            <button class="top-bar-btn" onclick="window.location.href='../index.html'"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon" style="display:none;"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    TOAST
+    ============================================================ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ============================================================
+    MODAL
+    ============================================================ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            <div class="modal-title" id="modalTitle">Modal Title</div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-container">
+
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+            <i class="fas fa-microchip"></i> AI Robot Management
+            <span class="sub">— Control Your Trading Robot</span>
+        </div>
+
+        <!-- ============================================================
+        ROBOT STATUS CARD
+        ============================================================ -->
+        <section class="card" id="robotCard">
+            <div class="card-title"><i class="fas fa-robot"></i> My AI Robot</div>
+            <div id="robotContent">
+                <!-- Rendered by JavaScript -->
+            </div>
+        </section>
+
+        <!-- ============================================================
+        PREMIUM ROBOTS CARD
+        ============================================================ -->
+        <section class="card" id="premiumCard">
+            <div class="card-title"><i class="fas fa-crown"></i> Premium AI Robots</div>
+            <div id="premiumContent">
+                <!-- Rendered by JavaScript -->
+            </div>
+        </section>
+
+        <!-- ============================================================
+        TRADING HISTORY
+        ============================================================ -->
+        <section class="card" id="historyCard">
+            <div class="card-title"><i class="fas fa-history"></i> Trading History</div>
+            <div id="historyContent">
+                <!-- Rendered by JavaScript -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ============================================================
+    BOTTOM NAV
+    ============================================================ -->
+    <nav class="bottom-nav">
+        <a href="../index.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+        <a href="ai-signal.html"><i class="fas fa-chart-line"></i><span>Signals</span></a>
+        <a href="robot.html" class="active"><i class="fas fa-microchip"></i><span>Robot</span></a>
+        <a href="broker-connection.html"><i class="fas fa-link"></i><span>Broker</span></a>
+        <a href="account.html"><i class="fas fa-user-cog"></i><span>Account</span></a>
+    </nav>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+            authDomain: "abotra-proa1.firebaseapp.com",
+            databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+            projectId: "abotra-proa1",
+            storageBucket: "abotra-proa1.firebasestorage.app",
+            messagingSenderId: "510401455603",
+            appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let userRobot = null;
+        let robotPlans = [];
+        let robotTrades = [];
+        let isLoading = false;
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const robotContent = document.getElementById('robotContent');
+        const premiumContent = document.getElementById('premiumContent');
+        const historyContent = document.getElementById('historyContent');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toastContainer');
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
+            toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, duration);
+        }
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function initTheme() {
+            const saved = localStorage.getItem('abotra_theme');
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+                document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+                document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+            }
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+            const sun = document.querySelector('#themeToggle i.fa-sun');
+            const moon = document.querySelector('#themeToggle i.fa-moon');
+            if (isLight) {
+                sun.style.display = 'none';
+                moon.style.display = 'inline-block';
+            } else {
+                sun.style.display = 'inline-block';
+                moon.style.display = 'none';
+            }
+        });
+
+        // ============================================================
+        // UTILITY FUNCTIONS
+        // ============================================================
+        function calculateDaysRemaining(expiryDate) {
+            const now = Date.now();
+            const expiry = expiryDate || 0;
+            const diff = expiry - now;
+            if (diff <= 0) return 0;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDays(days) {
+            if (days <= 0) return 'Expired';
+            if (days === 1) return '1 Day';
+            return `${days} Days`;
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'active': 'online',
+                'online': 'online',
+                'offline': 'offline',
+                'expired': 'expired',
+                'trial': 'trial',
+                'premium': 'premium',
+                'paused': 'paused',
+                'completed': 'completed'
+            };
+            return map[status] || 'offline';
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'active': 'Active',
+                'online': 'Online',
+                'offline': 'Offline',
+                'expired': 'Expired',
+                'trial': 'Trial',
+                'premium': 'Premium',
+                'paused': 'Paused',
+                'completed': 'Completed'
+            };
+            return map[status] || status;
+        }
+
+        // ============================================================
+        // API FUNCTIONS - USING CORRECT BACKEND ROUTES
+        // ============================================================
+        const BASE_URL = 'https://abotra-backend-production.up.railway.app';
+
+        async function getToken() {
+            if (currentUser) {
+                return await currentUser.getIdToken();
+            }
+            return null;
+        }
+
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            const token = await getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            };
+
+            const url = `${BASE_URL}${endpoint}`;
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(url, options);
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(responseData.error || responseData.message || 'API request failed');
+            }
+
+            return responseData;
+        }
+
+        // ============================================================
+        // LOAD DATA - USING CORRECT API ROUTES
+        // ============================================================
+        async function loadAllData() {
+            if (isLoading || !currentUser) return;
+            isLoading = true;
+
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                // Show skeleton
+                robotContent.innerHTML = `
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                `;
+                premiumContent.innerHTML = `
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                `;
+                historyContent.innerHTML = `
+                    <div class="skeleton-card"></div>
+                `;
+
+                // Load robot status - using /api/robot/status as defined in backend
+                let robotResult;
+                try {
+                    console.log('[ROBOT] Fetching robot status from /api/robot/status');
+                    robotResult = await apiRequest('/api/robot/status', 'GET');
+                } catch (e) {
+                    console.log('[ROBOT] /api/robot/status failed, trying /robot/status');
+                    robotResult = await apiRequest('/robot/status', 'GET');
+                }
+
+                if (robotResult && robotResult.robot) {
+                    userRobot = robotResult.robot;
+                } else if (robotResult && robotResult.data) {
+                    userRobot = robotResult.data;
+                } else {
+                    userRobot = null;
+                }
+
+                // Load premium plans from Firebase
+                const plansSnapshot = await db.ref('robotPlans').once('value');
+                robotPlans = [];
+                if (plansSnapshot.exists()) {
+                    plansSnapshot.forEach(child => {
+                        const plan = child.val();
+                        plan.id = child.key;
+                        robotPlans.push(plan);
+                    });
+                    robotPlans.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+                }
+
+                // Load trades - using /api/robot/trades
+                let tradesResult;
+                try {
+                    console.log('[ROBOT] Fetching trades from /api/robot/trades');
+                    tradesResult = await apiRequest('/api/robot/trades', 'GET');
+                } catch (e) {
+                    console.log('[ROBOT] /api/robot/trades failed, trying /robot/trades');
+                    tradesResult = await apiRequest('/robot/trades', 'GET');
+                }
+                robotTrades = tradesResult?.trades || [];
+
+                // Render everything
+                renderRobot(userRobot);
+                renderPremiumPlans(robotPlans);
+                renderHistory(robotTrades);
+
+            } catch (error) {
+                console.error('Load error:', error);
+                showToast('Failed to load robot data: ' + error.message, 'error');
+                
+                robotContent.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load robot data</p>
+                        <button class="btn btn-outline btn-sm mt-8" onclick="loadAllData()">Retry</button>
+                    </div>
+                `;
+            } finally {
+                isLoading = false;
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                }
+            }
+        }
+
+        // ============================================================
+        // RENDER ROBOT
+        // ============================================================
+        function renderRobot(robot) {
+            if (!robot) {
+                robotContent.innerHTML = `
+                    <div class="status-bar">
+                        <div class="status-left">
+                            <span class="badge-status offline">● No Robot</span>
+                            <span class="text-secondary fs-10">No robot assigned</span>
+                        </div>
+                        <div class="status-right">
+                            <button class="btn btn-primary btn-sm" id="refreshRobotBtn"><i class="fas fa-sync"></i> Refresh</button>
+                            <button class="btn btn-success btn-sm" id="createTrialBtn"><i class="fas fa-plus"></i> Start Trial</button>
+                        </div>
+                    </div>
+                    <div class="empty-state">
+                        <i class="fas fa-robot"></i>
+                        <p>You don't have an active AI robot yet</p>
+                        <p class="text-muted fs-10 mt-8">Start a free trial or upgrade to premium</p>
+                    </div>
+                `;
+                document.getElementById('refreshRobotBtn')?.addEventListener('click', loadAllData);
+                document.getElementById('createTrialBtn')?.addEventListener('click', createTrialRobot);
+                return;
+            }
+
+            const isExpired = robot.status === 'expired';
+            const isActive = robot.status === 'active' || robot.status === 'online';
+            const isTrial = robot.type === 'trial';
+            const isPremium = robot.premium === true;
+
+            const statusBadge = getStatusBadge(robot.status);
+            const statusText = getStatusText(robot.status);
+
+            const daysRemaining = calculateDaysRemaining(robot.expiryDate);
+            const daysDisplay = formatDays(daysRemaining);
+
+            const balance = robot.balance || 0;
+            const totalProfit = robot.totalProfit || 0;
+            const tradesCount = robot.tradesCount || 0;
+            const winRate = robot.winRate || 0;
+
+            robotContent.innerHTML = `
+                <div class="status-bar">
+                    <div class="status-left">
+                        <span class="badge-status ${statusBadge}">● ${statusText}</span>
+                        ${isTrial ? `<span class="badge-status trial">Trial</span>` : ''}
+                        ${isPremium ? `<span class="badge-status premium">Premium</span>` : ''}
+                        <span class="text-secondary fs-10">${robot.name || 'ABOTRA Starter AI'}</span>
+                    </div>
+                    <div class="status-right">
+                        ${isExpired ? 
+                            `<button class="btn btn-danger btn-sm" disabled>Expired</button>` :
+                            isActive ?
+                            `<button class="btn btn-danger btn-sm" id="pauseRobotBtn"><i class="fas fa-pause"></i> Pause</button>` :
+                            `<button class="btn btn-success btn-sm" id="activateRobotBtn"><i class="fas fa-play"></i> Activate</button>`
+                        }
+                        <button class="btn btn-outline btn-sm" id="refreshRobotBtn"><i class="fas fa-sync"></i></button>
+                    </div>
+                </div>
+
+                ${isExpired ? `
+                    <div class="expired-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Your AI Robot trial has ended.</strong><br>
+                        <span class="fs-10">Upgrade to continue trading with advanced AI features.</span>
+                        <div>
+                            <button class="btn btn-primary btn-sm" id="upgradeFromExpiredBtn"><i class="fas fa-crown"></i> Upgrade Now</button>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="countdown-container">
+                        <div class="countdown">
+                            <span class="days">${daysRemaining}</span> ${daysRemaining === 1 ? 'Day' : 'Days'}
+                        </div>
+                        <div class="countdown-label">Remaining</div>
+                        <div class="countdown-dates">
+                            ${robot.startDate ? `Started: ${new Date(robot.startDate).toLocaleDateString()}` : ''}
+                            ${robot.expiryDate ? ` · Expires: ${new Date(robot.expiryDate).toLocaleDateString()}` : ''}
+                        </div>
+                    </div>
+                `}
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="label">Investment</span>
+                        <span class="value gold">$${(robot.investment || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Balance</span>
+                        <span class="value gold">$${balance.toFixed(2)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Total Profit</span>
+                        <span class="value ${totalProfit >= 0 ? 'green' : 'red'}">${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Trades</span>
+                        <span class="value">${tradesCount}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Win Rate</span>
+                        <span class="value gold">${winRate}%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Status</span>
+                        <span class="value ${isActive ? 'green' : isExpired ? 'red' : 'gold'}">${isExpired ? 'Expired' : isActive ? 'Active' : 'Paused'}</span>
+                    </div>
+                </div>
+            `;
+
+            // Event listeners
+            document.getElementById('pauseRobotBtn')?.addEventListener('click', pauseRobot);
+            document.getElementById('activateRobotBtn')?.addEventListener('click', activateRobot);
+            document.getElementById('refreshRobotBtn')?.addEventListener('click', loadAllData);
+            document.getElementById('upgradeFromExpiredBtn')?.addEventListener('click', () => {
+                document.getElementById('premiumCard').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('premiumCard').style.borderColor = 'var(--gold)';
+                setTimeout(() => {
+                    document.getElementById('premiumCard').style.borderColor = '';
+                }, 3000);
+            });
+        }
+
+        // ============================================================
+        // RENDER PREMIUM PLANS
+        // ============================================================
+        function renderPremiumPlans(plans) {
+            if (!plans || plans.length === 0) {
+                premiumContent.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-crown"></i>
+                        <p>No premium plans available</p>
+                        <p class="text-muted fs-10">Check back later for updates</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const isPremium = userRobot?.premium === true;
+            const iconMap = {
+                'bronze': 'fa-medal',
+                'silver': 'fa-star',
+                'gold': 'fa-crown',
+                'platinum': 'fa-gem'
+            };
+
+            let html = `<div class="premium-plans-grid">`;
+
+            plans.forEach(plan => {
+                const isCurrent = isPremium && plan.id === userRobot?.planId;
+                const icon = iconMap[plan.id?.toLowerCase()] || 'fa-robot';
+
+                let features = plan.features || 'Full AI Trading • Priority Support • Advanced Analytics';
+                if (typeof features === 'string') {
+                    features = features.split('•').map(f => f.trim());
+                }
+
+                html += `
+                    <div class="premium-plan-card">
+                        <div class="plan-icon"><i class="fas ${icon}"></i></div>
+                        <div class="plan-name">${plan.name || 'Premium Robot'}</div>
+                        <div class="plan-duration">${plan.duration || 30} Days</div>
+                        <div class="plan-price">$${plan.minInvestment || 50} <span>minimum</span></div>
+                        <div class="plan-features">
+                            ${Array.isArray(features) ? 
+                                features.map(f => `<div><i class="fas fa-check-circle"></i> ${f}</div>`).join('') :
+                                features
+                            }
+                        </div>
+                        ${isCurrent ? 
+                            `<button class="btn btn-success btn-sm" disabled style="width:100%;"><i class="fas fa-check"></i> Current Plan</button>` :
+                            `<button class="btn btn-primary btn-sm upgrade-plan-btn" data-id="${plan.id}" style="width:100%;"><i class="fas fa-arrow-up"></i> Upgrade Now</button>`
+                        }
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            premiumContent.innerHTML = html;
+
+            document.querySelectorAll('.upgrade-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const planId = btn.dataset.id;
+                    const plan = robotPlans.find(p => p.id === planId);
+                    if (plan) showUpgradeModal(plan);
+                });
+            });
+        }
+
+        // ============================================================
+        // RENDER HISTORY
+        // ============================================================
+        function renderHistory(trades) {
+            if (!trades || trades.length === 0) {
+                historyContent.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>No trading history yet</p>
+                        <p class="text-muted fs-10">Start trading to see your results here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>Profit</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            trades.slice(0, 20).forEach(trade => {
+                const profit = trade.profit || 0;
+                const statusClass = trade.status === 'closed' ? 'closed' : 'pending';
+                const sideClass = trade.side === 'BUY' ? 'positive' : 'negative';
+                
+                html += `
+                    <tr>
+                        <td>${trade.timestamp ? new Date(trade.timestamp).toLocaleString() : '—'}</td>
+                        <td><strong>${trade.symbol || 'BTCUSDT'}</strong></td>
+                        <td class="${sideClass}">${trade.side || '—'}</td>
+                        <td>$${trade.entry?.toFixed(2) || '—'}</td>
+                        <td>$${trade.exit?.toFixed(2) || '—'}</td>
+                        <td class="trade-profit ${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}</td>
+                        <td><span class="trade-status ${statusClass}">${trade.status || 'pending'}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                ${trades.length > 20 ? `<div class="text-muted fs-10 mt-8">Showing last 20 trades</div>` : ''}
+            `;
+
+            historyContent.innerHTML = html;
+        }
+
+        // ============================================================
+        // ROBOT ACTIONS
+        // ============================================================
+        async function createTrialRobot() {
+            if (!currentUser) return;
+
+            const confirm = window.confirm('🚀 Start a 15-day free trial of ABOTRA AI Robot?');
+            if (!confirm) return;
+
+            try {
+                showToast('Creating trial robot...', 'info');
+
+                const startDate = Date.now();
+                const expiryDate = startDate + (15 * 24 * 60 * 60 * 1000);
+
+                const trialRobot = {
+                    name: 'ABOTRA Starter AI',
+                    type: 'trial',
+                    premium: false,
+                    status: 'active',
+                    startDate: startDate,
+                    expiryDate: expiryDate,
+                    investment: 0,
+                    balance: 0,
+                    totalProfit: 0,
+                    tradesCount: 0,
+                    winRate: 0,
+                    createdAt: startDate
+                };
+
+                await db.ref(`users/${currentUser.uid}/robots/currentRobot`).set(trialRobot);
+                showToast('🎉 Trial robot created! 15 days remaining.', 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to create trial: ' + error.message, 'error');
+            }
+        }
+
+        async function activateRobot() {
+            if (!currentUser) return;
+            try {
+                await db.ref(`users/${currentUser.uid}/robots/currentRobot/status`).set('active');
+                showToast('✅ Robot activated successfully!', 'success');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to activate robot: ' + error.message, 'error');
+            }
+        }
+
+        async function pauseRobot() {
+            if (!currentUser) return;
+            try {
+                await db.ref(`users/${currentUser.uid}/robots/currentRobot/status`).set('paused');
+                showToast('⏸️ Robot paused', 'info');
+                await loadAllData();
+            } catch (error) {
+                showToast('Failed to pause robot: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // UPGRADE MODAL
+        // ============================================================
+        function showUpgradeModal(plan) {
+            showModal(
+                `Upgrade to ${plan.name}`,
+                `
+                    <p class="text-secondary">Upgrade your AI Robot to <strong class="text-gold">${plan.name}</strong> for ${plan.duration} days.</p>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Investment Amount (USDT)</label>
+                        <input type="number" id="upgradeAmount" value="${plan.minInvestment || 50}" min="${plan.minInvestment || 50}" step="10">
+                        <div style="font-size:8px; color:var(--text-muted); margin-top:4px;">
+                            <i class="fas fa-info-circle"></i> Minimum investment: $${plan.minInvestment || 50}
+                        </div>
+                    </div>
+                    
+                    <div style="font-size:10px; color:var(--text-secondary); margin-top:8px; padding:10px; background:rgba(255,215,0,0.04); border-radius:8px;">
+                        <i class="fas fa-crown text-gold"></i> 
+                        <strong class="text-gold">Premium Features:</strong><br>
+                        ${typeof plan.features === 'string' ? plan.features : (Array.isArray(plan.features) ? plan.features.join(' • ') : 'Full AI Trading • Priority Support')}
+                    </div>
+                    
+                    <div style="font-size:9px; color:var(--text-muted); margin-top:8px;">
+                        <i class="fas fa-shield-alt"></i> 
+                        Your current robot will be replaced with the premium version.
+                    </div>
+                `,
+                `
+                    <button class="btn btn-success" id="upgradeConfirmBtn"><i class="fas fa-crown"></i> Upgrade Now</button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                `
+            );
+
+            document.getElementById('upgradeConfirmBtn').addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('upgradeAmount').value);
+
+                if (!amount || amount < (plan.minInvestment || 50)) {
+                    showToast(`Minimum investment is $${plan.minInvestment || 50}`, 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('upgradeConfirmBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                try {
+                    const uid = currentUser.uid;
+
+                    // Check user balance from Firebase
+                    const userSnap = await db.ref(`users/${uid}/balance`).once('value');
+                    const balance = userSnap.val() || 0;
+
+                    if (balance < amount) {
+                        showToast(`❌ Insufficient balance. Need $${amount.toFixed(2)}`, 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-crown"></i> Upgrade Now';
+                        return;
+                    }
+
+                    // Deduct balance
+                    await db.ref(`users/${uid}/balance`).set(balance - amount);
+
+                    // Create premium robot
+                    const startDate = Date.now();
+                    const expiryDate = startDate + (plan.duration * 24 * 60 * 60 * 1000);
+
+                    const premiumRobot = {
+                        name: plan.name || 'Premium Robot',
+                        type: 'premium',
+                        premium: true,
+                        status: 'active',
+                        duration: plan.duration,
+                        startDate: startDate,
+                        expiryDate: expiryDate,
+                        investment: amount,
+                        balance: amount,
+                        totalProfit: 0,
+                        tradesCount: 0,
+                        winRate: 0,
+                        planId: plan.id,
+                        upgradedAt: Date.now()
+                    };
+
+                    await db.ref(`users/${uid}/robots/currentRobot`).set(premiumRobot);
+
+                    showToast(`✅ Upgraded to ${plan.name} successfully!`, 'success');
+                    closeModal();
+                    await loadAllData();
+
+                } catch (error) {
+                    showToast('❌ Failed to upgrade: ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-crown"></i> Upgrade Now';
+                }
+            });
+        }
+
+        // ============================================================
+        // MODAL FUNCTIONS
+        // ============================================================
+        function showModal(title, bodyHTML, actionsHTML) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            document.getElementById('modalActions').innerHTML = actionsHTML || '';
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // ============================================================
+        // SETUP REALTIME LISTENERS
+        // ============================================================
+        function setupListeners() {
+            if (!currentUser) return;
+            const uid = currentUser.uid;
+
+            // Listen for robot changes
+            db.ref(`users/${uid}/robots/currentRobot`).on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    userRobot = snapshot.val();
+                    // Check expiry
+                    if (userRobot.expiryDate && Date.now() > userRobot.expiryDate) {
+                        userRobot.status = 'expired';
+                        db.ref(`users/${uid}/robots/currentRobot/status`).set('expired');
+                    }
+                    renderRobot(userRobot);
+                    renderPremiumPlans(robotPlans);
+                }
+            });
+
+            // Listen for trades
+            db.ref(`robotTrades/${uid}`).orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
+                robotTrades = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => robotTrades.push(child.val()));
+                }
+                robotTrades.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                renderHistory(robotTrades);
+            });
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            initTheme();
+
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+                currentUser = user;
+                await loadAllData();
+                setupListeners();
+
+                document.getElementById('refreshBtn').addEventListener('click', loadAllData);
+                console.log('🤖 Robot Management page loaded');
+                console.log('🌐 Backend URL:', BASE_URL);
+            });
+        }
+
+        // Start
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

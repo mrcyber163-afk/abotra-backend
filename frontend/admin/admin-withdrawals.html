@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Withdrawals | Admin Panel - ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:#050505;background-image:url("../assets/images/background.png");background-size:cover;background-position:center;background-attachment:fixed;min-height:100vh;position:relative;font-size:12px;}
+body.light-theme{background:#f5f5f5;background-image:url("../assets/images/background-light.png");}
+body.light-theme .admin-header,body.light-theme .sidebar,body.light-theme .section-card,body.light-theme .withdraw-stat-card{background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.08);}
+body.light-theme .admin-header h2,body.light-theme .page-title,body.light-theme .withdraw-stat-value{color:#800000;}
+body.light-theme .nav-item{color:#555;}
+body.light-theme .nav-item:hover,body.light-theme .nav-item.active{background:rgba(128,0,0,0.08);color:#800000;}
+body.light-theme th{color:#800000;}
+body.light-theme td{color:#444;}
+body.light-theme .modal-content{background:linear-gradient(145deg,#ffffff,#f5f5f5);border:1px solid rgba(128,0,0,0.1);}
+body.light-theme .modal-detail-value{color:#800000;}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);z-index:0;pointer-events:none;}
+body.light-theme .overlay{background:rgba(255,255,255,0.85);}
+.admin-header{position:fixed;top:0;left:0;right:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,215,0,0.2);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:100;}
+.header-left{display:flex;align-items:center;gap:15px;}
+.menu-btn{background:rgba(255,215,0,0.15);border:none;border-radius:10px;padding:8px 12px;color:#FFD700;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600;transition:0.3s;font-size:11px;}
+.menu-btn:hover{background:rgba(255,215,0,0.3);transform:scale(1.02);}
+.logo-area{display:flex;align-items:center;gap:10px;}
+.logo-area img{width:36px;height:36px;border-radius:10px;object-fit:cover;}
+.logo-area h2{color:#FFD700;font-size:16px;font-weight:700;margin-bottom:2px;}
+.logo-area p{color:rgba(255,255,255,0.7);font-size:8px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.notif-icon{position:relative;cursor:pointer;color:#FFD700;font-size:18px;transition:0.3s;background:rgba(255,215,0,0.15);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.notif-icon:hover{background:rgba(255,215,0,0.3);transform:scale(1.05);}
+.notif-badge{position:absolute;top:-5px;right:-5px;background:#F6465D;color:white;font-size:9px;font-weight:700;padding:2px 5px;border-radius:20px;display:none;animation:pulse 1s infinite;}
+@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
+.theme-toggle{background:rgba(255,215,0,0.15);border:none;border-radius:10px;padding:8px 12px;cursor:pointer;color:#FFD700;display:flex;align-items:center;gap:6px;transition:0.3s;font-weight:500;font-size:11px;}
+.theme-toggle:hover{background:rgba(255,215,0,0.3);transform:scale(1.02);}
+.logout-btn{background:rgba(246,70,93,0.15);border:none;border-radius:10px;padding:8px 14px;color:#F6465D;cursor:pointer;display:flex;align-items:center;gap:6px;transition:0.3s;font-weight:500;font-size:11px;}
+.logout-btn:hover{background:rgba(246,70,93,0.3);transform:scale(1.02);}
+.sidebar-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(5px);z-index:199;display:none;}
+.sidebar-overlay.active{display:block;}
+.sidebar{position:fixed;top:-100%;left:0;right:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:200;transition:top 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);border-radius:0 0 20px 20px;max-height:80vh;overflow-y:auto;border-bottom:1px solid rgba(255,215,0,0.2);}
+.sidebar.open{top:65px;}
+.nav-menu{padding:12px 0;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#ccc;text-decoration:none;transition:0.3s;font-size:12px;font-weight:500;border-left:3px solid transparent;}
+.nav-item i{width:20px;font-size:14px;}
+.nav-item:hover{background:rgba(255,215,0,0.08);color:#FFD700;border-left-color:#FFD700;}
+.nav-item.active{background:rgba(255,215,0,0.12);color:#FFD700;border-left-color:#FFD700;}
+.nav-badge{background:#F6465D;color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:auto;display:none;}
+.main-content{position:relative;z-index:2;margin-top:70px;padding:20px;max-width:1400px;margin-left:auto;margin-right:auto;}
+.page-title{font-size:22px;font-weight:800;color:#FFD700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.withdraw-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.withdraw-stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px 10px;text-align:center;transition:all 0.3s ease;backdrop-filter:blur(10px);}
+.withdraw-stat-card:hover{transform:translateY(-3px);border-color:#FFD700;background:rgba(255,215,0,0.08);}
+.withdraw-stat-value{font-size:22px;font-weight:800;color:#FFD700;margin-bottom:3px;}
+.withdraw-stat-label{color:#aaa;font-size:9px;font-weight:500;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.tab-btn{padding:8px 16px;border:none;border-radius:30px;background:rgba(255,255,255,0.08);color:#ccc;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:all 0.3s ease;font-size:11px;}
+.tab-btn:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
+.tab-btn.active{background:linear-gradient(135deg,#800000,#FFD700);color:white;box-shadow:0 4px 12px rgba(255,215,0,0.3);}
+body.light-theme .tab-btn{background:white;color:#666;border:1px solid #ddd;}
+body.light-theme .tab-btn.active{background:linear-gradient(135deg,#800000,#b8860b);color:white;border:none;}
+.section-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,215,0,0.1);border-radius:16px;padding:16px;backdrop-filter:blur(10px);}
+.table-responsive{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:1000px;}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;}
+th{color:#FFD700;font-weight:600;font-size:8px;text-transform:uppercase;}
+td{color:#ddd;font-size:9px;}
+tr:hover td{background:rgba(255,215,0,0.04);}
+.status-pending,.status-approved,.status-rejected{padding:2px 8px;border-radius:30px;font-size:8px;font-weight:700;display:inline-block;white-space:nowrap;}
+.status-pending{background:rgba(255,215,0,0.2);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
+.status-approved{background:rgba(14,203,129,0.2);color:#0ECB81;border:1px solid rgba(14,203,129,0.3);}
+.status-rejected{background:rgba(246,70,93,0.2);color:#F6465D;border:1px solid rgba(246,70,93,0.3);}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;}
+.btn-view,.btn-approve,.btn-reject,.btn-delete{border:none;border-radius:4px;padding:3px 6px;color:white;cursor:pointer;font-size:8px;font-weight:600;transition:0.3s;display:inline-flex;align-items:center;gap:3px;}
+.btn-view{background:rgba(255,215,0,0.2);color:#FFD700;border:1px solid rgba(255,215,0,0.3);}
+.btn-view:hover{background:rgba(255,215,0,0.4);transform:translateY(-1px);}
+.btn-approve{background:linear-gradient(135deg,#0ECB81,#0A9E65);}
+.btn-approve:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(14,203,129,0.3);}
+.btn-reject{background:linear-gradient(135deg,#F6465D,#D43F52);}
+.btn-reject:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(246,70,93,0.3);}
+.btn-delete{background:rgba(246,70,93,0.15);color:#F6465D;border:1px solid rgba(246,70,93,0.3);}
+.btn-delete:hover{background:rgba(246,70,93,0.35);transform:translateY(-1px);color:white;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;}
+.modal.active{display:flex;}
+.modal-content{background:linear-gradient(145deg,#1e1e2e,#161626);border-radius:20px;padding:24px;max-width:480px;width:90%;border:1px solid rgba(255,215,0,0.3);box-shadow:0 20px 40px -12px rgba(0,0,0,0.5);position:relative;animation:slideUp 0.3s ease;max-height:85vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+body.light-theme .modal-content{background:linear-gradient(145deg,#ffffff,#f5f5f5);border:1px solid rgba(128,0,0,0.1);}
+.modal-close{position:absolute;top:14px;right:16px;font-size:22px;cursor:pointer;color:#FFD700;transition:0.3s;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.modal-close:hover{background:rgba(255,215,0,0.1);transform:rotate(90deg);}
+.modal-content h3{color:#FFD700;margin-bottom:16px;display:flex;align-items:center;gap:8px;font-size:17px;border-bottom:1px solid rgba(255,215,0,0.2);padding-bottom:10px;}
+.modal-detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:6px;}
+.modal-detail-label{color:#999;font-weight:500;font-size:10px;display:flex;align-items:center;gap:4px;}
+.modal-detail-value{color:#FFD700;font-weight:600;font-size:11px;word-break:break-word;text-align:right;max-width:60%;}
+.modal-detail-value.green{color:#0ECB81;}
+.modal-detail-value.red{color:#F6465D;}
+.local-amount-box{background:rgba(14,203,129,0.12);border-radius:12px;padding:10px 12px;margin:10px 0;text-align:center;}
+.local-amount-box span{color:#0ECB81;font-size:11px;}
+.local-amount-box .amount{color:#FFD700;font-size:18px;font-weight:800;}
+.modal-buttons{display:flex;gap:10px;margin-top:16px;}
+.modal-btn{flex:1;padding:10px;border:none;border-radius:12px;font-weight:700;cursor:pointer;transition:0.3s;font-size:11px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.modal-btn-confirm{background:linear-gradient(135deg,#0ECB81,#0A9E65);color:white;}
+.modal-btn-confirm:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(14,203,129,0.3);}
+.modal-btn-cancel{background:rgba(255,255,255,0.08);color:#aaa;border:1px solid rgba(255,255,255,0.1);}
+.modal-btn-cancel:hover{background:rgba(255,255,255,0.15);transform:translateY(-1px);}
+.confirm-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(16px);z-index:20000;display:none;align-items:center;justify-content:center;}
+.confirm-modal.active{display:flex;}
+.confirm-modal-card{background:linear-gradient(145deg,#1e1e2e,#14141f);border-radius:24px;padding:28px 24px;max-width:400px;width:90%;border:1px solid rgba(255,215,0,0.25);box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:modalSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);text-align:center;}
+@keyframes modalSlideUp{from{transform:translateY(40px) scale(0.95);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+body.light-theme .confirm-modal-card{background:linear-gradient(145deg,#ffffff,#f0f0f5);border:1px solid rgba(128,0,0,0.2);}
+.confirm-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;}
+.confirm-modal-icon.warning{background:rgba(255,215,0,0.15);color:#FFD700;}
+.confirm-modal-icon.danger{background:rgba(246,70,93,0.15);color:#F6465D;}
+.confirm-modal-icon.success{background:rgba(14,203,129,0.15);color:#0ECB81;}
+.confirm-modal-title{color:#FFFFFF;font-size:18px;font-weight:700;margin-bottom:6px;}
+body.light-theme .confirm-modal-title{color:#1a1a1a;}
+.confirm-modal-subtitle{color:#aaa;font-size:13px;margin-bottom:16px;line-height:1.5;}
+.confirm-modal-details{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:left;border:1px solid rgba(255,255,255,0.06);}
+.confirm-modal-details .detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.confirm-modal-details .detail-row:last-child{border-bottom:none;}
+.confirm-modal-details .detail-label{color:#888;}
+.confirm-modal-details .detail-value{color:#FFD700;font-weight:600;}
+body.light-theme .confirm-modal-details .detail-value{color:#800000;}
+.confirm-modal-warning{background:rgba(246,70,93,0.1);border-radius:10px;padding:8px 12px;margin:10px 0;color:#F6465D;font-size:12px;border:1px solid rgba(246,70,93,0.2);display:flex;align-items:center;gap:6px;}
+.confirm-modal-buttons{display:flex;gap:10px;margin-top:16px;}
+.confirm-modal-btn{flex:1;padding:10px 16px;border:none;border-radius:30px;font-weight:700;font-size:13px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.confirm-modal-btn.cancel{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.08);}
+.confirm-modal-btn.cancel:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
+.confirm-modal-btn.confirm{background:linear-gradient(135deg,#F6465D,#D43F52);color:white;}
+.confirm-modal-btn.confirm:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(246,70,93,0.4);}
+.confirm-modal-btn.confirm-success{background:linear-gradient(135deg,#0ECB81,#0A9E65);color:white;}
+.confirm-modal-btn.confirm-success:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(14,203,129,0.4);}
+.notification-panel{position:fixed;top:65px;right:-380px;width:380px;height:calc(100vh - 65px);background:rgba(10,10,10,0.98);backdrop-filter:blur(12px);z-index:150;transition:right 0.3s cubic-bezier(0.68,-0.55,0.265,1.55);border-left:1px solid rgba(255,215,0,0.2);overflow-y:auto;display:flex;flex-direction:column;}
+.notification-panel.open{right:0;}
+body.light-theme .notification-panel{background:white;border-left:1px solid rgba(128,0,0,0.1);}
+.notification-header{padding:12px 16px;border-bottom:1px solid rgba(255,215,0,0.2);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:inherit;z-index:1;}
+.notification-header h3{color:#FFD700;font-size:15px;}
+.notification-actions{display:flex;gap:6px;}
+.notif-action-btn{background:rgba(255,215,0,0.15);border:none;border-radius:16px;padding:3px 8px;color:#FFD700;font-size:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:3px;}
+.notif-action-btn:hover{background:rgba(255,215,0,0.3);}
+.notif-action-btn.clear-all{background:rgba(246,70,93,0.15);color:#F6465D;}
+.notif-action-btn.clear-all:hover{background:rgba(246,70,93,0.3);}
+.close-notif{background:none;border:none;color:#FFD700;font-size:20px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.close-notif:hover{background:rgba(255,215,0,0.15);}
+.notification-list{flex:1;overflow-y:auto;padding:6px 0;}
+.notification-item{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:default;transition:0.2s;display:flex;align-items:flex-start;gap:10px;}
+.notification-item:hover{background:rgba(255,215,0,0.05);}
+.notification-item.unread{background:rgba(255,215,0,0.08);border-left:3px solid #FFD700;}
+.notification-icon-small{width:32px;height:32px;background:rgba(255,215,0,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notification-icon-small i{font-size:14px;color:#FFD700;}
+.notification-content{flex:1;min-width:0;}
+.notification-title{color:#FFD700;font-size:11px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.notification-message{color:#ccc;font-size:10px;line-height:1.5;margin-bottom:3px;word-break:break-word;}
+.notification-time{color:#666;font-size:8px;}
+.notification-actions-item{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.notif-item-btn{background:rgba(255,215,0,0.15);border:none;border-radius:10px;padding:2px 8px;color:#FFD700;font-size:8px;cursor:pointer;transition:0.2s;display:inline-flex;align-items:center;gap:3px;}
+.notif-item-btn:hover{background:rgba(255,215,0,0.3);}
+.notif-item-btn.nav-btn{background:rgba(14,203,129,0.2);color:#0ECB81;}
+.notif-item-btn.nav-btn:hover{background:rgba(14,203,129,0.4);}
+.notif-item-btn.delete{background:rgba(246,70,93,0.15);color:#F6465D;}
+.notif-item-btn.delete:hover{background:rgba(246,70,93,0.3);}
+.empty-state{text-align:center;padding:30px 16px;color:#888;}
+.empty-state i{font-size:30px;color:rgba(255,215,0,0.3);margin-bottom:8px;}
+.empty-state p{font-size:10px;}
+.loading-spinner{width:28px;height:28px;border:2px solid rgba(255,215,0,0.2);border-top:2px solid #FFD700;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.toast-notification{position:fixed;bottom:25px;right:25px;padding:10px 16px;border-radius:10px;color:white;z-index:9999;animation:slideInRight 0.3s ease;display:flex;align-items:center;gap:8px;font-weight:500;font-size:11px;}
+.toast-notification.success{background:linear-gradient(135deg,#0ECB81,#0A9E65);}
+.toast-notification.error{background:linear-gradient(135deg,#F6465D,#D43F52);}
+.toast-notification.info{background:linear-gradient(135deg,#FFD700,#b8860b);color:#1a1a1a;}
+@keyframes slideInRight{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+@media(max-width:768px){.main-content{padding:12px;margin-top:65px;}.page-title{font-size:18px;}.tabs{gap:4px;}.tab-btn{padding:5px 12px;font-size:9px;}.withdraw-stat-value{font-size:18px;}.actions-cell{gap:2px;}.modal-content{padding:18px;max-width:95%;}.modal-detail-row{flex-direction:column;}.modal-detail-value{text-align:left;max-width:100%;}.logo-area p{display:none;}.menu-btn span{display:none;}.menu-btn{padding:8px 10px;}.notification-panel{width:100%;right:-100%;}table{min-width:800px;}th,td{font-size:8px;padding:4px 4px;}}
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+    <div class="header-left">
+        <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i> <span>Menu</span></button>
+        <div class="logo-area">
+            <img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.parentElement.innerHTML='<i class=\'fas fa-robot\' style=\'font-size:28px; color:#FFD700;\'></i>'">
+            <div><h2>ABOTRA-PROAI</h2><p>Admin Panel</p></div>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="notif-icon" id="notifIcon"><i class="fas fa-bell"></i><span class="notif-badge" id="notifBadge">0</span></div>
+        <button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i> <span>Theme</span></button>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
+
+<div class="overlay"></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="nav-menu">
+        <a href="admin-dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="admin-users.html" class="nav-item"><i class="fas fa-users"></i> Users</a>
+        <a href="admin-kyc.html" class="nav-item"><i class="fas fa-id-card"></i> KYC Reviews <span class="nav-badge" id="kycBadge">0</span></a>
+        <a href="admin-deposits.html" class="nav-item"><i class="fas fa-arrow-down"></i> Deposits <span class="nav-badge" id="depositBadge">0</span></a>
+        <a href="admin-withdrawals.html" class="nav-item active"><i class="fas fa-arrow-up"></i> Withdrawals <span class="nav-badge" id="withdrawBadge">0</span></a>
+        <a href="admin-merchants.html" class="nav-item"><i class="fas fa-store"></i> Merchants</a>
+        <a href="admin-admins.html" class="nav-item"><i class="fas fa-user-shield"></i> Admins</a>
+        <a href="admin-master-trade.html" class="nav-item"><i class="fas fa-crown"></i> Master Trade</a>
+        <a href="admin-broadcast.html" class="nav-item"><i class="fas fa-broadcast-tower"></i> Broadcast</a>
+        <a href="admin-risk.html" class="nav-item"><i class="fas fa-chart-line"></i> Risk Control</a>
+        <a href="admin-reports.html" class="nav-item"><i class="fas fa-flag"></i> Reported Posts</a>
+        <a href="admin-settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+</div>
+
+<div class="notification-panel" id="notificationPanel">
+    <div class="notification-header">
+        <h3><i class="fas fa-bell"></i> Notifications</h3>
+        <div class="notification-actions">
+            <button class="notif-action-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+            <button class="notif-action-btn clear-all" id="clearAllNotifBtn"><i class="fas fa-trash-alt"></i> Clear all</button>
+            <button class="close-notif" id="closeNotif">&times;</button>
+        </div>
+    </div>
+    <div class="notification-list" id="notificationList"><div class="empty-state"><div class="loading-spinner"></div><p>Loading...</p></div></div>
+</div>
+
+<div class="main-content">
+    <div class="page-title"><i class="fas fa-arrow-up"></i> Withdrawal Management</div>
+
+    <div class="withdraw-stats">
+        <div class="withdraw-stat-card"><div class="withdraw-stat-value" id="totalWithdrawals">$0</div><div class="withdraw-stat-label">Total (Approved)</div></div>
+        <div class="withdraw-stat-card"><div class="withdraw-stat-value" id="pendingCount">0</div><div class="withdraw-stat-label">Pending</div></div>
+        <div class="withdraw-stat-card"><div class="withdraw-stat-value" id="approvedCount">0</div><div class="withdraw-stat-label">Approved</div></div>
+        <div class="withdraw-stat-card"><div class="withdraw-stat-value" id="rejectedCount">0</div><div class="withdraw-stat-label">Rejected</div></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="pending"><i class="fas fa-clock"></i> Pending</button>
+        <button class="tab-btn" data-tab="approved"><i class="fas fa-check-circle"></i> Approved</button>
+        <button class="tab-btn" data-tab="rejected"><i class="fas fa-times-circle"></i> Rejected</button>
+        <button class="tab-btn" data-tab="all"><i class="fas fa-list"></i> All</button>
+    </div>
+
+    <div class="section-card">
+        <div id="withdrawalsContainer"><div class="empty-state"><div class="loading-spinner"></div><p style="margin-top:8px;">Loading withdrawals...</p></div></div>
+    </div>
+</div>
+
+<!-- Withdrawal Modal -->
+<div id="withdrawalModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('withdrawalModal')">&times;</span>
+        <h3><i class="fas fa-info-circle"></i> Withdrawal Details</h3>
+        <div id="modalDetails"></div>
+        <div class="modal-buttons"><button class="modal-btn modal-btn-cancel" onclick="closeModal('withdrawalModal')"><i class="fas fa-times"></i> Close</button></div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-modal-card">
+        <div class="confirm-modal-icon" id="confirmIcon">⚠️</div>
+        <div class="confirm-modal-title" id="confirmTitle">Confirm Action</div>
+        <div class="confirm-modal-subtitle" id="confirmSubtitle">Are you sure?</div>
+        <div class="confirm-modal-details" id="confirmDetails"></div>
+        <div class="confirm-modal-warning" id="confirmWarning" style="display:none;"><i class="fas fa-exclamation-triangle"></i><span>This action cannot be undone!</span></div>
+        <div class="confirm-modal-buttons">
+            <button class="confirm-modal-btn cancel" id="confirmCancel"><i class="fas fa-times"></i> Cancel</button>
+            <button class="confirm-modal-btn confirm" id="confirmAction"><i class="fas fa-check"></i> Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+let currentAdminId = null;
+let currentAdminEmail = null;
+let currentTab = 'pending';
+let allWithdrawals = [];
+let pendingWithdrawalData = null;
+let exchangeRates = {};
+let notificationListener = null;
+
+// ============================================================
+// HELPERS
+// ============================================================
+function showToast(message, type) {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function getSafeNumber(val, def = 0) {
+    const n = parseFloat(val);
+    return isNaN(n) ? def : n;
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+window.closeModal = closeModal;
+window.openModal = openModal;
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+function showConfirmModal(options) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const icon = document.getElementById('confirmIcon');
+        const title = document.getElementById('confirmTitle');
+        const subtitle = document.getElementById('confirmSubtitle');
+        const details = document.getElementById('confirmDetails');
+        const warning = document.getElementById('confirmWarning');
+        const confirmBtn = document.getElementById('confirmAction');
+        const cancelBtn = document.getElementById('confirmCancel');
+        
+        icon.className = 'confirm-modal-icon ' + (options.iconClass || 'warning');
+        icon.textContent = options.icon || '⚠️';
+        title.textContent = options.title || 'Confirm Action';
+        subtitle.textContent = options.subtitle || 'Are you sure?';
+        
+        if (options.details) {
+            let html = '';
+            for (const [key, value] of Object.entries(options.details)) {
+                html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-value">${value}</span></div>`;
+            }
+            details.innerHTML = html;
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+        }
+        
+        if (options.warning) {
+            warning.style.display = 'flex';
+            warning.querySelector('span').textContent = options.warning;
+        } else {
+            warning.style.display = 'none';
+        }
+        
+        confirmBtn.className = 'confirm-modal-btn confirm ' + (options.btnClass || '');
+        confirmBtn.innerHTML = `<i class="fas ${options.btnIcon || 'fa-check'}"></i> ${options.btnText || 'Confirm'}`;
+        
+        modal.classList.add('active');
+        const cleanup = () => { modal.classList.remove('active'); confirmBtn.removeEventListener('click', onConfirm); cancelBtn.removeEventListener('click', onCancel); };
+        const onConfirm = () => { cleanup(); resolve(true); };
+        const onCancel = () => { cleanup(); resolve(false); };
+        confirmBtn.addEventListener('click', onConfirm);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', (e) => { if (e.target === modal) { cleanup(); resolve(false); } });
+    });
+}
+
+// ============================================================
+// SIDEBAR & THEME
+// ============================================================
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+document.getElementById('menuBtn').addEventListener('click', () => { sidebar.classList.add('open'); sidebarOverlay.classList.add('active'); });
+sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); });
+
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+    if (isLight) {
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    } else {
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    }
+});
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function getNotificationType(type) {
+    const map = {
+        'deposit': { icon: 'fa-arrow-down', color: '#0ECB81', page: 'admin-deposits.html' },
+        'withdrawal': { icon: 'fa-arrow-up', color: '#F6465D', page: 'admin-withdrawals.html' },
+        'kyc': { icon: 'fa-id-card', color: '#FFD700', page: 'admin-kyc.html' },
+        'broadcast': { icon: 'fa-broadcast-tower', color: '#FF6B6B', page: 'admin-broadcast.html' },
+        'system': { icon: 'fa-bell', color: '#FFD700', page: '#' }
+    };
+    return map[type] || map['system'];
+}
+
+function loadAdminNotifications() {
+    const notifRef = db.ref('adminNotifications');
+    if (notificationListener) { notifRef.off('value', notificationListener); }
+    notificationListener = notifRef.on('value', (snapshot) => {
+        const list = document.getElementById('notificationList');
+        const notifications = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => { notifications.push({ id: child.key, ...child.val() }); });
+        }
+        notifications.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        const unreadCount = notifications.filter(n => !n.read).length;
+        const badge = document.getElementById('notifBadge');
+        if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+        if (notifications.length === 0) { list.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No notifications</p></div>'; return; }
+        list.innerHTML = '';
+        notifications.forEach(notif => {
+            const isUnread = !notif.read;
+            const typeInfo = getNotificationType(notif.type);
+            const item = document.createElement('div');
+            item.className = `notification-item ${isUnread ? 'unread' : ''}`;
+            item.innerHTML = `
+                <div class="notification-icon-small" style="background:${typeInfo.color}22;"><i class="fas ${typeInfo.icon}" style="color:${typeInfo.color};"></i></div>
+                <div class="notification-content">
+                    <div class="notification-title">${notif.title || 'Notification'}</div>
+                    <div class="notification-message">${escapeHtml(notif.message || '')}</div>
+                    <div class="notification-time"><i class="far fa-clock"></i> ${notif.timestamp ? new Date(notif.timestamp).toLocaleString() : 'Just now'}</div>
+                    <div class="notification-actions-item">
+                        ${isUnread ? `<button class="notif-item-btn" data-id="${notif.id}" data-action="read"><i class="fas fa-check"></i> Mark Read</button>` : ''}
+                        ${typeInfo.page && typeInfo.page !== '#' ? `<button class="notif-item-btn nav-btn" data-page="${typeInfo.page}"><i class="fas fa-arrow-right"></i> Go</button>` : ''}
+                        <button class="notif-item-btn delete" data-id="${notif.id}" data-action="delete"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+        document.querySelectorAll('.notif-item-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const notifId = btn.dataset.id;
+                const action = btn.dataset.action;
+                const page = btn.dataset.page;
+                if (action === 'read') {
+                    await db.ref(`adminNotifications/${notifId}`).update({ read: true });
+                    loadAdminNotifications();
+                } else if (action === 'delete') {
+                    if (await showConfirmModal({ title: 'Delete Notification?', subtitle: 'This notification will be permanently removed.', icon: '🗑️', iconClass: 'danger', btnText: 'Delete', btnIcon: 'fa-trash-alt' })) {
+                        await db.ref(`adminNotifications/${notifId}`).remove();
+                        loadAdminNotifications();
+                    }
+                } else if (page) { window.location.href = page; }
+            });
+        });
+    });
+}
+
+const notifIcon = document.getElementById('notifIcon');
+const notificationPanel = document.getElementById('notificationPanel');
+const closeNotif = document.getElementById('closeNotif');
+notifIcon.addEventListener('click', () => notificationPanel.classList.toggle('open'));
+closeNotif.addEventListener('click', () => notificationPanel.classList.remove('open'));
+
+document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+    const snapshot = await db.ref('adminNotifications').once('value');
+    if (snapshot.exists()) {
+        const updates = {};
+        snapshot.forEach(child => { if (!child.val().read) updates[`${child.key}/read`] = true; });
+        if (Object.keys(updates).length > 0) {
+            await db.ref('adminNotifications').update(updates);
+            showToast('All notifications marked as read', 'success');
+            loadAdminNotifications();
+        }
+    }
+});
+
+document.getElementById('clearAllNotifBtn').addEventListener('click', async () => {
+    if (await showConfirmModal({ title: 'Clear All Notifications?', subtitle: 'This will permanently delete all admin notifications.', icon: '🗑️', iconClass: 'danger', warning: 'This action cannot be undone!', btnText: 'Clear All', btnIcon: 'fa-trash-alt' })) {
+        await db.ref('adminNotifications').remove();
+        showToast('All notifications cleared', 'success');
+        loadAdminNotifications();
+    }
+});
+
+// ============================================================
+// EXCHANGE RATES
+// ============================================================
+async function loadExchangeRates() {
+    try {
+        const snapshot = await db.ref('exchangeRates').once('value');
+        if (snapshot.exists()) {
+            exchangeRates = snapshot.val();
+        } else {
+            exchangeRates = { Tanzania: 2800, Rwanda: 1300, Zambia: 30, Congo: 2800, Malawi: 5600, Kenya: 150, Uganda: 3700, Nigeria: 1600, Botswana: 14, Mozambique: 64, Namibia: 19 };
+        }
+    } catch(e) { console.log("Exchange rates error:", e); }
+}
+
+function getExchangeRate(country) {
+    if (!country) return 2800;
+    return exchangeRates[country] || 2800;
+}
+
+function calculateLocalAmount(amountUSD, country) {
+    const rate = getExchangeRate(country);
+    return amountUSD * rate * 0.9; // 10% fee already applied
+}
+
+// ============================================================
+// WITHDRAWAL FUNCTIONS
+// ============================================================
+async function loadWithdrawals() {
+    try {
+        const container = document.getElementById('withdrawalsContainer');
+        if (container) container.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><p>Loading withdrawals...</p></div>';
+        
+        allWithdrawals = [];
+        let totalApproved = 0, pending = 0, approved = 0, rejected = 0;
+        
+        const adminSnapshot = await db.ref('adminWithdrawals').once('value');
+        
+        if (adminSnapshot.exists()) {
+            adminSnapshot.forEach(child => {
+                const w = child.val();
+                w.id = child.key;
+                w.amount = getSafeNumber(w.amount);
+                w.fee = getSafeNumber(w.amount) * 0.1;
+                w.receiveAmount = getSafeNumber(w.amount) * 0.9;
+                allWithdrawals.push(w);
+                
+                if (w.status === 'pending') pending++;
+                else if (w.status === 'approved' || w.status === 'completed') {
+                    approved++;
+                    totalApproved += w.amount;
+                } else if (w.status === 'rejected') rejected++;
+            });
+        }
+        
+        document.getElementById('totalWithdrawals').innerHTML = `$${totalApproved.toFixed(2)}`;
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('approvedCount').textContent = approved;
+        document.getElementById('rejectedCount').textContent = rejected;
+        
+        const badge = document.getElementById('withdrawBadge');
+        if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+        
+        renderWithdrawals();
+    } catch(e) {
+        console.error("Error loading withdrawals:", e);
+        showToast('Error loading withdrawals', 'error');
+        const container = document.getElementById('withdrawalsContainer');
+        if (container) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#F6465D;"></i><p style="color:#F6465D;">Error loading withdrawals</p></div>'; }
+    }
+}
+
+function getWithdrawalTypeLabel(w) {
+    if (w.type === 'affiliate_commission' || w.type === 'affiliate') {
+        return 'Affiliate';
+    }
+    return 'Balance';
+}
+
+function renderWithdrawals() {
+    let filtered = currentTab === 'all' ? [...allWithdrawals] : allWithdrawals.filter(w => w.status === currentTab);
+    filtered.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+    const container = document.getElementById('withdrawalsContainer');
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No withdrawals found</p></div>';
+        return;
+    }
+    
+    let html = `<div class="table-responsive"><table>
+        <thead><tr><th>ID</th><th>Date</th><th>User</th><th>Amount</th><th>Fee</th><th>Receive</th><th>Local</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+    
+    filtered.forEach((w) => {
+        let statusClass = w.status === 'pending' ? 'pending' : (w.status === 'approved' || w.status === 'completed' ? 'approved' : 'rejected');
+        let statusText = w.status === 'pending' ? 'Pending' : (w.status === 'approved' || w.status === 'completed' ? 'Approved' : 'Rejected');
+        
+        const displayName = w.userEmail ? w.userEmail.split('@')[0] : (w.userName || (w.uid ? w.uid.substring(0, 8) : 'User'));
+        const typeLabel = getWithdrawalTypeLabel(w);
+        const amount = getSafeNumber(w.amount);
+        const fee = amount * 0.1;
+        const receiveAmount = amount * 0.9;
+        const country = w.country || 'Tanzania';
+        const localAmount = calculateLocalAmount(amount, country);
+        const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
+        
+        html += `<tr>
+            <td><small>${w.id ? w.id.substring(0, 8) : 'N/A'}</small></td>
+            <td>${w.createdAt ? new Date(w.createdAt).toLocaleDateString() : (w.timestamp ? new Date(w.timestamp).toLocaleDateString() : 'N/A')}</td>
+            <td><strong>${escapeHtml(displayName)}</strong><br><small style="color:#888;">${escapeHtml(w.userEmail || '')}</small></td>
+            <td><strong>$${amount.toFixed(2)}</strong></td>
+            <td><span style="color:#F6465D;">-$${fee.toFixed(2)}</span></td>
+            <td><strong style="color:#0ECB81;">$${receiveAmount.toFixed(2)}</strong></td>
+            <td><strong style="color:#FFD700;">${localAmount.toFixed(0)} ${currency}</strong></td>
+            <td><span class="status-${statusClass}">${statusText}</span></td>
+            <td class="actions-cell">
+                <button class="btn-view" onclick="viewWithdrawal('${w.id}')"><i class="fas fa-eye"></i></button>
+                ${w.status === 'pending' ? 
+                    `<button class="btn-approve" onclick="showApproveConfirm('${w.id}')"><i class="fas fa-check"></i></button>
+                    <button class="btn-reject" onclick="showRejectConfirm('${w.id}')"><i class="fas fa-times"></i></button>` : ''}
+                <button class="btn-delete" onclick="showDeleteConfirm('${w.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+
+// ============================================================
+// WITHDRAWAL ACTIONS - FIXED WITH ASYNC/AWAIT
+// ============================================================
+window.viewWithdrawal = function(id) {
+    const w = allWithdrawals.find(w => w.id === id);
+    if (!w) return;
+    const amount = getSafeNumber(w.amount);
+    const fee = amount * 0.1;
+    const receiveAmount = amount * 0.9;
+    const country = w.country || 'Tanzania';
+    const localAmount = calculateLocalAmount(amount, country);
+    const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
+    const typeLabel = getWithdrawalTypeLabel(w);
+    
+    document.getElementById('modalDetails').innerHTML = `
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-tag"></i> Type:</span><span class="modal-detail-value">${typeLabel}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-user"></i> User:</span><span class="modal-detail-value">${escapeHtml(w.userEmail || w.uid || 'N/A')}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-map-marker-alt"></i> Country:</span><span class="modal-detail-value">${escapeHtml(country)}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-dollar-sign"></i> Requested:</span><span class="modal-detail-value">$${amount.toFixed(2)}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-percent"></i> Fee (10%):</span><span class="modal-detail-value red">-$${fee.toFixed(2)}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-arrow-down"></i> Receive Amount:</span><span class="modal-detail-value green">$${receiveAmount.toFixed(2)}</span></div>
+        <div class="local-amount-box"><span>💰 Local Currency Amount</span><br><span class="amount">${localAmount.toFixed(0)} ${currency}</span></div>
+        <hr>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-info-circle"></i> Status:</span><span class="modal-detail-value">${w.status}</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-clock"></i> Submitted:</span><span class="modal-detail-value">${w.createdAt ? new Date(w.createdAt).toLocaleString() : (w.timestamp ? new Date(w.timestamp).toLocaleString() : 'N/A')}</span></div>
+        ${w.approvedAt ? `<div class="modal-detail-row"><span class="modal-detail-label"><i class="fas fa-check-circle"></i> Approved:</span><span class="modal-detail-value">${new Date(w.approvedAt).toLocaleString()}</span></div>` : ''}
+    `;
+    openModal('withdrawalModal');
+};
+
+window.showApproveConfirm = async function(id) {
+    const withdrawal = allWithdrawals.find(w => w.id === id);
+    if (!withdrawal) return;
+    pendingWithdrawalData = { withdrawal };
+    const amount = getSafeNumber(withdrawal.amount);
+    const receiveAmount = amount * 0.9;
+    const fee = amount * 0.1;
+    const country = withdrawal.country || 'Tanzania';
+    const localAmount = calculateLocalAmount(amount, country);
+    const currency = country === 'Tanzania' ? 'TZS' : (country === 'Malawi' ? 'MWK' : 'ZMW');
+    
+    const confirmed = await showConfirmModal({
+        title: 'Approve Withdrawal?', 
+        subtitle: `Approve $${amount.toFixed(2)} withdrawal for ${withdrawal.userEmail || 'user'}`,
+        icon: '✅', 
+        iconClass: 'success',
+        details: {
+            'User': withdrawal.userEmail || withdrawal.uid || 'N/A',
+            'Requested': `$${amount.toFixed(2)}`,
+            'Fee (10%)': `-$${fee.toFixed(2)}`,
+            'To Receive': `$${receiveAmount.toFixed(2)} USDT`,
+            'Local': `${localAmount.toFixed(0)} ${currency}`
+        },
+        warning: 'This will deduct the amount from user balance.',
+        btnText: 'Approve', 
+        btnIcon: 'fa-check', 
+        btnClass: 'confirm-success'
+    });
+    
+    if (confirmed) {
+        await executeApproveWithdrawal();
+    } else {
+        pendingWithdrawalData = null;
+    }
+};
+
+window.showRejectConfirm = async function(id) {
+    const withdrawal = allWithdrawals.find(w => w.id === id);
+    if (!withdrawal) return;
+    pendingWithdrawalData = { withdrawal };
+    const amount = getSafeNumber(withdrawal.amount);
+    
+    const confirmed = await showConfirmModal({
+        title: 'Reject Withdrawal?', 
+        subtitle: `Reject $${amount.toFixed(2)} withdrawal for ${withdrawal.userEmail || 'user'}`,
+        icon: '❌', 
+        iconClass: 'danger',
+        details: { 
+            'User': withdrawal.userEmail || withdrawal.uid || 'N/A', 
+            'Amount': `$${amount.toFixed(2)} USDT` 
+        },
+        warning: 'User will be notified of the rejection and funds will be refunded.',
+        btnText: 'Reject & Refund', 
+        btnIcon: 'fa-times'
+    });
+    
+    if (confirmed) {
+        await executeRejectWithdrawal();
+    } else {
+        pendingWithdrawalData = null;
+    }
+};
+
+window.showDeleteConfirm = async function(id) {
+    const withdrawal = allWithdrawals.find(w => w.id === id);
+    if (!withdrawal) return;
+    pendingWithdrawalData = { withdrawal };
+    const amount = getSafeNumber(withdrawal.amount);
+    
+    const confirmed = await showConfirmModal({
+        title: 'Delete Withdrawal?', 
+        subtitle: `Permanently delete $${amount.toFixed(2)} withdrawal record.`,
+        icon: '🗑️', 
+        iconClass: 'danger',
+        details: { 
+            'User': withdrawal.userEmail || withdrawal.uid || 'N/A', 
+            'Amount': `$${amount.toFixed(2)} USDT` 
+        },
+        warning: 'This action cannot be undone! Balance will NOT be refunded.',
+        btnText: 'Delete Permanently', 
+        btnIcon: 'fa-trash-alt'
+    });
+    
+    if (confirmed) {
+        await executeDeleteWithdrawal();
+    } else {
+        pendingWithdrawalData = null;
+    }
+};
+
+// ============================================================
+// EXECUTE FUNCTIONS - FIXED WITH PROPER USER ID & BALANCE HANDLING
+// ============================================================
+
+async function executeApproveWithdrawal() {
+    if (!pendingWithdrawalData) return;
+    const withdrawal = pendingWithdrawalData.withdrawal;
+    const amount = getSafeNumber(withdrawal.amount);
+    const userId = withdrawal.uid || withdrawal.userId || withdrawal.userID;
+
+    if (!userId) {
+        showToast('Error: User ID not found', 'error');
+        pendingWithdrawalData = null;
+        return;
+    }
+
+    try {
+        // ✅ Update adminWithdrawals
+        const adminSnap = await db.ref(`adminWithdrawals/${withdrawal.id}`).once('value');
+        if (adminSnap.exists()) {
+            await db.ref(`adminWithdrawals/${withdrawal.id}`).update({ 
+                status: 'approved', 
+                approvedAt: Date.now(), 
+                approvedBy: currentAdminId 
+            });
+        }
+
+        // ✅ Also update user withdrawals - CHECK BOTH PATHS
+        let userWithdrawalRef = db.ref(`withdrawals/${userId}/${withdrawal.id}`);
+        let userWithdrawalSnap = await userWithdrawalRef.once('value');
+        if (!userWithdrawalSnap.exists()) {
+            userWithdrawalRef = db.ref(`withdrawalDetails/${userId}/${withdrawal.id}`);
+            userWithdrawalSnap = await userWithdrawalRef.once('value');
+        }
+        if (userWithdrawalSnap.exists()) {
+            await userWithdrawalRef.update({ status: 'approved', approvedAt: Date.now() });
+        }
+
+        // ✅ DEDUCT from user balance
+        const userRef = db.ref(`users/${userId}`);
+        await userRef.transaction((currentData) => {
+            if (currentData) {
+                const newBalance = Math.max(0, (currentData.balance || 0) - amount);
+                const newTotalWithdrawn = (currentData.totalWithdrawn || 0) + amount;
+                return { ...currentData, balance: newBalance, totalWithdrawn: newTotalWithdrawn };
+            }
+            return currentData;
+        });
+        
+        // ✅ Send notification to user
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({ 
+            id: notifRef.key, 
+            title: '✅ Withdrawal Approved', 
+            message: `Your withdrawal of $${amount.toFixed(2)} has been approved and processed.`, 
+            type: 'success', 
+            read: false, 
+            timestamp: Date.now() 
+        });
+        
+        showToast(`✅ Withdrawal of $${amount.toFixed(2)} approved!`, 'success');
+        pendingWithdrawalData = null;
+        await loadWithdrawals();
+    } catch(e) { 
+        console.error("Approve error:", e); 
+        showToast('Error: ' + e.message, 'error'); 
+    }
+}
+
+async function executeRejectWithdrawal() {
+    if (!pendingWithdrawalData) return;
+    const withdrawal = pendingWithdrawalData.withdrawal;
+    const amount = getSafeNumber(withdrawal.amount);
+    const userId = withdrawal.uid || withdrawal.userId || withdrawal.userID;
+
+    if (!userId) {
+        showToast('Error: User ID not found', 'error');
+        pendingWithdrawalData = null;
+        return;
+    }
+
+    try {
+        // ✅ Update adminWithdrawals
+        await db.ref(`adminWithdrawals/${withdrawal.id}`).update({ 
+            status: 'rejected', 
+            rejectedAt: Date.now(), 
+            rejectedBy: currentAdminId 
+        });
+
+        // ✅ Also update user withdrawals - CHECK BOTH PATHS
+        let userWithdrawalRef = db.ref(`withdrawals/${userId}/${withdrawal.id}`);
+        let userWithdrawalSnap = await userWithdrawalRef.once('value');
+        if (!userWithdrawalSnap.exists()) {
+            userWithdrawalRef = db.ref(`withdrawalDetails/${userId}/${withdrawal.id}`);
+            userWithdrawalSnap = await userWithdrawalRef.once('value');
+        }
+        if (userWithdrawalSnap.exists()) {
+            await userWithdrawalRef.update({ status: 'rejected', rejectedAt: Date.now() });
+        }
+
+        // ✅ REFUND the amount BACK to user balance (since withdrawal is rejected)
+        const userRef = db.ref(`users/${userId}`);
+        await userRef.transaction((currentData) => {
+            if (currentData) {
+                // Add the amount back to balance (refund)
+                const newBalance = (currentData.balance || 0) + amount;
+                return { ...currentData, balance: newBalance };
+            }
+            return currentData;
+        });
+
+        // ✅ Send notification to user
+        const notifRef = db.ref(`notifications/${userId}`).push();
+        await notifRef.set({ 
+            id: notifRef.key, 
+            title: '❌ Withdrawal Rejected', 
+            message: `Your withdrawal request of $${amount.toFixed(2)} has been rejected. The funds have been refunded to your balance.`, 
+            type: 'error', 
+            read: false, 
+            timestamp: Date.now() 
+        });
+        
+        showToast('Withdrawal rejected - funds refunded', 'success');
+        pendingWithdrawalData = null;
+        await loadWithdrawals();
+    } catch(e) { 
+        console.error("Reject error:", e); 
+        showToast('Error: ' + e.message, 'error'); 
+    }
+}
+
+async function executeDeleteWithdrawal() {
+    if (!pendingWithdrawalData) return;
+    const withdrawal = pendingWithdrawalData.withdrawal;
+    const userId = withdrawal.uid || withdrawal.userId || withdrawal.userID;
+
+    try {
+        // ✅ Delete from adminWithdrawals
+        await db.ref(`adminWithdrawals/${withdrawal.id}`).remove();
+        
+        // ✅ Also delete from user paths
+        if (userId) {
+            await db.ref(`withdrawals/${userId}/${withdrawal.id}`).remove().catch(() => {});
+            await db.ref(`withdrawalDetails/${userId}/${withdrawal.id}`).remove().catch(() => {});
+        }
+        
+        showToast('Withdrawal deleted', 'success');
+        pendingWithdrawalData = null;
+        await loadWithdrawals();
+    } catch(e) { 
+        console.error("Delete error:", e); 
+        showToast('Error: ' + e.message, 'error'); 
+    }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        renderWithdrawals();
+    });
+});
+
+// ============================================================
+// LOGOUT & AUTH
+// ============================================================
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    if (await showConfirmModal({ title: 'Logout?', subtitle: 'Are you sure you want to logout?', icon: '🚪', iconClass: 'warning', btnText: 'Logout', btnIcon: 'fa-sign-out-alt' })) {
+        await auth.signOut();
+        localStorage.removeItem('abotra_admin_logged_in');
+        window.location.href = 'login.html';
+    }
+});
+
+async function checkAdminSession(user) {
+    if (!user) return false;
+    try {
+        const snapshot = await db.ref('admins').once('value');
+        if (snapshot.exists()) {
+            for (const key in snapshot.val()) {
+                const admin = snapshot.val()[key];
+                if (admin === true && key === user.uid) return true;
+                if (typeof admin === 'object' && (admin.email === user.email || admin.uid === user.uid)) {
+                    currentAdminId = user.uid;
+                    currentAdminEmail = user.email;
+                    return true;
+                }
+            }
+        }
+        return false;
+    } catch(e) { console.error("Admin check error:", e); return false; }
+}
+
+auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (!(await checkAdminSession(user))) {
+        showToast('Admin access only', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return;
+    }
+    await loadExchangeRates();
+    await loadWithdrawals();
+    loadAdminNotifications();
+    setInterval(loadWithdrawals, 30000);
+});
+
+initTheme();
+</script>
+</body>
+</html>

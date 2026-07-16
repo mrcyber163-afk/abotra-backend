@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Login | ABOTRA-PROAI - Sign In to Your Trading Account</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+
+<script>
+const CONFIG = {
+    API_URL: 'https://abotra-backend-production.up.railway.app',
+    WS_URL: 'wss://abotra-backend-production.up.railway.app',
+    ENVIRONMENT: 'production',
+    VERSION: '2.0.0'
+};
+window.CONFIG = CONFIG;
+console.log('[ABOTRA] ✅ Backend URL:', CONFIG.API_URL);
+</script>
+
+<style>
+:root {
+    --bg-primary: #0A0A0A;
+    --bg-card: rgba(18,18,18,0.95);
+    --bg-input: rgba(255,255,255,0.04);
+    --text-primary: #FFFFFF;
+    --text-muted: #999999;
+    --gold: #FFD700;
+    --gold-gradient: linear-gradient(135deg, #FFD700, #FFB800);
+    --border-color: rgba(255,255,255,0.08);
+    --shadow-card: 0 15px 40px rgba(0,0,0,0.6);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
+
+body {
+    background: var(--bg-primary);
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+    transition: background var(--transition);
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+body.light-theme {
+    background: #f5f5f5;
+    --bg-primary: #f5f5f5;
+    --bg-card: rgba(255,255,255,0.95);
+    --bg-input: rgba(0,0,0,0.04);
+    --text-primary: #1a1a2e;
+    --text-muted: #666666;
+    --border-color: rgba(0,0,0,0.08);
+    --shadow-card: 0 15px 40px rgba(0,0,0,0.12);
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); }
+body.light-theme .login-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+body.light-theme .input-box input,
+body.light-theme .phone-number-input input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+body.light-theme .input-box input::placeholder { color: #999999; }
+body.light-theme .sub-text { color: var(--text-muted); }
+body.light-theme .bottom-text { color: var(--text-muted); }
+body.light-theme .bottom-text a { color: #800000; }
+body.light-theme .forgot-link { color: #800000; }
+body.light-theme .login-option { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); }
+body.light-theme .login-option:hover { background: rgba(128,0,0,0.08); border-color: #800000; }
+body.light-theme .login-option.active { background: var(--gold-gradient); color: #0A0A0A; }
+body.light-theme .biometric-icon {
+    background: rgba(128,0,0,0.1);
+    border-color: rgba(128,0,0,0.3);
+    color: #800000;
+}
+body.light-theme .biometric-icon:hover { background: rgba(128,0,0,0.2); }
+body.light-theme .biometric-icon.enabled {
+    background: rgba(14,203,129,0.15);
+    border-color: #0ECB81;
+    color: #0ECB81;
+}
+body.light-theme .biometric-modal-card { background: linear-gradient(145deg, #ffffff, #f0f0f5); }
+body.light-theme .biometric-modal-card h3 { color: #800000; }
+body.light-theme .biometric-modal-card p { color: var(--text-muted); }
+body.light-theme .biometric-setup-card { background: rgba(128,0,0,0.05); border-color: rgba(128,0,0,0.15); }
+body.light-theme .biometric-setup-card .setup-title { color: #800000; }
+body.light-theme .biometric-setup-card .setup-desc { color: var(--text-muted); }
+
+/* FLAG SVG STYLES - Same as register.html */
+.choices__item .country-flag-svg {
+    width: 22px;
+    height: 16px;
+    border-radius: 2px;
+    object-fit: cover;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.choices__list--single .choices__item .country-flag-svg {
+    width: 20px;
+    height: 14px;
+}
+.country-flag-svg {
+    width: 22px;
+    height: 16px;
+    border-radius: 2px;
+    object-fit: cover;
+    vertical-align: middle;
+}
+
+.theme-toggle {
+    position: fixed; top: 20px; right: 20px; z-index: 10000;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    gap: 8px;
+}
+.theme-toggle:hover { background: rgba(255,215,0,0.15); transform: scale(1.05); border-color: var(--gold); }
+.theme-toggle i { font-size: 16px; color: var(--gold); transition: var(--transition); }
+.theme-toggle .theme-label { font-size: 10px; font-weight: 600; color: var(--text-muted); display: none; }
+@media(min-width: 480px) { .theme-toggle .theme-label { display: inline; } }
+
+.overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1;
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-box {
+    width: 100%; max-width: 480px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+.login-box::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255,215,0,0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.logo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-primary);
+}
+.content { padding: 24px 28px 28px; position: relative; z-index: 1; }
+
+h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+.sub-text {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-bottom: 22px;
+    font-weight: 400;
+}
+
+.login-methods {
+    display: flex; gap: 6px; margin-bottom: 22px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px; padding: 4px;
+    border: 1px solid var(--border-color);
+}
+.login-option {
+    flex: 1; text-align: center; padding: 10px 8px; border: none; border-radius: 11px;
+    cursor: pointer; font-size: 11px; font-weight: 600;
+    transition: all var(--transition);
+    background: transparent; color: var(--text-muted);
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.login-option i { font-size: 14px; transition: var(--transition); }
+.login-option:hover { color: var(--gold); }
+.login-option.active {
+    background: var(--gold-gradient); color: #0A0A0A; box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+}
+.login-option.active i { color: #0A0A0A; }
+
+.input-box { width: 100%; padding: 0 0; margin-bottom: 14px; position: relative; }
+.input-box input {
+    width: 100%; height: 50px; border: none; outline: none; padding: 0 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: all var(--transition);
+    font-family: var(--font);
+}
+.input-box input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
+    background: rgba(255,255,255,0.06);
+}
+.input-box input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+.password-box .toggle-password {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 14px; cursor: pointer; transition: var(--transition);
+}
+.password-box .toggle-password:hover { color: var(--gold); }
+
+.phone-container {
+    display: flex; gap: 10px; margin-bottom: 14px;
+}
+.country-code-select {
+    width: 150px;
+    flex-shrink: 0;
+}
+.country-code-select .choices {
+    width: 100%;
+}
+.country-code-select .choices__inner {
+    height: 50px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border-color);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+}
+.country-code-select .choices__inner:hover {
+    border-color: rgba(255,215,0,0.3);
+}
+.country-code-select .choices.is-focused .choices__inner {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
+}
+.country-code-select .choices__list--single .choices__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+.country-code-select .choices__list--single .choices__item .country-flag-svg {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    object-fit: cover;
+}
+.country-code-select .choices__list--single .choices__item .country-name {
+    font-weight: 500;
+    font-size: 12px;
+}
+.country-code-select .choices__list--single .choices__item .country-code {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-left: auto;
+}
+.country-code-select .choices__list--dropdown {
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    max-height: 320px;
+    overflow: hidden;
+    margin-top: 4px;
+    backdrop-filter: blur(20px);
+}
+.country-code-select .choices__list--dropdown .choices__list {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 6px;
+}
+.country-code-select .choices__list--dropdown .choices__item {
+    color: var(--text-primary);
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all var(--transition);
+    cursor: pointer;
+}
+.country-code-select .choices__list--dropdown .choices__item .country-flag-svg {
+    width: 28px;
+    height: 18px;
+    border-radius: 2px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.country-code-select .choices__list--dropdown .choices__item .country-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 12px;
+}
+.country-code-select .choices__list--dropdown .choices__item .country-code {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+.country-code-select .choices__list--dropdown .choices__item:hover {
+    background: rgba(255,215,0,0.08);
+}
+.country-code-select .choices__list--dropdown .choices__item.is-highlighted {
+    background: rgba(255,215,0,0.15);
+}
+.country-code-select .choices__list--dropdown .choices__item.is-selected {
+    background: rgba(255,215,0,0.2);
+    border-left: 3px solid var(--gold);
+}
+.country-code-select .choices__input {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+.country-code-select .choices__placeholder {
+    color: var(--text-muted);
+}
+
+.country-code-select .choices__list--dropdown .choices__input {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-xs) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 6px !important;
+}
+.country-code-select .choices__list--dropdown .choices__input:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.1) !important;
+}
+
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar {
+    width: 3px;
+}
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.country-code-select .choices__list--dropdown .choices__list::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+.phone-number-input { flex: 1; }
+.phone-number-input input {
+    width: 100%; height: 50px; border: none; outline: none; padding: 0 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: all var(--transition);
+}
+.phone-number-input input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
+}
+.phone-number-input input::placeholder { color: var(--text-muted); }
+
+.phone-hint {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+}
+.phone-hint.active { color: var(--gold); }
+
+/* Biometric Setup Card - Appears after login */
+.biometric-setup-card {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    transition: all var(--transition);
+}
+.biometric-setup-card.show {
+    display: flex;
+}
+.biometric-setup-card .setup-icon {
+    font-size: 24px;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+.biometric-setup-card .setup-content { flex: 1; }
+.biometric-setup-card .setup-title {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+.biometric-setup-card .setup-desc {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+.biometric-setup-btn {
+    background: var(--gold-gradient);
+    border: none;
+    border-radius: 30px;
+    padding: 6px 16px;
+    color: #0A0A0A;
+    font-weight: 700;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.biometric-setup-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+}
+.biometric-setup-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.forgot-biometric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0;
+    margin: -2px 0 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.forgot-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+.forgot-link:hover { color: var(--text-primary); text-decoration: underline; }
+
+.biometric-icon {
+    background: rgba(255,215,0,0.12);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 50px;
+    padding: 6px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--transition);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold);
+}
+.biometric-icon i { font-size: 14px; }
+.biometric-icon:hover {
+    background: rgba(255,215,0,0.25);
+    transform: scale(1.02);
+}
+.biometric-icon.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(255,215,0,0.06);
+}
+.biometric-icon.disabled:hover { transform: none; background: rgba(255,215,0,0.06); }
+.biometric-icon.enabled {
+    background: rgba(14,203,129,0.15);
+    border-color: #0ECB81;
+    color: #0ECB81;
+}
+.biometric-icon.enabled:hover { background: rgba(14,203,129,0.25); }
+
+.button-container { display: flex; justify-content: center; width: 100%; margin-top: 4px; }
+.login-btn {
+    width: 100%; height: 52px; border: none; border-radius: var(--radius-sm);
+    background: var(--gold-gradient); color: #0A0A0A;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: 0 4px 20px rgba(255,215,0,0.25);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+    font-family: var(--font);
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,215,0,0.4); }
+.login-btn:active { transform: scale(0.98); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.login-btn .spinner {
+    width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #0A0A0A;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.google-btn {
+    background: linear-gradient(135deg, #DB4437, #C23321) !important;
+    color: white !important;
+    box-shadow: 0 4px 20px rgba(219,68,55,0.3) !important;
+}
+.google-btn:hover { box-shadow: 0 6px 30px rgba(219,68,55,0.5) !important; }
+.google-btn i { font-size: 18px; }
+
+.bottom-text {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.bottom-text a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 700;
+    transition: var(--transition);
+}
+.bottom-text a:hover { text-decoration: underline; }
+
+.biometric-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+    z-index: 20000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: all 0.3s ease;
+}
+.biometric-modal.active { opacity: 1; visibility: visible; }
+.biometric-modal-card {
+    background: var(--bg-card); border-radius: var(--radius);
+    width: 90%; max-width: 340px; padding: 32px 28px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    transform: scale(0.9); transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.biometric-modal-card::before {
+    content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 70% 30%, rgba(255,215,0,0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+.biometric-modal.active .biometric-modal-card { transform: scale(1); }
+
+.biometric-icon-large {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(255,215,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+}
+.biometric-icon-large i { font-size: 32px; color: var(--gold); }
+
+.biometric-modal-card h3 {
+    color: var(--gold);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.biometric-modal-card p {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.biometric-status {
+    padding: 10px 14px;
+    border-radius: var(--radius-xs);
+    margin: 12px 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+.biometric-status.success {
+    background: rgba(14,203,129,0.15);
+    color: #0ECB81;
+    border: 1px solid rgba(14,203,129,0.3);
+}
+.biometric-status.error {
+    background: rgba(246,70,93,0.15);
+    color: #F6465D;
+    border: 1px solid rgba(246,70,93,0.3);
+}
+.biometric-status.waiting {
+    background: rgba(255,215,0,0.1);
+    color: var(--gold);
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.biometric-status.setup-success {
+    background: rgba(14,203,129,0.15);
+    color: #0ECB81;
+    border: 1px solid rgba(14,203,129,0.3);
+}
+
+.biometric-modal-buttons {
+    display: flex; gap: 10px; margin-top: 4px;
+}
+.biometric-modal-btn {
+    flex: 1; height: 46px; border: none; border-radius: var(--radius-xs);
+    font-weight: 600; cursor: pointer; transition: all var(--transition);
+    font-size: 12px;
+    font-family: var(--font);
+}
+.biometric-modal-btn.cancel {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+.biometric-modal-btn.cancel:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+.biometric-modal-btn.use-password {
+    background: var(--gold-gradient);
+    color: #0A0A0A;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.2);
+}
+.biometric-modal-btn.use-password:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,215,0,0.35); }
+.biometric-modal-btn.setup-btn {
+    background: linear-gradient(135deg, #0ECB81, #0A9E65);
+    color: white;
+}
+.biometric-modal-btn.setup-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14,203,129,0.3); }
+
+.notification {
+    position: fixed; top: 80px; right: 25px; min-width: 260px; max-width: 330px;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 99999; backdrop-filter: blur(20px);
+    background: rgba(18,18,18,0.95); border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    animation: slideInRight 0.4s ease; border-left: 4px solid;
+}
+.notification.success { border-left-color: #0ECB81; }
+.notification.success i { color: #0ECB81; }
+.notification.success .message { color: var(--text-primary); }
+.notification.error { border-left-color: #F6465D; }
+.notification.error i { color: #F6465D; }
+.notification.error .message { color: var(--text-primary); }
+.notification.info { border-left-color: var(--gold); }
+.notification.info i { color: var(--gold); }
+.notification.info .message { color: var(--text-primary); }
+.notification i { font-size: 18px; flex-shrink: 0; }
+.notification .message { flex: 1; font-size: 12px; font-weight: 500; }
+.notification .close-notif { cursor: pointer; opacity: 0.5; transition: var(--transition); font-size: 14px; color: var(--text-muted); }
+.notification .close-notif:hover { opacity: 1; color: var(--text-primary); }
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(100%) scale(0.95); }
+}
+
+@media(max-width: 480px) {
+    body { padding: 10px; }
+    .content { padding: 18px 16px 20px; }
+    h1 { font-size: 20px; }
+    .login-box { max-width: 100%; border-radius: var(--radius-sm); }
+    .logo { height: 110px; }
+    .input-box input { height: 46px; font-size: 12px; }
+    .phone-container { flex-direction: column; gap: 6px; }
+    .country-code-select { width: 100%; }
+    .country-code-select .choices__inner { height: 46px; }
+    .phone-number-input input { height: 46px; }
+    .login-btn { height: 48px; font-size: 13px; }
+    .notification { right: 10px; left: 10px; min-width: auto; max-width: none; top: 70px; }
+    .theme-toggle { top: 12px; right: 12px; padding: 8px 10px; }
+    .theme-toggle .theme-label { display: none; }
+    .login-option { padding: 6px 4px; font-size: 9px; }
+    .login-option i { font-size: 14px; }
+    .forgot-biometric-row { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    .biometric-icon { padding: 4px 10px; font-size: 10px; }
+    .biometric-icon span { font-size: 9px; }
+    .biometric-modal-card { padding: 22px 18px; }
+    .biometric-setup-card { flex-wrap: wrap; }
+    .biometric-setup-btn { width: 100%; text-align: center; }
+}
+@media(max-width: 360px) {
+    .content { padding: 14px 12px 16px; }
+    h1 { font-size: 18px; }
+    .login-option { font-size: 8px; padding: 4px 2px; }
+    .login-option i { font-size: 12px; }
+    .forgot-link { font-size: 10px; }
+    .biometric-icon span { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-sun" id="sunIcon"></i>
+    <i class="fas fa-moon" id="moonIcon" style="display:none;"></i>
+    <span class="theme-label" id="themeLabel">Light</span>
+</div>
+
+<div class="overlay"></div>
+
+<div class="biometric-modal" id="biometricModal">
+    <div class="biometric-modal-card">
+        <div class="biometric-icon-large"><i class="fas fa-fingerprint"></i></div>
+        <h3 id="biometricModalTitle">Biometric Verification</h3>
+        <p id="biometricModalText">Place your finger on the sensor or use Face ID</p>
+        <div class="biometric-status waiting" id="biometricStatus">
+            <i class="fas fa-spinner fa-pulse"></i>
+            <span id="biometricStatusText">Waiting for verification...</span>
+        </div>
+        <div class="biometric-modal-buttons" id="biometricModalButtons">
+            <button class="biometric-modal-btn cancel" id="biometricCancelBtn"><i class="fas fa-times"></i> Cancel</button>
+            <button class="biometric-modal-btn use-password" id="biometricUsePasswordBtn"><i class="fas fa-keyboard"></i> Use Password</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="login-box">
+        <img src="../assets/images/logo.png" alt="ABOTRA-PROAI" class="logo" onerror="this.src='https://placehold.co/480x150/800000/FFD700?text=ABOTRA-PROAI'">
+        <div class="content">
+            <h1>Welcome Back</h1>
+            <p class="sub-text">Login to your trading account</p>
+
+            <!-- Biometric Setup Card -->
+            <div class="biometric-setup-card" id="biometricSetupCard">
+                <div class="setup-icon"><i class="fas fa-fingerprint"></i></div>
+                <div class="setup-content">
+                    <div class="setup-title">🔐 Enable Biometric Login</div>
+                    <div class="setup-desc">Login faster with fingerprint or Face ID</div>
+                </div>
+                <button class="biometric-setup-btn" id="biometricSetupBtn"><i class="fas fa-plus"></i> Enable</button>
+            </div>
+
+            <div class="login-methods">
+                <div class="login-option active" data-method="email"><i class="fas fa-envelope"></i><span class="opt-label">Email</span></div>
+                <div class="login-option" data-method="phone"><i class="fas fa-phone"></i><span class="opt-label">Phone</span></div>
+                <div class="login-option" data-method="google"><i class="fab fa-google"></i><span class="opt-label">Google</span></div>
+            </div>
+
+            <div id="emailLoginSection">
+                <div class="input-box"><input type="email" id="email" placeholder="Email Address" autocomplete="email"></div>
+                <div class="input-box password-box">
+                    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                    <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <div id="phoneLoginSection" style="display:none;">
+                <div class="phone-container">
+                    <div class="country-code-select" id="phoneCountryContainer">
+                        <select id="phoneCountryCode"></select>
+                    </div>
+                    <div class="phone-number-input">
+                        <input type="tel" id="phoneNumber" placeholder="Phone Number">
+                        <div class="phone-hint" id="phoneHint"><i class="fas fa-info-circle"></i> Select country to see required digits</div>
+                    </div>
+                </div>
+                <div class="input-box password-box">
+                    <input type="password" id="phonePassword" placeholder="Password" autocomplete="current-password">
+                    <i class="fa-solid fa-eye-slash toggle-password" id="togglePhonePassword"></i>
+                </div>
+            </div>
+
+            <div id="googleLoginSection" style="display:none;">
+                <button id="googleLoginBtn" class="login-btn google-btn"><i class="fab fa-google"></i> Continue with Google</button>
+            </div>
+
+            <div class="forgot-biometric-row">
+                <a href="forgot.html" class="forgot-link">Forgot Password?</a>
+                <div class="biometric-icon" id="biometricLoginBtn">
+                    <i class="fas fa-fingerprint"></i> <span id="biometricLabel">Biometric Login</span>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button id="loginBtn" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</button>
+            </div>
+
+            <p class="bottom-text">No account? <a href="register.html">Register</a></p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+// ============================================================
+// CONFIG
+// ============================================================
+const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : 'https://abotra-backend-production.up.railway.app';
+
+// ============================================================
+// FIREBASE CLIENT SDK
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signInWithPhoneNumber,
+    RecaptchaVerifier,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    getDatabase,
+    ref,
+    get,
+    set,
+    update
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const rtdb = getDatabase(app);
+
+// ============================================================
+// COUNTRIES DATA with SVG Flag URLs (Same as register.html)
+// ============================================================
+const countriesData = [
+    { code: "+93", name: "Afghanistan", flag: "https://flagcdn.com/af.svg", digits: 9 },
+    { code: "+355", name: "Albania", flag: "https://flagcdn.com/al.svg", digits: 9 },
+    { code: "+213", name: "Algeria", flag: "https://flagcdn.com/dz.svg", digits: 9 },
+    { code: "+376", name: "Andorra", flag: "https://flagcdn.com/ad.svg", digits: 6 },
+    { code: "+244", name: "Angola", flag: "https://flagcdn.com/ao.svg", digits: 9 },
+    { code: "+1", name: "Antigua and Barbuda", flag: "https://flagcdn.com/ag.svg", digits: 7 },
+    { code: "+54", name: "Argentina", flag: "https://flagcdn.com/ar.svg", digits: 10 },
+    { code: "+374", name: "Armenia", flag: "https://flagcdn.com/am.svg", digits: 8 },
+    { code: "+61", name: "Australia", flag: "https://flagcdn.com/au.svg", digits: 9 },
+    { code: "+43", name: "Austria", flag: "https://flagcdn.com/at.svg", digits: 10 },
+    { code: "+994", name: "Azerbaijan", flag: "https://flagcdn.com/az.svg", digits: 9 },
+    { code: "+1", name: "Bahamas", flag: "https://flagcdn.com/bs.svg", digits: 7 },
+    { code: "+973", name: "Bahrain", flag: "https://flagcdn.com/bh.svg", digits: 8 },
+    { code: "+880", name: "Bangladesh", flag: "https://flagcdn.com/bd.svg", digits: 10 },
+    { code: "+1", name: "Barbados", flag: "https://flagcdn.com/bb.svg", digits: 7 },
+    { code: "+375", name: "Belarus", flag: "https://flagcdn.com/by.svg", digits: 9 },
+    { code: "+32", name: "Belgium", flag: "https://flagcdn.com/be.svg", digits: 9 },
+    { code: "+501", name: "Belize", flag: "https://flagcdn.com/bz.svg", digits: 7 },
+    { code: "+229", name: "Benin", flag: "https://flagcdn.com/bj.svg", digits: 8 },
+    { code: "+975", name: "Bhutan", flag: "https://flagcdn.com/bt.svg", digits: 8 },
+    { code: "+591", name: "Bolivia", flag: "https://flagcdn.com/bo.svg", digits: 8 },
+    { code: "+387", name: "Bosnia and Herzegovina", flag: "https://flagcdn.com/ba.svg", digits: 8 },
+    { code: "+267", name: "Botswana", flag: "https://flagcdn.com/bw.svg", digits: 7 },
+    { code: "+55", name: "Brazil", flag: "https://flagcdn.com/br.svg", digits: 11 },
+    { code: "+673", name: "Brunei", flag: "https://flagcdn.com/bn.svg", digits: 7 },
+    { code: "+359", name: "Bulgaria", flag: "https://flagcdn.com/bg.svg", digits: 9 },
+    { code: "+226", name: "Burkina Faso", flag: "https://flagcdn.com/bf.svg", digits: 8 },
+    { code: "+257", name: "Burundi", flag: "https://flagcdn.com/bi.svg", digits: 8 },
+    { code: "+855", name: "Cambodia", flag: "https://flagcdn.com/kh.svg", digits: 9 },
+    { code: "+237", name: "Cameroon", flag: "https://flagcdn.com/cm.svg", digits: 9 },
+    { code: "+1", name: "Canada", flag: "https://flagcdn.com/ca.svg", digits: 10 },
+    { code: "+238", name: "Cape Verde", flag: "https://flagcdn.com/cv.svg", digits: 7 },
+    { code: "+236", name: "Central African Republic", flag: "https://flagcdn.com/cf.svg", digits: 8 },
+    { code: "+235", name: "Chad", flag: "https://flagcdn.com/td.svg", digits: 8 },
+    { code: "+56", name: "Chile", flag: "https://flagcdn.com/cl.svg", digits: 9 },
+    { code: "+86", name: "China", flag: "https://flagcdn.com/cn.svg", digits: 11 },
+    { code: "+57", name: "Colombia", flag: "https://flagcdn.com/co.svg", digits: 10 },
+    { code: "+269", name: "Comoros", flag: "https://flagcdn.com/km.svg", digits: 7 },
+    { code: "+242", name: "Congo", flag: "https://flagcdn.com/cg.svg", digits: 9 },
+    { code: "+243", name: "Congo DRC", flag: "https://flagcdn.com/cd.svg", digits: 9 },
+    { code: "+506", name: "Costa Rica", flag: "https://flagcdn.com/cr.svg", digits: 8 },
+    { code: "+385", name: "Croatia", flag: "https://flagcdn.com/hr.svg", digits: 9 },
+    { code: "+53", name: "Cuba", flag: "https://flagcdn.com/cu.svg", digits: 8 },
+    { code: "+357", name: "Cyprus", flag: "https://flagcdn.com/cy.svg", digits: 8 },
+    { code: "+420", name: "Czech Republic", flag: "https://flagcdn.com/cz.svg", digits: 9 },
+    { code: "+45", name: "Denmark", flag: "https://flagcdn.com/dk.svg", digits: 8 },
+    { code: "+253", name: "Djibouti", flag: "https://flagcdn.com/dj.svg", digits: 8 },
+    { code: "+1", name: "Dominica", flag: "https://flagcdn.com/dm.svg", digits: 7 },
+    { code: "+1", name: "Dominican Republic", flag: "https://flagcdn.com/do.svg", digits: 10 },
+    { code: "+593", name: "Ecuador", flag: "https://flagcdn.com/ec.svg", digits: 9 },
+    { code: "+20", name: "Egypt", flag: "https://flagcdn.com/eg.svg", digits: 10 },
+    { code: "+503", name: "El Salvador", flag: "https://flagcdn.com/sv.svg", digits: 8 },
+    { code: "+240", name: "Equatorial Guinea", flag: "https://flagcdn.com/gq.svg", digits: 9 },
+    { code: "+291", name: "Eritrea", flag: "https://flagcdn.com/er.svg", digits: 7 },
+    { code: "+372", name: "Estonia", flag: "https://flagcdn.com/ee.svg", digits: 8 },
+    { code: "+251", name: "Ethiopia", flag: "https://flagcdn.com/et.svg", digits: 9 },
+    { code: "+679", name: "Fiji", flag: "https://flagcdn.com/fj.svg", digits: 7 },
+    { code: "+358", name: "Finland", flag: "https://flagcdn.com/fi.svg", digits: 9 },
+    { code: "+33", name: "France", flag: "https://flagcdn.com/fr.svg", digits: 9 },
+    { code: "+241", name: "Gabon", flag: "https://flagcdn.com/ga.svg", digits: 7 },
+    { code: "+220", name: "Gambia", flag: "https://flagcdn.com/gm.svg", digits: 7 },
+    { code: "+995", name: "Georgia", flag: "https://flagcdn.com/ge.svg", digits: 9 },
+    { code: "+49", name: "Germany", flag: "https://flagcdn.com/de.svg", digits: 10 },
+    { code: "+233", name: "Ghana", flag: "https://flagcdn.com/gh.svg", digits: 9 },
+    { code: "+30", name: "Greece", flag: "https://flagcdn.com/gr.svg", digits: 10 },
+    { code: "+1", name: "Grenada", flag: "https://flagcdn.com/gd.svg", digits: 7 },
+    { code: "+502", name: "Guatemala", flag: "https://flagcdn.com/gt.svg", digits: 8 },
+    { code: "+224", name: "Guinea", flag: "https://flagcdn.com/gn.svg", digits: 9 },
+    { code: "+245", name: "Guinea-Bissau", flag: "https://flagcdn.com/gw.svg", digits: 7 },
+    { code: "+592", name: "Guyana", flag: "https://flagcdn.com/gy.svg", digits: 7 },
+    { code: "+509", name: "Haiti", flag: "https://flagcdn.com/ht.svg", digits: 8 },
+    { code: "+504", name: "Honduras", flag: "https://flagcdn.com/hn.svg", digits: 8 },
+    { code: "+36", name: "Hungary", flag: "https://flagcdn.com/hu.svg", digits: 9 },
+    { code: "+354", name: "Iceland", flag: "https://flagcdn.com/is.svg", digits: 7 },
+    { code: "+91", name: "India", flag: "https://flagcdn.com/in.svg", digits: 10 },
+    { code: "+62", name: "Indonesia", flag: "https://flagcdn.com/id.svg", digits: 10 },
+    { code: "+98", name: "Iran", flag: "https://flagcdn.com/ir.svg", digits: 10 },
+    { code: "+964", name: "Iraq", flag: "https://flagcdn.com/iq.svg", digits: 10 },
+    { code: "+353", name: "Ireland", flag: "https://flagcdn.com/ie.svg", digits: 9 },
+    { code: "+972", name: "Israel", flag: "https://flagcdn.com/il.svg", digits: 9 },
+    { code: "+39", name: "Italy", flag: "https://flagcdn.com/it.svg", digits: 10 },
+    { code: "+1", name: "Jamaica", flag: "https://flagcdn.com/jm.svg", digits: 7 },
+    { code: "+81", name: "Japan", flag: "https://flagcdn.com/jp.svg", digits: 10 },
+    { code: "+962", name: "Jordan", flag: "https://flagcdn.com/jo.svg", digits: 9 },
+    { code: "+7", name: "Kazakhstan", flag: "https://flagcdn.com/kz.svg", digits: 10 },
+    { code: "+254", name: "Kenya", flag: "https://flagcdn.com/ke.svg", digits: 9 },
+    { code: "+686", name: "Kiribati", flag: "https://flagcdn.com/ki.svg", digits: 5 },
+    { code: "+965", name: "Kuwait", flag: "https://flagcdn.com/kw.svg", digits: 8 },
+    { code: "+996", name: "Kyrgyzstan", flag: "https://flagcdn.com/kg.svg", digits: 9 },
+    { code: "+856", name: "Laos", flag: "https://flagcdn.com/la.svg", digits: 9 },
+    { code: "+371", name: "Latvia", flag: "https://flagcdn.com/lv.svg", digits: 8 },
+    { code: "+961", name: "Lebanon", flag: "https://flagcdn.com/lb.svg", digits: 8 },
+    { code: "+266", name: "Lesotho", flag: "https://flagcdn.com/ls.svg", digits: 8 },
+    { code: "+231", name: "Liberia", flag: "https://flagcdn.com/lr.svg", digits: 7 },
+    { code: "+218", name: "Libya", flag: "https://flagcdn.com/ly.svg", digits: 9 },
+    { code: "+423", name: "Liechtenstein", flag: "https://flagcdn.com/li.svg", digits: 7 },
+    { code: "+370", name: "Lithuania", flag: "https://flagcdn.com/lt.svg", digits: 8 },
+    { code: "+352", name: "Luxembourg", flag: "https://flagcdn.com/lu.svg", digits: 9 },
+    { code: "+261", name: "Madagascar", flag: "https://flagcdn.com/mg.svg", digits: 9 },
+    { code: "+265", name: "Malawi", flag: "https://flagcdn.com/mw.svg", digits: 9 },
+    { code: "+60", name: "Malaysia", flag: "https://flagcdn.com/my.svg", digits: 9 },
+    { code: "+960", name: "Maldives", flag: "https://flagcdn.com/mv.svg", digits: 7 },
+    { code: "+223", name: "Mali", flag: "https://flagcdn.com/ml.svg", digits: 8 },
+    { code: "+356", name: "Malta", flag: "https://flagcdn.com/mt.svg", digits: 8 },
+    { code: "+692", name: "Marshall Islands", flag: "https://flagcdn.com/mh.svg", digits: 7 },
+    { code: "+222", name: "Mauritania", flag: "https://flagcdn.com/mr.svg", digits: 8 },
+    { code: "+230", name: "Mauritius", flag: "https://flagcdn.com/mu.svg", digits: 7 },
+    { code: "+52", name: "Mexico", flag: "https://flagcdn.com/mx.svg", digits: 10 },
+    { code: "+691", name: "Micronesia", flag: "https://flagcdn.com/fm.svg", digits: 7 },
+    { code: "+373", name: "Moldova", flag: "https://flagcdn.com/md.svg", digits: 8 },
+    { code: "+377", name: "Monaco", flag: "https://flagcdn.com/mc.svg", digits: 8 },
+    { code: "+976", name: "Mongolia", flag: "https://flagcdn.com/mn.svg", digits: 8 },
+    { code: "+382", name: "Montenegro", flag: "https://flagcdn.com/me.svg", digits: 8 },
+    { code: "+212", name: "Morocco", flag: "https://flagcdn.com/ma.svg", digits: 9 },
+    { code: "+258", name: "Mozambique", flag: "https://flagcdn.com/mz.svg", digits: 9 },
+    { code: "+95", name: "Myanmar", flag: "https://flagcdn.com/mm.svg", digits: 9 },
+    { code: "+264", name: "Namibia", flag: "https://flagcdn.com/na.svg", digits: 9 },
+    { code: "+674", name: "Nauru", flag: "https://flagcdn.com/nr.svg", digits: 7 },
+    { code: "+977", name: "Nepal", flag: "https://flagcdn.com/np.svg", digits: 10 },
+    { code: "+31", name: "Netherlands", flag: "https://flagcdn.com/nl.svg", digits: 9 },
+    { code: "+64", name: "New Zealand", flag: "https://flagcdn.com/nz.svg", digits: 9 },
+    { code: "+505", name: "Nicaragua", flag: "https://flagcdn.com/ni.svg", digits: 8 },
+    { code: "+227", name: "Niger", flag: "https://flagcdn.com/ne.svg", digits: 8 },
+    { code: "+234", name: "Nigeria", flag: "https://flagcdn.com/ng.svg", digits: 10 },
+    { code: "+850", name: "North Korea", flag: "https://flagcdn.com/kp.svg", digits: 8 },
+    { code: "+389", name: "North Macedonia", flag: "https://flagcdn.com/mk.svg", digits: 8 },
+    { code: "+47", name: "Norway", flag: "https://flagcdn.com/no.svg", digits: 8 },
+    { code: "+968", name: "Oman", flag: "https://flagcdn.com/om.svg", digits: 8 },
+    { code: "+92", name: "Pakistan", flag: "https://flagcdn.com/pk.svg", digits: 10 },
+    { code: "+680", name: "Palau", flag: "https://flagcdn.com/pw.svg", digits: 7 },
+    { code: "+507", name: "Panama", flag: "https://flagcdn.com/pa.svg", digits: 8 },
+    { code: "+675", name: "Papua New Guinea", flag: "https://flagcdn.com/pg.svg", digits: 7 },
+    { code: "+595", name: "Paraguay", flag: "https://flagcdn.com/py.svg", digits: 9 },
+    { code: "+51", name: "Peru", flag: "https://flagcdn.com/pe.svg", digits: 9 },
+    { code: "+63", name: "Philippines", flag: "https://flagcdn.com/ph.svg", digits: 10 },
+    { code: "+48", name: "Poland", flag: "https://flagcdn.com/pl.svg", digits: 9 },
+    { code: "+351", name: "Portugal", flag: "https://flagcdn.com/pt.svg", digits: 9 },
+    { code: "+974", name: "Qatar", flag: "https://flagcdn.com/qa.svg", digits: 8 },
+    { code: "+40", name: "Romania", flag: "https://flagcdn.com/ro.svg", digits: 9 },
+    { code: "+7", name: "Russia", flag: "https://flagcdn.com/ru.svg", digits: 10 },
+    { code: "+250", name: "Rwanda", flag: "https://flagcdn.com/rw.svg", digits: 9 },
+    { code: "+1", name: "Saint Kitts and Nevis", flag: "https://flagcdn.com/kn.svg", digits: 7 },
+    { code: "+1", name: "Saint Lucia", flag: "https://flagcdn.com/lc.svg", digits: 7 },
+    { code: "+1", name: "Saint Vincent", flag: "https://flagcdn.com/vc.svg", digits: 7 },
+    { code: "+685", name: "Samoa", flag: "https://flagcdn.com/ws.svg", digits: 7 },
+    { code: "+378", name: "San Marino", flag: "https://flagcdn.com/sm.svg", digits: 7 },
+    { code: "+239", name: "Sao Tome", flag: "https://flagcdn.com/st.svg", digits: 7 },
+    { code: "+966", name: "Saudi Arabia", flag: "https://flagcdn.com/sa.svg", digits: 9 },
+    { code: "+221", name: "Senegal", flag: "https://flagcdn.com/sn.svg", digits: 9 },
+    { code: "+381", name: "Serbia", flag: "https://flagcdn.com/rs.svg", digits: 9 },
+    { code: "+248", name: "Seychelles", flag: "https://flagcdn.com/sc.svg", digits: 7 },
+    { code: "+232", name: "Sierra Leone", flag: "https://flagcdn.com/sl.svg", digits: 8 },
+    { code: "+65", name: "Singapore", flag: "https://flagcdn.com/sg.svg", digits: 8 },
+    { code: "+421", name: "Slovakia", flag: "https://flagcdn.com/sk.svg", digits: 9 },
+    { code: "+386", name: "Slovenia", flag: "https://flagcdn.com/si.svg", digits: 8 },
+    { code: "+677", name: "Solomon Islands", flag: "https://flagcdn.com/sb.svg", digits: 7 },
+    { code: "+252", name: "Somalia", flag: "https://flagcdn.com/so.svg", digits: 8 },
+    { code: "+27", name: "South Africa", flag: "https://flagcdn.com/za.svg", digits: 9 },
+    { code: "+82", name: "South Korea", flag: "https://flagcdn.com/kr.svg", digits: 10 },
+    { code: "+211", name: "South Sudan", flag: "https://flagcdn.com/ss.svg", digits: 9 },
+    { code: "+34", name: "Spain", flag: "https://flagcdn.com/es.svg", digits: 9 },
+    { code: "+94", name: "Sri Lanka", flag: "https://flagcdn.com/lk.svg", digits: 9 },
+    { code: "+249", name: "Sudan", flag: "https://flagcdn.com/sd.svg", digits: 9 },
+    { code: "+597", name: "Suriname", flag: "https://flagcdn.com/sr.svg", digits: 7 },
+    { code: "+46", name: "Sweden", flag: "https://flagcdn.com/se.svg", digits: 9 },
+    { code: "+41", name: "Switzerland", flag: "https://flagcdn.com/ch.svg", digits: 9 },
+    { code: "+963", name: "Syria", flag: "https://flagcdn.com/sy.svg", digits: 9 },
+    { code: "+886", name: "Taiwan", flag: "https://flagcdn.com/tw.svg", digits: 9 },
+    { code: "+992", name: "Tajikistan", flag: "https://flagcdn.com/tj.svg", digits: 9 },
+    { code: "+255", name: "Tanzania", flag: "https://flagcdn.com/tz.svg", digits: 9 },
+    { code: "+66", name: "Thailand", flag: "https://flagcdn.com/th.svg", digits: 9 },
+    { code: "+670", name: "Timor-Leste", flag: "https://flagcdn.com/tl.svg", digits: 7 },
+    { code: "+228", name: "Togo", flag: "https://flagcdn.com/tg.svg", digits: 8 },
+    { code: "+676", name: "Tonga", flag: "https://flagcdn.com/to.svg", digits: 5 },
+    { code: "+1", name: "Trinidad and Tobago", flag: "https://flagcdn.com/tt.svg", digits: 7 },
+    { code: "+216", name: "Tunisia", flag: "https://flagcdn.com/tn.svg", digits: 8 },
+    { code: "+90", name: "Turkey", flag: "https://flagcdn.com/tr.svg", digits: 10 },
+    { code: "+993", name: "Turkmenistan", flag: "https://flagcdn.com/tm.svg", digits: 8 },
+    { code: "+688", name: "Tuvalu", flag: "https://flagcdn.com/tv.svg", digits: 5 },
+    { code: "+256", name: "Uganda", flag: "https://flagcdn.com/ug.svg", digits: 9 },
+    { code: "+380", name: "Ukraine", flag: "https://flagcdn.com/ua.svg", digits: 9 },
+    { code: "+971", name: "United Arab Emirates", flag: "https://flagcdn.com/ae.svg", digits: 9 },
+    { code: "+44", name: "United Kingdom", flag: "https://flagcdn.com/gb.svg", digits: 10 },
+    { code: "+1", name: "United States", flag: "https://flagcdn.com/us.svg", digits: 10 },
+    { code: "+598", name: "Uruguay", flag: "https://flagcdn.com/uy.svg", digits: 8 },
+    { code: "+998", name: "Uzbekistan", flag: "https://flagcdn.com/uz.svg", digits: 9 },
+    { code: "+678", name: "Vanuatu", flag: "https://flagcdn.com/vu.svg", digits: 5 },
+    { code: "+379", name: "Vatican City", flag: "https://flagcdn.com/va.svg", digits: 6 },
+    { code: "+58", name: "Venezuela", flag: "https://flagcdn.com/ve.svg", digits: 10 },
+    { code: "+84", name: "Vietnam", flag: "https://flagcdn.com/vn.svg", digits: 9 },
+    { code: "+967", name: "Yemen", flag: "https://flagcdn.com/ye.svg", digits: 9 },
+    { code: "+260", name: "Zambia", flag: "https://flagcdn.com/zm.svg", digits: 9 },
+    { code: "+263", name: "Zimbabwe", flag: "https://flagcdn.com/zw.svg", digits: 9 }
+];
+
+// ============================================================
+// INIT COUNTRY DROPDOWN WITH CHOICES.JS + SVG FLAGS
+// ============================================================
+let phoneCountryChoices = null;
+
+function initCountryDropdowns() {
+    const phoneSelect = document.getElementById('phoneCountryCode');
+    if (!phoneSelect) return;
+    
+    const sorted = [...countriesData].sort((a, b) => a.name.localeCompare(b.name));
+    sorted.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.code;
+        // Use innerHTML with img tag like register.html
+        option.innerHTML = `<img src="${c.flag}" class="country-flag-svg" alt="${c.name}"> ${c.name} (${c.code})`;
+        phoneSelect.appendChild(option);
+    });
+
+    if (typeof Choices === 'undefined') {
+        console.error('[CHOICES] Choices.js not loaded.');
+        return;
+    }
+
+    try {
+        phoneCountryChoices = new Choices(phoneSelect, {
+            searchEnabled: true,
+            searchPlaceholderValue: '🔍 Search country...',
+            itemSelectText: '',
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: '🌍 Select Country',
+            allowHTML: true,
+            renderSelectedChoices: 'always',
+            searchFields: ['label', 'value'],
+            classNames: {
+                containerOuter: 'choices country-code-select'
+            }
+        });
+
+        const defaultCountry = countriesData.find(c => c.code === '+255' || c.name === 'Tanzania');
+        if (defaultCountry) {
+            phoneCountryChoices.setChoiceByValue(defaultCountry.code);
+            updatePhoneHint(defaultCountry);
+        }
+
+        phoneSelect.addEventListener('change', () => {
+            const code = phoneSelect.value;
+            const country = countriesData.find(c => c.code === code);
+            if (country) {
+                updatePhoneHint(country);
+            }
+        });
+
+        console.log('[CHOICES] ✅ Initialized with SVG flags');
+    } catch (error) {
+        console.error('[CHOICES] Error:', error);
+    }
+}
+
+function updatePhoneHint(country) {
+    const hint = document.getElementById('phoneHint');
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    if (country) {
+        hint.innerHTML = `<i class="fas fa-check-circle"></i> ${country.name} requires ${country.digits} digits`;
+        hint.className = 'phone-hint active';
+        phoneNumberInput.maxLength = country.digits;
+        phoneNumberInput.placeholder = `Enter ${country.digits} digits`;
+    } else {
+        hint.innerHTML = '<i class="fas fa-info-circle"></i> Select country to see required digits';
+        hint.className = 'phone-hint';
+        phoneNumberInput.maxLength = 15;
+        phoneNumberInput.placeholder = 'Phone Number';
+    }
+}
+
+async function autoDetectCountry() {
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        const detectedName = data.country_name;
+        const matched = countriesData.find(c => c.name === detectedName);
+        if (matched && phoneCountryChoices) {
+            phoneCountryChoices.setChoiceByValue(matched.code);
+            updatePhoneHint(matched);
+            return;
+        }
+    } catch (e) { console.log("[DETECT] Auto-detect failed"); }
+    
+    const defaultCountry = countriesData.find(c => c.code === '+255');
+    if (defaultCountry && phoneCountryChoices) {
+        phoneCountryChoices.setChoiceByValue(defaultCountry.code);
+        updatePhoneHint(defaultCountry);
+    }
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const label = document.getElementById('themeLabel');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        label.textContent = 'Dark';
+    } else {
+        document.body.classList.remove('light-theme');
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        label.textContent = 'Light';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    localStorage.setItem('abotra_theme', isLight ? 'light' : 'dark');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const label = document.getElementById('themeLabel');
+    if (isLight) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        label.textContent = 'Dark';
+    } else {
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        label.textContent = 'Light';
+    }
+});
+
+// ============================================================
+// METHOD SWITCHING
+// ============================================================
+let currentMethod = 'email';
+document.querySelectorAll('.login-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.login-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        currentMethod = this.dataset.method;
+        document.getElementById('emailLoginSection').style.display = 'none';
+        document.getElementById('phoneLoginSection').style.display = 'none';
+        document.getElementById('googleLoginSection').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'flex';
+        if (currentMethod === 'email') {
+            document.getElementById('emailLoginSection').style.display = 'block';
+        } else if (currentMethod === 'phone') {
+            document.getElementById('phoneLoginSection').style.display = 'block';
+        } else {
+            document.getElementById('googleLoginSection').style.display = 'block';
+            document.getElementById('loginBtn').style.display = 'none';
+        }
+    });
+});
+
+// ============================================================
+// PASSWORD TOGGLES
+// ============================================================
+document.getElementById('togglePassword')?.addEventListener('click', function() {
+    const inp = document.getElementById('password');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+});
+document.getElementById('togglePhonePassword')?.addEventListener('click', function() {
+    const inp = document.getElementById('phonePassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+});
+
+// ============================================================
+// NOTIFICATION
+// ============================================================
+function showNotification(msg, type) {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    const n = document.createElement('div');
+    n.className = `notification ${type}`;
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        info: 'fa-info-circle'
+    };
+    n.innerHTML = `
+        <i class="fas ${iconMap[type] || 'fa-info-circle'}"></i>
+        <div class="message">${msg}</div>
+        <div class="close-notif"><i class="fas fa-times"></i></div>
+    `;
+    document.body.appendChild(n);
+    setTimeout(() => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); }, 3000);
+    n.querySelector('.close-notif').onclick = () => { n.style.animation = 'fadeOut 0.3s'; setTimeout(() => n.remove(), 300); };
+}
+
+// ============================================================
+// UPDATE USER IN RTDB
+// ============================================================
+async function updateUserInRTDB(userId, userData) {
+    const userRef = ref(rtdb, `users/${userId}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) {
+        await set(userRef, {
+            uid: userId,
+            email: userData.email || '',
+            username: userData.username || userData.email?.split('@')[0] || 'User',
+            fullName: userData.fullName || userData.email?.split('@')[0] || 'User',
+            createdAt: Date.now(),
+            balance: 0,
+            totalDeposited: 0,
+            lastLogin: Date.now()
+        });
+    } else {
+        await update(userRef, { lastLogin: Date.now() });
+    }
+}
+
+// ============================================================
+// BIOMETRIC - FIXED with proper credential saving
+// ============================================================
+let rpId = window.location.hostname || "abotra-proai.com";
+if (rpId === 'localhost' || rpId === '127.0.0.1') rpId = 'localhost';
+else if (rpId.includes(':')) rpId = rpId.split(':')[0];
+
+function isBiometricSupported() {
+    try {
+        if (typeof SimpleWebAuthnBrowser === 'undefined') return false;
+        if (typeof navigator.credentials === 'undefined') return false;
+        if (typeof navigator.credentials.create !== 'function') return false;
+        if (typeof navigator.credentials.get !== 'function') return false;
+        return true;
+    } catch(e) { return false; }
+}
+
+async function checkBiometricEnabled() {
+    const savedCredential = localStorage.getItem('abotra_biometric_credential');
+    const savedEmail = localStorage.getItem('abotra_biometric_email');
+    const bioBtn = document.getElementById('biometricLoginBtn');
+    const bioLabel = document.getElementById('biometricLabel');
+    const setupCard = document.getElementById('biometricSetupCard');
+    const setupBtn = document.getElementById('biometricSetupBtn');
+    
+    const supported = isBiometricSupported();
+    
+    if (!supported) {
+        bioBtn.className = 'biometric-icon disabled';
+        bioBtn.querySelector('span').textContent = 'Biometric (Not Supported)';
+        setupCard.classList.remove('show');
+        return false;
+    }
+    
+    if (savedCredential && savedEmail) {
+        bioBtn.className = 'biometric-icon enabled';
+        bioBtn.querySelector('span').textContent = '🔓 Biometric Login';
+        setupCard.classList.remove('show');
+        return true;
+    }
+    
+    bioBtn.className = 'biometric-icon';
+    bioBtn.querySelector('span').textContent = '🔐 Setup Biometric';
+    setupCard.classList.add('show');
+    setupBtn.disabled = false;
+    return false;
+}
+
+async function setupBiometric(email, password) {
+    try {
+        if (!isBiometricSupported()) {
+            showNotification('Biometric not supported on this device', 'error');
+            return false;
+        }
+        
+        const modal = document.getElementById('biometricModal');
+        const statusDiv = document.getElementById('biometricStatus');
+        const statusText = document.getElementById('biometricStatusText');
+        const title = document.getElementById('biometricModalTitle');
+        const text = document.getElementById('biometricModalText');
+        const buttons = document.getElementById('biometricModalButtons');
+        
+        title.textContent = '🔐 Setup Biometric Login';
+        text.textContent = 'Place your finger on the sensor or use Face ID to register';
+        buttons.innerHTML = `
+            <button class="biometric-modal-btn cancel" id="biometricCancelBtn"><i class="fas fa-times"></i> Cancel</button>
+            <button class="biometric-modal-btn setup-btn" id="biometricSetupConfirmBtn"><i class="fas fa-fingerprint"></i> Register</button>
+        `;
+        
+        modal.classList.add('active');
+        statusDiv.className = 'biometric-status waiting';
+        statusText.innerHTML = 'Preparing registration...';
+        
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        const userId = new TextEncoder().encode(email || 'user');
+        
+        const options = {
+            challenge: challenge,
+            rp: { name: "ABOTRA-PROAI", id: rpId },
+            user: {
+                id: userId,
+                name: email || 'user@abotra.com',
+                displayName: email || 'ABOTRA User'
+            },
+            pubKeyCredParams: [
+                { type: "public-key", alg: -7 },
+                { type: "public-key", alg: -257 }
+            ],
+            authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                residentKey: "preferred",
+                userVerification: "required"
+            },
+            timeout: 60000,
+            attestation: "none",
+            excludeCredentials: []
+        };
+        
+        statusText.innerHTML = '⏳ Waiting for biometric authentication...';
+        
+        return new Promise((resolve) => {
+            const cancelBtn = document.getElementById('biometricCancelBtn');
+            const confirmBtn = document.getElementById('biometricSetupConfirmBtn');
+            
+            const cleanup = () => {
+                modal.classList.remove('active');
+                cancelBtn?.removeEventListener('click', onCancel);
+                confirmBtn?.removeEventListener('click', onConfirm);
+            };
+            
+            const onCancel = () => {
+                cleanup();
+                statusText.innerHTML = 'Setup cancelled';
+                statusDiv.className = 'biometric-status error';
+                resolve(false);
+            };
+            
+            const onConfirm = async () => {
+                statusText.innerHTML = '⏳ Please authenticate with fingerprint or Face ID...';
+                statusDiv.className = 'biometric-status waiting';
+                
+                try {
+                    let credential;
+                    
+                    try {
+                        credential = await SimpleWebAuthnBrowser.startRegistration(options);
+                    } catch (webauthnError) {
+                        console.log('[BIOMETRIC] SimpleWebAuthnBrowser failed:', webauthnError.message);
+                        const nativeOptions = {
+                            publicKey: {
+                                challenge: challenge,
+                                rp: { name: "ABOTRA-PROAI", id: rpId },
+                                user: {
+                                    id: new TextEncoder().encode(email || 'user'),
+                                    name: email || 'user@abotra.com',
+                                    displayName: email || 'ABOTRA User'
+                                },
+                                pubKeyCredParams: [
+                                    { type: "public-key", alg: -7 },
+                                    { type: "public-key", alg: -257 }
+                                ],
+                                authenticatorSelection: {
+                                    authenticatorAttachment: "platform",
+                                    residentKey: "preferred",
+                                    userVerification: "required"
+                                },
+                                timeout: 60000,
+                                attestation: "none"
+                            }
+                        };
+                        const nativeCredential = await navigator.credentials.create(nativeOptions);
+                        if (nativeCredential) {
+                            credential = {
+                                id: nativeCredential.id,
+                                credentialId: nativeCredential.id,
+                                response: { credentialId: nativeCredential.id }
+                            };
+                        }
+                    }
+                    
+                    if (credential) {
+                        const credentialData = {
+                            id: credential.id,
+                            credentialId: credential.id,
+                            userId: email,
+                            email: email,
+                            createdAt: Date.now()
+                        };
+                        
+                        localStorage.setItem('abotra_biometric_credential', JSON.stringify(credentialData));
+                        localStorage.setItem('abotra_biometric_email', email);
+                        localStorage.setItem('abotra_biometric_password', password);
+                        localStorage.setItem('abotra_biometric_enabled', 'true');
+                        
+                        try {
+                            const user = auth.currentUser;
+                            if (user) {
+                                await set(ref(rtdb, `users/${user.uid}/biometricCredential`), {
+                                    credentialId: credential.id,
+                                    email: email,
+                                    createdAt: Date.now()
+                                });
+                            }
+                        } catch(e) { console.log('[BIOMETRIC] Firebase save skipped:', e.message); }
+                        
+                        statusText.innerHTML = '✅ Biometric setup successful!';
+                        statusDiv.className = 'biometric-status setup-success';
+                        
+                        const bioBtn = document.getElementById('biometricLoginBtn');
+                        bioBtn.className = 'biometric-icon enabled';
+                        bioBtn.querySelector('span').textContent = '🔓 Biometric Login';
+                        
+                        document.getElementById('biometricSetupCard').classList.remove('show');
+                        
+                        showNotification('✅ Biometric login enabled!', 'success');
+                        
+                        setTimeout(() => { cleanup(); resolve(true); }, 1500);
+                    } else {
+                        statusText.innerHTML = '❌ Registration failed. Please try again.';
+                        statusDiv.className = 'biometric-status error';
+                        setTimeout(() => { cleanup(); resolve(false); }, 1500);
+                    }
+                } catch (error) {
+                    console.error('[BIOMETRIC] Setup error:', error);
+                    let msg = error.message || 'Setup failed';
+                    if (error.name === 'NotSupportedError') msg = 'Biometric not supported on this device.';
+                    else if (error.name === 'SecurityError') msg = 'Security error. Please use HTTPS.';
+                    else if (error.name === 'AbortError') msg = 'Authentication was cancelled.';
+                    statusText.innerHTML = `❌ ${msg}`;
+                    statusDiv.className = 'biometric-status error';
+                    setTimeout(() => { cleanup(); resolve(false); }, 1500);
+                }
+            };
+            
+            cancelBtn?.addEventListener('click', onCancel);
+            confirmBtn?.addEventListener('click', onConfirm);
+        });
+    } catch (error) {
+        console.error('[BIOMETRIC] Setup error:', error);
+        showNotification('Biometric setup failed: ' + error.message, 'error');
+        return false;
+    }
+}
+
+async function performBiometricLogin() {
+    const savedCredentialStr = localStorage.getItem('abotra_biometric_credential');
+    const savedEmail = localStorage.getItem('abotra_biometric_email');
+    const savedPassword = localStorage.getItem('abotra_biometric_password');
+    
+    if (!savedCredentialStr || !savedEmail || !savedPassword) {
+        showNotification('Biometric not set up. Please login with password first.', 'info');
+        return false;
+    }
+    
+    try {
+        if (!isBiometricSupported()) {
+            showNotification('Biometric not supported on this device', 'error');
+            return false;
+        }
+        
+        const savedCredential = JSON.parse(savedCredentialStr);
+        const credentialId = savedCredential.credentialId || savedCredential.id;
+        
+        const authOptions = {
+            challenge: new Uint8Array(32),
+            allowCredentials: [{
+                id: credentialId,
+                type: "public-key",
+                transports: ["internal", "usb", "nfc", "ble"]
+            }],
+            timeout: 60000,
+            userVerification: "required",
+            rpId: rpId
+        };
+        crypto.getRandomValues(authOptions.challenge);
+        
+        const modal = document.getElementById('biometricModal');
+        const statusDiv = document.getElementById('biometricStatus');
+        const statusText = document.getElementById('biometricStatusText');
+        const title = document.getElementById('biometricModalTitle');
+        const text = document.getElementById('biometricModalText');
+        const buttons = document.getElementById('biometricModalButtons');
+        
+        title.textContent = '🔐 Biometric Verification';
+        text.textContent = 'Place your finger on the sensor or use Face ID';
+        buttons.innerHTML = `
+            <button class="biometric-modal-btn cancel" id="biometricCancelBtn"><i class="fas fa-times"></i> Cancel</button>
+            <button class="biometric-modal-btn use-password" id="biometricUsePasswordBtn"><i class="fas fa-keyboard"></i> Use Password</button>
+        `;
+        
+        modal.classList.add('active');
+        statusDiv.className = 'biometric-status waiting';
+        statusText.innerHTML = '⏳ Waiting for biometric verification...';
+        
+        return new Promise((resolve) => {
+            const cancelBtn = document.getElementById('biometricCancelBtn');
+            const usePasswordBtn = document.getElementById('biometricUsePasswordBtn');
+            
+            const cleanup = () => {
+                modal.classList.remove('active');
+                cancelBtn?.removeEventListener('click', onCancel);
+                usePasswordBtn?.removeEventListener('click', onUsePassword);
+            };
+            
+            const onCancel = () => {
+                cleanup();
+                statusText.innerHTML = 'Verification cancelled';
+                statusDiv.className = 'biometric-status error';
+                resolve(false);
+            };
+            
+            const onUsePassword = () => {
+                cleanup();
+                statusText.innerHTML = 'Using password instead';
+                statusDiv.className = 'biometric-status error';
+                resolve(false);
+            };
+            
+            cancelBtn?.addEventListener('click', onCancel);
+            usePasswordBtn?.addEventListener('click', onUsePassword);
+            
+            let authPromise;
+            try {
+                authPromise = SimpleWebAuthnBrowser.startAuthentication(authOptions);
+            } catch(e) {
+                const nativeAuthOptions = {
+                    publicKey: {
+                        challenge: authOptions.challenge,
+                        allowCredentials: authOptions.allowCredentials,
+                        timeout: authOptions.timeout,
+                        userVerification: authOptions.userVerification,
+                        rpId: authOptions.rpId
+                    }
+                };
+                authPromise = navigator.credentials.get(nativeAuthOptions);
+            }
+            
+            authPromise.then(async (assertionResp) => {
+                if (assertionResp) {
+                    statusText.innerHTML = '✅ Verification successful! Logging in...';
+                    statusDiv.className = 'biometric-status success';
+                    try {
+                        const emailInput = document.getElementById('email');
+                        const passwordInput = document.getElementById('password');
+                        if (emailInput) emailInput.value = savedEmail;
+                        if (passwordInput) passwordInput.value = savedPassword;
+                        
+                        const result = await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
+                        await updateUserInRTDB(result.user.uid, { email: savedEmail });
+                        showNotification('✅ Biometric login successful!', 'success');
+                        setTimeout(() => { cleanup(); resolve(true); window.location.href = 'dashboard.html'; }, 500);
+                    } catch (loginError) {
+                        statusText.innerHTML = '❌ Login failed. Please use password.';
+                        statusDiv.className = 'biometric-status error';
+                        showNotification('Login failed. Please login with password.', 'error');
+                        setTimeout(() => { cleanup(); resolve(false); }, 1500);
+                    }
+                } else {
+                    statusText.innerHTML = '❌ Verification failed. Please try again.';
+                    statusDiv.className = 'biometric-status error';
+                    setTimeout(() => { cleanup(); resolve(false); }, 1500);
+                }
+            }).catch((error) => {
+                console.error('[BIOMETRIC] Auth error:', error);
+                let msg = error.message || 'Verification failed';
+                if (error.name === "NotAllowedError" || error.name === "AbortError") msg = 'Biometric cancelled.';
+                else if (error.name === "InvalidStateError") {
+                    msg = 'Credential not found. Please setup biometric again.';
+                    localStorage.removeItem('abotra_biometric_credential');
+                    localStorage.removeItem('abotra_biometric_email');
+                    localStorage.removeItem('abotra_biometric_password');
+                    localStorage.removeItem('abotra_biometric_enabled');
+                    checkBiometricEnabled();
+                }
+                statusText.innerHTML = `❌ ${msg}`;
+                statusDiv.className = 'biometric-status error';
+                setTimeout(() => { cleanup(); resolve(false); }, 1500);
+            });
+        });
+    } catch (error) {
+        console.error('[BIOMETRIC] Error:', error);
+        showNotification('Biometric error: ' + error.message, 'error');
+        return false;
+    }
+}
+
+// ============================================================
+// BIOMETRIC BUTTON CLICK
+// ============================================================
+document.getElementById('biometricLoginBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const isEnabled = await checkBiometricEnabled();
+    if (isEnabled) {
+        await performBiometricLogin();
+    } else {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if (!email || !password) {
+            showNotification('Please enter email and password first', 'error');
+            return;
+        }
+        try {
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            await updateUserInRTDB(result.user.uid, { email });
+            await setupBiometric(email, password);
+        } catch (error) {
+            showNotification('Please login first with valid credentials', 'error');
+        }
+    }
+});
+
+document.getElementById('biometricSetupBtn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) {
+        showNotification('Please enter email and password first', 'error');
+        return;
+    }
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await updateUserInRTDB(result.user.uid, { email });
+        await setupBiometric(email, password);
+    } catch (error) {
+        showNotification('Please login first with valid credentials', 'error');
+    }
+});
+
+// ============================================================
+// LOGIN FUNCTIONS
+// ============================================================
+let recaptchaVerifier = null;
+
+async function initRecaptcha() {
+    if (!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'loginBtn', { 
+            size: 'invisible',
+            callback: () => console.log("[RECAPTCHA] Resolved")
+        });
+    }
+    await recaptchaVerifier.render();
+}
+
+async function loginWithEmail(email, password) {
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Logging in...';
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await updateUserInRTDB(result.user.uid, { email: result.user.email });
+        
+        localStorage.setItem('abotra_biometric_email', email);
+        localStorage.setItem('abotra_biometric_password', password);
+        
+        showNotification('Login successful!', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    } catch (error) {
+        let msg = error.code === 'auth/invalid-credential' ? 'Invalid email or password' : error.message;
+        showNotification(msg, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    }
+}
+
+async function loginWithPhone(phoneNumber, countryCode, password) {
+    const fullPhone = countryCode + phoneNumber;
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
+    
+    const usersRef = ref(rtdb, 'users');
+    const snapshot = await get(usersRef);
+    let foundUser = null;
+    if (snapshot.exists()) {
+        for (const [userId, userData] of Object.entries(snapshot.val())) {
+            const userPhone = userData.phone || '';
+            const userPhoneRaw = userData.phoneRaw || '';
+            if (userPhone === fullPhone || userPhone === phoneNumber || 
+                userPhoneRaw === digitsOnly || userPhoneRaw === phoneNumber) {
+                foundUser = { userId, ...userData };
+                break;
+            }
+        }
+    }
+    if (!foundUser) { 
+        showNotification('Phone number not registered. Please register first.', 'error'); 
+        return; 
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Sending OTP...';
+    try {
+        await initRecaptcha();
+        const result = await signInWithPhoneNumber(auth, fullPhone, recaptchaVerifier);
+        const otp = prompt("Enter 6-digit verification code:");
+        if (!otp) { 
+            btn.disabled = false; 
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login'; 
+            return; 
+        }
+        btn.innerHTML = '<span class="spinner"></span> Verifying...';
+        const confirmation = await result.confirm(otp);
+        await updateUserInRTDB(confirmation.user.uid, { 
+            phone: fullPhone,
+            email: foundUser.email || ''
+        });
+        showNotification('Login successful!', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    } catch (error) {
+        console.error("Phone login error:", error);
+        let msg = error.code === 'auth/invalid-verification-code' ? 'Invalid OTP code' : error.message;
+        showNotification(msg, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    }
+}
+
+// ============================================================
+// GOOGLE LOGIN
+// ============================================================
+document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
+    const provider = new GoogleAuthProvider();
+    const btn = document.getElementById('googleLoginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Connecting...';
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const userRef = ref(rtdb, `users/${user.uid}`);
+        const userSnap = await get(userRef);
+        if (!userSnap.exists()) {
+            showNotification('Google account not registered. Please register first.', 'error');
+            setTimeout(() => window.location.href = 'register.html', 2000);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-google"></i> Continue with Google';
+            return;
+        }
+        await updateUserInRTDB(user.uid, {
+            email: user.email,
+            username: userSnap.val().username || user.displayName || user.email.split('@')[0],
+            fullName: userSnap.val().fullName || user.displayName || user.email.split('@')[0]
+        });
+        showNotification('Login successful!', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    } catch (err) {
+        showNotification('Login failed: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fab fa-google"></i> Continue with Google';
+    }
+});
+
+// ============================================================
+// LOGIN BUTTON CLICK
+// ============================================================
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    if (currentMethod === 'email') {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if (!email || !password) { 
+            showNotification('Enter email and password', 'error'); 
+            return; 
+        }
+        await loginWithEmail(email, password);
+    } else if (currentMethod === 'phone') {
+        const countryCode = document.getElementById('phoneCountryCode').value;
+        const phone = document.getElementById('phoneNumber').value.trim();
+        const password = document.getElementById('phonePassword').value;
+        if (!countryCode || !phone || !password) { 
+            showNotification('Enter phone and password', 'error'); 
+            return; 
+        }
+        const matched = countriesData.find(c => c.code === countryCode);
+        const digitsOnly = phone.replace(/\D/g, '');
+        if (matched && digitsOnly.length !== matched.digits) {
+            showNotification(`Invalid ${matched.name} phone number`, 'error');
+            return;
+        }
+        await loginWithPhone(phone, countryCode, password);
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active && (active.id === 'email' || active.id === 'password' || 
+            active.id === 'phoneNumber' || active.id === 'phonePassword')) {
+            document.getElementById('loginBtn').click();
+        }
+    }
+});
+
+// ============================================================
+// AUTH STATE OBSERVER
+// ============================================================
+onAuthStateChanged(auth, async (user) => {
+    if (user && window.location.pathname.includes('login.html')) {
+        const hasBiometric = localStorage.getItem('abotra_biometric_credential');
+        if (!hasBiometric) {
+            try {
+                const email = user.email || localStorage.getItem('abotra_biometric_email');
+                const password = localStorage.getItem('abotra_biometric_password');
+                if (email && password && isBiometricSupported()) {
+                    document.getElementById('biometricSetupCard').classList.add('show');
+                }
+            } catch (e) {
+                console.log("[BIOMETRIC] Auto-setup skipped:", e.message);
+            }
+        } else {
+            document.getElementById('biometricSetupCard').classList.remove('show');
+            const bioBtn = document.getElementById('biometricLoginBtn');
+            bioBtn.className = 'biometric-icon enabled';
+            bioBtn.querySelector('span').textContent = '🔓 Biometric Login';
+        }
+        window.location.href = 'dashboard.html';
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+initTheme();
+
+setTimeout(() => {
+    initCountryDropdowns();
+    setTimeout(autoDetectCountry, 500);
+}, 100);
+
+checkBiometricEnabled();
+</script>
+</body>
+</html>

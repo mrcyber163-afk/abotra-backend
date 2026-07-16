@@ -1,0 +1,17 @@
+{
+  "appId": "e8654c5c-faf8-4dc4-9f60-d8d3ce7cd1cc",
+  "serviceWorkerPath": "/sw.js",
+  "serviceWorkerParam": { "scope": "/" },
+  "allowLocalhostAsSecureOrigin": true,
+  "notifyButton": {
+    "enable": false
+  },
+  "safari_web_id": "",
+  "persistNotification": true,
+  "autoRegister": true,
+  "welcomeNotification": {
+    "title": "ABOTRA-PROAI",
+    "message": "Thank you for subscribing to notifications!",
+    "url": "https://abotraproai.surge.sh/pages/dashboard.html"
+  }
+}

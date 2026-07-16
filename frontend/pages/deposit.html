@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Deposit | ABOTRA-PROAI - Add Funds</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: #050505; background-image: url("../assets/images/background.png"); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; min-height: 100vh; padding-bottom: 75px; position: relative; font-size: 11px; }
+body.light-theme { background: #f5f5f5; background-image: url("../assets/images/background-light.png"); color: #1e1e2f; }
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar, body.light-theme .wallet-card, body.light-theme .network-card, body.light-theme .input-box input, body.light-theme .input-box select, body.light-theme .input-box textarea { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); color: #1e1e2f; }
+body.light-theme .top-bar h2, body.light-theme .page-title, body.light-theme .wallet-title, body.light-theme .network-name { color: #800000; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+body.light-theme .network-card.selected { background: rgba(128,0,0,0.1); border-color: #800000; }
+body.light-theme .buy-usdt-btn { background: rgba(128,0,0,0.1); border-color: #800000; color: #800000; }
+body.light-theme .payment-request-card { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.08); }
+body.light-theme .payment-request-card .label { color: #666; }
+body.light-theme .payment-request-card .value { color: #1a1a2e; }
+body.light-theme .payment-request-card .divider { background: rgba(0,0,0,0.08); }
+
+.country-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(20px);
+    z-index: 999999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px 20px;
+    animation: slideUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.country-modal.active { display: flex; }
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.country-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: #FFD700;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.country-modal-close:hover { background: rgba(255,215,0,0.2); transform: rotate(90deg); }
+.country-modal-title { color: #FFD700; font-size: 18px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+.country-modal-search {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,215,0,0.3);
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+    margin-bottom: 16px;
+}
+.country-modal-search:focus { border-color: #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+body.light-theme .country-modal-search { background: rgba(0,0,0,0.04); color: #1a1a1a; border-color: rgba(128,0,0,0.3); }
+body.light-theme .country-modal-search:focus { border-color: #800000; }
+.country-modal-list {
+    width: 100%;
+    max-width: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+}
+.country-modal-list::-webkit-scrollbar { width: 3px; }
+.country-modal-list::-webkit-scrollbar-track { background: transparent; }
+.country-modal-list::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 10px; }
+.country-modal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #FFFFFF;
+    font-size: 14px;
+}
+.country-modal-item:hover { background: rgba(255,215,0,0.12); }
+.country-modal-item:active { transform: scale(0.98); }
+.country-modal-item .flag-img {
+    width: 30px;
+    height: 20px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.country-modal-item .name { flex: 1; font-weight: 500; }
+.country-modal-item .code { color: #888; font-size: 12px; }
+body.light-theme .country-modal-item { color: #1a1a1a; }
+body.light-theme .country-modal-item:hover { background: rgba(128,0,0,0.08); }
+.country-modal-no-results { color: #888; text-align: center; padding: 30px 0; font-size: 13px; }
+
+.wallet-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: visible !important;
+}
+.wallet-title { color: #FFD700; font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+.country-selector-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,215,0,0.2);
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.country-selector-trigger:hover { border-color: rgba(255,215,0,0.5); background: rgba(255,255,255,0.08); }
+.country-selector-trigger .selected-display { display: flex; align-items: center; gap: 10px; flex: 1; }
+.country-selector-trigger .selected-display .flag-img {
+    width: 28px;
+    height: 18px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.country-selector-trigger .selected-display .name { font-weight: 500; font-size: 13px; }
+.country-selector-trigger .selected-display .code { color: #888; font-size: 11px; }
+.country-selector-trigger .arrow-icon { color: #FFD700; font-size: 14px; transition: 0.3s; }
+body.light-theme .country-selector-trigger { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
+body.light-theme .country-selector-trigger:hover { border-color: rgba(128,0,0,0.3); }
+body.light-theme .country-selector-trigger .selected-display .code { color: #999; }
+
+.input-box { width: 100%; margin-bottom: 16px; }
+.input-box input, .input-box select, .input-box textarea { width: 100%; height: 46px; border: none; outline: none; border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #FFFFFF; font-size: 11px; transition: 0.3s; }
+.input-box textarea { height: 70px; padding: 10px 14px; resize: vertical; }
+.input-box input:focus, .input-box select:focus, .input-box textarea:focus { border-color: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+.input-box input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.networks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 16px; }
+.network-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; cursor: pointer; }
+.network-card:hover { background: rgba(255,215,0,0.08); transform: translateY(-2px); }
+.network-card.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
+.network-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+.network-logo { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; }
+.network-logo img { width: 35px; height: 35px; object-fit: contain; }
+.network-logo i { font-size: 20px; color: #FFD700; }
+.network-details { flex: 1; min-width: 0; }
+.network-name { color: #FFD700; font-weight: 700; font-size: 11px; margin-bottom: 4px; }
+.network-number { color: #AAAAAA; font-size: 10px; font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; word-break: break-all; }
+.network-number span { background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 5px; display: inline-block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+.network-number .copy-number-btn { background: rgba(255,215,0,0.2); border: none; border-radius: 5px; padding: 2px 6px; color: #FFD700; cursor: pointer; font-size: 9px; white-space: nowrap; }
+.network-account-name { color: #0ECB81; font-size: 10px; margin-top: 3px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.network-account-name span { background: rgba(14,203,129,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+.network-select-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,215,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.network-card.selected .network-select-radio { border-color: #FFD700; }
+.network-card.selected .network-select-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #FFD700; }
+
+.submit-btn { width: 100%; height: 48px; border: none; border-radius: 12px; background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-btn.binance-btn { background: linear-gradient(135deg, #F0B90B, #C9980A); }
+.submit-btn.binance-btn:hover { box-shadow: 0 8px 25px rgba(240,185,11,0.4); }
+.submit-btn.warning-btn { background: linear-gradient(135deg, #F6465D, #D6304A); }
+.submit-btn.warning-btn:hover { box-shadow: 0 8px 25px rgba(246,70,93,0.4); }
+.submit-btn.success-btn { background: linear-gradient(135deg, #0ECB81, #0A9E65); }
+.submit-btn.success-btn:hover { box-shadow: 0 8px 25px rgba(14,203,129,0.4); }
+
+.auto-payment-note { background: rgba(255,215,0,0.1); border-radius: 10px; padding: 10px; margin-top: 12px; text-align: center; font-size: 10px; color: #FFD700; }
+
+.kyc-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, #800000, #FFD700);
+    color: white;
+    font-weight: 600;
+    font-size: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    margin-top: 4px;
+}
+.kyc-action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+}
+.kyc-action-btn i { font-size: 11px; }
+.kyc-action-btn.verified {
+    background: rgba(14,203,129,0.2);
+    color: #0ECB81;
+    border: 1px solid rgba(14,203,129,0.3);
+    cursor: default;
+}
+.kyc-action-btn.verified:hover { transform: none; box-shadow: none; }
+.kyc-action-btn.pending {
+    background: rgba(255,215,0,0.2);
+    color: #FFD700;
+    border: 1px solid rgba(255,215,0,0.3);
+}
+.kyc-action-btn.rejected {
+    background: rgba(255,77,77,0.2);
+    color: #FF4D4D;
+    border: 1px solid rgba(255,77,77,0.3);
+}
+.kyc-action-btn.not-submitted {
+    background: rgba(255,255,255,0.05);
+    color: #888;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.payment-request-card {
+    background: rgba(255,255,255,0.03);
+    border: 2px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    animation: fadeSlideIn 0.5s ease;
+}
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.payment-request-card .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,215,0,0.1);
+}
+.payment-request-card .header .title {
+    color: #FFD700;
+    font-size: 13px;
+    font-weight: 700;
+}
+.payment-request-card .header .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.payment-request-card .header .status-badge.pending {
+    background: rgba(255,215,0,0.2);
+    color: #FFD700;
+}
+.payment-request-card .header .status-badge.waiting {
+    background: rgba(14,203,129,0.2);
+    color: #0ECB81;
+}
+.payment-request-card .header .status-badge.approved {
+    background: rgba(14,203,129,0.3);
+    color: #0ECB81;
+}
+.payment-request-card .header .status-badge.expired {
+    background: rgba(246,70,93,0.2);
+    color: #F6465D;
+}
+.payment-request-card .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    align-items: center;
+}
+.payment-request-card .row .label {
+    color: #888;
+    font-size: 10px;
+    font-weight: 500;
+}
+.payment-request-card .row .value {
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+}
+.payment-request-card .row .value.amount {
+    font-size: 18px;
+    color: #FFD700;
+}
+.payment-request-card .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+    margin: 8px 0;
+}
+.payment-request-card .qr-container {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+.payment-request-card .qr-container img {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    background: white;
+    padding: 8px;
+}
+.payment-request-card .action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.payment-request-card .action-buttons .btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.payment-request-card .action-buttons .btn:hover { transform: translateY(-2px); }
+.payment-request-card .action-buttons .btn.btn-gold { background: linear-gradient(135deg, #F0B90B, #C9980A); color: #0A0A0A; }
+.payment-request-card .action-buttons .btn.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; }
+.payment-request-card .action-buttons .btn.btn-outline:hover { border-color: #FFD700; color: #FFD700; }
+.payment-request-card .action-buttons .btn.btn-success { background: linear-gradient(135deg, #0ECB81, #0A9E65); color: white; }
+.payment-request-card .action-buttons .btn.btn-danger { background: linear-gradient(135deg, #F6465D, #D6304A); color: white; }
+
+.skeleton-wallet-card {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 20px;
+padding: 20px;
+margin-bottom: 16px;
+animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+.skeleton-title {
+height: 18px;
+width: 150px;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 6px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-select {
+height: 46px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-bottom: 12px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 12px;
+margin-top: 12px;
+margin-bottom: 16px;
+}
+.skeleton-network-card {
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,215,0,0.2);
+border-radius: 14px;
+padding: 12px;
+height: 90px;
+animation: pulseOpacity 1.5s ease-in-out infinite;
+}
+.skeleton-input {
+height: 46px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-bottom: 16px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-submit-btn {
+width: 100%;
+height: 48px;
+background: linear-gradient(90deg, rgba(14,203,129,0.2) 25%, rgba(14,203,129,0.4) 50%, rgba(14,203,129,0.2) 75%);
+background-size: 200% 100%;
+border-radius: 12px;
+margin-top: 8px;
+animation: shimmer 1.5s infinite;
+}
+.skeleton-note {
+height: 36px;
+width: 100%;
+background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%);
+background-size: 200% 100%;
+border-radius: 10px;
+margin-top: 12px;
+animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
+}
+@keyframes skeletonPulse {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 1; }
+}
+@keyframes pulseOpacity {
+0%, 100% { opacity: 0.5; }
+50% { opacity: 0.8; }
+}
+
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.05); }
+.theme-toggle i { font-size: 15px; color: #FFFFFF; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 2px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 6px 12px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+.main-content { position: relative; z-index: 2; max-width: 900px; margin: 70px auto 20px; padding: 0 12px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.tab-selector { display: flex; gap: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 4px; flex-wrap: wrap; }
+.tab-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 10px; background: transparent; color: #AAAAAA; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 80px; }
+.tab-btn.active { background: linear-gradient(135deg, #800000, #FFD700); color: white; }
+.tab-btn .tab-icon { width: 20px; height: 20px; object-fit: contain; display: inline-block; }
+.deposit-container { max-width: 650px; margin: 0 auto; }
+
+.wallet-address-box {
+background: rgba(0,0,0,0.3);
+border-radius: 12px;
+padding: 12px 14px;
+margin: 12px 0;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+flex-wrap: wrap;
+}
+.wallet-address-box .address {
+color: #FFD700;
+font-family: monospace;
+font-size: 12px;
+word-break: break-all;
+flex: 1;
+}
+.wallet-address-box .copy-btn {
+background: rgba(255,215,0,0.2);
+border: none;
+border-radius: 6px;
+padding: 4px 10px;
+color: #FFD700;
+cursor: pointer;
+font-size: 10px;
+white-space: nowrap;
+}
+.binance-order-details {
+background: rgba(255,215,0,0.05);
+border-radius: 12px;
+padding: 12px;
+margin: 10px 0;
+border: 1px solid rgba(255,215,0,0.15);
+}
+.binance-order-details .row {
+display: flex;
+justify-content: space-between;
+padding: 4px 0;
+font-size: 11px;
+color: #AAAAAA;
+}
+.binance-order-details .row .label { color: #888; }
+.binance-order-details .row .value { color: #FFD700; font-weight: 600; }
+.binance-order-details .row .value .order-id { font-family: monospace; }
+.qr-placeholder {
+width: 120px;
+height: 120px;
+margin: 10px auto;
+background: rgba(255,255,255,0.05);
+border: 2px dashed rgba(255,215,0,0.3);
+border-radius: 16px;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #888;
+font-size: 10px;
+text-align: center;
+padding: 10px;
+}
+.qr-placeholder i {
+font-size: 30px;
+color: #FFD700;
+margin-bottom: 6px;
+display: block;
+}
+#binanceQrContainer img {
+width: 120px;
+height: 120px;
+border-radius: 12px;
+display: block;
+margin: 0 auto;
+}
+.kyc-status-badge {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 4px 12px;
+border-radius: 20px;
+font-size: 10px;
+font-weight: 600;
+}
+.kyc-status-badge.verified {
+background: rgba(14,203,129,0.2);
+color: #0ECB81;
+border: 1px solid rgba(14,203,129,0.3);
+}
+.kyc-status-badge.pending {
+background: rgba(255,215,0,0.2);
+color: #FFD700;
+border: 1px solid rgba(255,215,0,0.3);
+}
+.kyc-status-badge.rejected {
+background: rgba(255,77,77,0.2);
+color: #FF4D4D;
+border: 1px solid rgba(255,77,77,0.3);
+}
+.kyc-status-badge.not-submitted {
+background: rgba(255,255,255,0.05);
+color: #888;
+border: 1px solid rgba(255,255,255,0.1);
+}
+.kyc-status-badge.approved {
+background: rgba(14,203,129,0.2);
+color: #0ECB81;
+border: 1px solid rgba(14,203,129,0.3);
+}
+.kyc-lock-overlay {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.85);
+backdrop-filter: blur(8px);
+border-radius: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 10;
+padding: 20px;
+text-align: center;
+}
+.kyc-lock-overlay i {
+font-size: 40px;
+color: #FFD700;
+margin-bottom: 12px;
+}
+.kyc-lock-overlay h4 {
+color: #FFD700;
+font-size: 16px;
+margin-bottom: 8px;
+}
+.kyc-lock-overlay p {
+color: #AAAAAA;
+font-size: 11px;
+max-width: 300px;
+}
+.kyc-lock-overlay .btn-kyc {
+margin-top: 16px;
+background: linear-gradient(135deg, #800000, #FFD700);
+border: none;
+padding: 10px 24px;
+border-radius: 30px;
+color: white;
+font-weight: 600;
+font-size: 12px;
+cursor: pointer;
+transition: 0.3s;
+}
+.kyc-lock-overlay .btn-kyc:hover {
+transform: scale(1.05);
+}
+.binance-account-info {
+background: rgba(255,215,0,0.05);
+border-radius: 12px;
+padding: 12px;
+margin: 10px 0;
+border: 1px solid rgba(255,215,0,0.1);
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 8px;
+}
+.binance-account-info .user-details {
+display: flex;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+.binance-account-info .user-details .name {
+color: #FFFFFF;
+font-weight: 600;
+font-size: 12px;
+}
+.binance-account-info .user-details .email {
+color: #888;
+font-size: 10px;
+}
+.deposit-steps {
+display: flex;
+justify-content: space-between;
+margin: 16px 0;
+padding: 0 4px;
+position: relative;
+}
+.deposit-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 10%;
+right: 10%;
+height: 2px;
+background: rgba(255,255,255,0.1);
+z-index: 0;
+}
+.deposit-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
+flex: 1;
+position: relative;
+z-index: 1;
+cursor: default;
+}
+.deposit-step .step-circle {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 13px;
+font-weight: 700;
+background: rgba(255,255,255,0.05);
+border: 2px solid rgba(255,255,255,0.1);
+color: #888;
+transition: 0.3s;
+}
+.deposit-step.active .step-circle {
+background: #FFD700;
+border-color: #FFD700;
+color: #1a1a1a;
+box-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+.deposit-step.completed .step-circle {
+background: #0ECB81;
+border-color: #0ECB81;
+color: white;
+}
+.deposit-step .step-label {
+font-size: 8px;
+color: #888;
+text-align: center;
+max-width: 60px;
+}
+.deposit-step.active .step-label {
+color: #FFD700;
+}
+.deposit-step.completed .step-label {
+color: #0ECB81;
+}
+.buy-usdt-btn { width: 100%; background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 14px; padding: 14px; margin-bottom: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; font-weight: 700; font-size: 13px; }
+.buy-usdt-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.3); }
+.buy-usdt-btn i { font-size: 16px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,215,0,0.2); border-radius: 18px 18px 0 0; display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 16px; }
+.bottom-nav a.active { color: #FFD700; }
+.notification-popup { position: fixed; top: 70px; right: 15px; min-width: 240px; max-width: 300px; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; z-index: 99999; backdrop-filter: blur(20px); box-shadow: 0 12px 28px rgba(0,0,0,0.3); animation: slideInRight 0.3s ease; border-left: 3px solid; font-size: 10px; }
+.notification-popup.success { background: linear-gradient(135deg,rgba(0,255,136,0.15), rgba(0,255,136,0.08)); border-left-color: #00FF88; }
+.notification-popup.error { background: linear-gradient(135deg,rgba(255,77,77,0.15), rgba(255,77,77,0.08)); border-left-color: #FF4D4D; }
+.notification-popup.info { background: linear-gradient(135deg,rgba(255,215,0,0.15), rgba(255,215,0,0.08)); border-left-color: #FFD700; }
+.notification-popup .popup-message { flex: 1; font-size: 10px; color: #FFFFFF; font-weight: 500; }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+@media(max-width: 700px) { .main-content { padding: 0 12px; margin-top: 65px; } .page-title { font-size: 18px; } .tab-btn span { display: none; } .tab-btn { padding: 8px; min-width: 60px; font-size: 9px; } .bottom-nav a span { font-size: 6px; } .bottom-nav a i { font-size: 14px; } .networks-grid { grid-template-columns: 1fr; } .buy-usdt-btn { padding: 12px; font-size: 12px; } .wallet-address-box { flex-direction: column; align-items: stretch; } .wallet-address-box .copy-btn { align-self: flex-end; } .tab-btn .tab-label { display: none; } .deposit-steps { flex-wrap: wrap; gap: 8px; } .deposit-steps::before { display: none; } .deposit-step { flex: 0 0 45%; } .binance-account-info { flex-direction: column; align-items: stretch; } .payment-request-card .action-buttons .btn { min-width: 80px; font-size: 9px; padding: 8px 12px; } }
+.cancel-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeInOverlay 0.3s ease;
+}
+.cancel-modal-overlay.active {
+    display: flex;
+}
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.cancel-modal-card {
+    background: linear-gradient(145deg, #1a1a2e, #161626);
+    border-radius: 28px;
+    max-width: 420px;
+    width: 100%;
+    padding: 32px 28px 28px;
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.05);
+    animation: modalBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+.cancel-modal-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+@keyframes modalBounceIn {
+    0% { opacity: 0; transform: scale(0.8) translateY(40px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+body.light-theme .cancel-modal-card {
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    border: 1px solid rgba(128, 0, 0, 0.15);
+}
+body.light-theme .cancel-modal-card::before {
+    background: radial-gradient(ellipse at 30% 20%, rgba(128, 0, 0, 0.03) 0%, transparent 60%);
+}
+
+.cancel-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.cancel-modal-close:hover {
+    background: rgba(246, 70, 93, 0.2);
+    color: #F6465D;
+    transform: rotate(90deg);
+}
+body.light-theme .cancel-modal-close {
+    background: rgba(0, 0, 0, 0.04);
+    color: #666;
+}
+body.light-theme .cancel-modal-close:hover {
+    background: rgba(246, 70, 93, 0.1);
+    color: #F6465D;
+}
+
+.cancel-modal-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+    background: rgba(246, 70, 93, 0.12);
+    color: #F6465D;
+    border: 2px solid rgba(246, 70, 93, 0.2);
+    position: relative;
+    animation: pulseIcon 2s ease-in-out infinite;
+}
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.cancel-modal-icon i {
+    filter: drop-shadow(0 0 10px rgba(246, 70, 93, 0.2));
+}
+
+.cancel-modal-title {
+    text-align: center;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+}
+body.light-theme .cancel-modal-title {
+    color: #1a1a1a;
+}
+
+.cancel-modal-subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 0 8px;
+}
+body.light-theme .cancel-modal-subtitle {
+    color: #666;
+}
+
+.cancel-modal-warning {
+    background: rgba(246, 70, 93, 0.08);
+    border: 1px solid rgba(246, 70, 93, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #F6465D;
+    font-size: 11px;
+    font-weight: 500;
+}
+.cancel-modal-warning i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.cancel-modal-warning span {
+    flex: 1;
+}
+body.light-theme .cancel-modal-warning {
+    background: rgba(246, 70, 93, 0.06);
+}
+
+.cancel-modal-details {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+body.light-theme .cancel-modal-details {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.cancel-modal-details .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cancel-modal-details .detail-row:last-child {
+    border-bottom: none;
+}
+.cancel-modal-details .detail-label {
+    color: #888;
+    font-weight: 500;
+}
+.cancel-modal-details .detail-value {
+    color: #FFD700;
+    font-weight: 600;
+}
+body.light-theme .cancel-modal-details .detail-value {
+    color: #800000;
+}
+
+.cancel-modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+.cancel-modal-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cancel-modal-btn.keep {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cancel-modal-btn.keep:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
+}
+body.light-theme .cancel-modal-btn.keep {
+    background: rgba(0, 0, 0, 0.04);
+    color: #555;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.light-theme .cancel-modal-btn.keep:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.cancel-modal-btn.confirm-cancel {
+    background: linear-gradient(135deg, #F6465D, #D43F52);
+    color: white;
+    box-shadow: 0 4px 15px rgba(246, 70, 93, 0.25);
+}
+.cancel-modal-btn.confirm-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(246, 70, 93, 0.4);
+}
+.cancel-modal-btn.confirm-cancel:active {
+    transform: scale(0.97);
+}
+
+.cancel-modal-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+.cancel-modal-btn.loading .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media(max-width: 480px) {
+    .cancel-modal-card {
+        padding: 24px 18px 20px;
+        border-radius: 22px;
+    }
+    .cancel-modal-title {
+        font-size: 17px;
+    }
+    .cancel-modal-subtitle {
+        font-size: 12px;
+    }
+    .cancel-modal-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+    }
+    .cancel-modal-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .cancel-modal-btn {
+        padding: 14px 16px;
+        font-size: 13px;
+    }
+    .cancel-modal-details .detail-row {
+        font-size: 11px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>Deposit Funds</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="country-modal" id="countryModal">
+    <button class="country-modal-close" id="countryModalClose"><i class="fas fa-times"></i></button>
+    <div class="country-modal-title"><i class="fas fa-globe-africa"></i> Select Your Country</div>
+    <input type="text" class="country-modal-search" id="countrySearch" placeholder="🔍 Search country...">
+    <div class="country-modal-list" id="countryModalList"></div>
+</div>
+
+<div class="main-content">
+<div class="page-title"><i class="fas fa-plus-circle"></i> Deposit Funds</div>
+
+<div class="tab-selector">
+<button class="tab-btn active" data-tab="mobile"><i class="fas fa-mobile-alt"></i> <span class="tab-label">Mobile Money</span></button>
+<button class="tab-btn" data-tab="binance"><img src="../assets/icons/binance.png" alt="Binance" class="tab-icon" onerror="this.style.display='none';"> <span class="tab-label">Binance USDT</span></button>
+<button class="tab-btn" data-tab="p2p"><i class="fas fa-exchange-alt"></i> <span class="tab-label">User Transfer</span></button>
+</div>
+
+<div id="skeletonContent">
+<div class="skeleton-wallet-card"><div class="skeleton-title"></div><div class="skeleton-select"></div><div class="auto-payment-note" style="background: transparent; padding: 0;"><div class="skeleton-note" style="height: 36px;"></div></div></div>
+<div class="skeleton-wallet-card" style="margin-top: 16px;">
+<div class="skeleton-title"></div>
+<div class="skeleton-grid"><div class="skeleton-network-card"></div><div class="skeleton-network-card"></div></div>
+<div class="skeleton-input"></div><div class="skeleton-input"></div><div class="skeleton-input"></div><div class="skeleton-input"></div>
+<div class="skeleton-submit-btn"></div>
+</div>
+</div>
+
+<div id="realContent" style="display: none;">
+
+<!-- ============================================================ -->
+<!-- MOBILE MONEY TAB -->
+<!-- ============================================================ -->
+<div id="mobileTab" class="deposit-container">
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-globe-africa"></i> Your Country</div>
+<button class="country-selector-trigger" id="countrySelectorTrigger">
+    <span class="selected-display">
+        <img id="selectedCountryFlag" class="flag-img" src="https://flagcdn.com/tz.svg" alt="flag">
+        <span class="name" id="selectedCountryName">Select Country</span>
+        <span class="code" id="selectedCountryCode"></span>
+    </span>
+    <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+</button>
+<div class="auto-payment-note"><i class="fas fa-info-circle"></i> Select your country and payment network below.</div>
+<div style="margin-top: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
+    <button class="kyc-action-btn" id="mobileKycBtn" onclick="window.location.href='kyc.html'">
+        <i class="fas fa-id-card"></i> Complete KYC
+    </button>
+</div>
+</div>
+
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-globe-africa"></i> Mobile Money Deposit</div>
+<div id="mobileNetworksContainer" class="networks-grid"><div style="text-align:center; padding:20px; color:#888;">Select your country first</div></div>
+
+<div class="input-box"><input type="tel" id="senderPhone" placeholder="Your Phone Number (that sent payment)"></div>
+<div class="input-box"><input type="text" id="senderName" placeholder="Your Full Name (as registered)"></div>
+<div class="input-box"><input type="number" id="mobileAmount" placeholder="Amount (USDT) - Minimum $5" step="1" min="5"></div>
+
+<div id="rateDisplay" style="display:none; background:rgba(14,203,129,0.08); border:1px solid rgba(14,203,129,0.2); border-radius:10px; padding:10px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+        <span style="color:#888; font-size:10px;"><i class="fas fa-exchange-alt" style="color:#0ECB81;"></i> Exchange Rate</span>
+        <span style="color:#FFD700; font-weight:700; font-size:13px;" id="rateDisplayValue">1 USDT = 0 TZS</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#888; font-size:10px;"><i class="fas fa-coins" style="color:#FFD700;"></i> You will send</span>
+        <span style="color:#0ECB81; font-weight:700; font-size:14px;" id="localAmountDisplay">0 TZS</span>
+    </div>
+</div>
+
+<div class="input-box"><input type="text" id="transactionId" placeholder="Transaction ID / Reference Number (Optional)"></div>
+
+<button class="submit-btn" id="submitMobileBtn"><i class="fas fa-paper-plane"></i> Submit Mobile Deposit</button>
+
+<div class="auto-payment-note"><i class="fas fa-clock"></i> Send payment to the number shown above, then submit your details. Admin will verify and approve within 24 hours.</div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- BINANCE USDT TAB - FIXED (SINGLE NODE ONLY) -->
+<!-- ============================================================ -->
+<div id="binanceTab" class="deposit-container" style="display:none;">
+<div class="wallet-card" style="position:relative;">
+<div id="kycLockOverlay" class="kyc-lock-overlay" style="display:none;">
+<i class="fas fa-lock"></i><h4>KYC Required</h4>
+<p>Complete your KYC verification to enable Binance USDT deposits.</p>
+<button class="btn-kyc" onclick="window.location.href='kyc.html'">Complete KYC</button>
+</div>
+<div class="wallet-title"><img src="../assets/icons/binance.png" alt="Binance" style="width:24px;height:24px;object-fit:contain;"> USDT Payment Request</div>
+<div id="kycStatusDisplay" class="binance-account-info">
+<div class="user-details"><span class="name" id="userDisplayName">Loading...</span><span class="email" id="userDisplayEmail">-</span></div>
+<span id="kycStatusBadge" class="kyc-status-badge not-submitted">⏳ Checking KYC...</span>
+</div>
+
+<!-- Deposit Steps -->
+<div class="deposit-steps">
+<div class="deposit-step active" id="step1"><div class="step-circle">1</div><span class="step-label">Enter Amount</span></div>
+<div class="deposit-step" id="step2"><div class="step-circle">2</div><span class="step-label">Generate Request</span></div>
+<div class="deposit-step" id="step3"><div class="step-circle">3</div><span class="step-label">Send Payment</span></div>
+<div class="deposit-step" id="step4"><div class="step-circle">4</div><span class="step-label">Verify</span></div>
+</div>
+
+<!-- STEP 1: Enter Amount -->
+<div id="binanceStep1">
+<div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-bolt" style="color:#0ECB81;"></i> Generate a payment request and pay using Binance App.</div>
+<div class="input-box"><input type="number" id="usdtAmount" placeholder="Enter Amount (Minimum 5 USDT)" step="1" min="5"></div>
+<button class="submit-btn binance-btn" id="generatePaymentRequestBtn"><i class="fas fa-file-invoice"></i> Generate Payment Request</button>
+</div>
+
+<!-- STEP 2-4: Payment Request Display -->
+<div id="paymentRequestDisplay" style="display:none;">
+    <div class="payment-request-card" id="paymentRequestCard">
+        <div class="header">
+            <span class="title"><i class="fas fa-receipt"></i> Payment Request</span>
+            <span class="status-badge pending" id="paymentStatusBadge">⏳ Pending Payment</span>
+        </div>
+        
+        <div class="row">
+            <span class="label">Deposit ID</span>
+            <span class="value" id="displayDepositId">---</span>
+        </div>
+        <div class="row">
+            <span class="label">Amount</span>
+            <span class="value amount" id="displayAmount">$0.00</span>
+        </div>
+        <div class="row">
+            <span class="label">Network</span>
+            <span class="value">TRC20</span>
+        </div>
+        <div class="row">
+            <span class="label">Receiver Address</span>
+            <span class="value" id="displayWalletAddress" style="font-size:10px;font-family:monospace;">---</span>
+        </div>
+        <div class="divider"></div>
+        
+        <!-- QR Code -->
+        <div class="qr-container" id="qrContainer">
+            <img id="qrCodeImage" src="" alt="Payment QR Code" style="display:none;width:150px;height:150px;border-radius:12px;background:white;padding:8px;">
+            <div class="qr-placeholder" id="qrPlaceholder">
+                <i class="fas fa-qrcode"></i>
+                QR Code<br>
+                <span style="font-size:8px;">Generating...</span>
+            </div>
+        </div>
+        
+        <div style="text-align:center;font-size:9px;color:#888;margin:4px 0;">
+            <i class="fas fa-clock"></i> Expires in <span id="expiryCountdown">02:00:00</span>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-outline" id="copyAddressBtn"><i class="fas fa-copy"></i> Copy Address</button>
+            <button class="btn btn-gold" id="openBinanceBtn"><i class="fab fa-bitcoin"></i> Open Binance</button>
+        </div>
+        
+        <!-- I Have Paid Button -->
+        <button class="submit-btn success-btn" id="iHavePaidBtn" style="margin-top:12px;width:100%;">
+            <i class="fas fa-check-circle"></i> I Have Paid
+        </button>
+        
+        <!-- Cancel Button -->
+        <button class="submit-btn warning-btn" id="cancelPaymentBtn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,#F6465D,#D6304A);">
+            <i class="fas fa-times"></i> Cancel Request
+        </button>
+        
+        <div class="auto-payment-note" style="margin-top:8px;background:rgba(255,215,0,0.08);color:#FFD700;">
+            <i class="fas fa-info-circle"></i> After payment, click "I Have Paid" to submit for verification.
+        </div>
+    </div>
+</div>
+
+<!-- Waiting for Verification Status -->
+<div id="waitingVerificationDisplay" style="display:none;">
+    <div class="payment-request-card" style="border-color:rgba(14,203,129,0.3);background:rgba(14,203,129,0.05);">
+        <div class="header">
+            <span class="title"><i class="fas fa-clock"></i> Payment Submitted</span>
+            <span class="status-badge waiting">⏳ Waiting Verification</span>
+        </div>
+        <div style="text-align:center;padding:16px 0;">
+            <i class="fas fa-hourglass-half" style="font-size:40px;color:#FFD700;"></i>
+            <p style="color:#AAAAAA;font-size:11px;margin-top:8px;">
+                Your payment has been submitted.<br>
+                Admin will verify and approve within 24 hours.
+            </p>
+            <p style="color:#888;font-size:9px;margin-top:4px;">
+                Deposit ID: <span id="waitingDepositId" style="color:#FFD700;font-family:monospace;">---</span>
+            </p>
+        </div>
+        <div class="auto-payment-note" style="background:rgba(14,203,129,0.1);color:#0ECB81;">
+            <i class="fas fa-check-circle"></i> Your deposit will be credited after admin approval.
+        </div>
+        <button class="submit-btn" id="backToDashboardBtn" style="margin-top:12px;background:linear-gradient(135deg,#800000,#FFD700);">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+    </div>
+</div>
+
+<!-- Approved Status -->
+<div id="approvedDisplay" style="display:none;">
+    <div class="payment-request-card" style="border-color:rgba(14,203,129,0.5);background:rgba(14,203,129,0.1);">
+        <div class="header">
+            <span class="title"><i class="fas fa-check-circle" style="color:#0ECB81;"></i> Deposit Approved</span>
+            <span class="status-badge approved">✓ Approved</span>
+        </div>
+        <div style="text-align:center;padding:16px 0;">
+            <i class="fas fa-check-circle" style="font-size:40px;color:#0ECB81;"></i>
+            <p style="color:#0ECB81;font-size:14px;font-weight:700;margin-top:8px;">
+                Your deposit has been approved!
+            </p>
+            <p style="color:#AAAAAA;font-size:11px;margin-top:4px;">
+                Amount: <span id="approvedAmount" style="color:#FFD700;font-weight:700;">$0.00</span>
+            </p>
+        </div>
+        <button class="submit-btn" id="approvedDashboardBtn" style="background:linear-gradient(135deg,#0ECB81,#0A9E65);">
+            <i class="fas fa-arrow-left"></i> Go to Dashboard
+        </button>
+    </div>
+</div>
+
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P2P / USER TRANSFER TAB -->
+<!-- ============================================================ -->
+<div id="p2pTab" class="deposit-container" style="display:none;">
+<div class="wallet-card">
+<div class="wallet-title"><i class="fas fa-users"></i> Transfer USDT from Another User</div>
+<div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <span style="color: #888; font-size: 10px;"><i class="fas fa-shield-alt"></i> KYC Status</span>
+    <button class="kyc-action-btn" id="p2pKycBtn" onclick="window.location.href='kyc.html'">
+        <i class="fas fa-id-card"></i> Complete KYC
+    </button>
+</div>
+<button class="buy-usdt-btn" id="buyUsdtBtn"><i class="fas fa-shopping-cart"></i> Buy USDT Now <i class="fas fa-arrow-right"></i></button>
+<div class="auto-payment-note" style="margin-bottom:12px;"><i class="fas fa-info-circle"></i> Click the button above to buy USDT from trusted merchants on our P2P Market</div>
+<div class="auto-payment-note" style="background: rgba(14,203,129,0.1);"><i class="fas fa-shield-alt"></i> All P2P transactions are secured and verified by ABOTRA-PROAI escrow system</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="wallet.html"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+<a href="kyc.html"><i class="fas fa-id-card"></i><span>KYC</span></a>
+<a href="p2p-market.html"><i class="fas fa-handshake"></i><span>P2P</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<script type="module">
+// ============================================================
+// IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+    getDatabase, ref, push, set, get, onValue, update, 
+    runTransaction, query, orderByChild, equalTo 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// CONSTANTS
+// ============================================================
+const BINANCE_WALLET_ADDRESS = 'TC8YTPx9dyNF2Sfah1RWCMroDAUbWtk22D';
+const MIN_DEPOSIT_USDT = 5; // ✅ CHANGED FROM 10 TO 5
+const ORDER_EXPIRY_MINUTES = 120;
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let currentUserData = null;
+let currentKycData = null;
+let currentDepositId = null;
+let currentPaymentRequest = null;
+let expiryInterval = null;
+let selectedCountry = "";
+let selectedNetwork = null;
+let exchangeRates = {};
+let mobileNetworksData = {};
+
+// ============================================================
+// COUNTRY DATA
+// ============================================================
+const allCountries = [
+    { code: "Tanzania", flag: "tz" }, { code: "Malawi", flag: "mw" },
+    { code: "Zambia", flag: "zm" }, { code: "Kenya", flag: "ke" },
+    { code: "Uganda", flag: "ug" }, { code: "Nigeria", flag: "ng" },
+    { code: "Ghana", flag: "gh" }, { code: "South Africa", flag: "za" },
+    { code: "Congo DRC", flag: "cd" }, { code: "Burundi", flag: "bi" },
+    { code: "Botswana", flag: "bw" }, { code: "Namibia", flag: "na" },
+    { code: "Mozambique", flag: "mz" }, { code: "Rwanda", flag: "rw" },
+    { code: "Egypt", flag: "eg" }, { code: "Morocco", flag: "ma" },
+    { code: "Algeria", flag: "dz" }, { code: "Tunisia", flag: "tn" },
+    { code: "Libya", flag: "ly" }, { code: "Sudan", flag: "sd" },
+    { code: "Ethiopia", flag: "et" }, { code: "Somalia", flag: "so" },
+    { code: "Angola", flag: "ao" }, { code: "Zimbabwe", flag: "zw" },
+    { code: "United States", flag: "us" }, { code: "United Kingdom", flag: "gb" }
+];
+
+const DEFAULT_EXCHANGE_RATES = {
+    'Tanzania': 2800, 'Malawi': 5600, 'Zambia': 30,
+    'Congo DRC': 2850, 'Burundi': 3500, 'Kenya': 140,
+    'Botswana': 13, 'Namibia': 19, 'Mozambique': 64,
+    'Nigeria': 1500
+};
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function generateDepositId() {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const random = String(Math.floor(1000 + Math.random() * 9000));
+    return `DEP-${dateStr}-${random}`;
+}
+
+function getCountryFlag(code) {
+    return `https://flagcdn.com/${code}.svg`;
+}
+
+function getCurrency(country) {
+    const currencies = {
+        'Tanzania': 'TZS', 'Malawi': 'MWK', 'Zambia': 'ZMW',
+        'Congo DRC': 'CDF', 'Burundi': 'BIF', 'Kenya': 'KES',
+        'Botswana': 'BWP', 'Namibia': 'NAD', 'Mozambique': 'MZN',
+        'Nigeria': 'NGN', 'Rwanda': 'RWF', 'Ghana': 'GHS',
+        'Uganda': 'UGX', 'South Africa': 'ZAR'
+    };
+    return currencies[country] || 'USD';
+}
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 5000);
+}
+
+async function addNotification(userId, title, message, type = 'info') {
+    if (!userId) return;
+    try {
+        const notifRef = push(ref(db, `notifications/${userId}`));
+        await set(notifRef, { 
+            title, message, type, 
+            link: 'wallet.html',
+            read: false, 
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+    } catch(e) { console.error('Add notification error:', e); }
+}
+
+async function addAdminNotification(title, message, type = 'info') {
+    try {
+        const adminNotifRef = push(ref(db, 'adminNotifications'));
+        await set(adminNotifRef, { 
+            title, message, type, 
+            link: 'admin-dashboard.html',
+            read: false, 
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+    } catch(e) { console.error('Admin notification error:', e); }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================================
+// KYC FUNCTIONS
+// ============================================================
+async function loadKYCData(userId) {
+    try {
+        const kycRef = ref(db, `kyc/${userId}`);
+        const snapshot = await get(kycRef);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const status = data.status || 'not-submitted';
+            const fullName = data.fullName || currentUserData?.fullName || currentUserData?.displayName || 'User';
+            currentKycData = { status, fullName };
+            return currentKycData;
+        }
+        const userRef = ref(db, `users/${userId}`);
+        const userSnap = await get(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.val();
+            if (userData.kycVerified === true || userData.isVerified === true) {
+                currentKycData = { status: 'verified', fullName: userData.fullName || userData.displayName || 'User' };
+                return currentKycData;
+            }
+            if (userData.kycStatus) {
+                currentKycData = { status: userData.kycStatus, fullName: userData.fullName || userData.displayName || 'User' };
+                return currentKycData;
+            }
+        }
+        currentKycData = { status: 'not-submitted', fullName: currentUserData?.fullName || currentUserData?.displayName || 'User' };
+        return currentKycData;
+    } catch (error) {
+        console.error('Error loading KYC:', error);
+        currentKycData = { status: 'not-submitted', fullName: currentUserData?.fullName || 'User' };
+        return currentKycData;
+    }
+}
+
+async function loadUserData(userId) {
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            currentUserData = snapshot.val();
+            return currentUserData;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error loading user data:', error);
+        return null;
+    }
+}
+
+function checkKYCStatus(kycData) {
+    if (!kycData) return { status: 'not-submitted', label: 'Not Submitted', class: 'not-submitted' };
+    let status = typeof kycData === 'string' ? kycData : (kycData.status || 'not-submitted');
+    if (status === 'verified' || status === 'approved' || status === true) {
+        return { status: 'verified', label: '✓ Verified', class: 'verified' };
+    }
+    if (status === 'pending') return { status: 'pending', label: '⏳ Pending', class: 'pending' };
+    if (status === 'rejected') return { status: 'rejected', label: '✗ Rejected', class: 'rejected' };
+    return { status: 'not-submitted', label: 'Not Submitted', class: 'not-submitted' };
+}
+
+function getKycFullName(kycData) {
+    if (!kycData) return currentUserData?.fullName || currentUserData?.displayName || 'User';
+    if (typeof kycData === 'string') return currentUserData?.fullName || 'User';
+    return kycData.fullName || currentUserData?.fullName || currentUserData?.displayName || 'User';
+}
+
+function updateKYCUI() {
+    if (!currentKycData && !currentUserData) return;
+    const kycStatus = checkKYCStatus(currentKycData);
+    const fullName = getKycFullName(currentKycData);
+    const email = currentUser?.email || 'No email';
+    
+    document.getElementById('userDisplayName').textContent = fullName;
+    document.getElementById('userDisplayEmail').textContent = email;
+    const badge = document.getElementById('kycStatusBadge');
+    badge.className = `kyc-status-badge ${kycStatus.class}`;
+    badge.textContent = kycStatus.label;
+    const isVerified = kycStatus.status === 'verified';
+    const lockOverlay = document.getElementById('kycLockOverlay');
+    lockOverlay.style.display = isVerified ? 'none' : 'flex';
+    document.getElementById('usdtAmount').disabled = !isVerified;
+    document.getElementById('generatePaymentRequestBtn').disabled = !isVerified;
+    
+    const kycBtns = document.querySelectorAll('.kyc-action-btn');
+    kycBtns.forEach(btn => {
+        btn.className = `kyc-action-btn ${kycStatus.class}`;
+        if (kycStatus.status === 'verified') {
+            btn.innerHTML = `<i class="fas fa-check-circle"></i> KYC Verified`;
+            btn.onclick = null;
+        } else if (kycStatus.status === 'pending') {
+            btn.innerHTML = `<i class="fas fa-clock"></i> KYC Pending`;
+            btn.onclick = null;
+        } else if (kycStatus.status === 'rejected') {
+            btn.innerHTML = `<i class="fas fa-times-circle"></i> Re-verify KYC`;
+            btn.onclick = () => window.location.href = 'kyc.html';
+        } else {
+            btn.innerHTML = `<i class="fas fa-id-card"></i> Complete KYC`;
+            btn.onclick = () => window.location.href = 'kyc.html';
+        }
+    });
+}
+
+// ============================================================
+// COUNTRY SELECTOR
+// ============================================================
+function openCountryModal() {
+    document.getElementById('countryModal').classList.add('active');
+    renderCountryList(allCountries);
+    document.getElementById('countrySearch').value = '';
+    document.getElementById('countrySearch').focus();
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCountryModal() {
+    document.getElementById('countryModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function selectCountry(country) {
+    selectedCountry = country.code;
+    const flagCode = country.flag;
+    document.getElementById('selectedCountryFlag').src = getCountryFlag(flagCode);
+    document.getElementById('selectedCountryName').textContent = country.code;
+    document.getElementById('selectedCountryCode').textContent = country.code;
+    closeCountryModal();
+    renderMobileNetworks();
+    document.getElementById('rateDisplay').style.display = 'none';
+    if (currentUser) {
+        update(ref(db, `users/${currentUser.uid}`), { country: country.code }).catch(() => {});
+    }
+}
+
+function renderCountryList(countries, searchTerm = '') {
+    const list = document.getElementById('countryModalList');
+    const filtered = searchTerm 
+        ? countries.filter(c => c.code.toLowerCase().includes(searchTerm.toLowerCase()))
+        : countries;
+    
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="country-modal-no-results">No countries found for "<strong>${escapeHtml(searchTerm)}</strong>"</div>`;
+        return;
+    }
+    
+    list.innerHTML = '';
+    filtered.forEach(country => {
+        const item = document.createElement('div');
+        item.className = 'country-modal-item';
+        const flagUrl = getCountryFlag(country.flag);
+        item.innerHTML = `
+            <img src="${flagUrl}" class="flag-img" alt="${country.code}">
+            <span class="name">${escapeHtml(country.code)}</span>
+            <span class="code">${country.flag}</span>
+        `;
+        item.addEventListener('click', () => selectCountry(country));
+        list.appendChild(item);
+    });
+}
+
+async function autoDetectCountry() {
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.ok) {
+            const data = await response.json();
+            const matched = allCountries.find(c => 
+                c.code.toLowerCase() === data.country_name?.toLowerCase()
+            );
+            if (matched) {
+                selectedCountry = matched.code;
+                const flagCode = matched.flag;
+                document.getElementById('selectedCountryFlag').src = getCountryFlag(flagCode);
+                document.getElementById('selectedCountryName').textContent = matched.code;
+                document.getElementById('selectedCountryCode').textContent = matched.code;
+                renderMobileNetworks();
+                return;
+            }
+        }
+    } catch (e) { console.log('[DETECT] Auto-detect failed'); }
+    
+    try {
+        const locale = navigator.language || navigator.languages?.[0] || 'en-US';
+        const parts = locale.split('-');
+        if (parts.length > 1) {
+            const countryName = parts[1];
+            const matched = allCountries.find(c => 
+                c.code.toLowerCase() === countryName.toLowerCase()
+            );
+            if (matched) {
+                selectedCountry = matched.code;
+                const flagCode = matched.flag;
+                document.getElementById('selectedCountryFlag').src = getCountryFlag(flagCode);
+                document.getElementById('selectedCountryName').textContent = matched.code;
+                document.getElementById('selectedCountryCode').textContent = matched.code;
+                renderMobileNetworks();
+                return;
+            }
+        }
+    } catch (e) {}
+    
+    const defaultCountry = allCountries.find(c => c.code === 'Tanzania');
+    if (defaultCountry) {
+        selectedCountry = defaultCountry.code;
+        const flagCode = defaultCountry.flag;
+        document.getElementById('selectedCountryFlag').src = getCountryFlag(flagCode);
+        document.getElementById('selectedCountryName').textContent = defaultCountry.code;
+        document.getElementById('selectedCountryCode').textContent = defaultCountry.code;
+        renderMobileNetworks();
+    }
+}
+
+// ============================================================
+// MOBILE MONEY FUNCTIONS
+// ============================================================
+async function loadExchangeRates() {
+    try {
+        const ratesRef = ref(db, 'exchangeRates');
+        const snapshot = await get(ratesRef);
+        if (snapshot.exists()) {
+            exchangeRates = snapshot.val();
+        } else {
+            exchangeRates = { ...DEFAULT_EXCHANGE_RATES };
+        }
+    } catch (error) {
+        console.error('Error loading exchange rates:', error);
+        exchangeRates = { ...DEFAULT_EXCHANGE_RATES };
+    }
+}
+
+function loadMobileNetworksFromSettings() {
+    const settingsRef = ref(db, 'paymentMethods/mobileMoney');
+    onValue(settingsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            mobileNetworksData = snapshot.val();
+        } else {
+            mobileNetworksData = {};
+        }
+        renderMobileNetworks();
+    });
+}
+
+function renderMobileNetworks() {
+    const container = document.getElementById('mobileNetworksContainer');
+    if (!container) return;
+    if (!selectedCountry) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Select your country first</div>';
+        document.getElementById('rateDisplay').style.display = 'none';
+        return;
+    }
+    
+    const networks = mobileNetworksData[selectedCountry] || [];
+    if (networks.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No payment methods configured for this country. Please contact support.</div>';
+        document.getElementById('rateDisplay').style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = '';
+    networks.forEach((network) => {
+        const card = document.createElement('div');
+        card.className = 'network-card';
+        const number = network.number || '';
+        const accountName = network.accountName || network.receiverName || '';
+        const hasNumber = number && number !== '';
+        
+        let logoHtml = '';
+        const logoFilename = network.logo;
+        if (logoFilename) {
+            const logoPath = `../assets/icons/${logoFilename}`;
+            logoHtml = `<img src="${logoPath}" alt="${network.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'${network.fallbackIcon || 'fas fa-mobile-alt'}\\' style=\\'font-size:20px; color:#FFD700;\\'></i>'">`;
+        } else {
+            const iconName = network.name.toLowerCase().includes('mpesa') ? 'fas fa-mobile-alt' : 'fas fa-mobile-alt';
+            logoHtml = `<i class="${iconName}" style="font-size:20px; color:#FFD700;"></i>`;
+        }
+        
+        card.innerHTML = `
+            <div class="network-left">
+                <div class="network-logo">${logoHtml}</div>
+                <div class="network-details">
+                    <div class="network-name">${escapeHtml(network.name)}</div>
+                    <div class="network-number">
+                        ${hasNumber ? `<span>${escapeHtml(number)}</span><button class="copy-number-btn" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(number)}'); showNotification('Number copied!', 'success');"><i class="fas fa-copy"></i> Copy</button>` : '<span style="color:#F6465D;">⚠️ Not configured</span>'}
+                    </div>
+                    ${accountName ? `<div class="network-account-name"><i class="fas fa-user"></i> <span>${escapeHtml(accountName)}</span></div>` : ''}
+                </div>
+            </div>
+            <div class="network-select-radio"></div>
+        `;
+        
+        if (hasNumber) {
+            card.onclick = () => {
+                document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedNetwork = network;
+                updateRateDisplay();
+            };
+        } else {
+            card.style.opacity = '0.5';
+            card.style.cursor = 'not-allowed';
+        }
+        container.appendChild(card);
+    });
+}
+
+function updateRateDisplay() {
+    const rateDisplay = document.getElementById('rateDisplay');
+    const rateDisplayValue = document.getElementById('rateDisplayValue');
+    const localAmountDisplay = document.getElementById('localAmountDisplay');
+    
+    if (!selectedNetwork || !selectedCountry) {
+        rateDisplay.style.display = 'none';
+        return;
+    }
+    
+    const usdAmount = parseFloat(document.getElementById('mobileAmount').value) || 0;
+    if (usdAmount < 5) { // ✅ CHANGED FROM 10 TO 5
+        rateDisplay.style.display = 'none';
+        return;
+    }
+    
+    const rate = exchangeRates[selectedCountry] || 2800;
+    const currency = getCurrency(selectedCountry);
+    const localAmount = usdAmount * rate;
+    
+    rateDisplayValue.textContent = `1 USDT = ${rate.toFixed(0)} ${currency}`;
+    localAmountDisplay.textContent = `${localAmount.toFixed(0)} ${currency}`;
+    rateDisplay.style.display = 'block';
+}
+
+// ============================================================
+// MOBILE MONEY DEPOSIT - FIXED (SINGLE NODE)
+// ============================================================
+async function processMobileDeposit() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    if (!selectedNetwork) { showNotification('Please select a payment network', 'error'); return; }
+    if (!selectedCountry) { showNotification('Please select your country', 'error'); return; }
+    
+    const kycStatus = checkKYCStatus(currentKycData);
+    if (kycStatus.status !== 'verified') {
+        showNotification('Complete KYC to enable deposits', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(document.getElementById('mobileAmount').value);
+    const phone = document.getElementById('senderPhone').value.trim();
+    const name = document.getElementById('senderName').value.trim();
+    const transactionId = document.getElementById('transactionId').value.trim();
+    
+    if (!amount || amount < 5) { // ✅ CHANGED FROM 10 TO 5
+        showNotification('Minimum deposit is $5', 'error'); 
+        return;
+    }
+    if (!phone) { showNotification('Please enter your phone number', 'error'); return; }
+    if (!name) { showNotification('Please enter your name', 'error'); return; }
+    
+    const btn = document.getElementById('submitMobileBtn');
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
+    try {
+        const rate = exchangeRates[selectedCountry] || 2800;
+        const localAmount = amount * rate;
+        const depositId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 8);
+        const kycName = getKycFullName(currentKycData);
+        
+        const depositData = {
+            id: depositId,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            kycName: kycName,
+            amount: amount,
+            localAmount: localAmount,
+            method: 'mobile_money',
+            country: selectedCountry,
+            network: selectedNetwork.name,
+            accountNumber: selectedNetwork.number,
+            accountName: selectedNetwork.accountName || selectedNetwork.receiverName || '',
+            phone: phone,
+            senderName: name,
+            transactionId: transactionId || 'N/A',
+            status: 'pending',
+            createdAt: Date.now(),
+            date: new Date().toISOString(),
+            _source: 'deposit_request'
+        };
+
+        // ✅ SINGLE NODE ONLY - deposit_requests
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${depositId}`);
+        await set(requestRef, depositData);
+        
+        // Send notifications
+        await addNotification(currentUser.uid, 
+            '📱 Mobile Deposit Submitted', 
+            `Your mobile deposit of $${amount.toFixed(2)} has been submitted. Admin will verify within 24 hours.`, 
+            'deposit');
+        await addAdminNotification('💰 New Deposit Request', 
+            `${currentUser.email} deposited $${amount.toFixed(2)} via ${selectedNetwork.name}. Waiting for approval.`, 
+            'deposit');
+        
+        showNotification('✅ Mobile deposit submitted successfully! Please wait for admin verification.', 'success');
+        
+        // Reset form
+        document.getElementById('mobileAmount').value = '';
+        document.getElementById('senderPhone').value = '';
+        document.getElementById('senderName').value = '';
+        document.getElementById('transactionId').value = '';
+        selectedNetwork = null;
+        document.querySelectorAll('#mobileNetworksContainer .network-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('rateDisplay').style.display = 'none';
+        
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        
+    } catch (error) { 
+        console.error("Deposit error:", error);
+        showNotification('Error processing deposit: ' + error.message, 'error'); 
+    } finally {
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Mobile Deposit';
+    }
+}
+
+// ============================================================
+// BINANCE PAYMENT REQUEST - FIXED (SINGLE NODE ONLY)
+// ============================================================
+
+function generateUniqueDepositId() {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const random = String(Math.floor(1000 + Math.random() * 9000));
+    return `DEP-${dateStr}-${random}`;
+}
+
+function generateQRCode(data, size = 200) {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
+}
+
+function createBinancePayLink(address, amount, memo) {
+    return `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+}
+
+// ============================================================
+// STEP 1: Generate Payment Request - FIXED (SINGLE NODE)
+// ============================================================
+async function generatePaymentRequest() {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    
+    const kycStatus = checkKYCStatus(currentKycData);
+    if (kycStatus.status !== 'verified') {
+        showNotification('Complete KYC to enable deposits', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(document.getElementById('usdtAmount').value);
+    if (!amount || amount < MIN_DEPOSIT_USDT) { 
+        showNotification(`Minimum deposit is ${MIN_DEPOSIT_USDT} USDT`, 'error'); 
+        return; 
+    }
+    
+    const btn = document.getElementById('generatePaymentRequestBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    
+    try {
+        const depositId = generateUniqueDepositId();
+        const kycName = getKycFullName(currentKycData);
+        const expiresAt = Date.now() + (ORDER_EXPIRY_MINUTES * 60 * 1000);
+        
+        const paymentData = {
+            depositId: depositId,
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            kycName: kycName,
+            amount: amount,
+            currency: 'USDT',
+            network: 'TRC20',
+            walletAddress: BINANCE_WALLET_ADDRESS,
+            status: 'pending_payment',
+            createdAt: Date.now(),
+            createdAtISO: new Date().toISOString(),
+            expiresAt: expiresAt,
+            expiresAtISO: new Date(expiresAt).toISOString(),
+            paymentLink: createBinancePayLink(BINANCE_WALLET_ADDRESS, amount, depositId),
+            qrCode: generateQRCode(`USDT:${BINANCE_WALLET_ADDRESS}?amount=${amount}&memo=${depositId}`, 200),
+            txHash: null,
+            submittedAt: null,
+            approvedAt: null,
+            _source: 'deposit_request'
+        };
+        
+        // ✅ SINGLE NODE ONLY - deposit_requests
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${depositId}`);
+        await set(requestRef, paymentData);
+        
+        currentDepositId = depositId;
+        currentPaymentRequest = paymentData;
+        
+        // Display payment request
+        displayPaymentRequest(paymentData);
+        updateStep(2);
+        
+        showNotification('✅ Payment request generated successfully!', 'success');
+        btn.innerHTML = '<i class="fas fa-check"></i> Request Generated';
+        btn.disabled = true;
+        
+    } catch (error) {
+        console.error('Generate payment error:', error);
+        showNotification('Error generating payment: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Payment Request';
+    }
+}
+
+// ============================================================
+// STEP 2: Display Payment Request
+// ============================================================
+function displayPaymentRequest(data) {
+    document.getElementById('binanceStep1').style.display = 'none';
+    document.getElementById('paymentRequestDisplay').style.display = 'block';
+    document.getElementById('waitingVerificationDisplay').style.display = 'none';
+    document.getElementById('approvedDisplay').style.display = 'none';
+    
+    document.getElementById('displayDepositId').textContent = data.depositId;
+    document.getElementById('displayAmount').textContent = `$${data.amount.toFixed(2)}`;
+    document.getElementById('displayWalletAddress').textContent = data.walletAddress;
+    
+    const qrImg = document.getElementById('qrCodeImage');
+    const qrPlaceholder = document.getElementById('qrPlaceholder');
+    qrImg.src = data.qrCode;
+    qrImg.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+    
+    startExpiryCountdown(data.expiresAt);
+    updateStatusBadge('pending');
+    updateStep(2);
+}
+
+// ============================================================
+// STEP 3: "I Have Paid" - Submit for Verification
+// ============================================================
+async function submitForVerification() {
+    if (!currentUser || !currentDepositId) {
+        showNotification('No active payment request found', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('iHavePaidBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
+    try {
+        // Update status to waiting_verification
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+        await update(requestRef, {
+            status: 'waiting_verification',
+            submittedAt: Date.now(),
+            submittedAtISO: new Date().toISOString()
+        });
+        
+        // Send notifications
+        await addNotification(currentUser.uid, 
+            '💰 Binance USDT Deposit Submitted', 
+            `Your deposit of $${currentPaymentRequest.amount.toFixed(2)} has been submitted for verification.`, 
+            'deposit');
+        await addAdminNotification('📊 New Binance Deposit', 
+            `${currentUser.email} deposited $${currentPaymentRequest.amount.toFixed(2)} USDT. Request ID: ${currentDepositId}`, 
+            'deposit');
+        
+        // Update UI
+        document.getElementById('paymentRequestDisplay').style.display = 'none';
+        document.getElementById('waitingVerificationDisplay').style.display = 'block';
+        document.getElementById('waitingDepositId').textContent = currentDepositId;
+        
+        updateStep(4);
+        updateStatusBadge('waiting');
+        
+        showNotification('✅ Payment submitted for verification!', 'success');
+        btn.innerHTML = '<i class="fas fa-check"></i> Submitted';
+        
+    } catch (error) {
+        console.error('Submit verification error:', error);
+        showNotification('Error submitting: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> I Have Paid';
+    }
+}
+
+// ============================================================
+// CANCEL PAYMENT REQUEST
+// ============================================================
+function showCancelModal() {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('cancelModalOverlay');
+        const closeBtn = document.getElementById('cancelModalClose');
+        const keepBtn = document.getElementById('cancelKeepBtn');
+        const confirmBtn = document.getElementById('cancelConfirmBtn');
+        
+        document.getElementById('cancelDepositId').textContent = currentDepositId || '---';
+        document.getElementById('cancelAmount').textContent = `$${currentPaymentRequest?.amount?.toFixed(2) || '0.00'}`;
+        
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        const cleanup = (result) => {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            closeBtn.removeEventListener('click', onClose);
+            keepBtn.removeEventListener('click', onKeep);
+            confirmBtn.removeEventListener('click', onConfirm);
+            overlay.removeEventListener('click', onOverlayClick);
+            resolve(result);
+        };
+        
+        const onClose = () => cleanup(false);
+        const onKeep = () => cleanup(false);
+        const onConfirm = () => {
+            confirmBtn.classList.add('loading');
+            confirmBtn.innerHTML = '<span class="spinner"></span> Cancelling...';
+            setTimeout(() => { cleanup(true); }, 800);
+        };
+        const onOverlayClick = (e) => {
+            if (e.target === overlay) cleanup(false);
+        };
+        
+        closeBtn.addEventListener('click', onClose);
+        keepBtn.addEventListener('click', onKeep);
+        confirmBtn.addEventListener('click', onConfirm);
+        overlay.addEventListener('click', onOverlayClick);
+        
+        const onKeydown = (e) => {
+            if (e.key === 'Escape') {
+                cleanup(false);
+                document.removeEventListener('keydown', onKeydown);
+            }
+        };
+        document.addEventListener('keydown', onKeydown);
+    });
+}
+
+async function cancelPaymentRequest() {
+    if (!currentUser || !currentDepositId) {
+        showNotification('No active payment request found', 'error');
+        return;
+    }
+    
+    const confirmed = await showCancelModal();
+    
+    if (confirmed) {
+        try {
+            const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+            await update(requestRef, { status: 'cancelled' });
+            
+            await addNotification(currentUser.uid, 
+                '❌ Payment Request Cancelled', 
+                `Your payment request of $${currentPaymentRequest?.amount?.toFixed(2) || '0.00'} has been cancelled.`, 
+                'info');
+            
+            resetPaymentFlow();
+            showNotification('✅ Payment request cancelled successfully', 'info');
+            
+        } catch (error) {
+            console.error('Cancel error:', error);
+            showNotification('Error cancelling: ' + error.message, 'error');
+        }
+    }
+}
+
+// ============================================================
+// Utility Functions for Payment Flow
+// ============================================================
+function updateStep(step) {
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step${i}`);
+        el.classList.remove('active', 'completed');
+        if (i < step) el.classList.add('completed');
+        if (i === step) el.classList.add('active');
+    }
+}
+
+function updateStatusBadge(status) {
+    const badge = document.getElementById('paymentStatusBadge');
+    badge.className = `status-badge ${status}`;
+    const labels = {
+        'pending': '⏳ Pending Payment',
+        'waiting': '⏳ Waiting Verification',
+        'approved': '✓ Approved',
+        'expired': '✗ Expired',
+        'cancelled': '✗ Cancelled'
+    };
+    badge.textContent = labels[status] || status;
+}
+
+function startExpiryCountdown(expiresAt) {
+    if (expiryInterval) clearInterval(expiryInterval);
+    
+    const countdownEl = document.getElementById('expiryCountdown');
+    
+    expiryInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = expiresAt - now;
+        
+        if (remaining <= 0) {
+            clearInterval(expiryInterval);
+            countdownEl.textContent = '00:00:00';
+            handleExpired();
+            return;
+        }
+        
+        const hours = String(Math.floor(remaining / (1000 * 60 * 60))).padStart(2, '0');
+        const minutes = String(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        const seconds = String(Math.floor((remaining % (1000 * 60)) / 1000)).padStart(2, '0');
+        countdownEl.textContent = `${hours}:${minutes}:${seconds}`;
+    }, 1000);
+}
+
+async function handleExpired() {
+    if (!currentUser || !currentDepositId) return;
+    
+    try {
+        const requestRef = ref(db, `deposit_requests/${currentUser.uid}/${currentDepositId}`);
+        await update(requestRef, { status: 'expired' });
+        
+        updateStatusBadge('expired');
+        document.getElementById('iHavePaidBtn').disabled = true;
+        document.getElementById('iHavePaidBtn').innerHTML = '<i class="fas fa-clock"></i> Expired';
+        
+        showNotification('⏰ Payment request has expired. Please generate a new one.', 'error');
+        
+    } catch (error) {
+        console.error('Expiry update error:', error);
+    }
+}
+
+function resetPaymentFlow() {
+    if (expiryInterval) {
+        clearInterval(expiryInterval);
+        expiryInterval = null;
+    }
+    
+    currentDepositId = null;
+    currentPaymentRequest = null;
+    
+    document.getElementById('binanceStep1').style.display = 'block';
+    document.getElementById('paymentRequestDisplay').style.display = 'none';
+    document.getElementById('waitingVerificationDisplay').style.display = 'none';
+    document.getElementById('approvedDisplay').style.display = 'none';
+    
+    document.getElementById('qrCodeImage').style.display = 'none';
+    document.getElementById('qrPlaceholder').style.display = 'block';
+    
+    const genBtn = document.getElementById('generatePaymentRequestBtn');
+    genBtn.disabled = false;
+    genBtn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Payment Request';
+    
+    const paidBtn = document.getElementById('iHavePaidBtn');
+    paidBtn.disabled = false;
+    paidBtn.innerHTML = '<i class="fas fa-check-circle"></i> I Have Paid';
+    
+    document.getElementById('usdtAmount').value = '';
+    
+    updateStep(1);
+}
+
+// ============================================================
+// Admin Approval Listener (Real-time)
+// ============================================================
+function listenForApproval(userId, depositId) {
+    const requestRef = ref(db, `deposit_requests/${userId}/${depositId}`);
+    
+    onValue(requestRef, async (snapshot) => {
+        if (!snapshot.exists()) return;
+        
+        const data = snapshot.val();
+        
+        if (data.status === 'approved' && !data._balanceUpdated) {
+            await processApproval(userId, data);
+            await update(requestRef, { _balanceUpdated: true });
+        }
+    });
+}
+
+async function processApproval(userId, data) {
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        await runTransaction(userRef, (current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + data.amount;
+                current.totalDeposited = (current.totalDeposited || 0) + data.amount;
+                current.updatedAt = Date.now();
+            }
+            return current;
+        });
+        
+        const txRef = push(ref(db, `transactions/${userId}`));
+        await set(txRef, {
+            type: 'deposit',
+            amount: data.amount,
+            method: 'Binance USDT',
+            status: 'completed',
+            depositId: data.depositId,
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        });
+        
+        document.getElementById('waitingVerificationDisplay').style.display = 'none';
+        document.getElementById('approvedDisplay').style.display = 'block';
+        document.getElementById('approvedAmount').textContent = `$${data.amount.toFixed(2)}`;
+        
+        updateStatusBadge('approved');
+        
+        showNotification(`✅ Deposit of $${data.amount.toFixed(2)} approved!`, 'success');
+        
+    } catch (error) {
+        console.error('Approval processing error:', error);
+    }
+}
+
+// ============================================================
+// OPEN BINANCE
+// ============================================================
+function openBinanceApp() {
+    const amount = currentPaymentRequest?.amount || 0;
+    const memo = currentDepositId || '';
+    const address = BINANCE_WALLET_ADDRESS;
+    
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    
+    navigator.clipboard.writeText(address).catch(() => {});
+    
+    if (isMobile) {
+        const appLink = `binance://pay?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+        window.location.href = appLink;
+        
+        showNotification('📱 Opening Binance App... If not installed, download from Play Store/App Store.', 'info');
+        
+        setTimeout(() => {
+            const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+            window.open(webLink, '_blank');
+        }, 3000);
+    } else {
+        const webLink = `https://www.binance.com/en/pay/paymentrequest?address=${address}&amount=${amount}&memo=${memo}&network=TRC20`;
+        window.open(webLink, '_blank');
+        showNotification('📋 Address copied! Visit Binance Pay to complete payment.', 'info');
+    }
+}
+
+// ============================================================
+// P2P BUY USDT
+// ============================================================
+document.getElementById('buyUsdtBtn')?.addEventListener('click', () => {
+    window.location.href = 'p2p-market.html';
+});
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+        const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    }
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const sunIcon = document.querySelector('#themeToggle i.fa-sun');
+    const moonIcon = document.querySelector('#themeToggle i.fa-moon');
+    if (document.body.classList.contains('light-theme')) {
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'inline-block';
+    } else {
+        if (sunIcon) sunIcon.style.display = 'inline-block';
+        if (moonIcon) moonIcon.style.display = 'none';
+    }
+});
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('countrySelectorTrigger').addEventListener('click', openCountryModal);
+document.getElementById('countryModalClose').addEventListener('click', closeCountryModal);
+document.getElementById('countrySearch').addEventListener('input', (e) => {
+    renderCountryList(allCountries, e.target.value);
+});
+document.getElementById('countryModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('countryModal')) {
+        closeCountryModal();
+    }
+});
+
+document.getElementById('submitMobileBtn').addEventListener('click', processMobileDeposit);
+document.getElementById('mobileAmount').addEventListener('input', updateRateDisplay);
+
+document.getElementById('generatePaymentRequestBtn').addEventListener('click', generatePaymentRequest);
+document.getElementById('iHavePaidBtn').addEventListener('click', submitForVerification);
+document.getElementById('cancelPaymentBtn').addEventListener('click', cancelPaymentRequest);
+document.getElementById('copyAddressBtn').addEventListener('click', () => {
+    const address = document.getElementById('displayWalletAddress').textContent;
+    navigator.clipboard.writeText(address);
+    showNotification('Address copied to clipboard!', 'success');
+});
+document.getElementById('openBinanceBtn').addEventListener('click', openBinanceApp);
+
+document.getElementById('backToDashboardBtn')?.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+});
+document.getElementById('approvedDashboardBtn')?.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+});
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab) {
+    document.getElementById('mobileTab').style.display = tab === 'mobile' ? 'block' : 'none';
+    document.getElementById('binanceTab').style.display = tab === 'binance' ? 'block' : 'none';
+    document.getElementById('p2pTab').style.display = tab === 'p2p' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(btn => { 
+        btn.classList.remove('active'); 
+        if (btn.getAttribute('data-tab') === tab) btn.classList.add('active'); 
+    });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => 
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')))
+);
+
+// ============================================================
+// AUTH STATE
+// ============================================================
+async function loadUserCountry() {
+    if (!currentUser) return;
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            if (userData.country && userData.country !== 'Not selected' && userData.country !== '') {
+                const matched = allCountries.find(c => c.code === userData.country);
+                if (matched) {
+                    selectedCountry = matched.code;
+                    const flagCode = matched.flag;
+                    document.getElementById('selectedCountryFlag').src = getCountryFlag(flagCode);
+                    document.getElementById('selectedCountryName').textContent = matched.code;
+                    document.getElementById('selectedCountryCode').textContent = matched.code;
+                    renderMobileNetworks();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user country:', error);
+    }
+}
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    
+    document.getElementById('skeletonContent').style.display = 'block';
+    document.getElementById('realContent').style.display = 'none';
+    
+    await loadUserData(user.uid);
+    await loadKYCData(user.uid);
+    await loadExchangeRates();
+    await loadUserCountry();
+    loadMobileNetworksFromSettings();
+    
+    if (!selectedCountry) {
+        await autoDetectCountry();
+    }
+    
+    setTimeout(() => {
+        updateKYCUI();
+        updateStep(1);
+        document.getElementById('skeletonContent').style.display = 'none';
+        document.getElementById('realContent').style.display = 'block';
+    }, 800);
+});
+
+initTheme();
+
+console.log('[DEPOSIT] ✅ Page loaded - Minimum deposit $5');
+</script>
+
+<!-- CANCEL MODAL -->
+<div class="cancel-modal-overlay" id="cancelModalOverlay">
+    <div class="cancel-modal-card">
+        <button class="cancel-modal-close" id="cancelModalClose">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="cancel-modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="cancel-modal-title">Cancel Payment Request?</div>
+        <div class="cancel-modal-subtitle">
+            Are you sure you want to cancel this payment request?<br>
+            <span style="color:#888;font-size:11px;">This action cannot be undone.</span>
+        </div>
+        
+        <div class="cancel-modal-warning">
+            <i class="fas fa-info-circle"></i>
+            <span>Your payment request will be cancelled and you will need to generate a new one.</span>
+        </div>
+        
+        <div class="cancel-modal-details" id="cancelModalDetails">
+            <div class="detail-row">
+                <span class="detail-label">Deposit ID</span>
+                <span class="detail-value" id="cancelDepositId">---</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Amount</span>
+                <span class="detail-value" id="cancelAmount">$0.00</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Network</span>
+                <span class="detail-value">TRC20</span>
+            </div>
+        </div>
+        
+        <div class="cancel-modal-buttons">
+            <button class="cancel-modal-btn keep" id="cancelKeepBtn">
+                <i class="fas fa-arrow-left"></i> Keep Request
+            </button>
+            <button class="cancel-modal-btn confirm-cancel" id="cancelConfirmBtn">
+                <i class="fas fa-trash-alt"></i> Yes, Cancel
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

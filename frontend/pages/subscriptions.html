@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Subscription | ABOTRA-PROAI - Unlock Premium Features</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body {
+background: #050505;
+background-image: url("../assets/images/background.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+min-height: 100vh;
+padding-bottom: 75px;
+position: relative;
+font-size: 10px;
+}
+body.light-theme {
+background: #f5f5f5;
+background-image: url("../assets/images/background-light.png");
+}
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .top-bar,
+body.light-theme .subscription-container,
+body.light-theme .plan-card,
+body.light-theme .current-plan-card,
+body.light-theme .payment-modal-content {
+background: rgba(255,255,255,0.95);
+border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .top-bar h2,
+body.light-theme .page-title,
+body.light-theme .plan-name,
+body.light-theme .current-plan-title { color: #800000; }
+body.light-theme .plan-price { color: #800000; }
+body.light-theme .feature-text { color: #555; }
+body.light-theme .theme-toggle { background: rgba(0,0,0,0.08); border-color: rgba(128,0,0,0.3); }
+body.light-theme .theme-toggle i { color: #800000; }
+body.light-theme .bottom-nav { background: rgba(255,255,255,0.95); border-top: 1px solid rgba(128,0,0,0.2); }
+body.light-theme .bottom-nav a { color: #888; }
+body.light-theme .bottom-nav a.active { color: #800000; }
+
+.skeleton-balance-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-balance-label { height: 10px; width: 80px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 4px; animation: shimmer 1.5s infinite; }
+.skeleton-balance-amount { height: 20px; width: 60px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.5s infinite; }
+.skeleton-current-plan { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 18px; margin-bottom: 22px; text-align: center; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-current-title { height: 14px; width: 100px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 6px; margin: 0 auto 6px auto; animation: shimmer 1.5s infinite; }
+.skeleton-current-name { height: 20px; width: 90px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 6px; margin: 0 auto 5px auto; animation: shimmer 1.5s infinite; }
+.skeleton-current-expiry { height: 9px; width: 110px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 4px; margin: 0 auto 6px auto; animation: shimmer 1.5s infinite; }
+.skeleton-current-status { height: 20px; width: 60px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 16px; margin: 0 auto; animation: shimmer 1.5s infinite; }
+.skeleton-plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 22px; }
+.skeleton-plan-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 20px; animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-plan-name { height: 20px; width: 80px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 6px; margin-bottom: 6px; animation: shimmer 1.5s infinite; }
+.skeleton-plan-price { height: 28px; width: 95px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 6px; margin-bottom: 3px; animation: shimmer 1.5s infinite; }
+.skeleton-plan-period { height: 9px; width: 60px; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 4px; margin-bottom: 10px; animation: shimmer 1.5s infinite; }
+.skeleton-multiplier { height: 32px; width: 100%; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 8px; margin: 10px 0; animation: shimmer 1.5s infinite; }
+.skeleton-feature { height: 9px; width: 90%; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 4px; margin: 6px 0; animation: shimmer 1.5s infinite; }
+.skeleton-btn { height: 38px; width: 100%; background: linear-gradient(90deg, rgba(255,215,0,0.05) 25%, rgba(255,215,0,0.1) 50%, rgba(255,215,0,0.05) 75%); background-size: 200% 100%; border-radius: 10px; margin-top: 14px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+.theme-toggle { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.theme-toggle:hover { background: rgba(255,215,0,0.2); transform: scale(1.02); }
+.theme-toggle i { font-size: 14px; color: #FFFFFF; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 1; }
+.top-bar {
+position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255,215,0,0.2);
+padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;
+}
+.logo-area { display: flex; align-items: center; gap: 8px; }
+.logo-area img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: transparent; }
+.logo-area h2 { color: #FFD700; font-size: 14px; margin-bottom: 1px; }
+.logo-area p { color: #AAAAAA; font-size: 7px; }
+.top-bar-right { display: flex; align-items: center; gap: 6px; }
+.back-btn-top { background: rgba(255,215,0,0.15); border: none; border-radius: 8px; padding: 5px 8px; color: #FFD700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 500; }
+.back-btn-top:hover { background: rgba(255,215,0,0.3); }
+
+.subscription-container { position: relative; z-index: 2; max-width: 1200px; margin: 65px auto 20px; padding: 0 15px; }
+.page-title { text-align: center; font-size: 20px; font-weight: 800; color: #FFD700; margin-bottom: 6px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.page-subtitle { text-align: center; color: #AAAAAA; font-size: 10px; margin-bottom: 20px; }
+.current-plan-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); backdrop-filter: blur(10px); border-radius: 20px; padding: 18px; margin-bottom: 22px; text-align: center; }
+.current-plan-title { color: #FFD700; font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.current-plan-name { font-size: 18px; font-weight: 800; color: #FFD700; margin-bottom: 6px; }
+.current-plan-expiry { color: #AAAAAA; font-size: 9px; margin-bottom: 10px; }
+.current-plan-status { display: inline-block; padding: 3px 10px; border-radius: 16px; font-size: 9px; font-weight: 600; }
+.status-active { background: rgba(14,203,129,0.2); color: #0ECB81; }
+.status-expired { background: rgba(246,70,93,0.2); color: #F6465D; }
+.multiplier-badge { display: inline-block; background: rgba(255,215,0,0.2); border-radius: 50px; padding: 2px 6px; font-size: 8px; color: #FFD700; margin-left: 6px; }
+.balance-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.balance-label { color: #AAAAAA; font-size: 9px; display: flex; align-items: center; gap: 5px; }
+.balance-amount { color: #FFD700; font-size: 16px; font-weight: 800; }
+.plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 22px; }
+.plan-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; }
+.plan-card:hover { transform: translateY(-3px); border-color: #FFD700; box-shadow: 0 10px 30px rgba(255,215,0,0.1); }
+.plan-card.popular { border: 2px solid #FFD700; }
+.popular-badge { position: absolute; top: 10px; right: -30px; background: #FFD700; color: #800000; font-size: 9px; font-weight: 700; padding: 3px 30px; transform: rotate(45deg); }
+.plan-name { color: #FFD700; font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.plan-price { color: #FFD700; font-size: 20px; font-weight: 800; margin-bottom: 3px; }
+.plan-price small { font-size: 9px; font-weight: 400; color: #AAAAAA; }
+.plan-period { color: #888; font-size: 8px; margin-bottom: 14px; }
+.profit-multiplier { background: rgba(14,203,129,0.15); border-radius: 8px; padding: 5px; text-align: center; margin: 10px 0; }
+.profit-multiplier span { color: #0ECB81; font-size: 12px; font-weight: 800; }
+.plan-features { list-style: none; margin: 16px 0; }
+.plan-features li { padding: 5px 0; color: #CCCCCC; font-size: 9px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.plan-features li i { font-size: 9px; width: 14px; }
+.plan-features li .fa-check-circle { color: #0ECB81; }
+.plan-features li .fa-times-circle { color: #F6465D; }
+.subscribe-btn { width: 100%; background: linear-gradient(135deg, #800000, #FFD700); border: none; border-radius: 10px; padding: 9px; color: white; font-weight: 700; font-size: 10px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.subscribe-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,215,0,0.3); }
+.subscribe-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20000; align-items: center; justify-content: center; }
+.payment-modal-content { background: rgba(10,10,10,0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 18px; max-width: 400px; width: 90%; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.modal-header h3 { color: #FFD700; font-size: 16px; }
+.close-modal { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
+.payment-methods { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.payment-method { display: flex; align-items: center; gap: 10px; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; cursor: pointer; transition: 0.3s; }
+.payment-method:hover { background: rgba(255,215,0,0.1); border-color: #FFD700; }
+.payment-method i { font-size: 18px; color: #FFD700; }
+.payment-method .method-info { flex: 1; }
+.payment-method .method-name { color: white; font-weight: 600; font-size: 11px; }
+.payment-method .method-desc { color: #888; font-size: 8px; }
+.payment-method.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; }
+.pay-btn { width: 100%; background: linear-gradient(135deg, #0ECB81, #0A9E65); border: none; border-radius: 10px; padding: 9px; color: white; font-weight: 700; font-size: 11px; cursor: pointer; margin-top: 14px; }
+.pay-btn:hover { transform: translateY(-2px); }
+
+.bottom-nav {
+position: fixed; bottom: 0; left: 0; right: 0;
+background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+border-top: 1px solid rgba(255,215,0,0.2);
+border-radius: 16px 16px 0 0;
+display: flex; justify-content: space-around; padding: 6px 10px; z-index: 100;
+flex-wrap: wrap;
+}
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 7px; transition: 0.3s; gap: 2px; }
+.bottom-nav a i { font-size: 15px; }
+.bottom-nav a.active { color: #FFD700; }
+
+.notification-popup { display: none !important; }
+
+@media(max-width: 700px) {
+.subscription-container { padding: 0 15px; }
+.page-title { font-size: 18px; }
+.plans-grid { grid-template-columns: 1fr; }
+.plan-card { padding: 15px; }
+.theme-toggle { padding: 6px; }
+.logo-area h2 { font-size: 12px; }
+.logo-area p { display: none; }
+.bottom-nav a span { font-size: 6px; }
+.bottom-nav a i { font-size: 13px; }
+.bottom-nav { flex-wrap: wrap; gap: 3px; }
+.bottom-nav a { flex: 1; min-width: 45px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="logo-area">
+<img src="../assets/images/logo.png" alt="ABOTRA" onerror="this.src='https://placehold.co/40x40/800000/FFD700?text=AI'">
+<div><h2>ABOTRA-PROAI</h2><p>Subscription Plans</p></div>
+</div>
+<div class="top-bar-right">
+<button class="back-btn-top" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><i class="fas fa-moon" style="display:none;"></i></div>
+</div>
+</div>
+
+<div class="overlay"></div>
+
+<div class="subscription-container">
+<div class="page-title"><i class="fas fa-crown"></i> Subscription Plans</div>
+<div class="page-subtitle">Choose the perfect plan to unlock premium AI trading features!</div>
+
+<div id="skeletonContainer">
+    <div class="skeleton-balance-card"><div class="skeleton-balance-label"></div><div class="skeleton-balance-amount"></div></div>
+    <div class="skeleton-current-plan"><div class="skeleton-current-title"></div><div class="skeleton-current-name"></div><div class="skeleton-current-expiry"></div><div class="skeleton-current-status"></div></div>
+    <div class="skeleton-plans-grid"><div class="skeleton-plan-card"><div class="skeleton-plan-name"></div><div class="skeleton-plan-price"></div><div class="skeleton-plan-period"></div><div class="skeleton-multiplier"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-btn"></div></div><div class="skeleton-plan-card"><div class="skeleton-plan-name"></div><div class="skeleton-plan-price"></div><div class="skeleton-plan-period"></div><div class="skeleton-multiplier"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-btn"></div></div><div class="skeleton-plan-card"><div class="skeleton-plan-name"></div><div class="skeleton-plan-price"></div><div class="skeleton-plan-period"></div><div class="skeleton-multiplier"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-feature"></div><div class="skeleton-btn"></div></div></div>
+</div>
+
+<div id="realContent" style="display: none;">
+    <div class="balance-card">
+        <div class="balance-label"><i class="fas fa-wallet"></i> Your Balance</div>
+        <div class="balance-amount" id="userBalanceDisplay">$0.00</div>
+    </div>
+
+    <div class="current-plan-card" id="currentPlanCard">
+        <div class="current-plan-title"><i class="fas fa-id-card"></i> Your Current Plan</div>
+        <div class="current-plan-name" id="currentPlanName">Free Plan</div>
+        <div class="current-plan-expiry" id="currentPlanExpiry">Basic features only</div>
+        <div class="current-plan-status" id="currentPlanStatus" class="status-active">Active</div>
+    </div>
+
+    <div class="plans-grid" id="plansGrid"></div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a href="dashboard.html"><i class="fa-solid fa-house"></i><span>Home</span></a>
+<a href="auto-bot.html"><i class="fas fa-robot"></i><span>AI Bot</span></a>
+<a href="trade.html"><i class="fas fa-chart-line"></i><span>Trade</span></a>
+<a href="subscriptions.html" class="active"><i class="fas fa-crown"></i><span>Plans</span></a>
+<a href="account.html"><i class="fa-solid fa-user"></i><span>Account</span></a>
+</div>
+
+<div id="paymentModal" class="payment-modal">
+<div class="payment-modal-content">
+<div class="modal-header"><h3 id="modalPlanName">Complete Payment</h3><button class="close-modal" onclick="closePaymentModal()">&times;</button></div>
+<div id="modalPlanDetails"></div>
+<div class="payment-methods">
+<div class="payment-method" onclick="selectPaymentMethod('balance')"><i class="fas fa-wallet"></i><div class="method-info"><div class="method-name">Account Balance</div><div class="method-desc">Pay directly from your ABOTRA balance</div></div></div>
+<div class="payment-method" onclick="selectPaymentMethod('deposit')"><i class="fas fa-plus-circle"></i><div class="method-info"><div class="method-name">Deposit First</div><div class="method-desc">Add funds to your balance first</div></div></div>
+</div>
+<button class="pay-btn" id="confirmPaymentBtn">Confirm Payment</button>
+</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, set, get, update, onValue, off, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let userData = null;
+let pendingSubscription = null;
+let selectedPaymentMethod = null;
+let rtdbBalanceListener = null;
+
+const plans = [
+    { id: 1, name: "BASIC", price: 10, multiplier: 1.5, features: ["Up to $10,000 monthly volume", "1 AI Robot active", "Basic support", "2% trading fee", "<strong>1.5x profit multiplier</strong>"], popular: false },
+    { id: 2, name: "PRO", price: 30, multiplier: 3, features: ["Up to $50,000 monthly volume", "3 AI Robots active", "Priority support", "1% trading fee", "<strong>3x profit multiplier</strong>", "Advanced analytics"], popular: true },
+    { id: 3, name: "VIP", price: 100, multiplier: 5, features: ["Unlimited monthly volume", "7 AI Robots active", "24/7 Dedicated support", "0.5% trading fee", "<strong>5x profit multiplier</strong>", "Full API access"], popular: false }
+];
+
+// ✅ FIXED: Notification helper with proper link
+async function addNotification(userId, title, message, type = 'subscription', link = 'subscriptions.html') {
+    if (!userId) return;
+    try {
+        const notifRef = push(ref(db, `notifications/${userId}`));
+        await set(notifRef, { 
+            title, 
+            message, 
+            type, 
+            link: link,
+            read: false, 
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+    } catch(e) { console.error('Add notification error:', e); }
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('abotra_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', function() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('abotra_theme', 'dark');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'inline-block';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'none';
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('abotra_theme', 'light');
+        document.querySelector('#themeToggle i.fa-sun').style.display = 'none';
+        document.querySelector('#themeToggle i.fa-moon').style.display = 'inline-block';
+    }
+});
+
+function showNotification(message, type) {
+    const existing = document.querySelector('.notification-popup');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `notification-popup ${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><div class="popup-message">${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+async function getUserBalance() {
+    if (!currentUser) return 0;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) return snapshot.val().balance || 0;
+        return 0;
+    } catch (error) { return 0; }
+}
+
+function setupRealtimeBalance() {
+    if (!currentUser) return;
+    if (rtdbBalanceListener) off(rtdbBalanceListener);
+    const userRef = ref(db, `users/${currentUser.uid}`);
+    rtdbBalanceListener = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const balance = snapshot.val().balance || 0;
+            document.getElementById('userBalanceDisplay').textContent = `$${balance.toFixed(2)}`;
+        }
+    });
+}
+
+async function loadUserSubscription() {
+    if (!currentUser) return { plan: "Free Plan", multiplier: 1, expiry: null };
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.subscription && data.subscription.expiry > Date.now()) {
+                return { plan: data.subscription.plan, multiplier: data.subscription.multiplier, expiry: data.subscription.expiry };
+            }
+        }
+    } catch (error) { console.error("Error loading subscription:", error); }
+    return { plan: "Free Plan", multiplier: 1, expiry: null };
+}
+
+function renderPlans(currentPlan) {
+    const grid = document.getElementById('plansGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    plans.forEach(plan => {
+        const isCurrent = currentPlan.plan === plan.name;
+        const isHigher = currentPlan.multiplier >= plan.multiplier;
+        const card = document.createElement('div');
+        card.className = `plan-card ${plan.popular ? 'popular' : ''}`;
+        let featuresHtml = '';
+        plan.features.forEach(f => featuresHtml += `<li><i class="fas fa-check-circle"></i> ${f}</li>`);
+        card.innerHTML = `
+            ${plan.popular ? '<div class="popular-badge">POPULAR</div>' : ''}
+            <div class="plan-name">${plan.name}</div>
+            <div class="plan-price">$${plan.price} <small>/month</small></div>
+            <div class="plan-period">Billed monthly</div>
+            <div class="profit-multiplier"><span>✨ Profit Multiplier: ${plan.multiplier}x</span></div>
+            <ul class="plan-features">${featuresHtml}</ul>
+            <button class="subscribe-btn" data-plan="${plan.name}" data-price="${plan.price}" data-multiplier="${plan.multiplier}" ${isHigher || isCurrent ? 'disabled' : ''}>
+                ${isCurrent ? '<i class="fas fa-check"></i> Current Plan' : (isHigher ? '<i class="fas fa-check"></i> Already Have Better' : '<i class="fas fa-shopping-cart"></i> Subscribe')}
+            </button>
+        `;
+        const btn = card.querySelector('.subscribe-btn');
+        if (!isHigher && !isCurrent) {
+            btn.addEventListener('click', () => initiateSubscription(plan.name, plan.price, plan.multiplier));
+        }
+        grid.appendChild(card);
+    });
+}
+
+function updateCurrentPlanDisplay(plan) {
+    document.getElementById('currentPlanName').textContent = plan.plan;
+    document.getElementById('currentPlanExpiry').textContent = plan.expiry ? `Expires: ${new Date(plan.expiry).toLocaleDateString()}` : 'Basic features only';
+    const statusEl = document.getElementById('currentPlanStatus');
+    if (plan.plan !== "Free Plan") {
+        statusEl.textContent = 'Active';
+        statusEl.className = 'current-plan-status status-active';
+    } else {
+        statusEl.textContent = 'Free';
+        statusEl.className = 'current-plan-status status-active';
+    }
+}
+
+window.initiateSubscription = function(plan, price, multiplier) {
+    if (!currentUser) { showNotification('Please login first', 'error'); return; }
+    pendingSubscription = { plan, price, multiplier };
+    document.getElementById('modalPlanName').textContent = `${plan} Plan - $${price}/month`;
+    document.getElementById('modalPlanDetails').innerHTML = `
+        <p style="color:#AAAAAA; margin-bottom:10px; font-size:10px;">Complete payment to activate your ${plan} subscription</p>
+        <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;"><span>Plan:</span><span style="color:#FFD700;">${plan}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;"><span>Price:</span><span style="color:#FFD700;">$${price}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px;"><span>Multiplier:</span><span style="color:#0ECB81;">${multiplier}x</span></div>
+            <div style="display:flex; justify-content:space-between; padding-top:5px; border-top:1px solid rgba(255,255,255,0.1); font-size:10px;"><span>Duration:</span><span style="color:#FFD700;">30 days</span></div>
+        </div>
+    `;
+    document.getElementById('paymentModal').style.display = 'flex';
+    selectedPaymentMethod = null;
+    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+};
+
+window.selectPaymentMethod = function(method) {
+    selectedPaymentMethod = method;
+    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+};
+
+window.closePaymentModal = function() {
+    document.getElementById('paymentModal').style.display = 'none';
+    pendingSubscription = null;
+    selectedPaymentMethod = null;
+};
+
+document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+    if (!selectedPaymentMethod) { showNotification('Please select a payment method', 'error'); return; }
+    if (!pendingSubscription) return;
+    const { plan, price, multiplier } = pendingSubscription;
+    const currentBalance = await getUserBalance();
+    
+    if (selectedPaymentMethod === 'deposit') {
+        closePaymentModal();
+        showNotification('Please deposit funds first. Redirecting...', 'info');
+        setTimeout(() => { window.location.href = 'deposit.html'; }, 1500);
+        return;
+    }
+    
+    if (currentBalance < price) {
+        showNotification(`Insufficient balance! Need $${price}. Please deposit first.`, 'error');
+        closePaymentModal();
+        return;
+    }
+    
+    closePaymentModal();
+    showNotification('Processing subscription...', 'info');
+    
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        await runTransaction(userRef, (current) => {
+            if (current) {
+                const balance = current.balance || 0;
+                if (balance >= price) {
+                    current.balance = balance - price;
+                    current.subscription = {
+                        plan: plan,
+                        price: price,
+                        multiplier: multiplier,
+                        status: 'active',
+                        expiry: Date.now() + (30 * 24 * 60 * 60 * 1000),
+                        purchasedAt: Date.now()
+                    };
+                    current.subscriptionMultiplier = multiplier;
+                    current.subscriptionExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                }
+            }
+            return current;
+        });
+        
+        // ✅ FIXED: Subscription notification with proper link and type
+        await addNotification(currentUser.uid, 
+            '👑 Subscription Activated', 
+            `${plan} plan activated! ${multiplier}x profit multiplier applied to all your trades.`, 
+            'subscription', 
+            'subscriptions.html');
+        
+        showNotification(`✅ ${plan} subscription activated! ${multiplier}x profit multiplier applied!`, 'success');
+        const newPlan = await loadUserSubscription();
+        updateCurrentPlanDisplay(newPlan);
+        renderPlans(newPlan);
+    } catch (error) {
+        showNotification('Failed to activate subscription', 'error');
+    }
+});
+
+async function init() {
+    initTheme();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'login.html'; return; }
+        currentUser = user;
+        document.getElementById('skeletonContainer').style.display = 'block';
+        document.getElementById('realContent').style.display = 'none';
+        const currentPlan = await loadUserSubscription();
+        const balance = await getUserBalance();
+        document.getElementById('userBalanceDisplay').textContent = `$${balance.toFixed(2)}`;
+        updateCurrentPlanDisplay(currentPlan);
+        renderPlans(currentPlan);
+        setupRealtimeBalance();
+        setTimeout(() => {
+            document.getElementById('skeletonContainer').style.display = 'none';
+            document.getElementById('realContent').style.display = 'block';
+        }, 800);
+    });
+}
+init();
+</script>
+</body>
+</html>

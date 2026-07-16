@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Spin & Win | ABOTRA-PROAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: #0A0A0A;
+    background-image: url("../assets/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding: 80px 20px 100px;
+    color: #FFFFFF;
+    position: relative;
+}
+
+body.light-theme {
+    background: #f5f5f5;
+    background-image: url("../assets/images/background-light.png");
+}
+
+body.light-theme .overlay { background: rgba(255,255,255,0.85); }
+body.light-theme .spin-container {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+body.light-theme .spin-title { color: #800000; }
+body.light-theme .spin-subtitle { color: #666; }
+body.light-theme .referral-info { background: rgba(128,0,0,0.06); border-color: rgba(128,0,0,0.15); }
+body.light-theme .referral-info .label { color: #666; }
+body.light-theme .referral-info .value { color: #800000; }
+body.light-theme .stats-card { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+body.light-theme .stats-card .label { color: #666; }
+body.light-theme .stats-card .value { color: #800000; }
+body.light-theme .result-box { background: rgba(128,0,0,0.06); border-color: rgba(128,0,0,0.15); }
+body.light-theme .result-box .result-amount { color: #800000; }
+body.light-theme .history-item { background: rgba(0,0,0,0.04); color: #333; }
+body.light-theme .instructions-box { background: rgba(128,0,0,0.05); border-color: rgba(128,0,0,0.12); }
+body.light-theme .instructions-box h3 { color: #800000; }
+body.light-theme .instructions-box li { color: #444; }
+body.light-theme .instructions-box li .highlight { color: #0A9E65; }
+body.light-theme .instructions-box li .warning { color: #D43F52; }
+body.light-theme .instructions-box li i { color: #800000; }
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 1;
+}
+
+.spin-container {
+    position: relative;
+    z-index: 2;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 24px 20px 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.spin-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #FFD700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.spin-title i {
+    font-size: 28px;
+    background: linear-gradient(135deg, #FFD700, #FF6B00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.spin-subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #AAAAAA;
+    margin-bottom: 20px;
+}
+
+/* Back Button */
+.back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: #FFD700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: rgba(255,215,0,0.15);
+    transform: scale(1.05);
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 50px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #FFD700;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,215,0,0.15);
+    transform: scale(1.05);
+}
+
+/* Referral Info */
+.referral-info {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.referral-info .item {
+    text-align: center;
+}
+
+.referral-info .label {
+    font-size: 9px;
+    color: #AAAAAA;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.referral-info .value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFD700;
+    margin-top: 2px;
+}
+
+.referral-info .value.green { color: #0ECB81; }
+.referral-info .value.gold { color: #FFD700; }
+.referral-info .value.red { color: #F6465D; }
+.referral-info .value.small { font-size: 14px; }
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stats-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,215,0,0.1);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.stats-card .label {
+    font-size: 8px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-card .value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFD700;
+    margin-top: 2px;
+}
+
+.stats-card .value.green { color: #0ECB81; }
+.stats-card .value.gold { color: #FFD700; }
+.stats-card .value.red { color: #F6465D; }
+
+/* Wheel Container */
+.wheel-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto 20px;
+}
+
+.wheel-wrapper canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(255,215,0,0.15), inset 0 0 40px rgba(255,215,0,0.05);
+    cursor: pointer;
+    transition: filter 0.3s;
+}
+
+.wheel-wrapper canvas:hover {
+    filter: brightness(1.05);
+}
+
+.wheel-wrapper canvas:active {
+    transform: scale(0.99);
+}
+
+.pointer {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    font-size: 32px;
+    color: #F6465D;
+    filter: drop-shadow(0 4px 8px rgba(246,70,93,0.4));
+    text-shadow: 0 0 20px rgba(246,70,93,0.3);
+}
+
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD700, #F0A500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #0A0A0A;
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.center-circle i {
+    font-size: 20px;
+}
+
+/* Spin Button */
+.spin-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FFD700, #F0A500);
+    color: #0A0A0A;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.25);
+}
+
+.spin-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255,215,0,0.4);
+}
+
+.spin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    background: rgba(255,255,255,0.08);
+    color: #666;
+}
+
+.spin-btn .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-top-color: #0A0A0A;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Withdraw Button */
+.withdraw-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0ECB81, #0A9E65);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    box-shadow: 0 4px 20px rgba(14,203,129,0.2);
+}
+
+.withdraw-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(14,203,129,0.4);
+}
+
+.withdraw-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Result Box */
+.result-box {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    text-align: center;
+    display: none;
+    animation: fadeInUp 0.5s ease;
+}
+
+.result-box.show {
+    display: block;
+}
+
+.result-box .result-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.result-box .result-amount {
+    font-size: 32px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD700, #FF6B00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 4px 0;
+}
+
+.result-box .result-message {
+    font-size: 12px;
+    color: #AAAAAA;
+}
+
+/* History */
+.history-section {
+    margin-top: 18px;
+}
+
+.history-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-list {
+    max-height: 120px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.history-list::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(255,215,0,0.3);
+    border-radius: 10px;
+}
+
+.history-item {
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #CCCCCC;
+}
+
+.history-item .h-amount {
+    font-weight: 700;
+    color: #0ECB81;
+}
+
+.history-item .h-time {
+    font-size: 8px;
+    color: #666;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 15px;
+    color: #666;
+    font-size: 10px;
+}
+
+/* Instructions */
+.instructions-box {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.12);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-top: 20px;
+}
+
+.instructions-box h3 {
+    color: #FFD700;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructions-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instructions-box li {
+    color: #CCCCCC;
+    font-size: 10px;
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+.instructions-box li i {
+    color: #FFD700;
+    margin-top: 2px;
+    min-width: 16px;
+    font-size: 10px;
+}
+
+.instructions-box li .highlight {
+    color: #0ECB81;
+    font-weight: 600;
+}
+
+.instructions-box li .warning {
+    color: #F6465D;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media(max-width: 480px) {
+    body { padding: 70px 10px 90px; }
+    .spin-container { padding: 16px 14px 20px; }
+    .spin-title { font-size: 20px; }
+    .spin-title i { font-size: 22px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .stats-card { padding: 8px 4px; }
+    .stats-card .value { font-size: 14px; }
+    .center-circle { width: 40px; height: 40px; font-size: 10px; }
+    .center-circle i { font-size: 16px; }
+    .pointer { font-size: 24px; top: -8px; }
+    .result-box .result-amount { font-size: 24px; }
+    .back-btn { top: 12px; left: 12px; padding: 8px 12px; font-size: 10px; }
+    .theme-toggle { top: 12px; right: 12px; padding: 8px 10px; }
+    .referral-info { grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 10px 8px; }
+    .referral-info .value { font-size: 14px; }
+    .referral-info .label { font-size: 7px; }
+    .spin-btn { font-size: 14px; padding: 12px; }
+    .withdraw-btn { font-size: 12px; padding: 10px; }
+}
+
+@media(max-width: 380px) {
+    .spin-container { padding: 12px 10px 16px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .stats-card .value { font-size: 12px; }
+    .center-circle { width: 32px; height: 32px; font-size: 8px; }
+    .center-circle i { font-size: 12px; }
+    .referral-info .value { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+<div class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></div>
+
+<div class="overlay"></div>
+
+<div class="spin-container">
+    <div class="spin-title">
+        <i class="fas fa-gift"></i> Spin & Win
+    </div>
+    <p class="spin-subtitle">🎰 Invite friends to earn free spins & win bonuses!</p>
+
+    <!-- Referral Info -->
+    <div class="referral-info">
+        <div class="item">
+            <div class="label"><i class="fas fa-users"></i> Referrals</div>
+            <div class="value" id="referralCount">0</div>
+        </div>
+        <div class="item">
+            <div class="label"><i class="fas fa-ticket-alt"></i> Spins Left</div>
+            <div class="value" id="spinsLeft">0</div>
+        </div>
+        <div class="item">
+            <div class="label"><i class="fas fa-coins"></i> Spin Balance</div>
+            <div class="value gold small" id="spinBalance">$0.00</div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stats-card">
+            <div class="label">Total Spins</div>
+            <div class="value" id="totalSpins">0</div>
+        </div>
+        <div class="stats-card">
+            <div class="label">Total Bonus</div>
+            <div class="value gold" id="totalBonus">$0.00</div>
+        </div>
+        <div class="stats-card">
+            <div class="label">Status</div>
+            <div class="value" id="spinStatus" style="font-size:13px;">✅ Ready</div>
+        </div>
+    </div>
+
+    <!-- Wheel -->
+    <div class="wheel-wrapper">
+        <canvas id="wheelCanvas" width="600" height="600"></canvas>
+        <div class="pointer"><i class="fas fa-caret-down"></i></div>
+        <div class="center-circle"><i class="fas fa-gem"></i></div>
+    </div>
+
+    <!-- Spin Button -->
+    <button class="spin-btn" id="spinBtn">
+        <i class="fas fa-sync-alt"></i> SPIN NOW
+    </button>
+
+    <!-- Withdraw Button -->
+    <button class="withdraw-btn" id="withdrawBtn" style="display:none;">
+        <i class="fas fa-arrow-up"></i> Withdraw Spin Balance
+    </button>
+
+    <!-- Result -->
+    <div class="result-box" id="resultBox">
+        <div class="result-label">🎉 You Won</div>
+        <div class="result-amount" id="resultAmount">$0.00</div>
+        <div class="result-message" id="resultMessage">Keep inviting friends to get more spins!</div>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+        <div class="history-title">
+            <span><i class="fas fa-clock"></i> Spin History</span>
+            <span style="font-size:9px;color:#666;" id="historyCount">0 entries</span>
+        </div>
+        <div class="history-list" id="historyList">
+            <div class="empty-history">No spins yet. Invite friends to get spins!</div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions-box">
+        <h3><i class="fas fa-info-circle"></i> How Spin & Win Works</h3>
+        <ul>
+            <li><i class="fas fa-user-plus"></i> <span>Get <strong class="highlight">1 spin</strong> for <strong class="highlight">every new referral</strong> who registers using your link</span></li>
+            <li><i class="fas fa-gift"></i> <span>New users get <strong class="highlight">1 free spin</strong> after their <strong class="highlight">first deposit</strong> (any amount)</span></li>
+            <li><i class="fas fa-ticket-alt"></i> <span>Each spin uses <strong class="highlight">1 spin token</strong>. When tokens run out, invite more friends!</span></li>
+            <li><i class="fas fa-coins"></i> <span>Spin balance = bonuses earned from spins. <strong class="highlight">Withdraw when:</strong></span></li>
+            <li style="padding-left:20px;"><i class="fas fa-chevron-right"></i> <span>Balance ≥ <strong class="highlight">$10</strong> <strong class="warning">OR</strong></span></li>
+            <li style="padding-left:20px;"><i class="fas fa-chevron-right"></i> <span>You have deposited <strong class="highlight">$50+</strong> total</span></li>
+            <li><i class="fas fa-arrow-up"></i> <span>Click <strong class="highlight">"Withdraw Spin Balance"</strong> to transfer to your main wallet</span></li>
+            <li><i class="fas fa-exclamation-triangle warning"></i> <span><strong class="warning">Note:</strong> Spin tokens are earned only through <strong class="highlight">new referrals</strong> - no daily free spins!</span></li>
+        </ul>
+    </div>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE IMPORTS
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+    getDatabase, 
+    ref, 
+    onValue, 
+    set, 
+    update, 
+    get, 
+    push, 
+    runTransaction 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCAr7b_5VOqQWCLXb8JlJ1zOcoDNg0V4tM",
+    authDomain: "abotra-proa1.firebaseapp.com",
+    databaseURL: "https://abotra-proa1-default-rtdb.firebaseio.com",
+    projectId: "abotra-proa1",
+    storageBucket: "abotra-proa1.firebasestorage.app",
+    messagingSenderId: "510401455603",
+    appId: "1:510401455603:web:8efa0a186a90dea7c0de86"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ============================================================
+// CONFIG
+// ============================================================
+const SEGMENTS = [
+    { label: '$0.50', value: 0.50, color: '#2A2A3E' },
+    { label: '$1.00', value: 1.00, color: '#3A2A4E' },
+    { label: '$0.25', value: 0.25, color: '#2A3A3E' },
+    { label: '$2.00', value: 2.00, color: '#4E2A3A' },
+    { label: '$0.50', value: 0.50, color: '#3A3A2A' },
+    { label: '$5.00', value: 5.00, color: '#2A4E3A' },
+    { label: '$0.25', value: 0.25, color: '#4E3A2A' },
+    { label: '$10.00', value: 10.00, color: '#3A2A2A' },
+    { label: '$0.50', value: 0.50, color: '#2A3A4E' },
+    { label: '$3.00', value: 3.00, color: '#4E2A4E' },
+    { label: '$1.00', value: 1.00, color: '#2A4E4E' },
+    { label: '$0.25', value: 0.25, color: '#4E4E2A' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let userData = null;
+let spinData = null;
+let isSpinning = false;
+let animationId = null;
+let currentRotation = 0;
+let canWithdraw = false;
+
+// ============================================================
+// DOM REFS
+// ============================================================
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spinBtn');
+const withdrawBtn = document.getElementById('withdrawBtn');
+const resultBox = document.getElementById('resultBox');
+const resultAmount = document.getElementById('resultAmount');
+const resultMessage = document.getElementById('resultMessage');
+const historyList = document.getElementById('historyList');
+const historyCount = document.getElementById('historyCount');
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+    const saved = localStorage.getItem('abotra_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+    }
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('abotra_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+});
+
+// ============================================================
+// DRAW WHEEL
+// ============================================================
+function drawWheel(rotation = 0) {
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 10;
+    const numSegments = SEGMENTS.length;
+    const angleStep = (2 * Math.PI) / numSegments;
+
+    ctx.clearRect(0, 0, width, height);
+
+    SEGMENTS.forEach((segment, i) => {
+        const startAngle = i * angleStep + rotation;
+        const endAngle = startAngle + angleStep;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+
+        ctx.fillStyle = segment.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,215,0,0.15)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        const midAngle = startAngle + angleStep / 2;
+        const textRadius = radius * 0.65;
+        const x = centerX + Math.cos(midAngle) * textRadius;
+        const y = centerY + Math.sin(midAngle) * textRadius;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(midAngle + (midAngle > Math.PI / 2 ? Math.PI : 0));
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(segment.label, 0, 0);
+        ctx.restore();
+    });
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius * 0.15, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(255,215,0,0.1)';
+    ctx.fill();
+}
+
+// ============================================================
+// GET SEGMENT FROM ANGLE
+// ============================================================
+function getSegmentFromAngle(angle) {
+    const numSegments = SEGMENTS.length;
+    const angleStep = (2 * Math.PI) / numSegments;
+    
+    let normalized = angle % (2 * Math.PI);
+    if (normalized < 0) normalized += 2 * Math.PI;
+    
+    const adjustedAngle = (normalized + Math.PI / 2) % (2 * Math.PI);
+    const index = Math.floor(adjustedAngle / angleStep);
+    return SEGMENTS[index % numSegments];
+}
+
+// ============================================================
+// SPIN FUNCTION
+// ============================================================
+async function spinWheel() {
+    if (isSpinning) return;
+    if (!currentUser) {
+        alert('Please login first');
+        return;
+    }
+
+    // Check if user has spin tokens
+    const spinsLeft = spinData?.spinTokens || 0;
+    if (spinsLeft <= 0) {
+        showResult('❌ No Spins Left!', 'Invite friends to earn more spins! 🎯', 0);
+        return;
+    }
+
+    isSpinning = true;
+    spinBtn.disabled = true;
+    spinBtn.innerHTML = '<span class="spinner"></span> Spinning...';
+    resultBox.classList.remove('show');
+
+    const extraSpins = 5 + Math.random() * 5;
+    const targetAngle = extraSpins * 2 * Math.PI + Math.random() * 2 * Math.PI;
+    const startRotation = currentRotation;
+    const endRotation = startRotation + targetAngle;
+    const duration = 4000 + Math.random() * 1500;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const eased = 1 - Math.pow(1 - progress, 3);
+            currentRotation = startRotation + targetAngle * eased;
+            
+            drawWheel(currentRotation);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                currentRotation = endRotation;
+                drawWheel(currentRotation);
+                
+                const winningSegment = getSegmentFromAngle(currentRotation);
+                const bonusAmount = winningSegment.value;
+                
+                saveSpinResult(bonusAmount, winningSegment.label);
+                
+                showResult(
+                    `$${bonusAmount.toFixed(2)}`,
+                    `🎯 ${winningSegment.label} - Spin saved!`,
+                    bonusAmount
+                );
+                
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.innerHTML = '<i class="fas fa-sync-alt"></i> SPIN NOW';
+                resolve();
+            }
+        }
+        animate();
+    });
+}
+
+// ============================================================
+// SAVE SPIN RESULT
+// ============================================================
+async function saveSpinResult(amount, label) {
+    if (!currentUser) return;
+    
+    const uid = currentUser.uid;
+    const now = Date.now();
+    
+    try {
+        // Use transaction to deduct spin token and add bonus
+        const spinRef = ref(db, `spinData/${uid}`);
+        await runTransaction(spinRef, (current) => {
+            if (!current) {
+                current = {
+                    totalSpins: 0,
+                    totalBonus: 0,
+                    spinBalance: 0,
+                    spinTokens: 0,
+                    lastSpinTime: 0
+                };
+            }
+            // Deduct one spin token
+            current.spinTokens = Math.max(0, (current.spinTokens || 0) - 1);
+            current.totalSpins = (current.totalSpins || 0) + 1;
+            current.totalBonus = (current.totalBonus || 0) + amount;
+            current.spinBalance = (current.spinBalance || 0) + amount;
+            current.lastSpinTime = now;
+            return current;
+        });
+        
+        // Save spin history
+        const historyRef = ref(db, `spinHistory/${uid}`);
+        const newSpinRef = push(historyRef);
+        await set(newSpinRef, {
+            amount: amount,
+            label: label,
+            timestamp: now,
+            date: new Date().toISOString().split('T')[0]
+        });
+        
+        await loadSpinData();
+        updateUI();
+        
+    } catch (error) {
+        console.error('[SPIN] Save error:', error);
+    }
+}
+
+// ============================================================
+// WITHDRAW SPIN BALANCE
+// ============================================================
+async function withdrawSpinBalance() {
+    if (!currentUser) return;
+    
+    const spinBalance = spinData?.spinBalance || 0;
+    const totalDeposited = userData?.totalDeposited || 0;
+    
+    // Check conditions
+    let canWithdraw = false;
+    let reason = '';
+    
+    if (spinBalance >= 10) {
+        canWithdraw = true;
+        reason = 'Balance ≥ $10';
+    } else if (totalDeposited >= 50) {
+        canWithdraw = true;
+        reason = 'Total deposits ≥ $50';
+    } else {
+        const needAmount = Math.max(0, 10 - spinBalance);
+        const needDeposit = Math.max(0, 50 - totalDeposited);
+        if (needAmount > 0 && needDeposit > 0) {
+            showResult('❌ Cannot Withdraw', `Need spin balance ≥ $10 (need $${needAmount.toFixed(2)}) OR total deposits ≥ $50 (need $${needDeposit.toFixed(2)})`, 0);
+        } else if (needAmount > 0) {
+            showResult('❌ Cannot Withdraw', `Need spin balance ≥ $10 (need $${needAmount.toFixed(2)})`, 0);
+        } else if (needDeposit > 0) {
+            showResult('❌ Cannot Withdraw', `Need total deposits ≥ $50 (need $${needDeposit.toFixed(2)})`, 0);
+        }
+        return;
+    }
+    
+    if (spinBalance <= 0) {
+        showResult('❌ No Balance', 'Your spin balance is $0.00', 0);
+        return;
+    }
+    
+    // Confirm withdraw
+    if (!confirm(`Withdraw $${spinBalance.toFixed(2)} from spin balance to main wallet?\n\nReason: ${reason}`)) return;
+    
+    try {
+        const uid = currentUser.uid;
+        const amount = spinBalance;
+        
+        // Transfer from spinBalance to main balance
+        const spinRef = ref(db, `spinData/${uid}`);
+        await runTransaction(spinRef, (current) => {
+            if (current) {
+                current.spinBalance = 0;
+            }
+            return current;
+        });
+        
+        const userRef = ref(db, `users/${uid}`);
+        await runTransaction(userRef, (current) => {
+            if (current) {
+                current.balance = (current.balance || 0) + amount;
+            }
+            return current;
+        });
+        
+        // Log the withdrawal
+        const logRef = push(ref(db, `spinHistory/${uid}`));
+        await set(logRef, {
+            amount: -amount,
+            label: '💳 Withdrawal to Main Balance',
+            timestamp: Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            type: 'withdraw'
+        });
+        
+        await loadSpinData();
+        await loadUserData();
+        updateUI();
+        
+        showResult('✅ Withdrawn!', `$${amount.toFixed(2)} transferred to main balance! 🎉`, amount);
+        
+    } catch (error) {
+        console.error('[SPIN] Withdraw error:', error);
+        showResult('❌ Error', 'Failed to withdraw. Please try again.', 0);
+    }
+}
+
+// ============================================================
+// SHOW RESULT
+// ============================================================
+function showResult(amount, message, value) {
+    resultAmount.textContent = typeof amount === 'string' ? amount : `$${amount.toFixed(2)}`;
+    resultMessage.textContent = message || 'Keep inviting friends to get more spins!';
+    resultBox.classList.add('show');
+    
+    if (value > 0) {
+        resultBox.style.borderColor = 'rgba(14,203,129,0.4)';
+        resultAmount.style.background = 'linear-gradient(135deg, #0ECB81, #00FF88)';
+        resultAmount.style.webkitBackgroundClip = 'text';
+        resultAmount.style.webkitTextFillColor = 'transparent';
+    } else if (typeof amount === 'string' && amount.includes('❌')) {
+        resultBox.style.borderColor = 'rgba(246,70,93,0.4)';
+        resultAmount.style.background = 'linear-gradient(135deg, #F6465D, #FF6B6B)';
+        resultAmount.style.webkitBackgroundClip = 'text';
+        resultAmount.style.webkitTextFillColor = 'transparent';
+    } else {
+        resultBox.style.borderColor = 'rgba(255,215,0,0.15)';
+        resultAmount.style.background = 'linear-gradient(135deg, #FFD700, #FF6B00)';
+        resultAmount.style.webkitBackgroundClip = 'text';
+        resultAmount.style.webkitTextFillColor = 'transparent';
+    }
+}
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+async function loadUserData() {
+    if (!currentUser) return;
+    try {
+        const snapshot = await get(ref(db, `users/${currentUser.uid}`));
+        if (snapshot.exists()) {
+            userData = snapshot.val();
+        }
+    } catch (error) {
+        console.error('[SPIN] Load user error:', error);
+    }
+}
+
+async function loadSpinData() {
+    if (!currentUser) return;
+    try {
+        // Get referral count
+        const userSnap = await get(ref(db, `users/${currentUser.uid}`));
+        let referralCount = 0;
+        let totalDeposited = 0;
+        if (userSnap.exists()) {
+            const user = userSnap.val();
+            referralCount = user.referrals?.count || 0;
+            totalDeposited = user.totalDeposited || 0;
+        }
+        
+        // Get spin data
+        const spinSnap = await get(ref(db, `spinData/${currentUser.uid}`));
+        let data = {};
+        if (spinSnap.exists()) {
+            data = spinSnap.val();
+        }
+        
+        // Calculate spin tokens: referrals + (1 if has deposited and firstSpinUsed is false)
+        let spinTokens = referralCount;
+        
+        // Check if user has deposited and hasn't used their first spin
+        if (totalDeposited > 0 && !data.firstSpinUsed) {
+            spinTokens += 1;
+            // Mark first spin as used
+            if (spinSnap.exists()) {
+                await update(ref(db, `spinData/${currentUser.uid}`), { firstSpinUsed: true });
+            } else {
+                await set(ref(db, `spinData/${currentUser.uid}`), { 
+                    firstSpinUsed: true,
+                    totalSpins: 0,
+                    totalBonus: 0,
+                    spinBalance: 0,
+                    spinTokens: 0,
+                    lastSpinTime: 0
+                });
+            }
+        }
+        
+        // If no spin data exists, create it
+        if (!spinSnap.exists() && spinTokens > 0) {
+            await set(ref(db, `spinData/${currentUser.uid}`), {
+                totalSpins: 0,
+                totalBonus: 0,
+                spinBalance: 0,
+                spinTokens: spinTokens,
+                lastSpinTime: 0,
+                firstSpinUsed: totalDeposited > 0 ? true : false
+            });
+        }
+        
+        // Update spin tokens based on referrals
+        if (spinSnap.exists()) {
+            await update(ref(db, `spinData/${currentUser.uid}`), { spinTokens: spinTokens });
+        }
+        
+        // Get updated data
+        const updatedSnap = await get(ref(db, `spinData/${currentUser.uid}`));
+        if (updatedSnap.exists()) {
+            data = updatedSnap.val();
+        }
+        
+        // Get spin history
+        const historySnap = await get(ref(db, `spinHistory/${currentUser.uid}`));
+        let history = [];
+        if (historySnap.exists()) {
+            historySnap.forEach(child => {
+                history.push({ id: child.key, ...child.val() });
+            });
+            history.sort((a, b) => b.timestamp - a.timestamp);
+        }
+        
+        spinData = {
+            ...data,
+            referralCount: referralCount,
+            totalDeposited: totalDeposited,
+            history: history,
+            spinTokens: spinTokens
+        };
+        
+        updateUI();
+        
+    } catch (error) {
+        console.error('[SPIN] Load spin data error:', error);
+    }
+}
+
+// ============================================================
+// UPDATE UI
+// ============================================================
+function updateUI() {
+    if (!spinData) return;
+    
+    const referrals = spinData.referralCount || 0;
+    const spinTokens = spinData.spinTokens || 0;
+    const spinBalance = spinData.spinBalance || 0;
+    const totalSpins = spinData.totalSpins || 0;
+    const totalBonus = spinData.totalBonus || 0;
+    const totalDeposited = spinData.totalDeposited || 0;
+    
+    // Check withdraw conditions
+    canWithdraw = (spinBalance >= 10) || (totalDeposited >= 50);
+    
+    document.getElementById('referralCount').textContent = referrals;
+    document.getElementById('spinsLeft').textContent = spinTokens;
+    document.getElementById('spinBalance').textContent = `$${spinBalance.toFixed(2)}`;
+    document.getElementById('totalSpins').textContent = totalSpins;
+    document.getElementById('totalBonus').textContent = `$${totalBonus.toFixed(2)}`;
+    
+    // Spin status
+    const statusEl = document.getElementById('spinStatus');
+    if (spinTokens > 0) {
+        statusEl.textContent = '✅ Ready to Spin!';
+        statusEl.style.color = '#0ECB81';
+        spinBtn.disabled = false;
+        spinBtn.innerHTML = '<i class="fas fa-sync-alt"></i> SPIN NOW';
+        spinBtn.style.opacity = '1';
+        spinBtn.style.background = 'linear-gradient(135deg, #FFD700, #F0A500)';
+    } else {
+        statusEl.textContent = '❌ No Spins - Invite Friends!';
+        statusEl.style.color = '#F6465D';
+        spinBtn.disabled = true;
+        spinBtn.innerHTML = '<i class="fas fa-users"></i> Invite Friends to Spin';
+        spinBtn.style.opacity = '0.6';
+        spinBtn.style.background = 'rgba(255,255,255,0.08)';
+        spinBtn.style.color = '#666';
+    }
+    
+    // Withdraw button
+    if (spinBalance > 0 && canWithdraw) {
+        withdrawBtn.style.display = 'flex';
+        withdrawBtn.disabled = false;
+        const reason = spinBalance >= 10 ? 'Spin Balance ≥ $10' : 'Total Deposits ≥ $50';
+        withdrawBtn.innerHTML = `<i class="fas fa-arrow-up"></i> Withdraw $${spinBalance.toFixed(2)} (${reason})`;
+    } else if (spinBalance > 0) {
+        withdrawBtn.style.display = 'flex';
+        withdrawBtn.disabled = true;
+        const need = Math.max(0, 10 - spinBalance);
+        const needDep = Math.max(0, 50 - totalDeposited);
+        let msg = '';
+        if (need > 0 && needDep > 0) {
+            msg = `Need $${need.toFixed(2)} more OR $${needDep.toFixed(2)} deposit`;
+        } else if (need > 0) {
+            msg = `Need $${need.toFixed(2)} more in spin balance`;
+        } else if (needDep > 0) {
+            msg = `Need $${needDep.toFixed(2)} more in deposits`;
+        }
+        withdrawBtn.innerHTML = `<i class="fas fa-lock"></i> Withdraw (${msg})`;
+        withdrawBtn.style.opacity = '0.5';
+    } else {
+        withdrawBtn.style.display = 'none';
+    }
+    
+    // History
+    updateHistory();
+}
+
+function updateHistory() {
+    const history = spinData?.history || [];
+    historyCount.textContent = `${history.length} entries`;
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="empty-history">No spins yet. Invite friends to get spins!</div>';
+        return;
+    }
+    
+    let html = '';
+    history.slice(0, 10).forEach(item => {
+        const date = new Date(item.timestamp);
+        const timeStr = date.toLocaleTimeString();
+        const amount = item.amount || 0;
+        const label = item.label || '';
+        const isWithdraw = item.type === 'withdraw';
+        
+        if (isWithdraw) {
+            html += `
+                <div class="history-item" style="border-left: 2px solid #F6465D;">
+                    <span>💳 ${label}</span>
+                    <span>
+                        <span class="h-amount" style="color:#F6465D;">-$${Math.abs(amount).toFixed(2)}</span>
+                        <span class="h-time">${timeStr}</span>
+                    </span>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="history-item">
+                    <span>🎯 ${label}</span>
+                    <span>
+                        <span class="h-amount">+$${amount.toFixed(2)}</span>
+                        <span class="h-time">${timeStr}</span>
+                    </span>
+                </div>
+            `;
+        }
+    });
+    historyList.innerHTML = html;
+}
+
+// ============================================================
+// SETUP LISTENERS
+// ============================================================
+function setupListeners() {
+    if (!currentUser) return;
+    
+    const spinRef = ref(db, `spinData/${currentUser.uid}`);
+    onValue(spinRef, () => {
+        loadSpinData();
+    });
+    
+    const userRef = ref(db, `users/${currentUser.uid}`);
+    onValue(userRef, () => {
+        loadUserData();
+        loadSpinData();
+    });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+    initTheme();
+    drawWheel(0);
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        currentUser = user;
+        await loadUserData();
+        await loadSpinData();
+        setupListeners();
+    });
+    
+    spinBtn.addEventListener('click', spinWheel);
+    withdrawBtn.addEventListener('click', withdrawSpinBalance);
+}
+
+init();
+
+window.addEventListener('resize', () => {
+    drawWheel(currentRotation);
+});
+
+console.log('[SPIN] 🎡 Spin & Win v2.0 loaded successfully!');
+console.log('[SPIN] 📌 Spins earned through referrals only');
+console.log('[SPIN] 💰 New users get 1 free spin after first deposit');
+console.log('[SPIN] 🏦 Withdraw: $10+ balance OR $50+ total deposits');
+</script>
+</body>
+</html>
